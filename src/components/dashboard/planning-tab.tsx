@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Wallet } from 'lucide-react';
+import { Wallet, Info } from 'lucide-react';
 import { getCategoryInfo } from '@/lib/categories';
 import { Skeleton } from '../ui/skeleton';
 import ExpenseCategoryManager from './expense-category-manager';
@@ -15,6 +15,7 @@ import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import IncomeCategoryManager from './income-category-manager';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 function BudgetCard({ categoryId, onPlanChange, initialPlan, initialSpent }: { 
   categoryId: string;
@@ -159,7 +160,22 @@ export default function PlanningTab() {
            <Card>
             <AccordionTrigger className="px-6 data-[state=closed]:py-2 data-[state=open]:border-b">
               <CardHeader className="p-0">
-                <CardTitle className="flex items-center gap-2"><Wallet className="h-6 w-6" /> Planes por Categoría</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-6 w-6" /> Planes por Categoría
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                        <Info className="h-4 w-4" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64" side="top" sideOffset={8}>
+                      <h4 className="font-semibold mb-2">Guardado Manual</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Cualquier ajuste numérico en los planes requiere que pulses el botón <strong className="text-emerald-500">Guardar Planes</strong> al final de esta pestaña para hacerse efectivo.
+                      </p>
+                    </PopoverContent>
+                  </Popover>
+                </CardTitle>
                 <CardDescription className="text-left">
                   Establece tus límites de gasto para cada categoría.
                 </CardDescription>

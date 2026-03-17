@@ -4,7 +4,8 @@
 
 ## ✨ Características Principales
 
-- **Dashboard Interactivo:** Un resumen visual de tu salud financiera con KPIs clave, gráficos de gastos y estado de tus presupuestos.
+- **Dashboard Interactivo:** Un resumen visual de tu salud financiera con KPIs clave adaptables a dispositivos móviles, gráficos de gastos y estado de tus presupuestos.
+- **Estrategias de Ahorro Rápidas:** Alterna el objetivo de ahorro general entre un 0% (sin forzar), 5%, 10% o 20% con un solo toque desde tu resumen mensual.
 - **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
 - **Planificación Inteligente:**
     - **Presupuestos por Categoría:** Asigna límites de gasto mensuales a diferentes categorías y observa tu progreso en tiempo real.
@@ -13,7 +14,7 @@
 - **Cierre de Mes Automatizado (Rollover):** Configura cómo se deben tratar los excedentes o déficits de tus presupuestos al pasar al siguiente mes.
 - **Transferencias Flexibles:** Mueve fondos entre tus presupuestos de diferentes categorías a mitad de mes sin perder el control.
 - **Reportes Detallados:** Analiza tus finanzas con tablas comparativas mensuales, desgloses por tipo de gasto y el estado de tus presupuestos.
-- **Interfaz Limpia y Adaptable:** Diseño moderno y completamente responsivo, con tema claro y oscuro.
+- **Interfaz Limpia y Adaptable:** Diseño moderno con un enfoque **Mobile-First**, tipografía responsiva y componentes optimizados tanto para pantallas anchas como controles táctiles. Tema oscuro global.
 - **IA Integrada (Google GenAI):** Recibe análisis detallados y consejos personalizados sobre tus reportes mensuales, progreso de metas y el impacto de transacciones individuales en tu presupuesto general utilizando el poder de Gemini y Firebase Genkit.
 - **Glassmorphism UI:** Una experiencia visual sumamente premium con componentes translúcidos finamente trabajados, sombras dinámicas y gradientes de fondo fijos usando TailwindCSS (Next-gen UI design).
 - **Interactividad Sonora (8-bit):** Respuestas táctiles y auditivas; escucha agradables tonos en síntesis retro (Web Audio API) generados sin dependencias al realizar ingresos, gastos, o cuando completas una meta de ahorro.
