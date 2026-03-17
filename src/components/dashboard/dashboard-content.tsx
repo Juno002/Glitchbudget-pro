@@ -32,6 +32,7 @@ export default function DashboardContent() {
           Reportes
           </TabsTrigger>
       </TabsList>
+      <div className="min-h-[calc(100vh-200px)] w-full relative">
       <TabsContent value="summary">
         <SummaryTab />
       </TabsContent>
@@ -44,6 +45,7 @@ export default function DashboardContent() {
       <TabsContent value="reports">
          <ReportsTab />
       </TabsContent>
+      </div>
       <BottomNav />
     </Tabs>
   )
