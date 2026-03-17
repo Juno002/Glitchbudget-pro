@@ -145,9 +145,11 @@ export default function PlanningTab() {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Planificación Mensual</h2>
-        <TransferDialog />
+        <div className="w-full sm:w-auto">
+          <TransferDialog />
+        </div>
       </div>
       
       <GoalsManager />
@@ -215,7 +217,7 @@ export default function PlanningTab() {
           </Card>
         </AccordionItem>
       </Accordion>
-      <div className="sticky bottom-4 z-10 w-full px-4 md:px-0">
+      <div className="sticky bottom-[90px] md:bottom-8 z-10 w-full px-4 md:px-0">
           <Button onClick={onSaveBudgets} className="w-full h-12 text-base shadow-[0_0_15px_rgba(0,255,136,0.1)] bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Guardar Planes</Button>
       </div>
     </div>
