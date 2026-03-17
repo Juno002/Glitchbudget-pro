@@ -66,7 +66,7 @@ function Snapshot({
           <div className="shrink-0"><Ring pct={100} ok /></div>
           <div className="flex-1 min-w-0">
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Disponible</div>
-            <div className="text-lg font-semibold text-emerald-600 dark:text-emerald-500 truncate tabular-nums">{formatCurrency(available)}</div>
+            <div className="text-[15px] sm:text-lg font-semibold text-emerald-600 dark:text-emerald-500 tabular-nums break-words leading-tight">{formatCurrency(available)}</div>
           </div>
           <Popover>
             <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
@@ -81,7 +81,7 @@ function Snapshot({
           <div className="shrink-0"><Ring pct={currentSavePct} ok /></div>
           <div className="flex-1 min-w-0">
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Ahorro sugerido</div>
-            <div className="text-lg font-semibold text-amber-600 dark:text-amber-500 truncate tabular-nums">{formatCurrency(suggestedSave)}</div>
+            <div className="text-[15px] sm:text-lg font-semibold text-amber-600 dark:text-amber-500 tabular-nums break-words leading-tight">{formatCurrency(suggestedSave)}</div>
           </div>
           <Popover>
             <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
@@ -98,7 +98,7 @@ function Snapshot({
           <div className="shrink-0"><Ring pct={100 - spendingPct} ok /></div>
           <div className="flex-1 min-w-0">
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Ingresos</div>
-            <div className="text-lg font-semibold text-emerald-700 dark:text-emerald-600 truncate tabular-nums">{formatCurrency(totalIncome)}</div>
+            <div className="text-[15px] sm:text-lg font-semibold text-emerald-700 dark:text-emerald-600 tabular-nums break-words leading-tight">{formatCurrency(totalIncome)}</div>
           </div>
         </CardContent>
       </Card>
@@ -109,7 +109,7 @@ function Snapshot({
           <div className="shrink-0"><Ring pct={spendingPct} ok={spendingPct <= 70} /></div>
           <div className="flex-1 min-w-0">
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Gastos</div>
-            <div className="text-lg font-semibold text-rose-600 dark:text-rose-500 truncate tabular-nums">{formatCurrency(totalExpenses)}</div>
+            <div className="text-[15px] sm:text-lg font-semibold text-rose-600 dark:text-rose-500 tabular-nums break-words leading-tight">{formatCurrency(totalExpenses)}</div>
           </div>
         </CardContent>
       </Card>

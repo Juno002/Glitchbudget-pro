@@ -144,7 +144,7 @@ export default function PlanningTab() {
   const displayedCategories = showAll ? [...active, ...inactive] : active;
 
   return (
-    <div className="space-y-6 pb-20">
+    <div className="space-y-6 pb-[140px] md:pb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Planificación Mensual</h2>
         <div className="w-full sm:w-auto">

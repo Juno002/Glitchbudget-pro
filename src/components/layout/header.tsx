@@ -7,7 +7,7 @@ import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { useEffect, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { Moon, Sun, Settings, RefreshCw, Plus, Minus, Loader } from 'lucide-react';
+import { Moon, Sun, Settings, RefreshCw, Plus, Minus, Loader, Info } from 'lucide-react';
 import OpfsBackupDialog from '@/components/backup/opfs-backup-dialog';
 import {
   DropdownMenu,
@@ -21,6 +21,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { db } from '@/lib/db';
 import { hasOPFS } from '@/lib/opfs';
 
@@ -83,14 +84,29 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => {
-                  const newStrictMode = !strictMode;
-                  setStrictMode(newStrictMode);
-                  toast({ title: `Modo estricto ${newStrictMode ? 'activado' : 'desactivado'}` });
-                }}>
-                   <input type="checkbox" readOnly checked={strictMode} className="mr-2" />
-                  <span>Modo estricto</span>
-                </DropdownMenuItem>
+                <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[rgba(255,255,255,0.06)] focus:bg-[rgba(255,255,255,0.06)]">
+                    <div className="flex flex-1 items-center cursor-pointer" onClick={() => {
+                        const newStrictMode = !strictMode;
+                        setStrictMode(newStrictMode);
+                        toast({ title: `Modo estricto ${newStrictMode ? 'activado' : 'desactivado'}` });
+                    }}>
+                        <input type="checkbox" readOnly checked={strictMode} className="mr-2 cursor-pointer" />
+                        <span>Modo estricto</span>
+                    </div>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <button className="ml-2 rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                                <Info className="h-4 w-4" />
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-64" side="left">
+                            <h4 className="font-semibold mb-2">Modo Estricto</h4>
+                            <p className="text-xs text-muted-foreground">
+                                Impide guardar montos fijos que superen tus ingresos totales mensuales, protegiéndote matemáticamente de crear presupuestos irreales.
+                            </p>
+                        </PopoverContent>
+                    </Popover>
+                </div>
 
                 <Dialog>
                     <DialogTrigger asChild>
