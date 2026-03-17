@@ -3,6 +3,7 @@
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
+import { playAIInsight } from '@/lib/sounds';
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -158,6 +159,7 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
           const data = await res.json();
           if (active && data.insight) {
             setInsight(data.insight);
+            playAIInsight();
           }
         }
       } catch (e) {
@@ -179,9 +181,9 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
   if (!insight) return null;
 
   return (
-    <div className="flex items-start gap-2 pt-1 px-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
+    <div className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px]">
       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-      <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{insight}</p>
+      <p className="text-sm text-[rgba(255,255,255,0.5)] leading-snug">{insight}</p>
     </div>
   );
 }
@@ -210,7 +212,7 @@ const DonutChart = ({ data, title }: { data: { name: string, value: number }[], 
                             <PieChart>
                                 <RechartsTooltip formatter={(value: number) => [formatCurrency(value), title]} />
                                 <Legend />
-                                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} labelLine={false} label>
+                                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} labelLine={false}>
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
@@ -234,13 +236,20 @@ const SaveStrategyChips = () => {
                 {label:'Conservador 5%',  val:0.05},
                 {label:'Estándar 10%',   val:0.10},
                 {label:'Agresivo 20%',   val:0.20},
-            ].map(opt => (
-                <button key={opt.val}
-                onClick={() => updateSettings({ savePct: opt.val })}
-                className={`px-2 py-1 text-xs rounded border ${savePct===opt.val ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent' : 'border-slate-300 dark:border-slate-700'}`}>
-                {opt.label}
-                </button>
-            ))}
+            ].map(opt => {
+                const isActive = Math.abs(savePct - opt.val) < 0.01;
+                return (
+                  <button key={opt.val}
+                  onClick={() => updateSettings({ savePct: opt.val })}
+                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-[rgba(0,255,136,0.12)] border-[rgba(0,255,136,0.3)] text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.1)]' 
+                      : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.4)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[rgba(255,255,255,0.8)]'
+                  }`}>
+                  {opt.label}
+                  </button>
+                )
+            })}
         </div>
     )
 }
@@ -261,7 +270,7 @@ export default function SummaryTab() {
 
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={100}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlitchBudget Redesign Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Syne', sans-serif; }
+
+.gb-phone {
+  width: 320px;
+  background: #080808;
+  border-radius: 44px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+.gb-screen {
+  background: #080808;
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+  min-height: 640px;
+}
+.gb-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(0,255,136,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 55%, rgba(0,229,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 95%, rgba(255,45,120,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.gb-content { position: relative; z-index: 1; padding: 24px 16px 16px; }
+
+.gb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.gb-logo-text { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+.gb-logo-text span { color: #00ff88; }
+.gb-month { font-size: 10px; color: rgba(255,255,255,0.35); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+
+.glass-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.gb-balance { padding: 18px 20px; margin-bottom: 10px; }
+.gb-balance-label { font-size: 10px; color: rgba(255,255,255,0.35); margin-bottom: 6px; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.gb-balance-amount { font-size: 34px; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1; }
+.gb-balance-amount span { color: #00ff88; font-size: 18px; vertical-align: super; letter-spacing: 0; }
+.gb-balance-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+.ai-pill {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  background: rgba(0,255,136,0.04);
+  border: 1px solid rgba(0,255,136,0.12);
+  border-radius: 14px;
+}
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: #00ff88; margin-top: 4px; flex-shrink: 0; box-shadow: 0 0 6px #00ff88; }
+.ai-text { font-size: 11px; color: rgba(255,255,255,0.5); line-height: 1.6; font-family: 'DM Mono', monospace; }
+
+.gb-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.gb-kpi { padding: 14px 16px; }
+.gb-kpi-label { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; font-family: 'DM Mono', monospace; }
+.gb-kpi-val { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; }
+.gb-kpi-val.green { color: #00ff88; }
+.gb-kpi-val.red { color: #ff2d78; }
+.gb-kpi-val.cyan { color: #00e5ff; }
+
+.gb-budgets { padding: 16px 18px; margin-bottom: 10px; }
+.gb-budgets-title { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; font-family: 'DM Mono', monospace; }
+.gb-budget-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+.gb-budget-row:last-child { margin-bottom: 0; }
+.gb-budget-name { font-size: 11px; color: rgba(255,255,255,0.5); width: 74px; flex-shrink: 0; }
+.gb-budget-track { flex: 1; height: 3px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+.gb-budget-fill { height: 100%; border-radius: 99px; }
+.gb-budget-pct { font-size: 10px; color: rgba(255,255,255,0.25); width: 30px; text-align: right; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+
+.gb-nav { display: flex; justify-content: space-around; padding: 14px 0 6px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 4px; }
+.gb-nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
+.gb-nav-dot { width: 20px; height: 2px; border-radius: 99px; background: rgba(255,255,255,0.07); }
+.gb-nav-dot.active { background: #00ff88; box-shadow: 0 0 8px rgba(0,255,136,0.5); }
+.gb-nav-label { font-size: 9px; color: rgba(255,255,255,0.25); font-family: 'DM Mono', monospace; letter-spacing: 0.3px; }
+.gb-nav-label.active { color: #00ff88; }
+</style>
+</head>
+<body>
+
+<div class="gb-phone">
+  <div class="gb-screen">
+    <div class="gb-bg"></div>
+    <div class="gb-content">
+
+      <div class="gb-header">
+        <div class="gb-logo-text">Glitch<span>Budget</span></div>
+        <div class="gb-month">MARZO 2026</div>
+      </div>
+
+      <div class="glass-card gb-balance">
+        <div class="gb-balance-label">Disponible real</div>
+        <div class="gb-balance-amount"><span>RD$</span> 8,340</div>
+        <div class="gb-balance-sub">17 días restantes · inicio RD$14,500</div>
+      </div>
+
+      <div class="ai-pill">
+        <div class="ai-dot"></div>
+        <div class="ai-text">Vas al 57% del mes con el 42% del saldo. A este ritmo terminarás con déficit de ~RD$1,200.</div>
+      </div>
+
+      <div class="gb-kpis">
+        <div class="glass-card gb-kpi">
+          <div class="gb-kpi-label">Ingresos</div>
+          <div class="gb-kpi-val green">RD$28,500</div>
+        </div>
+        <div class="glass-card gb-kpi">
+          <div class="gb-kpi-label">Gastos</div>
+          <div class="gb-kpi-val red">RD$20,160</div>
+        </div>
+        <div class="glass-card gb-kpi">
+          <div class="gb-kpi-label">Ratio</div>
+          <div class="gb-kpi-val red">70.7%</div>
+        </div>
+        <div class="glass-card gb-kpi">
+          <div class="gb-kpi-label">Meta ahorro</div>
+          <div class="gb-kpi-val cyan">RD$2,500</div>
+        </div>
+      </div>
+
+      <div class="glass-card gb-budgets">
+        <div class="gb-budgets-title">Presupuestos</div>
+        <div class="gb-budget-row">
+          <div class="gb-budget-name">Comida</div>
+          <div class="gb-budget-track"><div class="gb-budget-fill" style="width:91%;background:#ff2d78;"></div></div>
+          <div class="gb-budget-pct">91%</div>
+        </div>
+        <div class="gb-budget-row">
+          <div class="gb-budget-name">Transporte</div>
+          <div class="gb-budget-track"><div class="gb-budget-fill" style="width:68%;background:#00e5ff;"></div></div>
+          <div class="gb-budget-pct">68%</div>
+        </div>
+        <div class="gb-budget-row">
+          <div class="gb-budget-name">Entretenim.</div>
+          <div class="gb-budget-track"><div class="gb-budget-fill" style="width:45%;background:#00ff88;"></div></div>
+          <div class="gb-budget-pct">45%</div>
+        </div>
+        <div class="gb-budget-row">
+          <div class="gb-budget-name">Servicios</div>
+          <div class="gb-budget-track"><div class="gb-budget-fill" style="width:100%;background:#ff2d78;"></div></div>
+          <div class="gb-budget-pct">100%</div>
+        </div>
+      </div>
+
+      <div class="gb-nav">
+        <div class="gb-nav-item">
+          <div class="gb-nav-dot active"></div>
+          <div class="gb-nav-label active">Resumen</div>
+        </div>
+        <div class="gb-nav-item">
+          <div class="gb-nav-dot"></div>
+          <div class="gb-nav-label">Movim.</div>
+        </div>
+        <div class="gb-nav-item">
+          <div class="gb-nav-dot"></div>
+          <div class="gb-nav-label">Plan</div>
+        </div>
+        <div class="gb-nav-item">
+          <div class="gb-nav-dot"></div>
+          <div class="gb-nav-label">Reportes</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

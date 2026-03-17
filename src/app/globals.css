@@ -8,73 +8,71 @@ body {
 
 @layer base {
   :root {
-    --background: 212 60% 98%; /* Adjusted from --panel */
-    --foreground: 210 29% 24%;
-    --card: 0 0% 100%;
-    --card-foreground: 210 29% 24%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 29% 24%;
-    --primary: 207 70% 53.1%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 212 50% 85%;
-    --secondary-foreground: 210 29% 24%;
-    --muted: 212 20% 65%;
-    --muted-foreground: 212 15% 45%;
-    --accent: 212 55% 89%;
-    --accent-foreground: 210 29% 24%;
-    --destructive: 6 78% 57.1%;
+    --background: 0 0% 3%; /* #080808 */
+    --foreground: 0 0% 100%; /* #ffffff */
+    --card: 0 0% 100%; /* controlled by rgba */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 152 100% 50%; /* #00ff88 */
+    --primary-foreground: 0 0% 3%;
+    --secondary: 186 100% 50%; /* #00e5ff */
+    --secondary-foreground: 0 0% 3%;
+    --muted: 0 0% 100%; /* using rgba with alpha */
+    --muted-foreground: 0 0% 100%; /* text-secondary rgba(255,255,255,0.5) */
+    --accent: 186 100% 50%;
+    --accent-foreground: 0 0% 3%;
+    --destructive: 338 100% 59%; /* #ff2d78 */
     --destructive-foreground: 0 0% 100%;
-    --border: 212 30% 88%; /* Lighter border */
-    --input: 212 40% 92%;
-    --ring: 207 70% 53.1%;
-    --chart-1: 207 70% 53%;
-    --chart-2: 6 78% 57%;
-    --chart-3: 140 50% 50%;
+    --border: 0 0% 100%; /* using rgba */
+    --input: 0 0% 100%; /* using rgba */
+    --ring: 152 100% 50%;
+    --chart-1: 152 100% 50%;
+    --chart-2: 338 100% 59%;
+    --chart-3: 186 100% 50%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.8rem; /* Increased from 0.5rem for more rounded corners */
+    --radius: 20px;
 
-     /* New variables from HTML */
-    --good: 145 63% 42%; /* #10b981 */
-    --bad: 355 83% 60%; /* #ef4444 */
-    --warning: 38 92% 50%; /* #f59e0b */
-    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --backdrop: rgba(255,255,255,0.85);
+    --good: 152 100% 50%; /* #00ff88 */
+    --bad: 338 100% 59%; /* #ff2d78 */
+    --warning: 43 96% 56%; /* #fbbf24 */
+    --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
+    --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
+    --backdrop: rgba(8,8,8,0.85);
   }
   .dark {
-    --background: 222 47% 11%; /* #0b1220 */
-    --foreground: 220 14% 71%; /* #e2e8f0 */
-    --card: 222 47% 15%; /* #1e293b */
-    --card-foreground: 220 14% 71%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 220 14% 71%;
-    --primary: 205 90% 61%; /* #38bdf8 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 29% 20%;
-    --secondary-foreground: 212 60% 92.2%;
-    --muted: 223 15% 50%; /* #9aa4b2 */
-    --muted-foreground: 223 15% 50%;
-    --accent: 222 47% 11%;
-    --accent-foreground: 212 60% 92.2%;
-    --destructive: 0 79% 63%; /* #f87171 */
+    --background: 0 0% 3%; /* #080808 */
+    --foreground: 0 0% 100%; /* #ffffff */
+    --card: 0 0% 100%; /* controlled by rgba */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 152 100% 50%; /* #00ff88 */
+    --primary-foreground: 0 0% 3%;
+    --secondary: 186 100% 50%; /* #00e5ff */
+    --secondary-foreground: 0 0% 3%;
+    --muted: 0 0% 100%; /* using rgba with alpha */
+    --muted-foreground: 0 0% 100%; /* text-secondary rgba(255,255,255,0.5) */
+    --accent: 186 100% 50%;
+    --accent-foreground: 0 0% 3%;
+    --destructive: 338 100% 59%; /* #ff2d78 */
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%; /* #1f2937 */
-    --input: 217 33% 17%;
-    --ring: 205 90% 61%;
-    --chart-1: 205 90% 61%;
-    --chart-2: 0 79% 63%;
-    --chart-3: 158 64% 52%;
-    --chart-4: 40 80% 60%;
-    --chart-5: 280 60% 65%;
+    --border: 0 0% 100%; /* using rgba */
+    --input: 0 0% 100%; /* using rgba */
+    --ring: 152 100% 50%;
+    --chart-1: 152 100% 50%;
+    --chart-2: 338 100% 59%;
+    --chart-3: 186 100% 50%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
 
-     /* New variables from HTML */
-    --good: 158 64% 52%; /* #34d399 */
-    --bad: 0 79% 63%; /* #f87171 */
+    --good: 152 100% 50%; /* #00ff88 */
+    --bad: 338 100% 59%; /* #ff2d78 */
     --warning: 43 96% 56%; /* #fbbf24 */
-    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --backdrop: rgba(11,18,32,0.85);
+    --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
+    --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
+    --backdrop: rgba(8,8,8,0.85);
   }
 }
 

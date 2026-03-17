@@ -40,6 +40,7 @@ Reglas estrictas:
 2. Tono directo, clínico, neutral y al grano.
 3. CERO frases motivacionales, saludos, o regaños morales.
 4. Da una observación clara basada exclusivamente en el impacto de este gasto en su presupuesto de la categoría o en su disponible restante. (ej. "El gasto consume el X% del presupuesto de comida", "Se excedió el límite de transporte", "Queda disponible general ajustado a Y").
+5. Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").
 `;
 
     const response = await ai.models.generateContent({

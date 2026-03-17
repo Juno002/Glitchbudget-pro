@@ -145,7 +145,7 @@ export default function TransferDialog() {
               )}
             />
             <DialogFooter>
-                <Button type="submit">Confirmar Transferencia</Button>
+                <Button type="submit" className="bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Confirmar Transferencia</Button>
             </DialogFooter>
           </form>
         </Form>

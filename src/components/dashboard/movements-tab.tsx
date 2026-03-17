@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
 import { useToast } from '@/hooks/use-toast';
+import { playAIInsight } from '@/lib/sounds';
 
 const movementSchema = z.object({
   movementType: z.enum(['expense', 'income']),
@@ -75,7 +76,7 @@ function MainIncomeCard() {
                         </Select>
                         <Input type="number" placeholder="0.00" min="0" step="0.01" {...form.register('amount')} />
                     </div>
-                    <Button type="submit" className="w-full sm:w-auto">Guardar Ingreso Principal</Button>
+                    <Button type="submit" className="w-full sm:w-auto bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Guardar Ingreso Principal</Button>
                 </form>
             </CardContent>
         </Card>
@@ -89,6 +90,7 @@ export default function MovementsTab() {
   const [movementType, setMovementType] = useState<'expense' | 'income'>('expense');
   const [expenseType, setExpenseType] = useState<'Fijo' | 'Variable' | 'Ocasional'>('Variable');
   const [insight, setInsight] = useState<string | null>(null);
+  const [isFetchingInsight, setIsFetchingInsight] = useState(false);
   
   const form = useForm<MovementFormValues>({
     resolver: zodResolver(movementSchema),
@@ -136,6 +138,10 @@ export default function MovementsTab() {
         frequency: values.expenseType === 'Fijo' ? values.frequency : undefined,
       });
 
+      // Show loading indicator
+      setIsFetchingInsight(true);
+      setInsight(null);
+
       // Ambient AI Fetching for Expense
       const budgets = getBudgetStatusDetails(currentMonth);
       const budget = budgets.find((b: any) => b.categoryId === values.categoryId);
@@ -156,9 +162,15 @@ export default function MovementsTab() {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.insight) setInsight(data.insight);
+        if (data.insight) {
+          setInsight(data.insight);
+          playAIInsight();
+        }
       })
-      .catch(() => {}); // Fallamos en silencio
+      .catch(() => {}) // Fallamos en silencio
+      .finally(() => {
+        setIsFetchingInsight(false);
+      });
       
     } else {
       addIncomeItem({
@@ -366,12 +378,21 @@ export default function MovementsTab() {
                 />
               </div>
 
-              <Button type="submit" className="w-full">Añadir Movimiento</Button>
+              <Button type="submit" className="w-full bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]" disabled={isFetchingInsight}>
+                Añadir Movimiento
+              </Button>
               
-              {insight && (
-                <div className="flex items-start gap-2 pt-2 px-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
+              {isFetchingInsight && (
+                <div className="flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px] mt-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mt-0.5" />
+                  <p className="text-sm text-[rgba(255,255,255,0.5)] italic">Analizando impacto...</p>
+                </div>
+              )}
+
+              {insight && !isFetchingInsight && (
+                <div className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px] mt-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{insight}</p>
+                  <p className="text-sm text-[rgba(255,255,255,0.5)] leading-snug">{insight}</p>
                 </div>
               )}
             </form>

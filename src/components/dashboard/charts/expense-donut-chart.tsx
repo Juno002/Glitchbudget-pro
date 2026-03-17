@@ -26,7 +26,7 @@ const CustomLegend = (props: any) => {
         payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span>{entry.value} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
+            <span>{formatCurrency(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
           </li>
         ))
       }

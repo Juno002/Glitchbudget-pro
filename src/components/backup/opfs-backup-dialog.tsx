@@ -144,7 +144,7 @@ export default function OpfsBackupDialog() {
         </DialogHeader>
         
         <div className="flex flex-col sm:flex-row gap-2">
-            <Button onClick={handleCreate} disabled={isWorking} className="w-full sm:w-auto">
+            <Button onClick={handleCreate} disabled={isWorking} className="w-full sm:w-auto bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">
               {isWorking ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (

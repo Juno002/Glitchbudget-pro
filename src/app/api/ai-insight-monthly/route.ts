@@ -22,7 +22,8 @@ export async function POST(req: Request) {
         - Longitud máxima: 2 oraciones.
         - Tono analítico, directo y objetivo. Cero frases de motivación.
         - Menciona el patrón principal que notas.
-        - NO uses viñetas ni saltos de línea. Escribe corrido.`;
+        - NO uses viñetas ni saltos de línea. Escribe corrido.
+        - Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").`;
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',

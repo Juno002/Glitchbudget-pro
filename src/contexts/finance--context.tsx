@@ -13,6 +13,7 @@ import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
 import { opfsWrite, opfsRead, hasOPFS, opfsList, opfsDelete } from "@/lib/opfs";
+import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
 const DEFAULT_SETTINGS: Settings = {
   id: 'general',
@@ -23,7 +24,9 @@ const DEFAULT_SETTINGS: Settings = {
   incomeCategories: defaultIncomeCatIds,
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
-  locale: "es-DO"
+  locale: "es-DO",
+  reservePct: 0.05,
+  savePct: 0.10,
 };
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
@@ -114,7 +117,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const rawSettings = useLiveQuery(() => db.settings.get('general'), [dataVersion]);
   
   const settings = useMemo(() => {
-    const s = rawSettings ?? {};
+    const s: Partial<Settings> = rawSettings ?? {};
     return {
       ...DEFAULT_SETTINGS,
       ...s,
@@ -301,6 +304,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       const newIncome: Income = { ...income, id: uuidv4(), month: currentMonth, amount: toCents(income.amount) };
       await db.incomes.add(newIncome);
+      playIncome();
       toast({ title: `Ingreso agregado`, description: `+${(newIncome.amount / 100).toFixed(2)}` });
     } catch (error) {
       toast({ title: 'Error al agregar ingreso', description: friendlyError(error), variant: 'destructive' });
@@ -318,8 +322,27 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addExpense = useCallback(async (expense: Omit<Expense, "id" | "month">) => {
     try {
-      const newExpense: Expense = { ...expense, id: uuidv4(), month: expense.date.slice(0,7), amount: toCents(expense.amount) };
+      const amountCents = toCents(expense.amount);
+      const newExpense: Expense = { ...expense, id: uuidv4(), month: expense.date.slice(0,7), amount: amountCents };
+      
+      // Check budget limit Before saving
+      const monthDetails = getBudgetStatusDetails(newExpense.month);
+      const categoryBudget = monthDetails.find(b => b.categoryId === newExpense.categoryId);
+      let exceeded = false;
+      if (categoryBudget && categoryBudget.limit > 0) {
+          if (categoryBudget.remaining - amountCents < 0) {
+              exceeded = true;
+          }
+      }
+
       await db.expenses.add(newExpense);
+      
+      if (exceeded) {
+          playBudgetExceeded();
+      } else {
+          playExpense();
+      }
+      
       toast({ title: `Gasto agregado`, description: `-${(newExpense.amount / 100).toFixed(2)}` });
     } catch (error) {
        toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
@@ -378,18 +401,25 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const newContribution: GoalContribution = { id: uuidv4(), goalId: id, amount: amountInCents, date: today };
     
     try {
+      let isCompletedNow = false;
       await db.transaction('rw', db.goals, db.goal_contributions, async () => {
           const goal = await db.goals.get(id);
           if (goal) {
               const newSaved = goal.saved + amountInCents;
               const status = newSaved >= goal.target ? 'completed' : 'active';
+              if (status === 'completed' && goal.status !== 'completed') {
+                  isCompletedNow = true;
+              }
               await db.goals.update(id, { saved: newSaved, status });
               await db.goal_contributions.add(newContribution);
           } else {
             throw new Error("Meta no encontrada");
           }
       });
-       toast({ title: '¡Contribución exitosa!', description: `Has añadido ${(amountInCents / 100).toFixed(2)}.` });
+      if (isCompletedNow) {
+          playGoalComplete();
+      }
+      toast({ title: '¡Contribución exitosa!', description: `Has añadido ${(amountInCents / 100).toFixed(2)}.` });
     } catch (error: any) {
       toast({ title: 'Error al aportar a la meta', description: friendlyError(error), variant: 'destructive' });
     }
@@ -647,7 +677,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
   
   const value: FinanceContextType = useMemo(() => ({
-    theme: activeSettings.theme,
+    theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
     strictMode: activeSettings.strictMode,
     rolloverStrategy: activeSettings.rolloverStrategy,
     baseIncome: activeSettings.baseIncome,

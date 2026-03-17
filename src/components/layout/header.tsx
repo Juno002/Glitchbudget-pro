@@ -68,9 +68,10 @@ export default function Header() {
       <div className="flex w-full items-center gap-2 flex-wrap">
          <div className="flex items-center gap-2 mr-auto">
             <Link href="/" className="flex items-center gap-2">
-                <Badge className="text-white" style={{ background: 'var(--gradient-primary)', borderColor: 'transparent' }}>
-                    💰 GlitchBudget Pro
-                </Badge>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(0,255,136,0.08)] border border-[rgba(0,255,136,0.2)] text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.1)] transition-all hover:bg-[rgba(0,255,136,0.12)]">
+                    <span className="text-lg">💰</span>
+                    <span className="font-syne font-bold tracking-wide">GlitchBudget Pro</span>
+                </div>
             </Link>
         </div>
         <div className="flex items-center gap-2">

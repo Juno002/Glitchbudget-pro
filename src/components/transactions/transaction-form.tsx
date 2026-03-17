@@ -132,7 +132,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Guardar transacción</Button>
+        <Button type="submit" className="w-full bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Guardar transacción</Button>
       </form>
     </Form>
   );

@@ -67,7 +67,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
+                <Button size="sm" className="bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -90,7 +90,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
                             )}
                         />
                          <DialogFooter>
-                            <Button type="submit">Confirmar Aporte</Button>
+                            <Button type="submit" className="bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Confirmar Aporte</Button>
                         </DialogFooter>
                     </form>
                 </Form>
@@ -160,7 +160,7 @@ export default function GoalsManager() {
             </div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button><PlusCircle className="mr-2"/> Nueva Meta</Button>
+                    <Button className="bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"><PlusCircle className="mr-2"/> Nueva Meta</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-xl">
                      <DialogHeader>
@@ -289,7 +289,7 @@ export default function GoalsManager() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full" disabled={!isFormValid}>
+                                <Button type="submit" className="w-full bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]" disabled={!isFormValid}>
                                     Crear Meta
                                 </Button>
                             </form>

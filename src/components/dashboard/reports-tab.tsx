@@ -136,9 +136,9 @@ const MonthlyComparisonTable = () => {
             </CardContent>
             {insight && (
                 <div className="px-6 pb-6 pt-2">
-                    <div className="flex items-start gap-2 bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-3 border border-border/40 animate-in fade-in duration-700">
+                    <div className="flex items-start gap-2 animate-in fade-in duration-700 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px]">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{insight}</p>
+                        <p className="text-sm text-[rgba(255,255,255,0.5)] leading-relaxed font-medium">{insight}</p>
                     </div>
                 </div>
             )}

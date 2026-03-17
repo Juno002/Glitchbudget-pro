@@ -38,6 +38,7 @@ Reglas estrictas:
 2. Tono directo, analítico, neutral y al grano.
 3. CERO frases motivacionales, saludos o despedidas.
 4. Da una observación clara basada exclusivamente en estos números (ej. advertencias de gasto, ritmo de gasto vs días restantes, etc).
+5. Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").
 `;
 
     const response = await ai.models.generateContent({
