@@ -144,7 +144,7 @@ export default function PlanningTab() {
   const displayedCategories = showAll ? [...active, ...inactive] : active;
 
   return (
-    <div className="space-y-6 pb-[140px] md:pb-8">
+    <div className="space-y-6 pb-24 md:pb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Planificación Mensual</h2>
         <div className="w-full sm:w-auto">
@@ -217,7 +217,7 @@ export default function PlanningTab() {
           </Card>
         </AccordionItem>
       </Accordion>
-      <div className="sticky bottom-[90px] md:static md:mt-4 z-10 w-full px-4 md:px-0">
+      <div className="pt-2 pb-8 w-full px-4 md:px-0">
           <Button onClick={onSaveBudgets} className="w-full h-12 text-base shadow-[0_0_15px_rgba(0,255,136,0.1)] bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Guardar Planes</Button>
       </div>
     </div>
