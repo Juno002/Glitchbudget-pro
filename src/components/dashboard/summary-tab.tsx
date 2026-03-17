@@ -9,7 +9,7 @@ import { format, differenceInDays, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from "react";
 import BudgetStatus from "./budget-status";
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 
 function formatMonth(date: string) {
@@ -68,10 +68,10 @@ function Snapshot({
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Disponible</div>
             <div className="text-lg font-semibold text-emerald-600 dark:text-emerald-500 truncate tabular-nums">{formatCurrency(available)}</div>
           </div>
-          <Tooltip>
-            <TooltipTrigger className="shrink-0 text-slate-400 text-sm">ℹ️</TooltipTrigger>
-            <TooltipContent>Libre para gastar tras presupuestos, metas y colchón.</TooltipContent>
-          </Tooltip>
+          <Popover>
+            <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
+            <PopoverContent>Libre para gastar tras presupuestos, metas y colchón.</PopoverContent>
+          </Popover>
         </CardContent>
       </Card>
 
@@ -83,12 +83,12 @@ function Snapshot({
             <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Ahorro sugerido</div>
             <div className="text-lg font-semibold text-amber-600 dark:text-amber-500 truncate tabular-nums">{formatCurrency(suggestedSave)}</div>
           </div>
-          <Tooltip>
-            <TooltipTrigger className="shrink-0 text-slate-400 text-sm">ℹ️</TooltipTrigger>
-            <TooltipContent>
+          <Popover>
+            <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
+            <PopoverContent>
               Recomendación basada en {Math.round(savePct * 100)}% del ingreso, limitado por lo disponible.
-            </TooltipContent>
-          </Tooltip>
+            </PopoverContent>
+          </Popover>
         </CardContent>
       </Card>
 
@@ -271,7 +271,6 @@ export default function SummaryTab() {
 
 
   return (
-    <TooltipProvider delayDuration={50}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>
@@ -298,6 +297,5 @@ export default function SummaryTab() {
         <BudgetStatus />
         
       </div>
-    </TooltipProvider>
   );
 }
