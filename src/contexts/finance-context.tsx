@@ -122,7 +122,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
   
   const settings = useMemo(() => {
-    const s = rawSettings ?? {};
+    const s: Partial<Settings> = rawSettings ?? {};
     return {
       ...DEFAULT_SETTINGS,
       ...s,
@@ -654,7 +654,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
   
   const value: FinanceContextType = useMemo(() => ({
-    theme: activeSettings.theme,
+    theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
     strictMode: activeSettings.strictMode,
     rolloverStrategy: activeSettings.rolloverStrategy,
     baseIncome: activeSettings.baseIncome,
