@@ -119,7 +119,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const goals = useLiveQuery(() => db.goals.toArray(), [dataVersion]);
   const goalContributions = useLiveQuery(() => db.goal_contributions.toArray(), [dataVersion]);
   const budgets = useLiveQuery(() => db.plans.toArray(), [dataVersion]);
-  const rawSettings = useLiveQuery(() => db.settings.get('general'), [dataVersion]);
+  const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
   
   const settings = useMemo(() => {
     const s = rawSettings ?? {};
@@ -141,17 +141,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   
   useEffect(() => {
     async function initializeDB() {
-        if (rawSettings === undefined) return; 
-        const settingsCount = await db.settings.count();
-        if (settingsCount === 0) {
-            console.log("No settings found, initializing database with default settings.");
-            try {
-                await db.settings.put(DEFAULT_SETTINGS);
-                setDataVersion(v => v + 1);
-            } catch (error) {
-                console.error("Failed to initialize default settings:", error);
-                toast({ title: "Error de inicialización", description: friendlyError(error), variant: 'destructive' });
-            }
+        if (rawSettings === undefined) return; // Dexie query still pending
+        if (rawSettings !== null) return; // Settings already exist
+        // rawSettings is null => no record in DB, seed defaults
+        console.log("No settings found, initializing database with default settings.");
+        try {
+            await db.settings.put(DEFAULT_SETTINGS);
+            setDataVersion(v => v + 1);
+        } catch (error) {
+            console.error("Failed to initialize default settings:", error);
+            toast({ title: "Error de inicialización", description: friendlyError(error), variant: 'destructive' });
         }
     }
     initializeDB().catch(()=>{});
