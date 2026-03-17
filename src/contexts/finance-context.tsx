@@ -26,7 +26,7 @@ const DEFAULT_SETTINGS: Settings = {
   currency: "DOP",
   locale: "es-DO",
   reservePct: 0.05,
-  savePct: 0.10,
+  savePct: 0.00,
 };
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';

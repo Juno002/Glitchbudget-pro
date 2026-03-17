@@ -14,16 +14,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuLabel
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Label } from '../ui/label';
 import { db } from '@/lib/db';
 import { hasOPFS } from '@/lib/opfs';
 
@@ -86,10 +83,6 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleThemeToggle}>
-                  {theme === 'dark' ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                  <span>Cambiar tema</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => {
                   const newStrictMode = !strictMode;
                   setStrictMode(newStrictMode);
@@ -99,26 +92,47 @@ export default function Header() {
                   <span>Modo estricto</span>
                 </DropdownMenuItem>
 
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    <span>Cierre de Mes</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                      <DropdownMenuLabel>Estrategia de Rollover</DropdownMenuLabel>
-                      <DropdownMenuRadioGroup value={rolloverStrategy} onValueChange={(value) => setRolloverStrategy(value as any)}>
-                        <DropdownMenuRadioItem value="reset">
-                          <RefreshCw className="mr-2 h-4 w-4" /> Resetear
-                        </DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="accumulate_surplus">
-                          <Plus className="mr-2 h-4 w-4" /> Acumular Sobrante
-                        </DropdownMenuRadioItem>
-                         <DropdownMenuRadioItem value="accumulate_debt">
-                           <Minus className="mr-2 h-4 w-4" /> Acumular Deuda
-                        </DropdownMenuRadioItem>
-                      </DropdownMenuRadioGroup>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            <span>Cierre de Mes</span>
+                        </DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Estrategia de Cierre de Mes</DialogTitle>
+                            <DialogDescription>
+                                ¿Qué ocurre con tus presupuestos cuando empieza un mes nuevo?
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <RadioGroup value={rolloverStrategy} onValueChange={(value) => setRolloverStrategy(value as any)} className="gap-4">
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="reset" id="r1" />
+                                    <Label htmlFor="r1" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><RefreshCw className="h-4 w-4 text-slate-400" /> Resetear a cero</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Descarta lo sobrante y empieza de nuevo con los límites base.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="accumulate_surplus" id="r2" />
+                                    <Label htmlFor="r2" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Plus className="h-4 w-4 text-emerald-500" /> Acumular Sobrante</span>
+                                        <span className="text-xs text-muted-foreground mt-1">El dinero que no gastaste se suma al presupuesto del mes siguiente.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="accumulate_debt" id="r3" />
+                                    <Label htmlFor="r3" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Minus className="h-4 w-4 text-rose-500" /> Acumular Deuda</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Si gastaste de más, se te restará del presupuesto base del nuevo mes.</span>
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <DropdownMenuSeparator />
                  {opfsAvailable && (
@@ -130,7 +144,7 @@ export default function Header() {
                 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-[rgba(255,45,120,0.9)] focus:bg-[rgba(255,45,120,0.15)] focus:text-[rgba(255,45,120,1)]">
                             <span>Limpiar datos</span>
                         </DropdownMenuItem>
                     </AlertDialogTrigger>

@@ -233,6 +233,7 @@ const SaveStrategyChips = () => {
     return (
         <div className="flex gap-2 pt-2">
             {[
+                {label:'Ninguno 0%',  val:0.00},
                 {label:'Conservador 5%',  val:0.05},
                 {label:'Estándar 10%',   val:0.10},
                 {label:'Agresivo 20%',   val:0.20},
@@ -270,7 +271,7 @@ export default function SummaryTab() {
 
 
   return (
-    <TooltipProvider delayDuration={100}>
+    <TooltipProvider delayDuration={50}>
       <div className="space-y-4">
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>

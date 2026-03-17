@@ -14,6 +14,9 @@
 - **Transferencias Flexibles:** Mueve fondos entre tus presupuestos de diferentes categorías a mitad de mes sin perder el control.
 - **Reportes Detallados:** Analiza tus finanzas con tablas comparativas mensuales, desgloses por tipo de gasto y el estado de tus presupuestos.
 - **Interfaz Limpia y Adaptable:** Diseño moderno y completamente responsivo, con tema claro y oscuro.
+- **IA Integrada (Google GenAI):** Recibe análisis detallados y consejos personalizados sobre tus reportes mensuales, progreso de metas y el impacto de transacciones individuales en tu presupuesto general utilizando el poder de Gemini y Firebase Genkit.
+- **Glassmorphism UI:** Una experiencia visual sumamente premium con componentes translúcidos finamente trabajados, sombras dinámicas y gradientes de fondo fijos usando TailwindCSS (Next-gen UI design).
+- **Interactividad Sonora (8-bit):** Respuestas táctiles y auditivas; escucha agradables tonos en síntesis retro (Web Audio API) generados sin dependencias al realizar ingresos, gastos, o cuando completas una meta de ahorro.
 - **Persistencia de Datos:** Toda tu información se guarda de forma segura en el almacenamiento local de tu navegador.
 
 ## 🚀 Flujo de Usuario Principal
@@ -60,7 +63,9 @@ La calculadora de metas te ayuda a crear planes de ahorro realistas.
 - **UI:** React, ShadCN UI
 - **Estilos:** Tailwind CSS
 - **Estado Global y Base de Datos:** React Context + **Dexie.js (IndexedDB)**
-- **Validación de Formularios:** React Hook Form + **Zod**
+- **Formularios & Validación:** React Hook Form + **Zod**
+- **IA:** Genkit + Google GenAI (Firebase)
+- **Audio:** Web Audio API (`window.AudioContext`)
 - **Iconos:** Lucide React
 - **Gráficos:** Recharts
 
@@ -113,7 +118,7 @@ src/
 
 ## 🧭 Roadmap
 
-- [ ] Reemplazar `LocalStorage` con **Dexie.js (IndexedDB)** para un manejo de datos más robusto y performante.
+- [x] Reemplazar `LocalStorage` con **Dexie.js (IndexedDB)** para un manejo de datos más robusto y performante.
 - [ ] Implementar **cifrado opcional** en los archivos de backup (CSV).
 - [ ] Explorar la **sincronización opcional y opt-in** entre dispositivos a través de un backend seguro.
 - [ ] Añadir **tests de regresión** para las funciones críticas (cálculos de metas, presupuestos, etc.).
