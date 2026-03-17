@@ -72,10 +72,12 @@ export default function Header() {
                 </div>
             </Link>
         </div>
-        <div className="flex items-center gap-2">
-            <label htmlFor="month" className="text-sm text-muted-foreground hidden sm:inline">Período</label>
-            <Input id="month" type="month" value={currentMonth} onChange={(e) => setCurrentMonth(e.target.value)} className="w-auto" />
-            <Button variant="outline" onClick={() => setCurrentMonth(new Date().toISOString().slice(0, 7))}>Este mes</Button>
+        <div className="flex items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto justify-between">
+            <div className="flex items-center gap-2">
+                <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
+                <Input id="month" type="month" value={currentMonth} onChange={(e) => setCurrentMonth(e.target.value)} className="w-auto h-9" />
+                <Button variant="outline" className="h-9" onClick={() => setCurrentMonth(new Date().toISOString().slice(0, 7))}>Este mes</Button>
+            </div>
             
              <DropdownMenu>
               <DropdownMenuTrigger asChild>

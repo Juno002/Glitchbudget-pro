@@ -13,16 +13,16 @@ export function toCents(amount: number | string): number {
 }
 
 
-export function formatCurrency(amountInCents: number, currency = 'DOP') {
+export function formatCurrency(amountInCents: number) {
   if (typeof amountInCents !== 'number') {
     amountInCents = 0;
   }
   const amount = amountInCents / 100;
-  return new Intl.NumberFormat('es-DO', {
-    style: 'currency',
-    currency: currency,
+  const formatted = new Intl.NumberFormat('es-DO', {
     minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
+  return `RD$ ${formatted}`;
 }
 
 export function formatDate(dateString: string | undefined | null) {
