@@ -4,7 +4,7 @@ import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from 'date-fns';
+import { format, differenceInDays, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from "react";
 import BudgetStatus from "./budget-status";
@@ -117,6 +117,76 @@ function Snapshot({
 }
 
 
+function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, budgetStatus: any[], currentMonth: string }) {
+  const [insight, setInsight] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Only call if there are real financial data
+    if (totals.totalIncome <= 0) return;
+
+    let active = true;
+    async function fetchInsight() {
+      try {
+        const selectedDate = new Date(`${currentMonth}-02`);
+        const today = new Date();
+        let daysLeft = 0;
+        
+        // Calculate days left only if we are in the current month
+        if (selectedDate.getMonth() === today.getMonth() && selectedDate.getFullYear() === today.getFullYear()) {
+          daysLeft = differenceInDays(endOfMonth(today), today);
+        }
+
+        const plannedBudgets = budgetStatus.map((b) => ({ 
+          category: b.categoryId, 
+          limit: b.limit / 100, 
+          spent: b.spent / 100 
+        }));
+        
+        const res = await fetch('/api/ai-insight', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            income: totals.totalIncome / 100,
+            expenses: totals.totalExpenses / 100,
+            plannedBudgets,
+            available: totals.available / 100,
+            daysLeft
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (active && data.insight) {
+            setInsight(data.insight);
+          }
+        }
+      } catch (e) {
+        // Silently ignore errors
+      }
+    }
+
+    // Small delay to avoid blocking render
+    const timer = setTimeout(() => {
+      fetchInsight();
+    }, 500);
+
+    return () => { 
+      active = false; 
+      clearTimeout(timer);
+    };
+  }, [totals.totalIncome, totals.totalExpenses, totals.available, currentMonth, budgetStatus]);
+
+  if (!insight) return null;
+
+  return (
+    <div className="flex items-start gap-2 pt-1 px-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+      <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{insight}</p>
+    </div>
+  );
+}
+
+
 const DonutChart = ({ data, title }: { data: { name: string, value: number }[], title: string }) => {
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true) }, []);
@@ -177,7 +247,7 @@ const SaveStrategyChips = () => {
 
 
 export default function SummaryTab() {
-  const { getTotals, getExpensesByCategory, getIncomesByCategory, loading, currentMonth, savePct } = useFinances();
+  const { getTotals, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, savePct } = useFinances();
   const [monthName, setMonthName] = useState('');
 
   useEffect(() => {
@@ -187,6 +257,7 @@ export default function SummaryTab() {
   const totals = getTotals(currentMonth);
   const expenseData = getExpensesByCategory(currentMonth);
   const incomeData = getIncomesByCategory(currentMonth);
+  const budgetStatus = getBudgetStatusDetails(currentMonth);
 
 
   return (
@@ -204,6 +275,8 @@ export default function SummaryTab() {
             savePct={savePct}
             loading={loading}
         />
+        
+        {!loading && <AmbientInsight totals={totals} budgetStatus={budgetStatus} currentMonth={currentMonth} />}
 
         <SaveStrategyChips />
 

@@ -9,6 +9,9 @@ import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import TransactionHistoryClient from "../transactions/transaction-history-client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
@@ -58,6 +61,37 @@ const MonthlyComparisonTable = () => {
         return { prevMonth, currentTotals, prevTotals };
     }, [currentMonth, getTotals]);
 
+    const [insight, setInsight] = useState<string | null>(null);
+
+    useEffect(() => {
+        setInsight(null); // Limpiar previo si se cambia el mes
+        // Analizamos solo si de verdad hay data en ambos
+        if (currentTotals.totalIncome > 0 && prevTotals.totalIncome > 0) {
+            fetch('/api/ai-insight-monthly', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    currentMonth: {
+                        income: currentTotals.totalIncome,
+                        expenses: currentTotals.totalExpenses,
+                        balance: currentTotals.balance,
+                        available: currentTotals.available
+                    },
+                    previousMonth: {
+                        income: prevTotals.totalIncome,
+                        expenses: prevTotals.totalExpenses,
+                        balance: prevTotals.balance,
+                        available: prevTotals.available
+                    }
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.insight) setInsight(data.insight);
+            })
+            .catch(() => {});
+        }
+    }, [currentTotals, prevTotals]);
 
     const rows = [
         { label: 'Ingresos', prev: prevTotals.totalIncome, curr: currentTotals.totalIncome },
@@ -100,6 +134,14 @@ const MonthlyComparisonTable = () => {
                     </Table>
                 </div>
             </CardContent>
+            {insight && (
+                <div className="px-6 pb-6 pt-2">
+                    <div className="flex items-start gap-2 bg-secondary/10 hover:bg-secondary/20 transition-colors rounded-lg p-3 border border-border/40 animate-in fade-in duration-700">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">{insight}</p>
+                    </div>
+                </div>
+            )}
         </Card>
     );
 }

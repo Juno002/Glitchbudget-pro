@@ -84,10 +84,11 @@ function MainIncomeCard() {
 
 
 export default function MovementsTab() {
-  const { addExpense, addIncomeItem, expenseCategories, incomeCategories, strictMode, getTotals, currentMonth } = useFinances();
+  const { addExpense, addIncomeItem, expenseCategories, incomeCategories, strictMode, getTotals, getBudgetStatusDetails, currentMonth } = useFinances();
   const { toast } = useToast();
   const [movementType, setMovementType] = useState<'expense' | 'income'>('expense');
   const [expenseType, setExpenseType] = useState<'Fijo' | 'Variable' | 'Ocasional'>('Variable');
+  const [insight, setInsight] = useState<string | null>(null);
   
   const form = useForm<MovementFormValues>({
     resolver: zodResolver(movementSchema),
@@ -109,7 +110,15 @@ export default function MovementsTab() {
     form.setValue('categoryId', '');
   }, [categoryOptions, form]);
 
-  const onSubmit = (values: MovementFormValues) => {
+  // Clear insight when user starts typing a new transaction
+  useEffect(() => {
+    const subscription = form.watch(() => {
+      if (insight) setInsight(null);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, insight]);
+
+  const onSubmit = async (values: MovementFormValues) => {
     const { available } = getTotals(currentMonth);
     
     if (values.movementType === 'expense' && strictMode && (values.amount * 100) > available) {
@@ -126,6 +135,31 @@ export default function MovementsTab() {
         type: values.expenseType || 'Variable',
         frequency: values.expenseType === 'Fijo' ? values.frequency : undefined,
       });
+
+      // Ambient AI Fetching for Expense
+      const budgets = getBudgetStatusDetails(currentMonth);
+      const budget = budgets.find((b: any) => b.categoryId === values.categoryId);
+      const catInfo = getCategoryInfo(values.categoryId);
+      
+      const aiPayload = {
+        description: values.concept,
+        amount: values.amount,
+        category: catInfo?.name || values.categoryId,
+        budgetForCategory: budget ? { limit: budget.limit / 100, spent: budget.spent / 100 } : null,
+        available: (available - values.amount * 100) / 100
+      };
+
+      fetch('/api/ai-insight-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(aiPayload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.insight) setInsight(data.insight);
+      })
+      .catch(() => {}); // Fallamos en silencio
+      
     } else {
       addIncomeItem({
         description: values.concept,
@@ -333,6 +367,13 @@ export default function MovementsTab() {
               </div>
 
               <Button type="submit" className="w-full">Añadir Movimiento</Button>
+              
+              {insight && (
+                <div className="flex items-start gap-2 pt-2 px-1 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-snug">{insight}</p>
+                </div>
+              )}
             </form>
           </Form>
         </CardContent>

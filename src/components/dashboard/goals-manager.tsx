@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,7 +15,6 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import type { SuggestionProfile } from '@/lib/goal-calculator';
 import { suggestMonthly, requiredMonthlyByDeadline } from '@/lib/goal-calculator';
@@ -100,144 +99,11 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
     )
 }
 
-function GoalPlanner({ onPlanCreate }: { onPlanCreate: (plan: Omit<GoalFormValues, 'name'>) => void }) {
-    const { getDisposable } = useFinances();
-    const disposable = getDisposable();
-    const [activeTab, setActiveTab] = useState("suggest");
-
-    const form = useForm({
-        defaultValues: {
-            target: 1000,
-            deadline: '',
-        }
-    });
-
-    const target = form.watch('target');
-    const deadline = form.watch('deadline');
-    
-    const suggestionProfiles: SuggestionProfile[] = ['conservative', 'balanced', 'aggressive'];
-    const suggestions = useMemo(() => {
-        return suggestionProfiles.map(p => ({
-            profile: p,
-            ...suggestMonthly(target * 100, 0, disposable, p)
-        }))
-    }, [target, disposable]);
-
-    const requiredByDeadline = useMemo(() => {
-        if (!deadline || !target) return null;
-        return requiredMonthlyByDeadline(target * 100, 0, deadline, disposable);
-    }, [target, deadline, disposable]);
-
-    return (
-        <div className="p-4 border rounded-lg bg-card">
-            <h3 className="font-semibold text-lg mb-2">Planificador Inteligente de Metas</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-                Disponible mensual para metas: <span className="font-bold text-primary">{formatCurrency(disposable)}</span>
-            </p>
-            <FormProvider {...form}>
-              <form>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                     <FormField
-                        control={form.control}
-                        name="target"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Monto Objetivo</FormLabel>
-                                <FormControl>
-                                    <Input type="number" placeholder="1000" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                    {activeTab === 'deadline' && (
-                        <FormField
-                            control={form.control}
-                            name="deadline"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fecha Límite</FormLabel>
-                                    <FormControl>
-                                        <Input type="date" {...field} />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                    )}
-                </div>
-            </form>
-            </FormProvider>
-
-
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="suggest"><Brain className="mr-2"/>Sugerir Aporte</TabsTrigger>
-                    <TabsTrigger value="deadline"><Calendar className="mr-2"/>Llegar a una Fecha</TabsTrigger>
-                </TabsList>
-                <TabsContent value="suggest" className="mt-4">
-                    <Card>
-                        <CardHeader><CardTitle>Sugerencias de Aporte</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                             {suggestions.map(({ profile, monthly, months, eta, viable }) => (
-                                <div key={profile} className={cn("p-3 rounded-lg border", viable ? 'border-green-500/50' : 'border-destructive/50 opacity-60')}>
-                                    <h4 className="font-semibold capitalize flex justify-between items-center">
-                                        {profile}
-                                        {viable ? 
-                                            <Button size="sm" variant="ghost" onClick={() => onPlanCreate({ target, quota: monthly / 100, date: eta?.toISOString().slice(0,10) })}>Usar este plan</Button> :
-                                            <span className="text-xs text-destructive">No viable</span>
-                                        }
-                                    </h4>
-                                    {viable && eta ? (
-                                        <div className="text-sm text-muted-foreground">
-                                            Aportando <span className="font-bold text-primary">{formatCurrency(monthly)}</span>/mes,
-                                            lo lograrás en ~<span className="font-bold">{months}</span> meses
-                                            (aprox. <span className="font-bold">{formatDate(eta?.toISOString().slice(0,10) || '')}</span>).
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-destructive-foreground">No tienes suficiente disponible para este perfil.</p>
-                                    )}
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                <TabsContent value="deadline" className="mt-4">
-                     <Card>
-                        <CardHeader><CardTitle>Plan por Fecha Límite</CardTitle></CardHeader>
-                        <CardContent>
-                           {requiredByDeadline ? (
-                                <div className={cn("p-3 rounded-lg border", requiredByDeadline.viable ? 'border-green-500/50' : 'border-destructive/50')}>
-                                    <div className="flex justify-between items-center">
-                                        <h4 className="font-semibold">Aporte mensual requerido</h4>
-                                        {requiredByDeadline.viable && (
-                                            <Button size="sm" variant="ghost" onClick={() => onPlanCreate({ target, quota: requiredByDeadline.monthlyRequired / 100, date: deadline })}>Usar este plan</Button>
-                                        )}
-                                    </div>
-                                    <p className="text-3xl font-bold text-primary">{formatCurrency(requiredByDeadline.monthlyRequired)}</p>
-                                    
-                                    {!requiredByDeadline.viable && (
-                                        <div className="mt-4 text-destructive-foreground bg-destructive/80 p-3 rounded-md">
-                                            <p className="font-bold">Plan no viable</p>
-                                            <p className="text-sm">Te faltan <span className="font-bold">{formatCurrency(requiredByDeadline.deficit)}</span>/mes.</p>
-                                            <p className="text-sm mt-2">
-                                                Con tu disponible actual, la nueva fecha sugerida es <span className="font-bold">{formatDate(requiredByDeadline.altEta.toISOString().slice(0,10))}</span>.
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                           ) : (
-                                <p className="text-sm text-muted-foreground text-center py-8">Ingresa un monto y una fecha para calcular el plan.</p>
-                           )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
-        </div>
-    );
-}
+// Removed GoalPlanner component as it's now integrated inside GoalsManager
 
 
 export default function GoalsManager() {
-  const { goals, addGoal, deleteGoal, contributeToGoal } = useFinances();
+  const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   
@@ -245,19 +111,43 @@ export default function GoalsManager() {
     resolver: zodResolver(goalSchema),
     defaultValues: { name: '', target: 0, date: '', quota: 0 },
   });
+
+  const disposable = getDisposable();
+  const target = form.watch('target');
+  const deadline = form.watch('date');
   
-  const onPlanCreate = (plan: Omit<GoalFormValues, 'name'>) => {
-    form.setValue('target', plan.target);
-    form.setValue('date', plan.date);
-    form.setValue('quota', plan.quota);
-    toast({ title: "Plan de meta cargado", description: "Ahora ponle un nombre a tu meta y guárdala." });
-  }
+  const suggestionProfiles: SuggestionProfile[] = ['conservative', 'balanced', 'aggressive'];
+  const suggestions = useMemo(() => {
+      if (!target || target <= 0) return [];
+      return suggestionProfiles.map(p => ({
+          profile: p,
+          ...suggestMonthly(target * 100, 0, disposable, p)
+      }))
+  }, [target, disposable]);
+
+  const requiredByDeadline = useMemo(() => {
+      if (!deadline || !target || target <= 0) return null;
+      return requiredMonthlyByDeadline(target * 100, 0, deadline, disposable);
+  }, [target, deadline, disposable]);
+
+  const isFormValid = !!(form.watch('name') && form.watch('target') > 0 && form.watch('quota'));
+
+  useEffect(() => {
+    if (!open) {
+      form.reset({ name: '', target: 0, date: '', quota: undefined });
+    }
+  }, [open, form]);
+
+  const onPlanSelect = (quota: number, date?: string) => {
+    form.setValue('quota', quota);
+    if (date) form.setValue('date', date);
+  };
 
   const onSubmit = (data: GoalFormValues) => {
-    addGoal(data);
+    addGoal({ ...data, quota: data.quota || 0 });
     toast({ title: '¡Meta creada!', description: 'Tu nueva meta de ahorro ha sido añadida.' });
-    form.reset({ name: '', target: 0, date: '', quota: 0 });
     setOpen(false);
+    form.reset({ name: '', target: 0, date: '', quota: undefined });
   };
 
   return (
@@ -272,46 +162,41 @@ export default function GoalsManager() {
                 <DialogTrigger asChild>
                     <Button><PlusCircle className="mr-2"/> Nueva Meta</Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-3xl">
+                <DialogContent className="max-w-xl">
                      <DialogHeader>
                         <DialogTitle>Crear Nueva Meta</DialogTitle>
+                        <DialogDescription>Configura tu meta de ahorro paso a paso.</DialogDescription>
                     </DialogHeader>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <GoalPlanner onPlanCreate={onPlanCreate} />
+                    <div>
                         <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg bg-card">
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                  <FormField
                                     control={form.control}
                                     name="name"
                                     render={({ field }) => (
                                         <FormItem>
-                                        <FormLabel>1. Nombre de la Meta</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Vacaciones, nuevo PC..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="target"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>2. Monto Objetivo</FormLabel>
-                                            <FormControl><Input type="number" readOnly disabled {...field} /></FormControl>
+                                            <FormLabel>1. Nombre de la Meta</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej. Vacaciones, Coche nuevo..." {...field} />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
+                                
                                 <div className="grid grid-cols-2 gap-4">
-                                     <FormField
+                                    <FormField
                                         control={form.control}
-                                        name="quota"
+                                        name="target"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>3. Cuota Mensual</FormLabel>
-                                                <FormControl><Input type="number" readOnly disabled {...field} /></FormControl>
+                                                <FormLabel>2. Monto Objetivo</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" placeholder="0.00" {...field} onChange={e => {
+                                                        field.onChange(parseFloat(e.target.value) || 0);
+                                                        form.setValue('quota', undefined); // Reset selection
+                                                    }} />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -321,14 +206,92 @@ export default function GoalsManager() {
                                         name="date"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>4. Fecha Estimada</FormLabel>
-                                                <FormControl><Input type="date" readOnly disabled {...field} /></FormControl>
+                                                <FormLabel>Fecha Límite (Opcional)</FormLabel>
+                                                <FormControl>
+                                                    <Input type="date" {...field} onChange={e => {
+                                                        field.onChange(e.target.value);
+                                                        form.setValue('quota', undefined); // Reset selection
+                                                    }} />
+                                                </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                 </div>
-                                <Button type="submit" className="w-full">Crear Meta</Button>
+
+                                {target > 0 && (
+                                    <div className="space-y-3 pt-2">
+                                        <FormLabel className="flex items-center gap-2 mb-2">
+                                            3. Selecciona un Plan de Ahorro
+                                            {disposable > 0 && (
+                                                <span className="text-xs font-normal text-muted-foreground ml-auto bg-secondary/30 px-2 py-1 rounded">
+                                                    Disponible: {formatCurrency(disposable)}
+                                                </span>
+                                            )}
+                                        </FormLabel>
+                                        <div className="grid gap-3">
+                                            {suggestions.map(({ profile, monthly, months, eta, viable }) => (
+                                                <button
+                                                    key={profile}
+                                                    type="button"
+                                                    disabled={!viable}
+                                                    onClick={() => onPlanSelect(monthly / 100, eta?.toISOString().slice(0,10))}
+                                                    className={cn(
+                                                        "text-left p-3 rounded-lg border flex flex-col sm:flex-row justify-between sm:items-center gap-2 transition-colors",
+                                                        !viable && "opacity-50 cursor-not-allowed bg-muted/30 border-dashed",
+                                                        viable && form.watch('quota') === monthly / 100 ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "hover:border-primary/50",
+                                                    )}
+                                                >
+                                                    <div>
+                                                        <h4 className="font-semibold capitalize text-sm">{profile}</h4>
+                                                        {viable && eta ? (
+                                                            <div className="text-xs text-muted-foreground mt-0.5">
+                                                                Lo lograrás en ~{months} meses ({formatDate(eta.toISOString().slice(0,10))})
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-xs text-destructive-foreground mt-0.5">Saldo insuficiente</div>
+                                                        )}
+                                                    </div>
+                                                    {viable && (
+                                                        <div className="font-bold text-primary shrink-0">
+                                                            {formatCurrency(monthly)}<span className="text-xs font-normal text-muted-foreground">/mes</span>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+
+                                            {requiredByDeadline && requiredByDeadline.viable && (
+                                                <div className="relative pt-4">
+                                                    <div className="absolute inset-x-0 top-0 flex items-center justify-center">
+                                                        <span className="bg-background px-2 text-xs text-muted-foreground uppercase tracking-widest">Plan de Fecha Opcional</span>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onPlanSelect(requiredByDeadline.monthlyRequired / 100, deadline)}
+                                                        className={cn(
+                                                            "w-full text-left p-3 rounded-lg border flex flex-col sm:flex-row justify-between sm:items-center gap-2 transition-colors",
+                                                            form.watch('quota') === requiredByDeadline.monthlyRequired / 100 ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "hover:border-primary/50",
+                                                        )}
+                                                    >
+                                                        <div>
+                                                            <h4 className="font-semibold text-sm">Dictado por Fecha Límite</h4>
+                                                            <div className="text-xs text-muted-foreground mt-0.5">
+                                                                Cuota requerida para llegar al {formatDate(deadline!)}
+                                                            </div>
+                                                        </div>
+                                                        <div className="font-bold text-primary shrink-0">
+                                                            {formatCurrency(requiredByDeadline.monthlyRequired)}<span className="text-xs font-normal text-muted-foreground">/mes</span>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button type="submit" className="w-full" disabled={!isFormValid}>
+                                    Crear Meta
+                                </Button>
                             </form>
                         </Form>
                     </div>
