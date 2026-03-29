@@ -7,7 +7,6 @@ import { formatCurrency, cn } from "@/lib/utils";
 import { getCategoryInfo } from "@/lib/categories";
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
-import TransactionHistoryClient from "../transactions/transaction-history-client";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
@@ -273,16 +272,6 @@ export default function ReportsTab() {
             <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
         </div>
         <ExpenseByTypeTable />
-        <Accordion type="single" collapsible className="w-full">
-            <AccordionItem value="item-1">
-                <AccordionTrigger>
-                    <h3 className="text-lg font-semibold">Ver Historial de Movimientos</h3>
-                </AccordionTrigger>
-                <AccordionContent>
-                    <TransactionHistoryClient />
-                </AccordionContent>
-            </AccordionItem>
-        </Accordion>
     </div>
   );
 }

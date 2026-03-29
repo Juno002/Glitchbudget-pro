@@ -7,7 +7,7 @@ import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { useEffect, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { Moon, Sun, Settings, RefreshCw, Plus, Minus, Loader, Info } from 'lucide-react';
+import { Moon, Sun, Settings, RefreshCw, Plus, Minus, Loader, Info, Briefcase } from 'lucide-react';
 import OpfsBackupDialog from '@/components/backup/opfs-backup-dialog';
 import {
   DropdownMenu,
@@ -31,8 +31,11 @@ export default function Header() {
     strictMode, setStrictMode, 
     currentMonth, setCurrentMonth, 
     rolloverStrategy, setRolloverStrategy,
+    baseIncome: baseIncomeSettings, setBaseIncome,
     resetSettings, isWorking
   } = useFinances();
+  const [baseFreq, setBaseFreq] = useState(baseIncomeSettings?.freq || 'mensual');
+  const [baseAmount, setBaseAmount] = useState(String((baseIncomeSettings?.amount || 0) / 100));
   const { toast } = useToast();
   const [opfsAvailable, setOpfsAvailable] = useState(false);
 
@@ -148,6 +151,52 @@ export default function Header() {
                                     </Label>
                                 </div>
                             </RadioGroup>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <Briefcase className="mr-2 h-4 w-4" />
+                            <span>Ingreso Principal</span>
+                        </DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>💼 Ingreso Principal</DialogTitle>
+                            <DialogDescription>
+                                Establece tu sueldo o ingreso recurrente principal.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <select
+                                    value={baseFreq}
+                                    onChange={(e) => setBaseFreq(e.target.value as any)}
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                >
+                                    <option value="mensual">Mensual</option>
+                                    <option value="quincenal">Quincenal (2x mes)</option>
+                                    <option value="semanal">Semanal (4.33x mes)</option>
+                                </select>
+                                <Input
+                                    type="number"
+                                    placeholder="0.00"
+                                    min="0"
+                                    step="0.01"
+                                    value={baseAmount}
+                                    onChange={(e) => setBaseAmount(e.target.value)}
+                                />
+                            </div>
+                            <Button
+                                onClick={() => {
+                                    setBaseIncome({ freq: baseFreq as any, amount: Number(baseAmount) });
+                                }}
+                                className="w-full bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
+                            >
+                                Guardar Ingreso Principal
+                            </Button>
                         </div>
                     </DialogContent>
                 </Dialog>

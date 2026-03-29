@@ -164,9 +164,9 @@ export default function PlanningTab() {
                   <Wallet className="h-6 w-6" /> Planes por Categoría
                   <Popover>
                     <PopoverTrigger asChild>
-                      <button className="rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                      <span role="button" tabIndex={0} className="rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none cursor-pointer" onClick={(e) => e.stopPropagation()}>
                         <Info className="h-4 w-4" />
-                      </button>
+                      </span>
                     </PopoverTrigger>
                     <PopoverContent className="w-64" side="top" sideOffset={8}>
                       <h4 className="font-semibold mb-2">Guardado Manual</h4>
