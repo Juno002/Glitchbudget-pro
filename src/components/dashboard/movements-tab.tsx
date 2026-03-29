@@ -14,6 +14,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
 import { useToast } from '@/hooks/use-toast';
 import { playAIInsight } from '@/lib/sounds';
+import MovementsView from './MovementsView';
 
 const movementSchema = z.object({
   movementType: z.enum(['expense', 'income']),
@@ -399,6 +400,8 @@ export default function MovementsTab() {
           </Form>
         </CardContent>
       </Card>
+
+      <MovementsView />
     </div>
   );
 }

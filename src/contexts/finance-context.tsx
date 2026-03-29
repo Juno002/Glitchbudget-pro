@@ -52,8 +52,10 @@ interface FinanceContextType {
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
   addIncomeItem: (income: Omit<Income, "id" | "month">) => void;
+  updateIncomeItem: (income: Income) => void;
   deleteIncomeItem: (id: string) => void;
   addExpense: (expense: Omit<Expense, "id" | "month">) => void;
+  updateExpense: (expense: Expense) => void;
   deleteExpense: (id: string) => void;
   addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => void;
   updateGoal: (goal: Goal) => void;
@@ -316,6 +318,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [currentMonth, toast]);
 
+  const updateIncomeItem = useCallback(async (income: Income) => {
+    try {
+      const updated: Income = { ...income, amount: toCents(income.amount) };
+      await db.incomes.put(updated);
+      toast({ title: 'Ingreso actualizado' });
+    } catch (error) {
+      toast({ title: 'Error al actualizar ingreso', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
   const deleteIncomeItem = async (id: string) => {
     try {
       await db.incomes.delete(id);
@@ -351,6 +363,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       toast({ title: `Gasto agregado`, description: `-${(newExpense.amount / 100).toFixed(2)}` });
     } catch (error) {
        toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const updateExpense = useCallback(async (expense: Expense) => {
+    try {
+      const updated: Expense = { ...expense, amount: toCents(expense.amount) };
+      await db.expenses.put(updated);
+      toast({ title: 'Gasto actualizado' });
+    } catch (error) {
+      toast({ title: 'Error al actualizar gasto', description: friendlyError(error), variant: 'destructive' });
     }
   }, [toast]);
 
@@ -700,8 +722,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setRolloverStrategy,
     setBaseIncome,
     addIncomeItem,
+    updateIncomeItem,
     deleteIncomeItem,
     addExpense,
+    updateExpense,
     deleteExpense,
     addGoal,
     updateGoal,
@@ -738,7 +762,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }), [
     activeSettings, incomes, expenses, goals, goalContributions, budgets,
     setTheme, setStrictMode, setRolloverStrategy, setBaseIncome, updateSettings,
-    addIncomeItem, deleteIncomeItem, addExpense, deleteExpense,
+    addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
     getMonthlyAverages, getDisposable, getTotals, getSpentAmount,
