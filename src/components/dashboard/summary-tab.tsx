@@ -157,7 +157,7 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
 
         if (res.ok) {
           const data = await res.json();
-          if (active && data.insight) {
+          if (active && data.insight && data.insight.trim() !== 'NO_ALERT') {
             setInsight(data.insight);
             playAIInsight();
           }
@@ -181,9 +181,12 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
   if (!insight) return null;
 
   return (
-    <div className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px]">
-      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-      <p className="text-sm text-[rgba(255,255,255,0.5)] leading-snug">{insight}</p>
+    <div className="flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-700 bg-amber-500/10 border border-amber-500/30 rounded-[14px] px-4 py-3 shadow-[0_4px_20px_rgba(245,158,11,0.1)]">
+      <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0 animate-pulse" />
+      <div className="flex-1 min-w-0">
+        <h4 className="text-amber-500 font-semibold text-sm mb-0.5">Alerta de Gastos</h4>
+        <p className="text-sm text-amber-200/80 leading-snug">{insight}</p>
+      </div>
     </div>
   );
 }

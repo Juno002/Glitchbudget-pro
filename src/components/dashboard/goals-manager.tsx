@@ -15,6 +15,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { SuggestionProfile } from '@/lib/goal-calculator';
 import { suggestMonthly, requiredMonthlyByDeadline } from '@/lib/goal-calculator';
@@ -151,13 +152,12 @@ export default function GoalsManager() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-            <div>
-                <CardTitle className="flex items-center gap-2"><Target className="h-6 w-6" /> Metas de Ahorro</CardTitle>
-                <CardDescription>Crea y gestiona tus objetivos de ahorro a corto y largo plazo.</CardDescription>
-            </div>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">Metas de Ahorro</h3>
+            <p className="text-sm text-muted-foreground">Crea y gestiona tus objetivos de ahorro a corto y largo plazo.</p>
+        </div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button className="bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"><PlusCircle className="mr-2"/> Nueva Meta</Button>
@@ -297,75 +297,94 @@ export default function GoalsManager() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+
+      <div className="pt-2">
             {(goals || []).length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="flex flex-col gap-3">
                     {goals!.map(goal => {
                         const progress = goal.target > 0 ? (goal.saved / goal.target) * 100 : 0;
                         const remaining = goal.target - goal.saved;
                         return (
-                            <div key={goal.id} className={cn("p-4 border rounded-lg", goal.status === 'completed' && "bg-green-500/10 border-green-500")}>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <p className="font-bold">{goal.name}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {goal.date ? `Objetivo para el ${formatDate(goal.date)}` : 'Sin fecha límite'}
-                                        </p>
-                                        {goal.status === 'completed' && <span className="text-xs font-bold text-green-600">¡Completada!</span>}
+                            <div key={goal.id} className={cn(
+                                "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center",
+                                goal.status === 'completed' ? "bg-emerald-500/5 border-emerald-500/30" : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]"
+                            )}>
+                                {/* Icon & Title */}
+                                <div className="flex items-center gap-3 w-full sm:w-auto sm:min-w-[200px]">
+                                    <div className={cn(
+                                        "shrink-0 flex items-center justify-center w-12 h-12 rounded-full",
+                                        goal.status === 'completed' ? "bg-emerald-500/20 text-emerald-500" : "bg-primary/10 text-primary"
+                                    )}>
+                                        <Target className="h-6 w-6" />
                                     </div>
-                                     <div className="flex items-center gap-2">
-                                        {goal.status === 'active' && <ContributeToGoalDialog goal={goal} onContribute={(amount) => contributeToGoal(goal.id, amount)} />}
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-destructive h-8 w-8">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>¿Eliminar meta?</AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Esta acción es permanente. Se eliminará la meta "{goal.name}". Los fondos aportados no se devolverán automáticamente a tu balance.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => deleteGoal(goal.id)}>Eliminar</AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="font-bold truncate">{goal.name}</h4>
+                                        <p className="text-xs text-muted-foreground truncate">
+                                            {goal.date ? `Para ${formatDate(goal.date)}` : 'Sin fecha límite'}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="mt-4">
-                                    <div className="flex justify-between text-sm mb-1">
-                                        <span className="font-semibold">{formatCurrency(goal.saved)}</span>
-                                        <span className="text-muted-foreground">de {formatCurrency(goal.target)}</span>
+
+                                {/* Progress Section */}
+                                <div className="flex-1 w-full space-y-1.5">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="font-medium text-foreground">{formatCurrency(goal.saved)}</span>
+                                        <span className="text-muted-foreground text-xs">de {formatCurrency(goal.target)} ({progress.toFixed(1)}%)</span>
                                     </div>
-                                    <Progress value={progress} />
-                                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                        <span>Resta: {formatCurrency(remaining)}</span>
-                                        <span>{progress.toFixed(1)}%</span>
+                                    <Progress value={progress} className={cn("h-2", goal.status === 'completed' && "[&>div]:bg-emerald-500")} />
+                                    <div className="flex justify-between text-xs text-muted-foreground !mt-1">
+                                        {goal.status === 'completed' ? (
+                                             <span className="font-semibold text-emerald-500">¡Meta Completada! 🎉</span>
+                                        ) : (
+                                            <span>Restan {formatCurrency(remaining)}</span>
+                                        )}
+                                        {goal.quota > 0 && goal.status === 'active' && (
+                                            <span className="flex items-center gap-1">
+                                                <Repeat className="h-3 w-3"/>
+                                                {formatCurrency(goal.quota)}/mes
+                                            </span>
+                                        )}
                                     </div>
-                                    {goal.quota > 0 && goal.status === 'active' && (
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            <Repeat className="inline h-3 w-3 mr-1"/>
-                                            Plan de aporte: <span className="font-semibold">{formatCurrency(goal.quota)}/mes</span>
-                                        </p>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                                    {goal.status === 'active' && (
+                                         <ContributeToGoalDialog goal={goal} onContribute={(amount) => contributeToGoal(goal.id, amount)} />
                                     )}
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-9 w-9">
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>¿Eliminar meta?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    Esta acción es permanente. Se eliminará la meta "{goal.name}". Los fondos aportados no se devolverán automáticamente a tu balance.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => deleteGoal(goal.id)} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
                                 </div>
                             </div>
                         )
                     })}
                 </div>
             ) : (
-                <div className="text-center text-muted-foreground py-10 border rounded-lg">
-                    <p>No has creado ninguna meta de ahorro todavía.</p>
-                    <p className="text-sm">Usa el botón "Nueva Meta" para empezar a planificar tus sueños.</p>
+                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-[rgba(255,255,255,0.02)]">
+                    <Target className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
+                    <h4 className="font-medium text-lg mb-1">Sin metas de ahorro</h4>
+                    <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">Usa el botón "Nueva Meta" para empezar a destinar fondos a tus sueños.</p>
                 </div>
             )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

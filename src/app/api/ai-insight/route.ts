@@ -25,20 +25,19 @@ export async function POST(req: Request) {
     }
 
     const prompt = `
-Eres un asistente financiero analítico e integrado en una aplicación de finanzas.
-El usuario tiene la siguiente situación financiera actual:
+Eres un vigilante financiero silencioso (Ambient AI) integrado en el dashboard de una app de finanzas.
+Tu objetivo es detectar anomalías graves o riesgos inminentes en la siguiente situación financiera actual:
 - Ingresos: ${income}
 - Gastos: ${expenses}
-- Presupuestado (límites de presupuesto): ${plannedBudgets}
-- Disponible: ${available}
+- Presupuestado (límites por categoría y gasto actual): ${JSON.stringify(plannedBudgets)}
+- Disponible libre: ${available}
 - Días restantes del mes: ${daysLeft}
 
 Reglas estrictas:
-1. Escribe máximo 2 oraciones.
-2. Tono directo, analítico, neutral y al grano.
-3. CERO frases motivacionales, saludos o despedidas.
-4. Da una observación clara basada exclusivamente en estos números (ej. advertencias de gasto, ritmo de gasto vs días restantes, etc).
-5. Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").
+1. REGLA DE SILENCIO: Si el usuario va bien (el ritmo de gasto es proporcional a los días restantes, no ha roto presupuestos importantes, tiene saldo disponible razonable), DEBES responder ÚNICA y EXCLUSIVAMENTE con la palabra: NO_ALERT
+2. REGLA DE ALERTA: Si detectas un peligro inminente (ej. gastó el 80% de su ingreso y faltan 20 días, o sobrepasó drásticamente el presupuesto de una categoría vital), escribe una alerta de máximo 1 o 2 oraciones muy breves y directas.
+3. CERO frases motivacionales, introducciones o saludos. Ve directo al problema.
+4. Todos los montos monetarios en la alerta (si hay) deben usar el prefijo "RD$" y separadores de miles (ej: "RD$4,000").
 `;
 
     const response = await ai.models.generateContent({

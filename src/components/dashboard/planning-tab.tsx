@@ -1,129 +1,162 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Wallet, Info } from 'lucide-react';
+import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft } from 'lucide-react';
 import { getCategoryInfo } from '@/lib/categories';
 import { Skeleton } from '../ui/skeleton';
 import ExpenseCategoryManager from './expense-category-manager';
 import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import IncomeCategoryManager from './income-category-manager';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-function BudgetCard({ categoryId, onPlanChange, initialPlan, initialSpent }: { 
+// --- Compact Budget Item with Auto-Save ---
+function BudgetItem({ categoryId, currentPlan, spent, onSave }: { 
   categoryId: string;
-  onPlanChange: (value: number) => void;
-  initialPlan: number;
-  initialSpent: number;
+  currentPlan: number;
+  spent: number;
+  onSave: (val: number) => Promise<void>;
 }) {
   const category = getCategoryInfo(categoryId);
-  const [inputValue, setInputValue] = useState(initialPlan / 100);
+  const [inputValue, setInputValue] = useState(String(currentPlan / 100));
+  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Sync if external changes happen
   useEffect(() => {
-    setInputValue(initialPlan / 100);
-  }, [initialPlan]);
+    if (status === 'idle') {
+      setInputValue(String(currentPlan / 100));
+    }
+  }, [currentPlan, status]);
 
-  const spent = initialSpent;
-  const plan = initialPlan;
+  if (!category) return null;
+
+  const handleSave = async (valStr: string) => {
+    const num = parseFloat(valStr) || 0;
+    if (num * 100 === currentPlan) return; // No change
+
+    setStatus('saving');
+    await onSave(num);
+    setStatus('saved');
+    setTimeout(() => setStatus('idle'), 2000);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+    setStatus('idle');
+    
+    // Optional: Auto-save on stop typing (debounce)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+       handleSave(e.target.value);
+    }, 1000);
+  };
+
+  const handleBlur = () => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    handleSave(inputValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur();
+    }
+  };
+
+  const plan = currentPlan;
   const left = Math.max(0, plan - spent);
   const pct = plan ? Math.min(100, Math.round((spent / plan) * 100)) : 0;
   const over = plan > 0 && spent > plan;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(Number(e.target.value));
-  };
-  
-  const handleBlur = () => {
-    onPlanChange(inputValue);
-  };
-
-  if (!category) return null;
-
   return (
-    <div className={cn("rounded-xl border p-3", over ? "border-amber-400 dark:border-amber-600" : "border-slate-200 dark:border-slate-700")}>
-      <div className="flex items-center gap-2 mb-2 min-w-0">
-        <category.icon className="h-4 w-4 text-muted-foreground shrink-0" />
-        <div className="font-medium text-sm truncate flex-1">{category.name}</div>
-        <span className={cn(
-          "ml-auto text-[10px] px-1.5 py-0.5 rounded font-semibold",
-          plan === 0 ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300" : 
-          over ? "bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300" : 
-          "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+    <div className={cn(
+        "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border transition-colors",
+        over ? "border-amber-500/30 bg-amber-500/5" : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]"
+    )}>
+      {/* Category Info */}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className={cn(
+            "shrink-0 flex items-center justify-center w-10 h-10 rounded-lg",
+            over ? "bg-amber-500/20 text-amber-500" : "bg-[rgba(255,255,255,0.08)] text-muted-foreground"
         )}>
-          {plan === 0 ? "sin plan" : over ? "alerta" : "ok"}
-        </span>
+          <category.icon className="h-5 w-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+             <span className="font-medium text-sm truncate">{category.name}</span>
+             {over && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Excedido</span>}
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+            <span>Gastado: {formatCurrency(spent)}</span>
+            <span>•</span>
+            <span className={cn(left === 0 && plan > 0 && "text-amber-500")}>Resta: {formatCurrency(left)}</span>
+          </div>
+        </div>
       </div>
 
-      <Input
-        type="number"
-        inputMode="numeric"
-        className="w-full h-8 text-sm rounded border px-2 mb-2"
-        value={inputValue}
-        onChange={handleInputChange}
-        onBlur={handleBlur}
-        placeholder="Plan"
-      />
-
-      <div className="h-2 w-full bg-slate-200 dark:bg-slate-700 rounded overflow-hidden mb-2">
-        <div className={cn("h-2 rounded", over ? "bg-rose-500" : "bg-sky-500")} style={{ width: `${pct}%` }} />
+      {/* Input & Status */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">RD$</span>
+            <Input
+                type="number"
+                inputMode="decimal"
+                value={inputValue}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyDown={handleKeyDown}
+                className={cn(
+                    "w-[130px] h-10 pl-10 pr-4 text-right font-medium",
+                    status === 'saving' && "opacity-50"
+                )}
+                placeholder="0.00"
+            />
+        </div>
+        
+        <div className="w-5 flex justify-center">
+            {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-emerald-500 animate-in zoom-in" />}
+        </div>
       </div>
 
-      <div className="text-[11px] text-slate-500 dark:text-slate-400 flex justify-between">
-        <span className="truncate">Gastado: {formatCurrency(spent)}</span>
-        <span className={cn("truncate", left === 0 && plan > 0 && "text-amber-500")}>
-            Resta: {formatCurrency(left)}
-        </span>
-      </div>
+      {/* Mini Progress Bar (Mobile only, beneath input) */}
+      {plan > 0 && (
+          <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden sm:hidden mt-1">
+              <div className={cn("h-full rounded-full transition-all", over ? "bg-rose-500" : "bg-emerald-500")} style={{ width: `${pct}%` }} />
+          </div>
+      )}
     </div>
   );
 }
 
 
 export default function PlanningTab() {
-  const { 
-    currentMonth, 
-    updateAllBudgets, 
-    getBudgetStatusDetails, 
-    expenseCategories,
-    loading
-  } = useFinances();
-  const { toast } = useToast();
+  const { currentMonth, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
-  const [planInputs, setPlanInputs] = useState<{[key: string]: number}>({});
+  const [activeTab, setActiveTab] = useState('budgets');
   
   const budgetDetails = useMemo(() => getBudgetStatusDetails(currentMonth), [currentMonth, getBudgetStatusDetails]);
-  
-  useEffect(() => {
-    // Reset local plan inputs when month or details change
-    const initialPlans: {[key: string]: number} = {};
-    budgetDetails.forEach(b => {
-      initialPlans[b.categoryId] = b.limit / 100;
-    });
-    setPlanInputs(initialPlans);
-  }, [budgetDetails]);
 
+  // Handle single budget save
+  const handleSaveBudget = async (categoryId: string, limitValue: number) => {
+    // updateAllBudgets expects an array of all updates. A bit heavy, but it's what we have.
+    // To preserve others, we map the current state and replace the changed one.
+    const currentPlans = budgetDetails.map(b => ({ categoryId: b.categoryId, limit: b.limit / 100 }));
+    const existingIdx = currentPlans.findIndex(p => p.categoryId === categoryId);
+    
+    if (existingIdx >= 0) {
+        currentPlans[existingIdx].limit = limitValue;
+    } else {
+        currentPlans.push({ categoryId, limit: limitValue });
+    }
 
-  const handlePlanChange = (categoryId: string, value: number) => {
-    setPlanInputs(prev => ({...prev, [categoryId]: value}));
-  };
-
-  const onSaveBudgets = () => {
-    const budgetsToUpdate = Object.entries(planInputs).map(([categoryId, limit]) => ({
-      categoryId,
-      limit,
-    }));
-    updateAllBudgets(currentMonth, budgetsToUpdate);
-    toast({
-        title: "Planes guardados!",
-        description: "Tus nuevos límites de presupuesto han sido actualizados.",
-    })
+    await updateAllBudgets(currentMonth, currentPlans);
   };
   
   const { active, inactive } = useMemo(() => {
@@ -139,7 +172,6 @@ export default function PlanningTab() {
           }
       });
       return { active: Array.from(activeIds), inactive: Array.from(inactiveIds) };
-
   }, [expenseCategories, budgetDetails]);
 
   const displayedCategories = showAll ? [...active, ...inactive] : active;
@@ -148,94 +180,81 @@ export default function PlanningTab() {
     <div className="space-y-6 pb-24 md:pb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <h2 className="text-2xl font-bold">Planificación Mensual</h2>
-        <div className="w-full sm:w-auto">
-          <TransferDialog />
-        </div>
       </div>
-      
-      <GoalsManager />
 
-      <Accordion type="multiple" className="w-full space-y-6">
-        <AccordionItem value="budgets">
-           <Card>
-            <AccordionTrigger className="px-6 data-[state=closed]:py-2 data-[state=open]:border-b">
-              <CardHeader className="p-0">
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="h-6 w-6" /> Planes por Categoría
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <span role="button" tabIndex={0} className="rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none cursor-pointer" onClick={(e) => e.stopPropagation()}>
-                        <Info className="h-4 w-4" />
-                      </span>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64" side="top" sideOffset={8}>
-                      <h4 className="font-semibold mb-2">Guardado Manual</h4>
-                      <p className="text-xs text-muted-foreground">
-                        Cualquier ajuste numérico en los planes requiere que pulses el botón <strong className="text-emerald-500">Guardar Planes</strong> al final de esta pestaña para hacerse efectivo.
-                      </p>
-                    </PopoverContent>
-                  </Popover>
-                </CardTitle>
-                <CardDescription className="text-left">
-                  Establece tus límites de gasto para cada categoría.
-                </CardDescription>
-              </CardHeader>
-            </AccordionTrigger>
-            <AccordionContent>
-              <CardContent className="pt-6">
-                {loading ? (
-                    [...Array(5)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)
-                ) : (
-                  <>
-                  <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
-                  {displayedCategories.map(catId => {
-                      const detail = budgetDetails.find(b => b.categoryId === catId);
-                      return (
-                          <BudgetCard 
-                              key={catId} 
-                              categoryId={catId}
-                              onPlanChange={(val) => handlePlanChange(catId, val)}
-                              initialPlan={detail?.limit ?? 0}
-                              initialSpent={detail?.spent ?? 0}
-                          />
-                      )
-                  })}
-                  </div>
-                   {inactive.length > 0 && (
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="goals">Metas</TabsTrigger>
+          <TabsTrigger value="budgets">Presupuestos</TabsTrigger>
+          <TabsTrigger value="categories">Categorías</TabsTrigger>
+        </TabsList>
+
+        {/* --- METAS TAB --- */}
+        <TabsContent value="goals" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+           <GoalsManager />
+        </TabsContent>
+
+        {/* --- PRESUPUESTOS TAB --- */}
+        <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <div className="space-y-1">
+                        <CardTitle className="text-lg">Límites de Gasto</CardTitle>
+                        <CardDescription>
+                            Tus presupuestos se guardan automáticamente al editar.
+                        </CardDescription>
+                    </div>
+                    <TransferDialog />
+                </CardHeader>
+                <CardContent className="pt-4">
+                    {loading ? (
+                        <div className="space-y-3">
+                            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
+                        </div>
+                    ) : (
+                    <>
+                    <div className="flex flex-col gap-3">
+                    {displayedCategories.map(catId => {
+                        const detail = budgetDetails.find(b => b.categoryId === catId);
+                        return (
+                            <BudgetItem 
+                                key={catId} 
+                                categoryId={catId}
+                                currentPlan={detail?.limit ?? 0}
+                                spent={detail?.spent ?? 0}
+                                onSave={(val) => handleSaveBudget(catId, val)}
+                            />
+                        )
+                    })}
+                    </div>
+                    {inactive.length > 0 && (
                         <button
-                          onClick={() => setShowAll(v => !v)}
-                          className="mt-4 text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-700"
+                            onClick={() => setShowAll(v => !v)}
+                            className="mt-4 text-xs px-3 py-2 w-full rounded-lg border border-dashed border-[rgba(255,255,255,0.1)] text-muted-foreground hover:bg-[rgba(255,255,255,0.02)] transition-colors"
                         >
-                          {showAll ? "Ocultar inactivas" : `Ver ${inactive.length} categorías inactivas`}
+                            {showAll ? "Ocultar categorías inactivas" : `Configurar presupuesto en ${inactive.length} categorías inactivas...`}
                         </button>
                     )}
-                  </>
-                )}
-              </CardContent>
-            </AccordionContent>
-          </Card>
-        </AccordionItem>
+                    </>
+                    )}
+                </CardContent>
+            </Card>
+        </TabsContent>
 
-        <AccordionItem value="categories">
-           <Card>
-            <AccordionTrigger className="px-6 data-[state=closed]:py-2 data-[state=open]:border-b">
-               <CardHeader className="p-0">
-                  <CardTitle className="flex items-center gap-2">🏷️ Gestión de Categorías</CardTitle>
-                  <CardDescription className="text-left">
-                    Añade o restaura las categorías de ingresos y gastos.
-                  </CardDescription>
-              </CardHeader>
-            </AccordionTrigger>
-            <AccordionContent className='p-6 flex flex-col gap-4'>
-               <ExpenseCategoryManager />
-               <IncomeCategoryManager />
-            </AccordionContent>
-          </Card>
-        </AccordionItem>
-      </Accordion>
-      <div className="pt-2 pb-8 w-full px-4 md:px-0">
-          <Button onClick={onSaveBudgets} className="w-full h-12 text-base shadow-[0_0_15px_rgba(0,255,136,0.1)] bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">Guardar Planes</Button>
-      </div>
+        {/* --- CATEGORIAS TAB --- */}
+        <TabsContent value="categories" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+             <Card>
+                <CardHeader>
+                    <CardTitle className="text-lg">Gestión de Categorías</CardTitle>
+                    <CardDescription>Añade o restaura las categorías base.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                    <ExpenseCategoryManager />
+                    <IncomeCategoryManager />
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
