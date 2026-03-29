@@ -141,3 +141,44 @@ export function playAIInsight() {
   osc.start(ctx.currentTime);
   osc.stop(ctx.currentTime + 0.15);
 }
+
+export function playCoinDrop() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain1 = ctx.createGain();
+  const gain2 = ctx.createGain();
+
+  // High metallic "clink"
+  osc1.type = 'sine';
+  osc2.type = 'triangle';
+  
+  // Coin hitting
+  osc1.frequency.setValueAtTime(1800, ctx.currentTime);
+  osc1.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
+  
+  // Resonant ring
+  osc2.frequency.setValueAtTime(2400, ctx.currentTime);
+  osc2.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
+
+  gain1.gain.setValueAtTime(0, ctx.currentTime);
+  gain1.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.02);
+  gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+
+  gain2.gain.setValueAtTime(0, ctx.currentTime);
+  gain2.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+  osc1.connect(gain1);
+  gain1.connect(ctx.destination);
+  
+  osc2.connect(gain2);
+  gain2.connect(ctx.destination);
+
+  osc1.start(ctx.currentTime);
+  osc2.start(ctx.currentTime);
+  osc1.stop(ctx.currentTime + 0.3);
+  osc2.stop(ctx.currentTime + 0.3);
+}

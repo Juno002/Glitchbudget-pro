@@ -6,15 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft } from 'lucide-react';
+import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft, Plus } from 'lucide-react';
 import { getCategoryInfo } from '@/lib/categories';
 import { Skeleton } from '../ui/skeleton';
 import ExpenseCategoryManager from './expense-category-manager';
 import TransferDialog from './transfer-dialog';
-import GoalsManager from './goals-manager';
-import IncomeCategoryManager from './income-category-manager';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { playIncome } from '@/lib/sounds';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: { 
@@ -135,6 +135,126 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   );
 }
 
+// --- New Budget Modal ---
+function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: string[], onSave: (categoryId: string, amount: number) => Promise<void> }) {
+  const [open, setOpen] = useState(false);
+  const [selectedCatId, setSelectedCatId] = useState<string>('');
+  const [amount, setAmount] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Group inactive by their mapped models for easy rendering
+  const inactiveInfo = inactiveCategories
+      .map(id => getCategoryInfo(id))
+      .filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
+
+  const selectedInfo = getCategoryInfo(selectedCatId);
+
+  const handleSave = async () => {
+    const num = parseFloat(amount) || 0;
+    if (num <= 0 || !selectedCatId) return;
+    setSaving(true);
+    await onSave(selectedCatId, num);
+    playIncome();
+    setSaving(false);
+    setOpen(false);
+    setSelectedCatId('');
+    setAmount('');
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-3 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+        >
+            <Plus className="h-4 w-4" /> Nuevo Presupuesto
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden gap-0">
+         <DialogHeader className="p-6 pb-2">
+            <DialogTitle>Añadir Presupuesto</DialogTitle>
+            <DialogDescription>Asigna un límite de gasto a una de tus categorías libres.</DialogDescription>
+         </DialogHeader>
+
+         <div className="px-6 pb-6 space-y-6">
+             {/* Category Grid */}
+             <div className="space-y-2">
+                 <label className="text-xs text-muted-foreground font-medium">1. Selecciona categoría</label>
+                 {inactiveInfo.length === 0 ? (
+                     <div className="text-center p-4 border border-dashed rounded-xl bg-muted/5 text-sm text-muted-foreground">
+                         No hay categorías disponibles.
+                     </div>
+                 ) : (
+                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[160px] overflow-y-auto pr-2">
+                        {inactiveInfo.map(cat => {
+                            const Icon = cat.icon;
+                            const isSelected = selectedCatId === cat.id;
+                            return (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCatId(cat.id)}
+                                    className={cn(
+                                        "flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all border",
+                                        isSelected 
+                                            ? "border-[#00ff88] bg-[rgba(0,255,136,0.1)] text-[#00ff88]" 
+                                            : "border-transparent hover:bg-[rgba(255,255,255,0.06)] text-muted-foreground"
+                                    )}
+                                >
+                                    <Icon className="h-6 w-6" />
+                                    <span className="text-[10px] truncate w-full text-center leading-tight">{cat.name}</span>
+                                </button>
+                            );
+                        })}
+                     </div>
+                 )}
+             </div>
+
+             {/* Amount Input */}
+             <div className="space-y-2">
+                <label className="text-xs text-muted-foreground font-medium">2. Establece el límite mensual</label>
+                <div className="flex items-center gap-3">
+                    {selectedInfo ? (
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                            <selectedInfo.icon className="h-6 w-6 text-emerald-400" />
+                        </div>
+                    ) : (
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                            <span className="text-muted-foreground">?</span>
+                        </div>
+                    )}
+                    <div className="relative flex-1">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">RD$</span>
+                        <Input
+                            type="number"
+                            inputMode="decimal"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            placeholder="0.00"
+                            className="h-12 pl-12 text-lg font-bold bg-transparent"
+                            disabled={!selectedCatId}
+                        />
+                    </div>
+                </div>
+             </div>
+
+             {/* Save Button */}
+             <button
+                disabled={!selectedCatId || !amount || parseFloat(amount) <= 0 || saving}
+                onClick={handleSave}
+                className={cn(
+                     "w-full h-12 rounded-xl font-bold flex items-center justify-center transition-all",
+                     selectedCatId && parseFloat(amount) > 0 && !saving
+                        ? "bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
+                        : "bg-[rgba(255,255,255,0.04)] text-muted-foreground cursor-not-allowed"
+                )}
+             >
+                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar Presupuesto"}
+             </button>
+         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function PlanningTab() {
   const { currentMonth, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
@@ -197,16 +317,19 @@ export default function PlanningTab() {
         {/* --- PRESUPUESTOS TAB --- */}
         <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                     <div className="space-y-1">
                         <CardTitle className="text-lg">Límites de Gasto</CardTitle>
                         <CardDescription>
                             Tus presupuestos se guardan automáticamente al editar.
                         </CardDescription>
                     </div>
-                    <TransferDialog />
+                    {/* Wrapped to prevent squash */}
+                    <div className="shrink-0 w-full sm:w-auto flex justify-end">
+                        <TransferDialog />
+                    </div>
                 </CardHeader>
-                <CardContent className="pt-4">
+                <CardContent className="pt-0">
                     {loading ? (
                         <div className="space-y-3">
                             {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
@@ -227,14 +350,8 @@ export default function PlanningTab() {
                         )
                     })}
                     </div>
-                    {inactive.length > 0 && (
-                        <button
-                            onClick={() => setShowAll(v => !v)}
-                            className="mt-4 text-xs px-3 py-2 w-full rounded-lg border border-dashed border-[rgba(255,255,255,0.1)] text-muted-foreground hover:bg-[rgba(255,255,255,0.02)] transition-colors"
-                        >
-                            {showAll ? "Ocultar categorías inactivas" : `Configurar presupuesto en ${inactive.length} categorías inactivas...`}
-                        </button>
-                    )}
+                    {/* Fixed 'New Budget' UX */}
+                    <NewBudgetDialog inactiveCategories={inactive} onSave={handleSaveBudget} />
                     </>
                     )}
                 </CardContent>

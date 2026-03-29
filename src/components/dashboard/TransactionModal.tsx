@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2 } from 'lucide-react';
-import { playAIInsight } from '@/lib/sounds';
+import { playAIInsight, playExpense, playIncome } from '@/lib/sounds';
 
 interface TransactionModalProps {
   open: boolean;
@@ -163,6 +163,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           type: expenseSubtype,
           frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
         });
+        playExpense();
       } else if (editingIncome) {
         updateIncomeItem({
           ...editingIncome,
@@ -172,6 +173,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           date,
           type: incomeSubtype,
         });
+        playIncome();
       }
       onClose();
       return;
@@ -187,6 +189,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         type: expenseSubtype,
         frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
       });
+      playExpense();
     } else {
       addIncomeItem({
         description: concept,
@@ -195,6 +198,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         date,
         type: incomeSubtype,
       });
+      playIncome();
     }
 
     setSaved(true);

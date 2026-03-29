@@ -192,11 +192,12 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
 }
 
 
-const DonutChart = ({ data, title }: { data: { name: string, value: number }[], title: string }) => {
+const DonutChart = ({ data, title, colors }: { data: { name: string, value: number }[], title: string, colors?: string[] }) => {
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true) }, []);
     
-    const COLORS = [
+    // Default palette if none provided
+    const COLORS = colors || [
         'hsl(var(--chart-1))',
         'hsl(var(--chart-2))',
         'hsl(var(--chart-3))',
@@ -293,8 +294,16 @@ export default function SummaryTab() {
         <SaveStrategyChips />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
-            <DonutChart data={expenseData} title="Gastos" />
-            <DonutChart data={incomeData} title="Ingresos" />
+            <DonutChart 
+                data={expenseData} 
+                title="Gastos" 
+                colors={['#f43f5e', '#fb923c', '#fbbf24', '#a78bfa', '#f472b6']} 
+            />
+            <DonutChart 
+                data={incomeData} 
+                title="Ingresos" 
+                colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']} 
+            />
         </div>
 
         <BudgetStatus />
