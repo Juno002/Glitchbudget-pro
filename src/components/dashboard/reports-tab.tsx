@@ -305,6 +305,124 @@ const BudgetStatusReport = () => {
     )
 }
 
+const CreditCardStatusReport = () => {
+    const { debts, debtPayments, expenses } = useFinances();
+    const activeCards = (debts || []).filter(d => d.type === 'credit_card' && d.status === 'active');
+
+    const getDaysUntil = (targetDay?: number) => {
+        if (!targetDay) return null;
+        const today = new Date();
+        const currDay = today.getDate();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        if (currDay <= targetDay) return targetDay - currDay;
+        return (daysInMonth - currDay) + targetDay;
+    };
+
+    if (activeCards.length === 0) return null;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>💳 Estado de Tarjetas</CardTitle>
+                <CardDescription>Seguimiento de saldos, límites y fechas clave para este periodo.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {/* MOBILE VIEW */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {activeCards.map(debt => {
+                        const ccExpenses = (expenses || []).filter(e => e.debtId === debt.id).reduce((sum, e) => sum + e.amount, 0);
+                        const ccPayments = (debtPayments || []).filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
+                        const currentDebt = ccExpenses - ccPayments;
+                        const available = debt.principal - currentDebt;
+                        const daysToCut = getDaysUntil(debt.billingCycleDay);
+                        const daysToPay = getDaysUntil(debt.paymentDueDay);
+
+                        return (
+                            <div key={debt.id} className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 rounded-xl flex flex-col gap-3">
+                                <div className="flex justify-between items-start">
+                                    <h4 className="font-bold text-base leading-none">{debt.name}</h4>
+                                    <div className="flex flex-col items-end gap-1">
+                                        {daysToCut !== null && (
+                                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border leading-none font-medium", daysToCut <= 3 ? "border-bad/50 text-bad bg-bad/5" : "border-muted-foreground/30 text-muted-foreground")}>
+                                                Corte: {daysToCut}d
+                                            </span>
+                                        )}
+                                        {daysToPay !== null && (
+                                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border leading-none font-bold", daysToPay <= 3 ? "border-bad text-bad bg-bad/10" : "border-primary/40 text-primary bg-primary/5")}>
+                                                Pago: {daysToPay}d
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Deuda Actual</span>
+                                        <span className={cn("font-mono font-bold text-sm", currentDebt > 0 ? "text-bad" : "text-good")}>
+                                            {formatCurrency(currentDebt)}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Crédito Disp.</span>
+                                        <span className="font-mono font-bold text-sm text-primary">
+                                            {formatCurrency(available)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* DESKTOP VIEW */}
+                <div className="hidden md:block overflow-x-auto">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="py-4">Tarjeta</TableHead>
+                                <TableHead className="text-right py-4">Balance Actual</TableHead>
+                                <TableHead className="text-right py-4">Límite Disp.</TableHead>
+                                <TableHead className="text-center py-4">Corte (Día)</TableHead>
+                                <TableHead className="text-center py-4">Pago (Día)</TableHead>
+                                <TableHead className="text-right py-4">Vencimiento</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {activeCards.map(debt => {
+                                const ccExpenses = (expenses || []).filter(e => e.debtId === debt.id).reduce((sum, e) => sum + e.amount, 0);
+                                const ccPayments = (debtPayments || []).filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
+                                const currentDebt = ccExpenses - ccPayments;
+                                const available = debt.principal - currentDebt;
+                                const daysToPay = getDaysUntil(debt.paymentDueDay);
+
+                                return (
+                                    <TableRow key={debt.id}>
+                                        <TableCell className="py-5 font-semibold text-base">{debt.name}</TableCell>
+                                        <TableCell className={cn("text-right py-5 font-mono text-base font-bold", currentDebt > 0 ? "text-bad" : "text-good")}>
+                                            {formatCurrency(currentDebt)}
+                                        </TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base text-primary">
+                                            {formatCurrency(available)}
+                                        </TableCell>
+                                        <TableCell className="text-center py-5 text-muted-foreground">{debt.billingCycleDay || '-'}</TableCell>
+                                        <TableCell className="text-center py-5 text-muted-foreground font-medium">{debt.paymentDueDay || '-'}</TableCell>
+                                        <TableCell className="text-right py-5">
+                                            {daysToPay !== null ? (
+                                                <span className={cn("text-xs font-bold px-2 py-1 rounded-md", daysToPay <= 3 ? "bg-bad/20 text-bad" : "bg-primary/10 text-primary")}>
+                                                    Faltan {daysToPay} días
+                                                </span>
+                                            ) : '-'}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                </div>
+            </CardContent>
+        </Card>
+    );
+};
+
 export default function ReportsTab() {
   const { getIncomesByCategory, getExpensesByCategory, currentMonth } = useFinances();
 
@@ -316,6 +434,7 @@ export default function ReportsTab() {
         <h2 className="text-2xl font-bold">Reportes</h2>
         <CashFlowChart />
         <MonthlyComparisonTable />
+        <CreditCardStatusReport />
         <BudgetStatusReport />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />

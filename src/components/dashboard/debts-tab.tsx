@@ -159,7 +159,7 @@ export default function DebtsTab() {
                 <div className="space-y-2 mb-6">
                   <div className="flex justify-between text-xs">
                     <span className="text-muted-foreground">Uso del límite base</span>
-                    <span className="font-mono">{isSurplus ? '0%' : percentUsed.toFixed(1)}%</span>
+                    <span className="font-mono">{isSurplus ? '0' : percentUsed.toFixed(1)}%</span>
                   </div>
                   <div className="w-full bg-black/10 dark:bg-white/10 h-2 rounded-full overflow-hidden">
                     <div 
@@ -174,7 +174,7 @@ export default function DebtsTab() {
                   else setPaymentDebtId(null);
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="w-full bg-white/5 border border-white/10 hover:bg-white/10 text-white">
+                    <Button className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 text-foreground transition-all">
                       Registrar Pago / Abono
                     </Button>
                   </DialogTrigger>
