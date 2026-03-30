@@ -128,15 +128,15 @@ export default function DebtsTab() {
               <div key={debt.id} className="relative overflow-hidden w-full backdrop-blur-md bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-[20px] p-5">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#00e5ff]/10 flex items-center justify-center">
-                      <CreditCard className="w-5 h-5 text-[#00e5ff]" />
+                    <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                      <CreditCard className="w-5 h-5 text-secondary" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg leading-tight">{debt.name}</h3>
                       <p className="text-xs text-muted-foreground">Corte: día {debt.billingCycleDay || '--'} • Pago: día {debt.paymentDueDay || '--'}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500/50 hover:bg-rose-500/10 hover:text-rose-500" onClick={() => deleteDebt(debt.id)}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-bad/50 hover:bg-bad/10 hover:text-bad" onClick={() => deleteDebt(debt.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -148,9 +148,9 @@ export default function DebtsTab() {
                       {formatCurrency(availableLimit)}
                     </p>
                   </div>
-                  <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-[rgba(0,255,136,0.03)] border-primary/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
+                  <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-good/5 border-good/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
                     <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Balance Deudado'}</p>
-                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-primary" : (currentDebt === 0 ? "text-slate-300" : "text-rose-400"))}>
+                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-good" : (currentDebt === 0 ? "text-slate-300 dark:text-slate-400" : "text-bad"))}>
                       {formatCurrency(absoluteDebt)}
                     </p>
                   </div>
@@ -163,7 +163,7 @@ export default function DebtsTab() {
                   </div>
                   <div className="w-full bg-black/10 dark:bg-white/10 h-2 rounded-full overflow-hidden">
                     <div 
-                      className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-rose-500" : percentUsed > 50 ? "bg-amber-400" : "bg-primary")}
+                      className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-bad" : percentUsed > 50 ? "bg-warning" : "bg-good")}
                       style={{ width: `${percentUsed}%` }}
                     />
                   </div>

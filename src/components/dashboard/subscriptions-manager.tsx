@@ -153,7 +153,7 @@ export default function SubscriptionsManager() {
                    >
                      <CheckCircle2 className="w-3 h-3 mr-1" /> Loggear
                    </Button>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-500/50 hover:bg-rose-500/10 hover:text-rose-500" onClick={() => deleteRecurring(sub.id)}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 text-bad/50 hover:bg-bad/10 hover:text-bad" onClick={() => deleteRecurring(sub.id)}>
                      <Trash2 className="w-4 h-4" />
                    </Button>
                 </div>

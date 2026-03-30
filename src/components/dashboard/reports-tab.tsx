@@ -200,16 +200,64 @@ const BudgetStatusReport = () => {
                 <CardDescription>Un resumen detallado del rendimiento de tus presupuestos para el mes.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
+                {/* MOBILE VIEW: Expandable Cards */}
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                    {budgetDetails.length > 0 ? budgetDetails.map(b => {
+                        const category = getCategoryInfo(b.categoryId);
+                        const progress = b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
+                        return (
+                            <div key={b.categoryId} className="bg-black/5 dark:bg-white/5 border border-[rgba(255,255,255,0.04)] dark:border-white/10 p-4 rounded-xl flex flex-col gap-3 relative overflow-hidden">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2 font-semibold text-base">
+                                        {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
+                                        {category?.name}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                                        <span className={cn("h-2 w-2 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
+                                        <span className="capitalize">{b.status}</span>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm mt-1">
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Planificado</span>
+                                        <span className="font-mono">{formatCurrency(b.limit)}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Gastado</span>
+                                        <span className="font-mono">{formatCurrency(b.spent)}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Restante</span>
+                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{formatCurrency(b.remaining)}</span>
+                                    </div>
+                                </div>
+                                <Progress 
+                                    value={progress} 
+                                    className={cn('h-1.5 mt-2 transition-all', 
+                                        b.status === 'over' ? '[&>div]:bg-bad' :
+                                        b.status === 'alert' ? '[&>div]:bg-warning' : '[&>div]:bg-good'
+                                    )}
+                                />
+                            </div>
+                        )
+                    }) : (
+                        <div className="text-center text-muted-foreground p-6 bg-black/5 dark:bg-white/5 rounded-xl border border-dashed border-border/50">
+                            No hay presupuestos configurados para este mes.
+                        </div>
+                    )}
+                </div>
+
+                {/* DESKTOP VIEW: Pro Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Categoría</TableHead>
-                                <TableHead className="text-right">Planificado</TableHead>
-                                <TableHead className="text-right">Gastado</TableHead>
-                                <TableHead className="text-right">Restante</TableHead>
-                                <TableHead>Progreso</TableHead>
-                                <TableHead>Estado</TableHead>
+                                <TableHead className="py-4">Categoría</TableHead>
+                                <TableHead className="text-right py-4">Planificado</TableHead>
+                                <TableHead className="text-right py-4">Gastado</TableHead>
+                                <TableHead className="text-right py-4">Restante</TableHead>
+                                <TableHead className="py-4">Progreso</TableHead>
+                                <TableHead className="py-4">Estado</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -218,35 +266,35 @@ const BudgetStatusReport = () => {
                                 const progress = b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
                                 return (
                                     <TableRow key={b.categoryId}>
-                                        <TableCell className="font-medium flex items-center gap-2">
-                                            {category?.icon && <category.icon className="h-4 w-4 text-muted-foreground" />}
+                                        <TableCell className="py-5 font-medium flex items-center gap-3 text-base">
+                                            {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                                             {category?.name}
                                         </TableCell>
-                                        <TableCell className="text-right">{formatCurrency(b.limit)}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(b.spent)}</TableCell>
-                                        <TableCell className={cn("text-right font-semibold", b.remaining < 0 ? "text-destructive" : "text-muted-foreground")}>
+                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.limit)}</TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.spent)}</TableCell>
+                                        <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
                                             {formatCurrency(b.remaining)}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-5">
                                             <Progress 
                                                 value={progress} 
                                                 className={cn('h-2', 
-                                                    b.status === 'over' ? '[&>div]:bg-destructive' :
-                                                    b.status === 'alert' ? '[&>div]:bg-yellow-500' : ''
+                                                    b.status === 'over' ? '[&>div]:bg-bad' :
+                                                    b.status === 'alert' ? '[&>div]:bg-warning' : '[&>div]:bg-good'
                                                 )}
                                             />
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-5">
                                             <div className="flex items-center gap-2">
-                                                <span className={cn("h-2 w-2 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                                <span className="capitalize">{b.status}</span>
+                                                <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
+                                                <span className="capitalize font-medium">{b.status}</span>
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 )
                             }) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground">No hay presupuestos configurados para este mes.</TableCell>
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 text-lg">No hay presupuestos configurados para este mes.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>

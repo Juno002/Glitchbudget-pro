@@ -68,6 +68,8 @@ export default function ExpenseDonutChart() {
                   fill="#8884d8"
                   dataKey="value"
                   paddingAngle={2}
+                  stroke="hsl(var(--background))"
+                  strokeWidth={2}
               >
                   {data.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

@@ -114,10 +114,10 @@ export default function MovementsView() {
       {/* Filter bar */}
       <div className="flex flex-wrap gap-2 items-end">
         <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)} className="flex-1 min-w-[200px]">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">Todos</TabsTrigger>
-            <TabsTrigger value="income">Ingresos</TabsTrigger>
-            <TabsTrigger value="expense">Gastos</TabsTrigger>
+          <TabsList className="flex w-full overflow-x-auto min-w-max pb-1 sm:pb-0 gap-1 no-scrollbar justify-start">
+            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="all">Todos</TabsTrigger>
+            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="income">Ingresos</TabsTrigger>
+            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="expense">Gastos</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -162,9 +162,9 @@ export default function MovementsView() {
                 {/* Icon */}
                 <div className={cn(
                   "shrink-0 flex items-center justify-center w-9 h-9 rounded-lg",
-                  isIncome ? "bg-[rgba(0,255,136,0.08)]" : "bg-[rgba(255,45,120,0.08)]"
+                  isIncome ? "bg-good/10" : "bg-bad/10"
                 )}>
-                  {Icon && <Icon className={cn("h-4 w-4", isIncome ? "text-emerald-500" : "text-rose-500")} />}
+                  {Icon && <Icon strokeWidth={1.75} className={cn("h-4 w-4", isIncome ? "text-good" : "text-bad")} />}
                 </div>
 
                 {/* Label + Category */}

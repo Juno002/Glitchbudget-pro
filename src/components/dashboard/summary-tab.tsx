@@ -231,6 +231,9 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
                                     animationBegin={delay * 1000}
                                     animationDuration={800}
                                     animationEasing="ease-out"
+                                    paddingAngle={3}
+                                    stroke="hsl(var(--background))"
+                                    strokeWidth={2}
                                 >
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

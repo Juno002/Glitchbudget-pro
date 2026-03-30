@@ -56,6 +56,9 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        good: 'hsl(var(--good))',
+        bad: 'hsl(var(--bad))',
+        warning: 'hsl(var(--warning))',
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',

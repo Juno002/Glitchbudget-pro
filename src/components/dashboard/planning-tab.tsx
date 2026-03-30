@@ -137,7 +137,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
       {/* Mini Progress Bar (Mobile only, beneath input) */}
       {plan > 0 && (
           <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden sm:hidden mt-1">
-              <div className={cn("h-full rounded-full transition-all", over ? "bg-rose-500" : "bg-primary")} style={{ width: `${pct}%` }} />
+              <div className={cn("h-full rounded-full transition-all", over ? "bg-bad" : "bg-primary")} style={{ width: `${pct}%` }} />
           </div>
       )}
     </motion.div>
@@ -314,12 +314,12 @@ export default function PlanningTab() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6 overflow-x-auto min-w-max">
-          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm">Metas</TabsTrigger>
-          <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm">Presupuestos</TabsTrigger>
-          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm">Suscripciones</TabsTrigger>
-          <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm">Tarjetas</TabsTrigger>
-          <TabsTrigger value="categories" className="text-[10px] sm:text-xs md:text-sm">Categorías</TabsTrigger>
+        <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
+          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
+          <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Suscripciones</TabsTrigger>
+          <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Tarjetas</TabsTrigger>
+          <TabsTrigger value="categories" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Categorías</TabsTrigger>
         </TabsList>
 
         {/* --- METAS TAB --- */}

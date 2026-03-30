@@ -239,6 +239,7 @@ function DesktopSankeyView({
         <g key={s.id}>
           <motion.rect
             x={s.x} y={s.y} width={NODE_W} height={s.h} rx={4} fill={s.color}
+            stroke="hsl(var(--background))" strokeWidth={2}
             initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
             transition={{ delay: i * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
             style={{ transformOrigin: `${s.x + NODE_W / 2}px ${s.y + s.h / 2}px` }}
@@ -256,6 +257,7 @@ function DesktopSankeyView({
         <g key={d.id}>
           <motion.rect
             x={d.x} y={d.y} width={NODE_W} height={d.h} rx={4} fill={d.color}
+            stroke="hsl(var(--background))" strokeWidth={2}
             initial={{ scaleY: 0 }} animate={{ scaleY: 1 }}
             transition={{ delay: 0.3 + i * 0.06, type: 'spring', stiffness: 200, damping: 20 }}
             style={{ transformOrigin: `${d.x + NODE_W / 2}px ${d.y + d.h / 2}px` }}
