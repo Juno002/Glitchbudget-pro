@@ -56,6 +56,9 @@ export default function Header() {
                 await table.clear();
             }
         });
+        // Also clear achievements stored in localStorage
+        localStorage.removeItem('glitchbudget_achievements');
+        localStorage.removeItem('glitchbudget_contribution_streak');
         await resetSettings();
         toast({ title: "Datos eliminados", description: "Todos los datos han sido borrados. La página se recargará." });
         setTimeout(() => window.location.reload(), 1500);
@@ -238,7 +241,7 @@ export default function Header() {
                         <AlertDialogHeader>
                             <AlertDialogTitle>¿Borrar todos los datos?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Esta acción no se puede deshacer. Se borrarán todos sus ingresos, gastos, metas y presupuestos.
+                                Esta acción no se puede deshacer. Se borrarán todos sus ingresos, gastos, metas, presupuestos y logros.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
