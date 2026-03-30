@@ -11,6 +11,8 @@ import { getCategoryInfo } from '@/lib/categories';
 import { Skeleton } from '../ui/skeleton';
 import ExpenseCategoryManager from './expense-category-manager';
 import TransferDialog from './transfer-dialog';
+import GoalsManager from './goals-manager';
+import IncomeCategoryManager from './income-category-manager';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
