@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import { motion } from 'framer-motion';
 import BudgetStatus from "./budget-status";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import AchievementsPanel from "./achievements-panel";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 
 function formatMonth(date: string) {
@@ -322,8 +321,6 @@ export default function SummaryTab() {
                 colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']} 
             />
         </div>
-
-        <AchievementsPanel />
 
         <BudgetStatus />
         

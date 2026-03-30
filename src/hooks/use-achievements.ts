@@ -30,13 +30,19 @@ export function useAchievements() {
   const [unlocked, setUnlocked] = useState<UnlockedAchievement[]>([]);
   const [newlyUnlocked, setNewlyUnlocked] = useState<AchievementId[]>([]);
   const [streak, setStreakState] = useState(0);
-  const initializedRef = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Canonical ref that stays in sync with the latest unlocked list,
+  // so we can check it synchronously without closure staleness.
+  const unlockedRef = useRef<UnlockedAchievement[]>([]);
 
   // Load persisted state on mount
   useEffect(() => {
-    setUnlocked(loadUnlocked());
+    const stored = loadUnlocked();
+    unlockedRef.current = stored;
+    setUnlocked(stored);
     setStreakState(getStreak());
-    initializedRef.current = true;
+    setHydrated(true);
   }, []);
 
   const isUnlocked = useCallback(
@@ -46,17 +52,19 @@ export function useAchievements() {
 
   const unlock = useCallback(
     (id: AchievementId) => {
-      if (unlocked.some((u) => u.id === id)) return;
+      // Check against the ref (always current) to prevent duplicates
+      if (unlockedRef.current.some((u) => u.id === id)) return;
       const newEntry: UnlockedAchievement = {
         id,
         unlockedAt: new Date().toISOString(),
       };
-      const next = [...unlocked, newEntry];
+      const next = [...unlockedRef.current, newEntry];
+      unlockedRef.current = next;
       setUnlocked(next);
       saveUnlocked(next);
       setNewlyUnlocked((prev) => [...prev, id]);
     },
-    [unlocked]
+    [] // No dependency on `unlocked` state — uses ref instead
   );
 
   const dismissNew = useCallback((id: AchievementId) => {
@@ -64,8 +72,11 @@ export function useAchievements() {
   }, []);
 
   // --- Evaluate achievements ---
+  // Only runs after hydrated = true, which is set in the same batch
+  // as setUnlocked(stored), so `unlocked` is guaranteed to have
+  // the persisted data by the time this effect fires.
   useEffect(() => {
-    if (loading || !initializedRef.current) return;
+    if (!hydrated || loading) return;
     if (!expenses || !incomes || !goals || !goalContributions || !budgets) return;
 
     // first_expense
@@ -133,6 +144,7 @@ export function useAchievements() {
   }, [
     expenses, incomes, goals, goalContributions, budgets,
     currentMonth, loading, unlock, streak, getBudgetStatusDetails,
+    hydrated,
   ]);
 
   const totalXP = getTotalXP(unlocked);

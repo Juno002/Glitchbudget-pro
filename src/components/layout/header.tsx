@@ -24,6 +24,7 @@ import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { db } from '@/lib/db';
 import { hasOPFS } from '@/lib/opfs';
+import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadge } from '@/components/dashboard/achievements-panel';
 
 export default function Header() {
   const { 
@@ -65,6 +66,7 @@ export default function Header() {
   }
 
   return (
+    <>
     <header className="sticky top-0 z-10 flex h-auto items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 py-2">
       <div className="flex w-full items-center gap-2 flex-wrap">
          <div className="flex items-center gap-2 mr-auto">
@@ -82,6 +84,23 @@ export default function Header() {
                 <Button variant="outline" className="h-9" onClick={() => setCurrentMonth(new Date().toISOString().slice(0, 7))}>Este mes</Button>
             </div>
             
+             <Dialog>
+               <DialogTrigger asChild>
+                 <Button variant="outline" size="icon" className="relative">
+                   <AchievementHeaderBadge />
+                 </Button>
+               </DialogTrigger>
+               <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+                 <DialogHeader>
+                   <DialogTitle>🏆 Logros</DialogTitle>
+                   <DialogDescription>
+                     Tu progreso y medallas desbloqueadas.
+                   </DialogDescription>
+                 </DialogHeader>
+                 <AchievementsDialogContent />
+               </DialogContent>
+             </Dialog>
+
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -233,5 +252,7 @@ export default function Header() {
         </div>
       </div>
     </header>
+    <AchievementToastLayer />
+    </>
   );
 }
