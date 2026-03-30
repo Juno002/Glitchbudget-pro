@@ -7,10 +7,12 @@ import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
+import IconPicker from "./icon-picker";
 
 export default function IncomeCategoryManager() {
     const { incomeCategories, addIncomeCategory, resetIncomeCategories } = useFinances();
     const [newCategory, setNewCategory] = useState('');
+    const [selectedIcon, setSelectedIcon] = useState('circle-dollar-sign');
     const { toast } = useToast();
 
     const handleAddCategory = () => {
@@ -22,8 +24,9 @@ export default function IncomeCategoryManager() {
             toast({ title: 'La categoría ya existe', variant: 'destructive' });
             return;
         }
-        addIncomeCategory(newCategory.trim());
+        addIncomeCategory(newCategory.trim(), selectedIcon);
         setNewCategory('');
+        setSelectedIcon('circle-dollar-sign');
         toast({ title: 'Categoría de ingresos agregada' });
     };
 
@@ -38,15 +41,19 @@ export default function IncomeCategoryManager() {
                 <CardTitle>🏷️ Gestión de categorías de ingresos</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col md:flex-row gap-2">
-                    <Input 
-                        placeholder="Nueva categoría"
-                        value={newCategory}
-                        onChange={(e) => setNewCategory(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-                    />
-                    <div className="flex gap-2">
-                        <Button onClick={handleAddCategory} className="w-full md:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">➕ Agregar</Button>
+                <div className="flex flex-col md:flex-row gap-2 items-end">
+                    <div className="flex-1 flex gap-2 w-full">
+                        <IconPicker value={selectedIcon} onChange={setSelectedIcon} />
+                        <Input 
+                            placeholder="Nueva categoría (ej: Freelance)"
+                            value={newCategory}
+                            onChange={(e) => setNewCategory(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+                            className="flex-1"
+                        />
+                    </div>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <Button onClick={handleAddCategory} className="flex-1 md:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">➕ Agregar</Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="outline" className="w-full md:w-auto">🔄 Restablecer</Button>

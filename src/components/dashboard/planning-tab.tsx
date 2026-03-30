@@ -319,7 +319,6 @@ export default function PlanningTab() {
           <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
           <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Suscripciones</TabsTrigger>
           <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Tarjetas</TabsTrigger>
-          <TabsTrigger value="categories" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Categorías</TabsTrigger>
         </TabsList>
 
         {/* --- METAS TAB --- */}
@@ -385,20 +384,6 @@ export default function PlanningTab() {
             <Card>
                 <CardContent className="pt-6">
                     <DebtsTab />
-                </CardContent>
-            </Card>
-        </TabsContent>
-
-        {/* --- CATEGORIAS TAB --- */}
-        <TabsContent value="categories" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-             <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">Gestión de Categorías</CardTitle>
-                    <CardDescription>Añade o restaura las categorías base.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-8">
-                    <ExpenseCategoryManager />
-                    <IncomeCategoryManager />
                 </CardContent>
             </Card>
         </TabsContent>

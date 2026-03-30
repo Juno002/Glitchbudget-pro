@@ -21,7 +21,7 @@ export default function BottomNav() {
   if (pathname !== '/') return null;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-black/10 dark:border-white/10 bg-[rgba(8,8,8,0.85)] backdrop-blur-xl shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-black/5 dark:border-white/10 bg-background/80 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       <div className="flex justify-around items-stretch p-1 gap-1" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.25rem)'}}>
         {navItems.map((item) => {
           const isActive = activeTab === item.value;
@@ -33,8 +33,8 @@ export default function BottomNav() {
               className={cn(
                 "flex flex-col items-center justify-center gap-1 p-2 flex-1 rounded-[12px] transition-all duration-300",
                 isActive 
-                  ? "text-primary bg-[rgba(0,255,136,0.08)] shadow-[0_0_15px_rgba(0,255,136,0.05)]" 
-                  : "text-[rgba(255,255,255,0.4)] hover:text-[rgba(255,255,255,0.7)] hover:bg-[rgba(255,255,255,0.03)]"
+                  ? "text-primary bg-primary/10 shadow-[0_0_15px_rgba(0,255,136,0.05)]" 
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
               )}
             >
               <item.icon className="h-5 w-5" />

@@ -112,12 +112,12 @@ export default function MovementsView() {
       <h3 className="text-lg font-semibold">Historial de Movimientos</h3>
 
       {/* Filter bar */}
-      <div className="flex flex-wrap gap-2 items-end">
-        <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)} className="flex-1 min-w-[200px]">
-          <TabsList className="flex w-full overflow-x-auto min-w-max pb-1 sm:pb-0 gap-1 no-scrollbar justify-start">
-            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="all">Todos</TabsTrigger>
-            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="income">Ingresos</TabsTrigger>
-            <TabsTrigger className="whitespace-nowrap flex-shrink-0" value="expense">Gastos</TabsTrigger>
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+        <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)} className="w-full sm:flex-1">
+          <TabsList className="flex w-full overflow-x-auto gap-1 no-scrollbar justify-start border bg-black/5 dark:bg-white/5 p-1 rounded-xl">
+            <TabsTrigger className="flex-1 whitespace-nowrap" value="all">Todos</TabsTrigger>
+            <TabsTrigger className="flex-1 whitespace-nowrap" value="income">Ingresos</TabsTrigger>
+            <TabsTrigger className="flex-1 whitespace-nowrap" value="expense">Gastos</TabsTrigger>
           </TabsList>
         </Tabs>
 

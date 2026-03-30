@@ -22,6 +22,7 @@ const DEFAULT_SETTINGS: Settings = {
   rolloverStrategy: 'reset',
   expenseCategories: defaultExpenseCatIds,
   incomeCategories: defaultIncomeCatIds,
+  customCategoryIcons: {},
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
   locale: "es-DO",
@@ -66,7 +67,7 @@ interface FinanceContextType {
   updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[]) => void;
   transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => void;
   resetSettings: () => Promise<void>;
-  updateSettings: (newSettings: Partial<Pick<Settings, 'savePct'>>) => void;
+  updateSettings: (newSettings: Partial<Settings>) => void;
   
   addDebt: (debt: Omit<Debt, 'id' | 'createdAt'>) => void;
   updateDebt: (debt: Debt) => void;
@@ -95,9 +96,9 @@ interface FinanceContextType {
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
   getBudgetStatusDetails: (month: string) => Array<Budget & { spent: number; remaining: number; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
   
-  addIncomeCategory: (category: string) => void;
+  addIncomeCategory: (category: string, iconName?: string) => void;
   resetIncomeCategories: () => void;
-  addExpenseCategory: (category: string) => void;
+  addExpenseCategory: (category: string, iconName?: string) => void;
   resetExpenseCategories: () => void;
   
   currentMonth: string;
@@ -304,7 +305,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
   
-  const updateSettings = useCallback(async (newSettings: Partial<Pick<Settings, 'savePct'>>) => {
+  const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
       try {
           await db.settings.update('general', newSettings);
       } catch (error) {
@@ -560,19 +561,42 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }));
   }, [expenses, monthlyFromBase]);
   
-  const addIncomeCategory = (category: string) => {
+  const addIncomeCategory = (category: string, iconName?: string) => {
     const catId = category.toLowerCase().replace(/\s/g, '-');
     if (!activeSettings.incomeCategories.includes(catId)) {
-      updateSetting('incomeCategories', [...activeSettings.incomeCategories, catId]);
+      const updates: Partial<Settings> = {
+        incomeCategories: [...activeSettings.incomeCategories, catId]
+      };
+      if (iconName) {
+        updates.customCategoryIcons = {
+          ...activeSettings.customCategoryIcons,
+          [catId]: iconName
+        };
+      }
+      updateSettings(updates);
     }
   };
-  const resetIncomeCategories = () => updateSetting('incomeCategories', defaultIncomeCatIds);
+  const resetIncomeCategories = () => {
+    updateSettings({ 
+        incomeCategories: defaultIncomeCatIds,
+        customCategoryIcons: {} // Clear custom icons on reset? Or keep them? User said reset, so we'll likely clear.
+    });
+  };
 
-  const addExpenseCategory = (categoryName: string) => {
+  const addExpenseCategory = (categoryName: string, iconName?: string) => {
     if (!categoryName.trim()) return;
     const catId = categoryName.trim().toLowerCase().replace(/\s/g, '-');
     if (!activeSettings.expenseCategories.includes(catId)) {
-      updateSetting('expenseCategories', [...activeSettings.expenseCategories, catId]);
+      const updates: Partial<Settings> = {
+        expenseCategories: [...activeSettings.expenseCategories, catId]
+      };
+      if (iconName) {
+        updates.customCategoryIcons = {
+          ...activeSettings.customCategoryIcons,
+          [catId]: iconName
+        };
+      }
+      updateSettings(updates);
     }
   };
   const resetExpenseCategories = () => updateSetting('expenseCategories', defaultExpenseCatIds);

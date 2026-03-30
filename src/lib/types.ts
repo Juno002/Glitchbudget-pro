@@ -31,7 +31,7 @@ export interface Expense {
 export type Category = {
   id: string;
   name: string;
-  icon: React.ComponentType<{ className?: string, strokeWidth?: number }>;
+  icon: React.ComponentType<{ className?: string, strokeWidth?: string | number }>;
   type: 'income' | 'expense' | 'both';
 };
 

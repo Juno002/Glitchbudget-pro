@@ -9,6 +9,7 @@ export interface Settings {
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
   expenseCategories: string[];
   incomeCategories: string[];
+  customCategoryIcons?: { [catId: string]: string }; // Map of catId -> iconName
   currency: string;
   locale: string;
   baseIncome: {
@@ -139,7 +140,7 @@ export class GlitchBudgetDB extends Dexie {
 
   constructor() {
     super('GlitchBudgetDB');
-    this.version(6).stores({
+    this.version(7).stores({
       expenses: 'id, date, month, categoryId, type',
       incomes: 'id, date, month, categoryId, type',
       goals: 'id, status',
@@ -152,14 +153,13 @@ export class GlitchBudgetDB extends Dexie {
       debt_payments: 'id, debtId, date',
       fxRates: 'id, base, quote, updatedAt',
     }).upgrade(tx => {
-        // Migration logic for version 6
         return tx.table("settings").toCollection().modify(settings => {
-            if (typeof settings.savePct === 'undefined') {
-                settings.savePct = 0.00;
+            if (!settings.customCategoryIcons) {
+                settings.customCategoryIcons = {};
             }
         });
     });
-    this.version(5).stores({
+    this.version(6).stores({
       expenses: 'id, date, month, categoryId, type',
       incomes: 'id, date, month, categoryId, type',
       goals: 'id, status',

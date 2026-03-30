@@ -25,6 +25,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { db } from '@/lib/db';
 import { hasOPFS } from '@/lib/opfs';
 import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadge } from '@/components/dashboard/achievements-panel';
+import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
+import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
 
 export default function Header() {
   const { 
@@ -258,6 +260,31 @@ export default function Header() {
                             >
                                 Guardar Ingreso Principal
                             </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                <DropdownMenuSeparator />
+
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <div className="flex items-center">
+                                <span className="mr-2 text-base">🏷️</span>
+                                <span>Categorías</span>
+                            </div>
+                        </DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Gestión de Categorías</DialogTitle>
+                            <DialogDescription>
+                                Personaliza tus categorías de gastos e ingresos. Elige iconos que te ayuden a identificar tus movimientos rápidamente.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex flex-col gap-6 py-4">
+                            <ExpenseCategoryManager />
+                            <IncomeCategoryManager />
                         </div>
                     </DialogContent>
                 </Dialog>
