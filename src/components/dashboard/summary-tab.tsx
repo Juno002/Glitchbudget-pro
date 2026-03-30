@@ -248,29 +248,61 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
     );
 }
 
+const chipClass = (isActive: boolean) =>
+  `px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
+    isActive
+      ? 'bg-[rgba(0,255,136,0.12)] border-[rgba(0,255,136,0.3)] text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.1)]'
+      : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.4)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[rgba(255,255,255,0.8)]'
+  }`;
+
+const ReserveStrategyChips = () => {
+    const { reservePct, updateSettings } = useFinances();
+    return (
+        <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">🛡️ Colchón de seguridad <span className="text-[10px] opacity-60">(se resta del disponible)</span></p>
+            <div className="flex flex-wrap gap-2">
+                {[
+                    {label:'Sin colchón 0%', val:0.00},
+                    {label:'Mínimo 3%',      val:0.03},
+                    {label:'Estándar 5%',    val:0.05},
+                    {label:'Alto 10%',       val:0.10},
+                ].map(opt => {
+                    const isActive = Math.abs(reservePct - opt.val) < 0.01;
+                    return (
+                      <button key={opt.val}
+                      onClick={() => updateSettings({ reservePct: opt.val })}
+                      className={chipClass(isActive)}>
+                      {opt.label}
+                      </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 const SaveStrategyChips = () => {
     const { savePct, updateSettings } = useFinances();
     return (
-        <div className="flex flex-wrap gap-2 pt-2">
-            {[
-                {label:'Ninguno 0%',  val:0.00},
-                {label:'Conservador 5%',  val:0.05},
-                {label:'Estándar 10%',   val:0.10},
-                {label:'Agresivo 20%',   val:0.20},
-            ].map(opt => {
-                const isActive = Math.abs(savePct - opt.val) < 0.01;
-                return (
-                  <button key={opt.val}
-                  onClick={() => updateSettings({ savePct: opt.val })}
-                  className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
-                    isActive 
-                      ? 'bg-[rgba(0,255,136,0.12)] border-[rgba(0,255,136,0.3)] text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.1)]' 
-                      : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.4)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[rgba(255,255,255,0.8)]'
-                  }`}>
-                  {opt.label}
-                  </button>
-                )
-            })}
+        <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro sugerido</p>
+            <div className="flex flex-wrap gap-2">
+                {[
+                    {label:'Ninguno 0%',      val:0.00},
+                    {label:'Conservador 5%',   val:0.05},
+                    {label:'Estándar 10%',     val:0.10},
+                    {label:'Agresivo 20%',     val:0.20},
+                ].map(opt => {
+                    const isActive = Math.abs(savePct - opt.val) < 0.01;
+                    return (
+                      <button key={opt.val}
+                      onClick={() => updateSettings({ savePct: opt.val })}
+                      className={chipClass(isActive)}>
+                      {opt.label}
+                      </button>
+                    )
+                })}
+            </div>
         </div>
     )
 }
@@ -307,7 +339,10 @@ export default function SummaryTab() {
         
         {!loading && <AmbientInsight totals={totals} budgetStatus={budgetStatus} currentMonth={currentMonth} />}
 
-        <SaveStrategyChips />
+        <div className="space-y-3 pt-2">
+            <ReserveStrategyChips />
+            <SaveStrategyChips />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
             <DonutChart 

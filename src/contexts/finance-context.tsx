@@ -25,7 +25,7 @@ const DEFAULT_SETTINGS: Settings = {
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
   locale: "es-DO",
-  reservePct: 0.05,
+  reservePct: 0.00,
   savePct: 0.00,
 };
 
