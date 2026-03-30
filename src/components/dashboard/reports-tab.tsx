@@ -11,6 +11,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "..
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
+import CashFlowChart from "./charts/cash-flow-chart";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
@@ -265,6 +266,7 @@ export default function ReportsTab() {
   return (
     <div className="space-y-6">
         <h2 className="text-2xl font-bold">Reportes</h2>
+        <CashFlowChart />
         <MonthlyComparisonTable />
         <BudgetStatusReport />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

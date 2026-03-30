@@ -182,3 +182,48 @@ export function playCoinDrop() {
   osc1.stop(ctx.currentTime + 0.3);
   osc2.stop(ctx.currentTime + 0.3);
 }
+
+export function playAchievementUnlock() {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  // Fast ascending arpeggio + shimmer tail
+  const notes = [
+    { freq: 523.25, time: 0 },      // C5
+    { freq: 659.25, time: 0.06 },    // E5
+    { freq: 783.99, time: 0.12 },    // G5
+    { freq: 1046.5, time: 0.18 },    // C6 (octave)
+  ];
+
+  notes.forEach((note) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(note.freq, ctx.currentTime + note.time);
+
+    gain.gain.setValueAtTime(0, ctx.currentTime + note.time);
+    gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + note.time + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + note.time + 0.25);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(ctx.currentTime + note.time);
+    osc.stop(ctx.currentTime + note.time + 0.3);
+  });
+
+  // Shimmer tail
+  const shimmer = ctx.createOscillator();
+  const shimmerGain = ctx.createGain();
+  shimmer.type = 'sine';
+  shimmer.frequency.setValueAtTime(2093, ctx.currentTime + 0.24);
+  shimmer.frequency.exponentialRampToValueAtTime(1046.5, ctx.currentTime + 0.6);
+  shimmerGain.gain.setValueAtTime(0, ctx.currentTime + 0.24);
+  shimmerGain.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.28);
+  shimmerGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+  shimmer.connect(shimmerGain);
+  shimmerGain.connect(ctx.destination);
+  shimmer.start(ctx.currentTime + 0.24);
+  shimmer.stop(ctx.currentTime + 0.65);
+}

@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { playIncome } from '@/lib/sounds';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: { 
@@ -77,9 +78,13 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   const over = plan > 0 && spent > plan;
 
   return (
-    <div className={cn(
-        "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border transition-colors",
-        over ? "border-amber-500/30 bg-amber-500/5" : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)]"
+    <motion.div 
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
+      className={cn(
+        "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md",
+        over ? "border-amber-500/30 bg-amber-500/5 hover:shadow-amber-500/10" : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.12)] hover:shadow-[rgba(0,255,136,0.04)]"
     )}>
       {/* Category Info */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -133,7 +138,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
               <div className={cn("h-full rounded-full transition-all", over ? "bg-rose-500" : "bg-emerald-500")} style={{ width: `${pct}%` }} />
           </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -166,11 +171,13 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button
-            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-3 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+        <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all font-bold group"
         >
-            <Plus className="h-4 w-4" /> Nuevo Presupuesto
-        </button>
+            <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Nuevo Presupuesto
+        </motion.button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden gap-0">
          <DialogHeader className="p-6 pb-2">

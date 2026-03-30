@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2 } from 'lucide-react';
 import { playAIInsight, playExpense, playIncome } from '@/lib/sounds';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface TransactionModalProps {
   open: boolean;
@@ -255,12 +256,17 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         </DialogHeader>
 
         {/* Hero Amount Card */}
-        <div className={cn(
-          "px-6 py-8 flex flex-col items-center gap-2 transition-colors",
-          txType === 'expense'
-            ? "bg-[rgba(255,45,120,0.08)]"
-            : "bg-[rgba(0,255,136,0.08)]"
-        )}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
+          className={cn(
+            "px-6 py-8 flex flex-col items-center gap-2 transition-colors",
+            txType === 'expense'
+              ? "bg-[rgba(255,45,120,0.08)]"
+              : "bg-[rgba(0,255,136,0.08)]"
+          )}
+        >
           <label className="text-xs text-muted-foreground">
             {saved ? (txType === 'expense' ? 'Gasto registrado' : 'Ingreso registrado') : (isEditing ? 'Editando' : 'Nuevo movimiento')}
           </label>
@@ -283,7 +289,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               )}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Toolbar */}
         <div className="flex border-b border-[rgba(255,255,255,0.06)] px-2">
@@ -470,9 +476,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   </AlertDialogContent>
                 </AlertDialog>
               )}
+              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}>
               <Button
                 className={cn(
-                  "flex-1 h-12 text-base font-semibold transition-all",
+                  "flex-1 h-12 text-base font-semibold transition-all w-full",
                   txType === 'expense'
                     ? "bg-[rgba(255,45,120,0.12)] border border-[rgba(255,45,120,0.3)] text-[rgba(255,45,120,0.9)] hover:bg-[rgba(255,45,120,0.2)]"
                     : "bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
@@ -482,6 +489,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               >
                 {isEditing ? 'Guardar Cambios' : (txType === 'expense' ? 'Crear Gasto' : 'Crear Ingreso')}
               </Button>
+              </motion.div>
             </div>
           )}
 
@@ -502,11 +510,16 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
           {/* Post-save confirmation */}
           {saved && !insight && !isFetchingInsight && (
-            <div className="flex items-center justify-center py-4 animate-in fade-in duration-300">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
+              className="flex items-center justify-center py-4"
+            >
               <p className="text-sm text-muted-foreground">
                 {txType === 'expense' ? '✅ Gasto registrado' : '✅ Ingreso registrado'}
               </p>
-            </div>
+            </motion.div>
           )}
         </div>
       </DialogContent>

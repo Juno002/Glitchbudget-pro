@@ -8,8 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useEffect, useState } from "react";
+import { motion } from 'framer-motion';
 import BudgetStatus from "./budget-status";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import AchievementsPanel from "./achievements-panel";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
 
 function formatMonth(date: string) {
@@ -58,61 +60,48 @@ function Snapshot({
       )
   }
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: (i: number) => ({
+      opacity: 1, y: 0, scale: 1,
+      transition: { delay: i * 0.08, type: 'spring' as const, stiffness: 260, damping: 20 }
+    }),
+  };
+
+  const cards = [
+    { label: 'Disponible', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Libre para gastar tras presupuestos, metas y colchón.' },
+    { label: 'Ahorro sugerido', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `Recomendación basada en ${Math.round(savePct * 100)}% del ingreso, limitado por lo disponible.` },
+    { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={100 - spendingPct} ok /> },
+    { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {/* Disponible */}
-      <Card className="p-3">
-        <CardContent className="p-0 flex items-center gap-3 min-w-0">
-          <div className="shrink-0"><Ring pct={100} ok /></div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Disponible</div>
-            <div className="text-2xl font-semibold text-emerald-600 dark:text-emerald-500 tabular-nums break-words leading-tight">{formatCurrency(available)}</div>
-          </div>
-          <Popover>
-            <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
-            <PopoverContent>Libre para gastar tras presupuestos, metas y colchón.</PopoverContent>
-          </Popover>
-        </CardContent>
-      </Card>
-
-      {/* Ahorro sugerido */}
-      <Card className="p-3">
-        <CardContent className="p-0 flex items-center gap-3 min-w-0">
-          <div className="shrink-0"><Ring pct={currentSavePct} ok /></div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Ahorro sugerido</div>
-            <div className="text-2xl font-semibold text-amber-600 dark:text-amber-500 tabular-nums break-words leading-tight">{formatCurrency(suggestedSave)}</div>
-          </div>
-          <Popover>
-            <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
-            <PopoverContent>
-              Recomendación basada en {Math.round(savePct * 100)}% del ingreso, limitado por lo disponible.
-            </PopoverContent>
-          </Popover>
-        </CardContent>
-      </Card>
-
-      {/* Ingresos */}
-      <Card className="p-3">
-        <CardContent className="p-0 flex items-center gap-3 min-w-0">
-          <div className="shrink-0"><Ring pct={100 - spendingPct} ok /></div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Ingresos</div>
-            <div className="text-2xl font-semibold text-emerald-700 dark:text-emerald-600 tabular-nums break-words leading-tight">{formatCurrency(totalIncome)}</div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Gastos */}
-      <Card className="p-3">
-        <CardContent className="p-0 flex items-center gap-3 min-w-0">
-          <div className="shrink-0"><Ring pct={spendingPct} ok={spendingPct <= 70} /></div>
-          <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">Gastos</div>
-            <div className="text-2xl font-semibold text-rose-600 dark:text-rose-500 tabular-nums break-words leading-tight">{formatCurrency(totalExpenses)}</div>
-          </div>
-        </CardContent>
-      </Card>
+      {cards.map((card, i) => (
+        <motion.div
+          key={card.label}
+          custom={i}
+          initial="hidden"
+          animate="visible"
+          variants={cardVariants}
+        >
+          <Card className="p-3 hover:shadow-lg hover:shadow-[rgba(0,255,136,0.04)] transition-shadow duration-300">
+            <CardContent className="p-0 flex items-center gap-3 min-w-0">
+              <div className="shrink-0">{card.ring}</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{card.label}</div>
+                <div className={`text-2xl font-semibold tabular-nums break-words leading-tight ${card.color}`}>{formatCurrency(card.value)}</div>
+              </div>
+              {card.info && (
+                <Popover>
+                  <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
+                  <PopoverContent>{card.info}</PopoverContent>
+                </Popover>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
     </div>
   );
 }
@@ -192,7 +181,7 @@ function AmbientInsight({ totals, budgetStatus, currentMonth }: { totals: any, b
 }
 
 
-const DonutChart = ({ data, title, colors }: { data: { name: string, value: number }[], title: string, colors?: string[] }) => {
+const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, value: number }[], title: string, colors?: string[], delay?: number }) => {
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true) }, []);
     
@@ -208,15 +197,42 @@ const DonutChart = ({ data, title, colors }: { data: { name: string, value: numb
     if(!isClient) return <Skeleton className="h-64 w-full" />;
 
     return (
-        <Card>
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay, type: 'spring', stiffness: 200, damping: 20 }}
+        >
+        <Card className="hover:shadow-lg hover:shadow-[rgba(0,255,136,0.04)] transition-shadow duration-300">
             <CardContent className="pt-6">
                 <div className="h-64 w-full">
                     {data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <RechartsTooltip formatter={(value: number) => [formatCurrency(value), title]} />
+                                <RechartsTooltip 
+                                    formatter={(value: number) => [formatCurrency(value), title]}
+                                    contentStyle={{
+                                        backgroundColor: 'rgba(10,10,20,0.9)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                                    }}
+                                    itemStyle={{ color: 'rgba(255,255,255,0.8)' }}
+                                />
                                 <Legend />
-                                <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={50} labelLine={false}>
+                                <Pie 
+                                    data={data} 
+                                    dataKey="value" 
+                                    nameKey="name" 
+                                    cx="50%" 
+                                    cy="50%" 
+                                    outerRadius={80} 
+                                    innerRadius={50} 
+                                    labelLine={false}
+                                    animationBegin={delay * 1000}
+                                    animationDuration={800}
+                                    animationEasing="ease-out"
+                                >
                                     {data.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
@@ -229,6 +245,7 @@ const DonutChart = ({ data, title, colors }: { data: { name: string, value: numb
                 </div>
             </CardContent>
         </Card>
+        </motion.div>
     );
 }
 
@@ -305,6 +322,8 @@ export default function SummaryTab() {
                 colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']} 
             />
         </div>
+
+        <AchievementsPanel />
 
         <BudgetStatus />
         

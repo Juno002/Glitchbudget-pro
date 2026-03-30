@@ -18,6 +18,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { playCoinDrop, playIncome } from '@/lib/sounds';
+import { triggerGoalCompletionConfetti } from '@/lib/confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { SuggestionProfile } from '@/lib/goal-calculator';
 import { suggestMonthly, requiredMonthlyByDeadline } from '@/lib/goal-calculator';
 import type { Goal } from '@/lib/types';
@@ -57,11 +59,21 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
             });
             return;
         }
-        playCoinDrop();
+
+        const addedCents = data.amount * 100;
+        const willBeCompleted = (goal.saved + addedCents) >= goal.target;
+
+        if (willBeCompleted && goal.saved < goal.target) {
+             triggerGoalCompletionConfetti();
+             playIncome(); // Sonido más triunfal
+        } else {
+             playCoinDrop();
+        }
+
         onContribute(data.amount);
         toast({
-            title: '¡Aporte Exitoso!',
-            description: `Has sumado ${formatCurrency(data.amount * 100)} a "${goal.name}".`
+            title: willBeCompleted ? '¡Meta Completada! 🎉' : '¡Aporte Exitoso!',
+            description: `Has sumado ${formatCurrency(addedCents)} a "${goal.name}".`
         });
         form.reset();
         setOpen(false);
@@ -178,14 +190,23 @@ export default function GoalsManager() {
       <div className="pt-2">
             {(goals || []).length > 0 ? (
                 <div className="flex flex-col gap-3">
+                    <AnimatePresence mode="popLayout">
                     {goals!.map(goal => {
                         const progress = goal.target > 0 ? (goal.saved / goal.target) * 100 : 0;
                         const remaining = goal.target - goal.saved;
                         return (
-                            <div key={goal.id} className={cn(
-                                "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center",
-                                goal.status === 'completed' ? "bg-emerald-500/5 border-emerald-500/30" : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]"
-                            )}>
+                            <motion.div 
+                                layout
+                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                key={goal.id} 
+                                className={cn(
+                                    "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center relative overflow-hidden group hover:border-[rgba(255,255,255,0.15)]",
+                                    goal.status === 'completed' ? "bg-emerald-500/5 border-emerald-500/30" : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]"
+                                )}
+                            >
                                 {/* Icon & Title */}
                                 <div className="flex items-center gap-3 w-full sm:w-auto sm:min-w-[200px]">
                                     <div className={cn(
@@ -256,9 +277,10 @@ export default function GoalsManager() {
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 </div>
-                            </div>
+                            </motion.div>
                         )
                     })}
+                    </AnimatePresence>
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-[rgba(255,255,255,0.02)]">
@@ -271,9 +293,13 @@ export default function GoalsManager() {
             {/* New Goal Modal (Moved to bottom) */}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <button className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-3 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 transition-colors">
-                        <PlusCircle className="h-4 w-4"/> Nueva Meta
-                    </button>
+                    <motion.button 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all font-bold group"
+                    >
+                        <PlusCircle className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300"/> Nueva Meta
+                    </motion.button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden gap-0">
                      <DialogHeader className="p-6 pb-4">
