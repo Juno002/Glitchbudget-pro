@@ -52,7 +52,7 @@ export default function SubscriptionsManager() {
     
     addExpense({
       concept: `Suscripción: ${sub.title}`,
-      amount: sub.amount,
+      amount: sub.amount / 100,
       categoryId: sub.categoryId,
       date: date.toISOString().slice(0, 10),
       type: 'Fijo',
@@ -72,7 +72,7 @@ export default function SubscriptionsManager() {
         
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10">
+            <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
               <Plus className="w-4 h-4 mr-2" /> Añadir
             </Button>
           </DialogTrigger>
@@ -119,7 +119,7 @@ export default function SubscriptionsManager() {
       </div>
 
       {sortedSubs.length === 0 ? (
-        <div className="text-center py-10 border border-dashed border-[rgba(255,255,255,0.1)] rounded-xl">
+        <div className="text-center py-10 border border-dashed border-black/10 dark:border-white/10 rounded-xl">
           <PlayCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-50" />
           <p className="text-sm font-medium">Aún no hay suscripciones</p>
         </div>
@@ -130,17 +130,17 @@ export default function SubscriptionsManager() {
             const isFuture = sub.day && sub.day > todayDay;
             
             return (
-              <div key={sub.id} className="flex items-center justify-between p-3 rounded-xl border bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)] transition-colors">
+              <div key={sub.id} className="flex items-center justify-between p-3 rounded-xl border hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className={cn(
                     "w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm",
-                    isDue ? "bg-amber-500/20 text-amber-500" : "bg-[rgba(255,255,255,0.05)] text-muted-foreground"
+                    isDue ? "bg-amber-500/20 text-amber-500" : "bg-black/5 dark:bg-white/5 text-muted-foreground"
                   )}>
                     {sub.day || '-'}
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm">{sub.title}</h4>
-                    <p className="text-xs text-muted-foreground font-mono">{formatCurrency(sub.amount / 100)}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{formatCurrency(sub.amount)}</p>
                   </div>
                 </div>
                 
@@ -149,7 +149,7 @@ export default function SubscriptionsManager() {
                       size="sm" 
                       variant="secondary" 
                       onClick={() => handleLogExpense(sub)} 
-                      className="h-8 text-[11px] bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/10"
+                      className="h-8 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
                    >
                      <CheckCircle2 className="w-3 h-3 mr-1" /> Loggear
                    </Button>

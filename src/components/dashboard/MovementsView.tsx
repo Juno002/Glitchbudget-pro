@@ -157,7 +157,7 @@ export default function MovementsView() {
               <button
                 key={`${item.kind}-${item.id}`}
                 onClick={() => handleItemClick(item)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border border-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.04)] transition-colors text-left"
+                className="w-full flex items-center gap-3 p-3 rounded-xl border hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left"
               >
                 {/* Icon */}
                 <div className={cn(
@@ -173,7 +173,7 @@ export default function MovementsView() {
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <span className="truncate">{cat?.name}</span>
                     {item.isFixed && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.06)] text-[10px] font-medium">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-medium">
                         <Pin className="h-2.5 w-2.5" /> Fijo
                       </span>
                     )}

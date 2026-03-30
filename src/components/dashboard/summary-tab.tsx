@@ -251,8 +251,8 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
 const chipClass = (isActive: boolean) =>
   `px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
     isActive
-      ? 'bg-[rgba(0,255,136,0.12)] border-[rgba(0,255,136,0.3)] text-[#00ff88] shadow-[0_0_12px_rgba(0,255,136,0.1)]'
-      : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.4)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[rgba(255,255,255,0.8)]'
+      ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_rgba(0,255,136,0.1)]'
+      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-[rgba(255,255,255,0.4)] hover:bg-black/10 dark:bg-white/10 hover:text-[rgba(255,255,255,0.8)]'
   }`;
 
 const SaveStrategyChips = () => {

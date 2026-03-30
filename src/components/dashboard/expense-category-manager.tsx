@@ -46,7 +46,7 @@ export default function ExpenseCategoryManager() {
                         onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
                     />
                     <div className="flex gap-2">
-                        <Button onClick={handleAddCategory} className="w-full md:w-auto bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]">➕ Agregar</Button>
+                        <Button onClick={handleAddCategory} className="w-full md:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">➕ Agregar</Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="outline" className="w-full md:w-auto">🔄 Restablecer</Button>

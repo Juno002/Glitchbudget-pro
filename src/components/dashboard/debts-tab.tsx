@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CreditCard, Plus, ArrowUpRight, ArrowDownRight, Trash2, ShieldCheck, HelpCircle } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { CreditCard, Plus, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
+import { formatCurrency, toCents, cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DebtsTab() {
@@ -23,12 +23,12 @@ export default function DebtsTab() {
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const limit = Math.round(Number(newDebt.principal) * 100);
-    if (!newDebt.name || limit <= 0) return;
+    const limitCents = toCents(newDebt.principal);
+    if (!newDebt.name || limitCents <= 0) return;
     addDebt({
       name: newDebt.name,
       type: 'credit_card',
-      principal: limit,
+      principal: limitCents,
       apr: 0,
       minPayment: 0,
       status: 'active',
@@ -41,7 +41,7 @@ export default function DebtsTab() {
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const amtCents = Math.round(Number(paymentAmount) * 100);
+    const amtCents = toCents(paymentAmount);
     if (!paymentDebtId || amtCents <= 0) return;
     
     addDebtPayment({
@@ -57,8 +57,8 @@ export default function DebtsTab() {
     <div className="space-y-6 max-w-2xl mx-auto pb-24">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Tarjetas y Deudas</h2>
-          <p className="text-sm text-muted-foreground mt-1">Gestiona tus plásticos y saldos a favor</p>
+          <h2 className="text-xl font-bold tracking-tight">Tarjetas</h2>
+          <p className="text-sm text-muted-foreground mt-1">Gestiona los límites de tus deudas activas</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
@@ -106,7 +106,7 @@ export default function DebtsTab() {
       </div>
 
       {activeDebts.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)]">
+        <div className="text-center py-12 px-4 rounded-xl border border-dashed border-black/10 dark:border-white/10">
           <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-medium mb-1">Aún no tienes tarjetas</h3>
           <p className="text-sm text-muted-foreground">Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente.</p>
@@ -125,7 +125,7 @@ export default function DebtsTab() {
             const percentUsed = Math.min(100, Math.max(0, (currentDebt / debt.principal) * 100));
 
             return (
-              <div key={debt.id} className="relative overflow-hidden w-full backdrop-blur-md bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-[20px] p-5">
+              <div key={debt.id} className="relative overflow-hidden w-full backdrop-blur-md bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-[20px] p-5">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#00e5ff]/10 flex items-center justify-center">
@@ -142,16 +142,16 @@ export default function DebtsTab() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.04)] rounded-xl p-3">
+                  <div className="bg-black/5 dark:bg-white/5 border border-[rgba(255,255,255,0.04)] rounded-xl p-3">
                     <p className="text-xs text-muted-foreground mb-1">Disponible para Uso</p>
-                    <p className="text-xl font-bold font-mono tracking-tight text-emerald-400">
-                      {formatCurrency(availableLimit / 100)}
+                    <p className="text-xl font-bold font-mono tracking-tight text-primary">
+                      {formatCurrency(availableLimit)}
                     </p>
                   </div>
-                  <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-[rgba(0,255,136,0.03)] border-[rgba(0,255,136,0.2)]" : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.04)]")}>
+                  <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-[rgba(0,255,136,0.03)] border-primary/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
                     <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Balance Deudado'}</p>
-                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-[#00ff88]" : (currentDebt === 0 ? "text-slate-300" : "text-rose-400"))}>
-                      {formatCurrency(absoluteDebt / 100)}
+                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-primary" : (currentDebt === 0 ? "text-slate-300" : "text-rose-400"))}>
+                      {formatCurrency(absoluteDebt)}
                     </p>
                   </div>
                 </div>
@@ -161,9 +161,9 @@ export default function DebtsTab() {
                     <span className="text-muted-foreground">Uso del límite base</span>
                     <span className="font-mono">{isSurplus ? '0%' : percentUsed.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full bg-[rgba(255,255,255,0.06)] h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-black/10 dark:bg-white/10 h-2 rounded-full overflow-hidden">
                     <div 
-                      className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-rose-500" : percentUsed > 50 ? "bg-amber-400" : "bg-emerald-500")}
+                      className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-rose-500" : percentUsed > 50 ? "bg-amber-400" : "bg-primary")}
                       style={{ width: `${percentUsed}%` }}
                     />
                   </div>
@@ -183,13 +183,13 @@ export default function DebtsTab() {
                       <DialogTitle>Abonar a {debt.name}</DialogTitle>
                     </DialogHeader>
                     {isSurplus ? (
-                       <div className="bg-[rgba(0,255,136,0.1)] p-3 rounded-md mb-2 flex items-start gap-2">
-                          <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                          <p className="text-xs text-emerald-200">Tienes saldo a favor de {formatCurrency(absoluteDebt / 100)}. Cualquier pago adicional aumentará este colchón temporal en la tarjeta.</p>
+                       <div className="bg-primary/10 p-3 rounded-md mb-2 flex items-start gap-2">
+                          <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                          <p className="text-xs text-primary dark:text-primary/80">Tienes saldo a favor de {formatCurrency(absoluteDebt)}. Cualquier pago adicional aumentará este colchón temporal en la tarjeta.</p>
                        </div>
                     ) : (
-                       <div className="bg-[rgba(255,255,255,0.05)] p-3 rounded-md mb-2">
-                          <p className="text-xs text-muted-foreground">Tu deuda actual con esta tarjeta es de <span className="text-rose-400 font-bold">{formatCurrency(currentDebt / 100)}</span>.</p>
+                       <div className="bg-black/5 dark:bg-[rgba(255,255,255,0.05)] p-3 rounded-md mb-2">
+                          <p className="text-xs text-muted-foreground">Tu deuda actual con esta tarjeta es de <span className="text-rose-500 dark:text-rose-400 font-bold">{formatCurrency(currentDebt)}</span>.</p>
                        </div>
                     )}
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">

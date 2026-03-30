@@ -71,7 +71,7 @@ export default function Header() {
       <div className="flex w-full items-center gap-2 flex-wrap">
          <div className="flex items-center gap-2 mr-auto">
             <Link href="/" className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(0,255,136,0.08)] border border-[rgba(0,255,136,0.2)] text-[#00ff88] shadow-[0_0_15px_rgba(0,255,136,0.1)] transition-all hover:bg-[rgba(0,255,136,0.12)]">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(0,255,136,0.08)] border border-primary/20 text-primary shadow-[0_0_15px_rgba(0,255,136,0.1)] transition-all hover:bg-primary/10">
                     <span className="text-lg">💰</span>
                     <span className="font-syne font-bold tracking-wide">GlitchBudget Pro</span>
                 </div>
@@ -108,7 +108,7 @@ export default function Header() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-[rgba(255,255,255,0.06)] focus:bg-[rgba(255,255,255,0.06)]">
+                <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10">
                     <div className="flex flex-1 items-center cursor-pointer" onClick={() => {
                         const newStrictMode = !strictMode;
                         setStrictMode(newStrictMode);
@@ -119,7 +119,7 @@ export default function Header() {
                     </div>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <button className="ml-2 rounded-full p-1 text-slate-400 hover:bg-[rgba(255,255,255,0.1)] hover:text-[rgba(255,255,255,0.9)] transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                            <button className="ml-2 rounded-full p-1 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
                                 <Info className="h-4 w-4" />
                             </button>
                         </PopoverTrigger>
@@ -148,21 +148,21 @@ export default function Header() {
                         </DialogHeader>
                         <div className="py-4">
                             <RadioGroup value={theme} onValueChange={(value) => setTheme(value as any)} className="gap-4">
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="dark" id="t1" />
                                     <Label htmlFor="t1" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Moon className="h-4 w-4 text-slate-400" /> Neón Oscuro (Default)</span>
                                         <span className="text-xs text-muted-foreground mt-1">El tema clásico de GlitchBudget con colores vibrantes.</span>
                                     </Label>
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="light" id="t2" />
                                     <Label htmlFor="t2" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Sun className="h-4 w-4 text-amber-500" /> Modo Claro</span>
                                         <span className="text-xs text-muted-foreground mt-1">Elegante inversión de colores para ambientes luminosos.</span>
                                     </Label>
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="serious" id="t3" />
                                     <Label htmlFor="t3" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Serie Minimalista</span>
@@ -190,21 +190,21 @@ export default function Header() {
                         </DialogHeader>
                         <div className="py-4">
                             <RadioGroup value={rolloverStrategy} onValueChange={(value) => setRolloverStrategy(value as any)} className="gap-4">
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="reset" id="r1" />
                                     <Label htmlFor="r1" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><RefreshCw className="h-4 w-4 text-slate-400" /> Resetear a cero</span>
                                         <span className="text-xs text-muted-foreground mt-1">Descarta lo sobrante y empieza de nuevo con los límites base.</span>
                                     </Label>
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="accumulate_surplus" id="r2" />
                                     <Label htmlFor="r2" className="flex flex-col cursor-pointer">
-                                        <span className="flex items-center gap-2 font-medium"><Plus className="h-4 w-4 text-emerald-500" /> Acumular Sobrante</span>
+                                        <span className="flex items-center gap-2 font-medium"><Plus className="h-4 w-4 text-primary" /> Acumular Sobrante</span>
                                         <span className="text-xs text-muted-foreground mt-1">El dinero que no gastaste se suma al presupuesto del mes siguiente.</span>
                                     </Label>
                                 </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="accumulate_debt" id="r3" />
                                     <Label htmlFor="r3" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Minus className="h-4 w-4 text-rose-500" /> Acumular Deuda</span>
@@ -254,7 +254,7 @@ export default function Header() {
                                 onClick={() => {
                                     setBaseIncome({ freq: baseFreq as any, amount: Number(baseAmount) });
                                 }}
-                                className="w-full bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
+                                className="w-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
                             >
                                 Guardar Ingreso Principal
                             </Button>

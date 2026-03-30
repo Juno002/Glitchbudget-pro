@@ -14,6 +14,7 @@ import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
 import IncomeCategoryManager from './income-category-manager';
 import SubscriptionsManager from './subscriptions-manager';
+import DebtsTab from './debts-tab';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -85,13 +86,13 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
       transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
       className={cn(
         "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md",
-        over ? "border-amber-500/30 bg-amber-500/5 hover:shadow-amber-500/10" : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:border-[rgba(255,255,255,0.12)] hover:shadow-[rgba(0,255,136,0.04)]"
+        over ? "border-amber-500/30 bg-amber-500/5 hover:shadow-amber-500/10" : "border-black/5 dark:border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/5 dark:bg-white/5 hover:border-black/10 dark:hover:border-[rgba(255,255,255,0.12)]"
     )}>
       {/* Category Info */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className={cn(
             "shrink-0 flex items-center justify-center w-10 h-10 rounded-lg",
-            over ? "bg-amber-500/20 text-amber-500" : "bg-[rgba(255,255,255,0.08)] text-muted-foreground"
+            over ? "bg-amber-500/20 text-amber-500" : "bg-black/5 dark:bg-white/10 text-muted-foreground"
         )}>
           <category.icon className="h-5 w-5" />
         </div>
@@ -129,14 +130,14 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
         
         <div className="w-5 flex justify-center">
             {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-emerald-500 animate-in zoom-in" />}
+            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary animate-in zoom-in" />}
         </div>
       </div>
 
       {/* Mini Progress Bar (Mobile only, beneath input) */}
       {plan > 0 && (
           <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden sm:hidden mt-1">
-              <div className={cn("h-full rounded-full transition-all", over ? "bg-rose-500" : "bg-emerald-500")} style={{ width: `${pct}%` }} />
+              <div className={cn("h-full rounded-full transition-all", over ? "bg-rose-500" : "bg-primary")} style={{ width: `${pct}%` }} />
           </div>
       )}
     </motion.div>
@@ -175,7 +176,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
         <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all font-bold group"
+            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-black/10 dark:border-white/10 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all font-bold group"
         >
             <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Nuevo Presupuesto
         </motion.button>
@@ -206,8 +207,8 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                                     className={cn(
                                         "flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all border",
                                         isSelected 
-                                            ? "border-[#00ff88] bg-[rgba(0,255,136,0.1)] text-[#00ff88]" 
-                                            : "border-transparent hover:bg-[rgba(255,255,255,0.06)] text-muted-foreground"
+                                            ? "border-primary bg-primary/10 text-primary" 
+                                            : "border-transparent hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground"
                                     )}
                                 >
                                     <Icon className="h-6 w-6" />
@@ -224,11 +225,11 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                 <label className="text-xs text-muted-foreground font-medium">2. Establece el límite mensual</label>
                 <div className="flex items-center gap-3">
                     {selectedInfo ? (
-                        <div className="w-12 h-12 shrink-0 rounded-xl bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
-                            <selectedInfo.icon className="h-6 w-6 text-emerald-400" />
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
+                            <selectedInfo.icon className="h-6 w-6 text-primary dark:text-primary" />
                         </div>
                     ) : (
-                        <div className="w-12 h-12 shrink-0 rounded-xl bg-[rgba(255,255,255,0.06)] flex items-center justify-center">
+                        <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
                             <span className="text-muted-foreground">?</span>
                         </div>
                     )}
@@ -254,7 +255,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                 className={cn(
                      "w-full h-12 rounded-xl font-bold flex items-center justify-center transition-all",
                      selectedCatId && parseFloat(amount) > 0 && !saving
-                        ? "bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
+                        ? "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
                         : "bg-[rgba(255,255,255,0.04)] text-muted-foreground cursor-not-allowed"
                 )}
              >
@@ -313,11 +314,12 @@ export default function PlanningTab() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="goals">Metas</TabsTrigger>
-          <TabsTrigger value="budgets" className="text-[11px] sm:text-sm">Presupuestos</TabsTrigger>
-          <TabsTrigger value="subscriptions" className="text-[11px] sm:text-sm">Suscripciones</TabsTrigger>
-          <TabsTrigger value="categories" className="text-[11px] sm:text-sm">Categorías</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 mb-6 overflow-x-auto min-w-max">
+          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm">Metas</TabsTrigger>
+          <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm">Presupuestos</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm">Suscripciones</TabsTrigger>
+          <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm">Tarjetas</TabsTrigger>
+          <TabsTrigger value="categories" className="text-[10px] sm:text-xs md:text-sm">Categorías</TabsTrigger>
         </TabsList>
 
         {/* --- METAS TAB --- */}
@@ -374,6 +376,15 @@ export default function PlanningTab() {
             <Card>
                 <CardContent className="pt-6">
                     <SubscriptionsManager />
+                </CardContent>
+            </Card>
+        </TabsContent>
+
+        {/* --- TARJETAS TAB --- */}
+        <TabsContent value="cards" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card>
+                <CardContent className="pt-6">
+                    <DebtsTab />
                 </CardContent>
             </Card>
         </TabsContent>

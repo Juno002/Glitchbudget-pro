@@ -245,7 +245,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       <PopoverTrigger asChild>
         <button className={cn(
           "flex flex-col items-center gap-1 flex-1 py-2 rounded-lg transition-colors text-xs",
-          active ? "text-[#00ff88]" : "text-muted-foreground hover:text-foreground"
+          active ? "text-primary" : "text-muted-foreground hover:text-foreground"
         )}>
           {icon}
           <span className="truncate max-w-[70px]">{label}</span>
@@ -303,7 +303,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         </motion.div>
 
         {/* Toolbar */}
-        <div className="flex border-b border-[rgba(255,255,255,0.06)] px-2">
+        <div className="flex border-b border-black/10 dark:border-white/10 px-2">
           {/* Type selector */}
           <ToolbarItem
             icon={txType === 'expense'
@@ -319,7 +319,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               <button
                 onClick={() => { setTxType('expense'); setCategoryId(''); setTypeOpen(false); }}
                 className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'expense' ? "bg-[rgba(255,45,120,0.1)] text-rose-400" : "hover:bg-[rgba(255,255,255,0.04)]"
+                  txType === 'expense' ? "bg-[rgba(255,45,120,0.1)] text-rose-400" : "hover:bg-black/10 dark:hover:bg-white/10"
                 )}
               >
                 <TrendingDown className="h-4 w-4" /> Gasto
@@ -327,7 +327,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               <button
                 onClick={() => { setTxType('income'); setCategoryId(''); setTypeOpen(false); }}
                 className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'income' ? "bg-[rgba(0,255,136,0.1)] text-emerald-400" : "hover:bg-[rgba(255,255,255,0.04)]"
+                  txType === 'income' ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:hover:bg-white/10"
                 )}
               >
                 <TrendingUp className="h-4 w-4" /> Ingreso
@@ -353,8 +353,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                     className={cn(
                       "flex flex-col items-center gap-1 p-2 rounded-lg text-[10px] transition-colors",
                       categoryId === cat.id
-                        ? "bg-[rgba(0,255,136,0.1)] text-[#00ff88]"
-                        : "hover:bg-[rgba(255,255,255,0.06)]"
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-black/10 dark:bg-white/10"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -403,20 +403,20 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       key={t}
                       onClick={() => { setExpenseSubtype(t); setSubtypeOpen(false); }}
                       className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                        expenseSubtype === t ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(255,255,255,0.04)]"
+                        expenseSubtype === t ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
                       )}
                     >
                       {t}
                     </button>
                   ))}
                   {expenseSubtype === 'Fijo' && (
-                    <div className="border-t border-[rgba(255,255,255,0.06)] mt-1 pt-1">
+                    <div className="border-t border-black/10 dark:border-white/10 mt-1 pt-1">
                       {(['mensual', 'quincenal', 'semanal'] as const).map(f => (
                         <button
                           key={f}
                           onClick={() => { setFrequency(f); setSubtypeOpen(false); }}
                           className={cn("px-3 py-1.5 rounded-lg text-xs w-full text-left transition-colors capitalize",
-                            frequency === f ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(255,255,255,0.04)]"
+                            frequency === f ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
                           )}
                         >
                           {f}
@@ -430,7 +430,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   <button
                     onClick={() => { setIncomeSubtype('extra'); setSubtypeOpen(false); }}
                     className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                      incomeSubtype === 'extra' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(255,255,255,0.04)]"
+                      incomeSubtype === 'extra' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
                     )}
                   >
                     Adicional
@@ -438,7 +438,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   <button
                     onClick={() => { setIncomeSubtype('gift'); setSubtypeOpen(false); }}
                     className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                      incomeSubtype === 'gift' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(255,255,255,0.04)]"
+                      incomeSubtype === 'gift' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
                     )}
                   >
                     Regalo / Otro
@@ -454,10 +454,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           
           {/* Payment Method Selector (Only when there are debts and it's an expense) */}
           {!saved && txType === 'expense' && debts && debts.length > 0 && (
-            <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded-lg p-1">
+            <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-lg p-1">
                <button
                  type="button"
-                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                  onClick={() => { setPaymentMethod('cash'); setDebtId(''); }}
                >
                  <Banknote className="h-4 w-4" /> Efectivo
@@ -467,7 +467,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                {debts.length === 1 ? (
                  <button
                    type="button"
-                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                    onClick={() => { setPaymentMethod('credit'); setDebtId(debts[0].id); }}
                  >
                    <CreditCard className="h-4 w-4" /> Tarjeta
@@ -477,19 +477,19 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                    <PopoverTrigger asChild>
                      <button
                        type="button"
-                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                      >
                        <CreditCard className="h-4 w-4" /> {paymentMethod === 'credit' && debtId ? debts.find(d => d.id === debtId)?.name || 'Tarjeta' : 'Pagar con Tarjeta'}
                      </button>
                    </PopoverTrigger>
                    <PopoverContent className="w-56 p-1" align="end">
-                     <div className="text-xs font-medium text-muted-foreground px-2 py-1.5 border-b border-[rgba(255,255,255,0.06)] mb-1">Elige una tarjeta</div>
+                     <div className="text-xs font-medium text-muted-foreground px-2 py-1.5 border-b border-black/10 dark:border-white/10 mb-1">Elige una tarjeta</div>
                      <div className="flex flex-col gap-1 max-h-[150px] overflow-y-auto">
                        {debts.map(d => (
                          <button
                            key={d.id}
                            type="button"
-                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-[rgba(0,255,136,0.1)] text-emerald-400" : "hover:bg-[rgba(255,255,255,0.06)] text-white")}
+                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:bg-white/10 text-white")}
                            onClick={() => { setPaymentMethod('credit'); setDebtId(d.id); }}
                          >
                            <CreditCard className="h-4 w-4" /> {d.name}
@@ -544,7 +544,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   "flex-1 h-12 text-base font-semibold transition-all w-full",
                   txType === 'expense'
                     ? "bg-[rgba(255,45,120,0.12)] border border-[rgba(255,45,120,0.3)] text-[rgba(255,45,120,0.9)] hover:bg-[rgba(255,45,120,0.2)]"
-                    : "bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]"
+                    : "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
                 )}
                 disabled={!canSave}
                 onClick={handleSave}

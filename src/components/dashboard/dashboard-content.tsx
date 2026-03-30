@@ -8,7 +8,6 @@ import BottomNav from "@/components/layout/bottom-nav";
 import { useTabs } from "@/contexts/tabs-context";
 import MovementsTab from "./movements-tab";
 import PlanningTab from "./planning-tab";
-import DebtsTab from "./debts-tab";
 import { CreditCard } from "lucide-react";
 
 export default function DashboardContent() {
@@ -16,7 +15,7 @@ export default function DashboardContent() {
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="hidden md:grid w-full grid-cols-5 mb-6">
+      <TabsList className="hidden md:grid w-full grid-cols-4 mb-6">
         <TabsTrigger value="summary">
           <BarChart2 className="w-4 h-4 mr-2"/>
           Resumen
@@ -24,10 +23,6 @@ export default function DashboardContent() {
         <TabsTrigger value="movements">
           <ArrowLeftRight className="w-4 h-4 mr-2" />
           Movimientos
-        </TabsTrigger>
-        <TabsTrigger value="debts">
-          <CreditCard className="w-4 h-4 mr-2" />
-          Deudas
         </TabsTrigger>
         <TabsTrigger value="planning">
           <NotebookPen className="w-4 h-4 mr-2" />
@@ -44,9 +39,6 @@ export default function DashboardContent() {
       </TabsContent>
        <TabsContent value="movements">
          <MovementsTab />
-      </TabsContent>
-      <TabsContent value="debts">
-         <DebtsTab />
       </TabsContent>
       <TabsContent value="planning">
          <PlanningTab />

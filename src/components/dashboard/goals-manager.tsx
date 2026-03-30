@@ -82,7 +82,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" className="h-9 font-semibold hover:bg-[rgba(0,255,136,0.1)] hover:text-[#00ff88] transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
+                <Button variant="ghost" className="h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden gap-0">
                 <DialogHeader className="p-6 pb-2">
@@ -107,7 +107,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
                                                     type="number" 
                                                     step="100" 
                                                     {...field} 
-                                                    className="h-16 pl-14 text-2xl font-bold bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.08)]"
+                                                    className="h-16 pl-14 text-2xl font-bold bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
                                                 />
                                             </div>
                                         </FormControl>
@@ -115,7 +115,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full h-12 text-base font-bold bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)] transition-all">
+                            <Button type="submit" className="w-full h-12 text-base font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all">
                                 Confirmar Aporte
                             </Button>
                         </form>
@@ -203,15 +203,15 @@ export default function GoalsManager() {
                                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                                 key={goal.id} 
                                 className={cn(
-                                    "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center relative overflow-hidden group hover:border-[rgba(255,255,255,0.15)]",
-                                    goal.status === 'completed' ? "bg-emerald-500/5 border-emerald-500/30" : "bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)]"
+                                    "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center relative overflow-hidden group hover:border-black/20 dark:border-white/20",
+                                    goal.status === 'completed' ? "bg-primary/5 border-primary/30" : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
                                 )}
                             >
                                 {/* Icon & Title */}
                                 <div className="flex items-center gap-3 w-full sm:w-auto sm:min-w-[200px]">
                                     <div className={cn(
                                         "shrink-0 flex items-center justify-center w-12 h-12 rounded-full",
-                                        goal.status === 'completed' ? "bg-emerald-500/20 text-emerald-500" : "bg-primary/10 text-primary"
+                                        goal.status === 'completed' ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary"
                                     )}>
                                         <Target className="h-6 w-6" />
                                     </div>
@@ -232,14 +232,14 @@ export default function GoalsManager() {
                                     <Progress 
                                         value={progress} 
                                         className={cn(
-                                            "h-2 bg-[rgba(255,255,255,0.1)]", 
-                                            "[&>div]:bg-[#00ff88]",
-                                            goal.status === 'completed' && "[&>div]:bg-emerald-500"
+                                            "h-2 bg-black/10 dark:bg-white/10", 
+                                            "[&>div]:bg-primary",
+                                            goal.status === 'completed' && "[&>div]:bg-primary"
                                         )} 
                                     />
                                     <div className="flex justify-between text-xs text-muted-foreground !mt-1">
                                         {goal.status === 'completed' ? (
-                                             <span className="font-semibold text-emerald-500">¡Meta Completada! 🎉</span>
+                                             <span className="font-semibold text-primary">¡Meta Completada! 🎉</span>
                                         ) : (
                                             <span>Restan {formatCurrency(remaining)}</span>
                                         )}
@@ -283,7 +283,7 @@ export default function GoalsManager() {
                     </AnimatePresence>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-[rgba(255,255,255,0.02)]">
+                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-black/5 dark:bg-white/5">
                     <Target className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
                     <h4 className="font-medium text-lg mb-1">Sin metas de ahorro</h4>
                     <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">Usa el botón inferior para empezar a destinar fondos a tus sueños.</p>
@@ -296,7 +296,7 @@ export default function GoalsManager() {
                     <motion.button 
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-[rgba(255,255,255,0.1)] text-emerald-500 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all font-bold group"
+                        className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-black/10 dark:border-white/10 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all font-bold group"
                     >
                         <PlusCircle className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300"/> Nueva Meta
                     </motion.button>
@@ -322,7 +322,7 @@ export default function GoalsManager() {
                                                 form.setValue('target', parseFloat(e.target.value) || 0);
                                                 form.setValue('quota', undefined); // Reset selection
                                             }}
-                                            className="h-16 pl-14 pr-4 text-2xl font-bold bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.08)]"
+                                            className="h-16 pl-14 pr-4 text-2xl font-bold bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
                                         />
                                     </div>
                                 </div>
@@ -335,7 +335,7 @@ export default function GoalsManager() {
                                             <FormItem>
                                                 <FormLabel className="text-xs">Nombre</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="Ej. Viaje..." {...field} className="h-10 border-[rgba(255,255,255,0.08)] bg-transparent" />
+                                                    <Input placeholder="Ej. Viaje..." {...field} className="h-10 border-black/10 dark:border-white/10 bg-transparent" />
                                                 </FormControl>
                                             </FormItem>
                                         )}
@@ -354,7 +354,7 @@ export default function GoalsManager() {
                                                             type="date" 
                                                             {...field} 
                                                             ref={inputRef}
-                                                            className="h-10 border-[rgba(255,255,255,0.08)] bg-transparent"
+                                                            className="h-10 border-black/10 dark:border-white/10 bg-transparent"
                                                             onChange={e => {
                                                                 field.onChange(e.target.value);
                                                                 form.setValue('quota', undefined); // Reset selection
@@ -379,7 +379,7 @@ export default function GoalsManager() {
                                         <div className="flex items-center justify-between">
                                             <FormLabel className="text-xs">Plan Sugerido</FormLabel>
                                             {disposable > 0 && (
-                                                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">
+                                                <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
                                                     Libre: {formatCurrency(disposable)}
                                                 </span>
                                             )}
@@ -395,8 +395,8 @@ export default function GoalsManager() {
                                                         "text-left p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-colors",
                                                         !viable && "opacity-50 cursor-not-allowed bg-muted/10 border-transparent",
                                                         viable && form.watch('quota') === monthly / 100 
-                                                            ? "border-[#00ff88] bg-[rgba(0,255,136,0.1)] text-[#00ff88]" 
-                                                            : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)]",
+                                                            ? "border-primary bg-primary/10 text-primary" 
+                                                            : "border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10",
                                                     )}
                                                 >
                                                     <div className="flex items-center gap-2">
@@ -424,8 +424,8 @@ export default function GoalsManager() {
                                                     className={cn(
                                                         "text-left p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-colors mt-2",
                                                         form.watch('quota') === requiredByDeadline.monthlyRequired / 100 
-                                                            ? "border-[#00ff88] bg-[rgba(0,255,136,0.1)] text-[#00ff88]" 
-                                                            : "border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] hover:bg-[rgba(255,255,255,0.04)]",
+                                                            ? "border-primary bg-primary/10 text-primary" 
+                                                            : "border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10",
                                                     )}
                                                 >
                                                     <div className="flex items-center gap-2">
@@ -446,7 +446,7 @@ export default function GoalsManager() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-12 font-bold bg-[rgba(0,255,136,0.12)] border border-[rgba(0,255,136,0.3)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.2)]" disabled={!isFormValid}>
+                                <Button type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20" disabled={!isFormValid}>
                                     Crear Meta
                                 </Button>
                             </form>
