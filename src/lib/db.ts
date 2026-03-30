@@ -15,7 +15,6 @@ export interface Settings {
     freq: 'mensual' | 'quincenal' | 'semanal';
     amount: number;
   };
-  reservePct: number; // Colchón de seguridad
   savePct: number; // Porcentaje de ahorro sugerido
 }
 
@@ -151,11 +150,8 @@ export class GlitchBudgetDB extends Dexie {
     }).upgrade(tx => {
         // Migration logic for version 6
         return tx.table("settings").toCollection().modify(settings => {
-            if (typeof settings.reservePct === 'undefined') {
-                settings.reservePct = 0.05;
-            }
             if (typeof settings.savePct === 'undefined') {
-                settings.savePct = 0.10;
+                settings.savePct = 0.00;
             }
         });
     });

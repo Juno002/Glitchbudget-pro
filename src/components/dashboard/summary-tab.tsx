@@ -68,8 +68,8 @@ function Snapshot({
   };
 
   const cards = [
-    { label: 'Disponible', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Libre para gastar tras presupuestos, metas y colchón.' },
-    { label: 'Ahorro sugerido', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `Recomendación basada en ${Math.round(savePct * 100)}% del ingreso, limitado por lo disponible.` },
+    { label: 'Disponible', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Libre para gastar tras presupuestos, metas y ahorro.' },
+    { label: 'Ahorro', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% del ingreso apartado como ahorro. Se resta del disponible.` },
     { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={100 - spendingPct} ok /> },
     { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
   ];
@@ -255,37 +255,11 @@ const chipClass = (isActive: boolean) =>
       : 'bg-[rgba(255,255,255,0.02)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.4)] hover:bg-[rgba(255,255,255,0.06)] hover:text-[rgba(255,255,255,0.8)]'
   }`;
 
-const ReserveStrategyChips = () => {
-    const { reservePct, updateSettings } = useFinances();
-    return (
-        <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">🛡️ Colchón de seguridad <span className="text-[10px] opacity-60">(se resta del disponible)</span></p>
-            <div className="flex flex-wrap gap-2">
-                {[
-                    {label:'Sin colchón 0%', val:0.00},
-                    {label:'Mínimo 3%',      val:0.03},
-                    {label:'Estándar 5%',    val:0.05},
-                    {label:'Alto 10%',       val:0.10},
-                ].map(opt => {
-                    const isActive = Math.abs(reservePct - opt.val) < 0.01;
-                    return (
-                      <button key={opt.val}
-                      onClick={() => updateSettings({ reservePct: opt.val })}
-                      className={chipClass(isActive)}>
-                      {opt.label}
-                      </button>
-                    )
-                })}
-            </div>
-        </div>
-    )
-}
-
 const SaveStrategyChips = () => {
     const { savePct, updateSettings } = useFinances();
     return (
         <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro sugerido</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro <span className="text-[10px] opacity-60">(se resta del disponible)</span></p>
             <div className="flex flex-wrap gap-2">
                 {[
                     {label:'Ninguno 0%',      val:0.00},
@@ -339,8 +313,7 @@ export default function SummaryTab() {
         
         {!loading && <AmbientInsight totals={totals} budgetStatus={budgetStatus} currentMonth={currentMonth} />}
 
-        <div className="space-y-3 pt-2">
-            <ReserveStrategyChips />
+        <div className="pt-2">
             <SaveStrategyChips />
         </div>
 

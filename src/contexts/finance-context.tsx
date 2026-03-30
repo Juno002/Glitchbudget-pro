@@ -25,7 +25,6 @@ const DEFAULT_SETTINGS: Settings = {
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
   locale: "es-DO",
-  reservePct: 0.00,
   savePct: 0.00,
 };
 
@@ -44,7 +43,6 @@ interface FinanceContextType {
   budgets: Plan[] | undefined;
   expenseCategories: string[];
   incomeCategories: string[];
-  reservePct: number;
   savePct: number;
   
   setTheme: (theme: 'light' | 'dark') => void;
@@ -64,7 +62,7 @@ interface FinanceContextType {
   updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[]) => void;
   transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => void;
   resetSettings: () => Promise<void>;
-  updateSettings: (newSettings: Partial<Pick<Settings, 'reservePct' | 'savePct'>>) => void;
+  updateSettings: (newSettings: Partial<Pick<Settings, 'savePct'>>) => void;
   
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
@@ -75,7 +73,6 @@ interface FinanceContextType {
     available: number;
     planned_total: number;
     totalGoalContributions: number;
-    safetyReserve: number;
     commitments: number;
     suggestedSave: number;
   };
@@ -135,7 +132,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       },
       expenseCategories: Array.isArray((s as any).expenseCategories) ? (s as any).expenseCategories : defaultExpenseCatIds,
       incomeCategories: Array.isArray((s as any).incomeCategories) ? (s as any).incomeCategories : defaultIncomeCatIds,
-      reservePct: s.reservePct ?? DEFAULT_SETTINGS.reservePct,
       savePct: s.savePct ?? DEFAULT_SETTINGS.savePct,
     };
   }, [rawSettings]);
@@ -217,16 +213,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       .filter(c => c.date.slice(0, 7) === month)
       .reduce((sum, c) => sum + c.amount, 0);
       
-    // New Logic based on user feedback
+    // Calculate available balance
     const balance = totalIncome - totalExpenses;
-    const safetyReserve = Math.round(totalIncome * activeSettings.reservePct);
-    const commitments = planned_total + totalGoalContributions + safetyReserve;
+    const suggestedSave = Math.round(totalIncome * activeSettings.savePct);
+    const commitments = planned_total + totalGoalContributions + suggestedSave;
     const available = Math.max(0, balance - commitments);
 
-    const baseSuggestion = Math.round(totalIncome * activeSettings.savePct);
-    const suggestedSave = Math.max(0, Math.min(available, baseSuggestion));
-
-    return { totalIncome, totalExpenses, balance, available, planned_total, totalGoalContributions, safetyReserve, commitments, suggestedSave };
+    return { totalIncome, totalExpenses, balance, available, planned_total, totalGoalContributions, commitments, suggestedSave };
 
   }, [incomes, expenses, budgets, goalContributions, activeSettings, monthlyFromBase]);
   
@@ -291,7 +284,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
   
-  const updateSettings = useCallback(async (newSettings: Partial<Pick<Settings, 'reservePct' | 'savePct'>>) => {
+  const updateSettings = useCallback(async (newSettings: Partial<Pick<Settings, 'savePct'>>) => {
       try {
           await db.settings.update('general', newSettings);
       } catch (error) {
@@ -710,7 +703,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     baseIncome: activeSettings.baseIncome,
     expenseCategories: activeSettings.expenseCategories,
     incomeCategories: activeSettings.incomeCategories,
-    reservePct: activeSettings.reservePct,
     savePct: activeSettings.savePct,
     incomes,
     expenses,
