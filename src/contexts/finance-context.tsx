@@ -6,7 +6,7 @@ import { defaultExpenseCategories as defaultExpenseCatIds, defaultIncomeCategori
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { v4 as uuidv4 } from 'uuid';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type Recurring } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { toCents } from "@/lib/utils";
@@ -32,7 +32,7 @@ type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
 export type BackupFile = { name: string; lastModified: number };
 
 interface FinanceContextType {
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'serious';
   strictMode: boolean;
   rolloverStrategy: RolloverStrategy;
   incomes: Income[] | undefined;
@@ -45,7 +45,11 @@ interface FinanceContextType {
   incomeCategories: string[];
   savePct: number;
   
-  setTheme: (theme: 'light' | 'dark') => void;
+  debts: Debt[] | undefined;
+  debtPayments: DebtPayment[] | undefined;
+  recurrents: Recurring[] | undefined;
+
+  setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setStrictMode: (strict: boolean) => void;
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
@@ -64,6 +68,15 @@ interface FinanceContextType {
   resetSettings: () => Promise<void>;
   updateSettings: (newSettings: Partial<Pick<Settings, 'savePct'>>) => void;
   
+  addDebt: (debt: Omit<Debt, 'id' | 'createdAt'>) => void;
+  updateDebt: (debt: Debt) => void;
+  deleteDebt: (id: string) => void;
+  addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => void;
+  
+  addRecurring: (recurring: Omit<Recurring, 'id'>) => void;
+  updateRecurring: (recurring: Recurring) => void;
+  deleteRecurring: (id: string) => void;
+
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
   getTotals: (month: string) => {
@@ -120,6 +133,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const goalContributions = useLiveQuery(() => db.goal_contributions.toArray(), [dataVersion]);
   const budgets = useLiveQuery(() => db.plans.toArray(), [dataVersion]);
   const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
+  const debts = useLiveQuery(() => db.debts.toArray(), [dataVersion]);
+  const debtPayments = useLiveQuery(() => db.debt_payments.toArray(), [dataVersion]);
+  const recurrents = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
   
   const settings = useMemo(() => {
     const s: Partial<Settings> = rawSettings ?? {};
@@ -136,7 +152,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
   }, [rawSettings]);
   
-  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings]);
+  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents]);
   
   useEffect(() => {
     async function initializeDB() {
@@ -159,7 +175,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (activeSettings.theme) {
-        document.body.classList.remove('light', 'dark');
+        document.body.classList.remove('light', 'dark', 'serious');
         document.body.classList.add(activeSettings.theme);
     }
   }, [activeSettings.theme]);
@@ -198,13 +214,17 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const totalIncome = baseIncome + totalAdditionalIncome;
     
     const totalExpenses = (expenses || [])
-      .filter(t => t.type === 'Fijo' || t.month === month)
+      .filter(t => (t.type === 'Fijo' || t.month === month) && t.paymentMethod !== 'credit')
       .reduce((sum, t) => {
           if (t.type === 'Fijo') {
               return sum + monthlyFromBase(t.frequency || 'mensual', t.amount);
           }
           return sum + t.amount;
       }, 0);
+
+    const totalDebtPayments = (debtPayments || [])
+      .filter(dp => dp.date.slice(0, 7) === month)
+      .reduce((sum, dp) => sum + dp.amount, 0);
 
     const monthBudgets = (budgets || []).filter(b => b.month === month);
     const planned_total = monthBudgets.reduce((sum, b) => sum + b.limit, 0);
@@ -214,14 +234,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       .reduce((sum, c) => sum + c.amount, 0);
       
     // Calculate available balance
-    const balance = totalIncome - totalExpenses;
+    const balance = totalIncome - totalExpenses - totalDebtPayments;
     const suggestedSave = Math.round(totalIncome * activeSettings.savePct);
     const commitments = planned_total + totalGoalContributions + suggestedSave;
     const available = Math.max(0, balance - commitments);
 
     return { totalIncome, totalExpenses, balance, available, planned_total, totalGoalContributions, commitments, suggestedSave };
 
-  }, [incomes, expenses, budgets, goalContributions, activeSettings, monthlyFromBase]);
+  }, [incomes, expenses, budgets, goalContributions, activeSettings, monthlyFromBase, debtPayments]);
   
   const getMonthlyAverages = useCallback((numMonths = 3) => {
       const allTotalsByMonth: { [month: string]: { income: number, expense: number } } = {};
@@ -292,7 +312,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }
   }, [toast]);
 
-  const setTheme = (theme: 'light' | 'dark') => updateSetting('theme', theme);
+  const setTheme = (theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme);
   const setStrictMode = (strict: boolean) => updateSetting('strictMode', strict);
   const setRolloverStrategy = (strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy);
   const setBaseIncome = (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
@@ -695,6 +715,71 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         setIsWorking(false);
     }
   }, [toast]);
+
+  const addDebt = useCallback(async (debt: Omit<Debt, "id" | "createdAt">) => {
+    try {
+      const newDebt: Debt = { ...debt, id: uuidv4(), createdAt: new Date().toISOString() };
+      await db.debts.add(newDebt);
+      toast({ title: 'Deuda registrada' });
+    } catch (e: any) {
+      toast({ title: 'Error al registrar', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const updateDebt = useCallback(async (debt: Debt) => {
+    try {
+      await db.debts.put(debt);
+      toast({ title: 'Deuda actualizada' });
+    } catch (e: any) {
+      toast({ title: 'Error al actualizar', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const deleteDebt = useCallback(async (id: string) => {
+    try {
+      await db.debts.delete(id);
+      toast({ title: 'Deuda eliminada' });
+    } catch (e: any) {
+      toast({ title: 'Error al eliminar', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const addDebtPayment = useCallback(async (payment: Omit<DebtPayment, "id">) => {
+    try {
+      const newPayment: DebtPayment = { ...payment, id: uuidv4() };
+      await db.debt_payments.add(newPayment);
+      toast({ title: 'Pago registrado' });
+    } catch (e: any) {
+      toast({ title: 'Error al pagar', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const addRecurring = useCallback(async (recurring: Omit<Recurring, "id">) => {
+    try {
+      await db.recurrents.add({ ...recurring, id: uuidv4() });
+      toast({ title: 'Suscripción registrada' });
+    } catch (e: any) {
+      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const updateRecurring = useCallback(async (recurring: Recurring) => {
+    try {
+      await db.recurrents.put(recurring);
+      toast({ title: 'Suscripción actualizada' });
+    } catch (e: any) {
+      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const deleteRecurring = useCallback(async (id: string) => {
+    try {
+      await db.recurrents.delete(id);
+      toast({ title: 'Suscripción borrada' });
+    } catch (e: any) {
+      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+    }
+  }, [toast]);
   
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
@@ -709,6 +794,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     goals,
     goalContributions,
     budgets,
+    debts,
+    debtPayments,
+    recurrents,
     setTheme,
     setStrictMode,
     setRolloverStrategy,
@@ -727,6 +815,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     transferBetweenBudgets,
     resetSettings,
     updateSettings,
+    addDebt,
+    updateDebt,
+    deleteDebt,
+    addDebtPayment,
+    addRecurring,
+    updateRecurring,
+    deleteRecurring,
     getMonthlyAverages,
     getDisposable,
     getTotals,
@@ -752,11 +847,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, incomes, expenses, goals, goalContributions, budgets,
+    activeSettings, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurrents,
     setTheme, setStrictMode, setRolloverStrategy, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
+    addDebt, updateDebt, deleteDebt, addDebtPayment,
+    addRecurring, updateRecurring, deleteRecurring,
     getMonthlyAverages, getDisposable, getTotals, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,

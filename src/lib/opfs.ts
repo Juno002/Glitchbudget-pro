@@ -27,6 +27,7 @@ export async function opfsList(): Promise<{ name: string; lastModified: number }
     // @ts-ignore
     const root = await navigator.storage.getDirectory();
     const files = [];
+    // @ts-ignore
     for await (const [name, handle] of root.entries()) {
         if (handle.kind === 'file') {
             const file = await handle.getFile();

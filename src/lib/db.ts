@@ -4,7 +4,7 @@ import Dexie, { type Table } from 'dexie';
 // Define a new structure for settings that doesn't rely on separate localStorage keys
 export interface Settings {
   id: 'general'; // Singleton ID for settings
-  theme: 'light' | 'dark' | 'system';
+  theme: 'light' | 'dark' | 'system' | 'serious';
   strictMode: boolean;
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
   expenseCategories: string[];
@@ -50,6 +50,8 @@ export interface Expense {
     currency?: string;
     fxRate?: number;
     amountBase?: number;
+    paymentMethod?: 'cash' | 'credit';
+    debtId?: string;
 }
 
 export interface Plan {
@@ -101,6 +103,8 @@ export interface Debt {
   minPayment: number;          // centavos
   createdAt: string;           // ISO
   status: 'active' | 'closed';
+  billingCycleDay?: number;    // 1..31 (Día de corte)
+  paymentDueDay?: number;      // 1..31 (Día de pago)
 }
 
 export interface DebtPayment {

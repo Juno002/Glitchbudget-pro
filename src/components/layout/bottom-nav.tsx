@@ -2,13 +2,14 @@
 
 import { useTabs } from "@/contexts/tabs-context";
 import { cn } from "@/lib/utils";
-import { BarChart2, NotebookPen, FileText, ArrowLeftRight, History } from "lucide-react";
+import { BarChart2, NotebookPen, FileText, ArrowLeftRight, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { value: "summary", label: "Resumen", icon: BarChart2, href: "/" },
+  { value: "summary", label: "Dashboard", icon: BarChart2, href: "/" },
   { value: "movements", label: "Movimientos", icon: ArrowLeftRight, href: "/"},
+  { value: "debts", label: "Deudas", icon: CreditCard, href: "/" },
   { value: "planning", label: "Plan", icon: NotebookPen, href: "/" },
   { value: "reports", label: "Reportes", icon: FileText, href: "/" },
 ];

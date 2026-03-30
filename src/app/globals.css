@@ -74,6 +74,64 @@ body {
     --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
     --backdrop: rgba(8,8,8,0.85);
   }
+  .light {
+    --background: 0 0% 98%; 
+    --foreground: 0 0% 9%; 
+    --card: 0 0% 100%; 
+    --card-foreground: 0 0% 9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 9%;
+    --primary: 152 100% 35%; /* Darker green for visibility */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 186 100% 35%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 186 100% 35%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 338 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 152 100% 35%;
+    --good: 152 100% 35%;
+    --bad: 338 100% 50%;
+    --warning: 43 96% 45%;
+    --gradient-primary: linear-gradient(135deg, #00b35f 0%, #00a0b3 100%);
+    --gradient-accent: linear-gradient(135deg, #d91c5c 0%, #00a0b3 100%);
+    --backdrop: rgba(250,250,250,0.85);
+  }
+  .serious {
+    --background: 224 71% 4%; /* Slate-950 */
+    --foreground: 213 31% 91%; /* Slate-100 */
+    --card: 224 71% 4%; 
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 212 100% 48%; /* Blue-500 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 215 25% 27%; /* Slate-700 */
+    --secondary-foreground: 213 31% 91%;
+    --muted: 215 25% 27%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 212 100% 48%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%; /* Red-500 */
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 212 100% 48%;
+    --good: 142 71% 45%; /* Green-500 */
+    --bad: 0 84% 60%; /* Red-500 */
+    --warning: 38 92% 50%; /* Orange-500 */
+    --gradient-primary: linear-gradient(135deg, hsl(212, 100%, 48%) 0%, hsl(212, 100%, 40%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(215, 25%, 27%) 0%, hsl(215, 25%, 20%) 100%);
+    --backdrop: rgba(2,6,23,0.85);
+  }
+}
+.serious * {
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
 @layer base {

@@ -13,6 +13,7 @@ import ExpenseCategoryManager from './expense-category-manager';
 import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
 import IncomeCategoryManager from './income-category-manager';
+import SubscriptionsManager from './subscriptions-manager';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -312,10 +313,11 @@ export default function PlanningTab() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="goals">Metas</TabsTrigger>
-          <TabsTrigger value="budgets">Presupuestos</TabsTrigger>
-          <TabsTrigger value="categories">Categorías</TabsTrigger>
+          <TabsTrigger value="budgets" className="text-[11px] sm:text-sm">Presupuestos</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-[11px] sm:text-sm">Suscripciones</TabsTrigger>
+          <TabsTrigger value="categories" className="text-[11px] sm:text-sm">Categorías</TabsTrigger>
         </TabsList>
 
         {/* --- METAS TAB --- */}
@@ -363,6 +365,15 @@ export default function PlanningTab() {
                     <NewBudgetDialog inactiveCategories={inactive} onSave={handleSaveBudget} />
                     </>
                     )}
+                </CardContent>
+            </Card>
+        </TabsContent>
+
+        {/* --- SUSCRIPCIONES TAB --- */}
+        <TabsContent value="subscriptions" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
+            <Card>
+                <CardContent className="pt-6">
+                    <SubscriptionsManager />
                 </CardContent>
             </Card>
         </TabsContent>

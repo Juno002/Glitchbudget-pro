@@ -66,7 +66,7 @@ export default function DiagRestore() {
       const n = normalizeDump(raw);
 
       await db.transaction('rw',
-        db.settings, db.incomes, db.expenses, db.plans, db.goals, db.goal_contributions,
+        db.tables,
         async () => {
           await Promise.all([
             db.settings.clear(), db.incomes.clear(), db.expenses.clear(),

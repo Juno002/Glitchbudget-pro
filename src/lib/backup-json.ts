@@ -14,7 +14,7 @@ const SettingsV3 = z.object({
   id: z.literal('general').default('general'),
   currency: z.string().default('DOP'),
   locale: z.string().default('es-DO'),
-  theme: z.enum(['light','dark','system']).optional(),
+  theme: z.enum(['light','dark','system','serious']).optional(),
   strictMode: z.boolean().default(false),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
   baseIncome: z.object({ 
@@ -48,7 +48,9 @@ const ExpenseV3 = z.object({
   concept: z.string().optional(),
   currency: z.string().optional(),
   fxRate: z.number().optional(),
-  amountBase: z.number().int().optional()
+  amountBase: z.number().int().optional(),
+  paymentMethod: z.enum(['cash', 'credit']).optional(),
+  debtId: z.string().optional()
 });
 
 const PlanV3 = z.object({
@@ -123,11 +125,11 @@ export async function exportDataJSON(): Promise<string> {
       id: 'general',
       currency: settings.currency ?? 'DOP',
       locale: settings.locale ?? 'es-DO',
-      theme: settings.theme ?? 'system',
+      theme: (settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
       strictMode: settings.strictMode ?? false,
-      rolloverStrategy: settings.rolloverStrategy ?? 'reset',
+      rolloverStrategy: (settings.rolloverStrategy as ('reset' | 'accumulate_surplus' | 'accumulate_debt')) ?? 'reset',
       baseIncome: { 
-        freq: settings.baseIncome?.freq ?? 'mensual',
+        freq: (settings.baseIncome?.freq as ('mensual' | 'quincenal' | 'semanal')) ?? 'mensual',
         amount: Math.max(0, Number(settings.baseIncome?.amount ?? 0))
       },
       incomeCategories: Array.isArray(settings.incomeCategories) ? settings.incomeCategories : [],
@@ -145,6 +147,7 @@ export async function exportDataJSON(): Promise<string> {
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
       currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+      paymentMethod: e.paymentMethod, debtId: e.debtId,
     })),
     plans: plans.map(p => ({
       month: p.month, categoryId: p.categoryId,
@@ -206,7 +209,7 @@ export async function importDataJSON(text: string): Promise<{
     id: 'general',
     currency: d.settings.currency ?? 'DOP',
     locale:   d.settings.locale   ?? 'es-DO',
-    theme:    d.settings.theme    ?? 'system',
+    theme:    (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
     strictMode: d.settings.strictMode ?? false,
     rolloverStrategy: d.settings.rolloverStrategy ?? 'reset',
     baseIncome: { 
@@ -227,6 +230,7 @@ export async function importDataJSON(text: string): Promise<{
     id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
     amount: e.amount, concept: e.concept ?? '', type: 'Variable',
     currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+    paymentMethod: e.paymentMethod, debtId: e.debtId,
   }));
 
   const plans = d.plans.map(p => ({
@@ -253,8 +257,7 @@ export async function importDataJSON(text: string): Promise<{
 
   // 4) Transacción: clear + bulkAdd
   await db.transaction('rw',
-    db.settings, db.periods, db.incomes, db.expenses, db.plans, db.goals, db.goal_contributions,
-    db.recurrents, db.debts, db.debt_payments, db.fxRates,
+    db.tables,
     async () => {
       await Promise.all([
         db.settings.clear(),

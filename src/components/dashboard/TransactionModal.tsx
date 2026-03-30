@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2, CreditCard, Banknote } from 'lucide-react';
 import { playAIInsight, playExpense, playIncome } from '@/lib/sounds';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -30,6 +30,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     addIncomeItem, updateIncomeItem, deleteIncomeItem,
     expenseCategories, incomeCategories,
     strictMode, getTotals, currentMonth, getBudgetStatusDetails,
+    debts,
   } = useFinances();
 
   // --- State ---
@@ -41,6 +42,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [expenseSubtype, setExpenseSubtype] = useState<'Fijo' | 'Variable' | 'Ocasional'>('Variable');
   const [incomeSubtype, setIncomeSubtype] = useState<'extra' | 'gift'>('extra');
   const [frequency, setFrequency] = useState<'mensual' | 'quincenal' | 'semanal'>('mensual');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit'>('cash');
+  const [debtId, setDebtId] = useState('');
 
   // AI insight state
   const [insight, setInsight] = useState<string | null>(null);
@@ -76,6 +79,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setDate(editingExpense.date);
       setExpenseSubtype(editingExpense.type);
       setFrequency(editingExpense.frequency || 'mensual');
+      setPaymentMethod(editingExpense.paymentMethod || 'cash');
+      setDebtId(editingExpense.debtId || '');
     } else if (mode === 'edit' && editingIncome) {
       setTxType('income');
       setAmount(String(editingIncome.amount / 100));
@@ -92,6 +97,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setExpenseSubtype('Variable');
       setIncomeSubtype('extra');
       setFrequency('mensual');
+      setPaymentMethod('cash');
+      setDebtId('');
     }
     setSaved(false);
     setInsight(null);
@@ -163,6 +170,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           date,
           type: expenseSubtype,
           frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
+          paymentMethod,
+          debtId: paymentMethod === 'credit' ? debtId : undefined,
         });
         playExpense();
       } else if (editingIncome) {
@@ -189,6 +198,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         date,
         type: expenseSubtype,
         frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
+        paymentMethod,
+        debtId: paymentMethod === 'credit' ? debtId : undefined,
       });
       playExpense();
     } else {
@@ -440,6 +451,57 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
         {/* Body */}
         <div className="px-6 py-4 space-y-3">
+          
+          {/* Payment Method Selector (Only when there are debts and it's an expense) */}
+          {!saved && txType === 'expense' && debts && debts.length > 0 && (
+            <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.06)] rounded-lg p-1">
+               <button
+                 type="button"
+                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                 onClick={() => { setPaymentMethod('cash'); setDebtId(''); }}
+               >
+                 <Banknote className="h-4 w-4" /> Efectivo
+               </button>
+               
+               {/* Dropdown for credit cards if more than 1, otherwise just a button */}
+               {debts.length === 1 ? (
+                 <button
+                   type="button"
+                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                   onClick={() => { setPaymentMethod('credit'); setDebtId(debts[0].id); }}
+                 >
+                   <CreditCard className="h-4 w-4" /> Tarjeta
+                 </button>
+               ) : (
+                 <Popover>
+                   <PopoverTrigger asChild>
+                     <button
+                       type="button"
+                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-[rgba(255,255,255,0.1)] text-white shadow-sm" : "hover:bg-[rgba(255,255,255,0.04)] text-muted-foreground")}
+                     >
+                       <CreditCard className="h-4 w-4" /> {paymentMethod === 'credit' && debtId ? debts.find(d => d.id === debtId)?.name || 'Tarjeta' : 'Pagar con Tarjeta'}
+                     </button>
+                   </PopoverTrigger>
+                   <PopoverContent className="w-56 p-1" align="end">
+                     <div className="text-xs font-medium text-muted-foreground px-2 py-1.5 border-b border-[rgba(255,255,255,0.06)] mb-1">Elige una tarjeta</div>
+                     <div className="flex flex-col gap-1 max-h-[150px] overflow-y-auto">
+                       {debts.map(d => (
+                         <button
+                           key={d.id}
+                           type="button"
+                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-[rgba(0,255,136,0.1)] text-emerald-400" : "hover:bg-[rgba(255,255,255,0.06)] text-white")}
+                           onClick={() => { setPaymentMethod('credit'); setDebtId(d.id); }}
+                         >
+                           <CreditCard className="h-4 w-4" /> {d.name}
+                         </button>
+                       ))}
+                     </div>
+                   </PopoverContent>
+                 </Popover>
+               )}
+            </div>
+          )}
+
           {/* Concept input */}
           {!saved && (
             <Input

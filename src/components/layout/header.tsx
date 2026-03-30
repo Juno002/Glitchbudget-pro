@@ -44,10 +44,7 @@ export default function Header() {
     hasOPFS().then(setOpfsAvailable);
   }, []);
 
-  const handleThemeToggle = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-  };
+  // Theme toggle moved to explicit selector dialog
   
   const handleClearData = async () => {
     try {
@@ -134,6 +131,48 @@ export default function Header() {
                         </PopoverContent>
                     </Popover>
                 </div>
+
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            {theme === 'light' ? <Sun className="mr-2 h-4 w-4" /> : theme === 'serious' ? <Briefcase className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                            <span>Apariencia</span>
+                        </DropdownMenuItem>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Apariencia visual</DialogTitle>
+                            <DialogDescription>
+                                Personaliza los colores y el estilo de la aplicación.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <RadioGroup value={theme} onValueChange={(value) => setTheme(value as any)} className="gap-4">
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="dark" id="t1" />
+                                    <Label htmlFor="t1" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Moon className="h-4 w-4 text-slate-400" /> Neón Oscuro (Default)</span>
+                                        <span className="text-xs text-muted-foreground mt-1">El tema clásico de GlitchBudget con colores vibrantes.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="light" id="t2" />
+                                    <Label htmlFor="t2" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Sun className="h-4 w-4 text-amber-500" /> Modo Claro</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Elegante inversión de colores para ambientes luminosos.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-[rgba(255,255,255,0.08)] p-4 hover:bg-[rgba(255,255,255,0.02)] transition-colors">
+                                    <RadioGroupItem value="serious" id="t3" />
+                                    <Label htmlFor="t3" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Serie Minimalista</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Tonos mate, sin neón ni distracciones. Ideal para ver reportes.</span>
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <Dialog>
                     <DialogTrigger asChild>
