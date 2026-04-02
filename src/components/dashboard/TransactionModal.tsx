@@ -114,33 +114,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   // --- AI Insight fetch ---
   const fetchInsight = async (numAmount: number) => {
-    setIsFetchingInsight(true);
-    try {
-      const budgets = getBudgetStatusDetails(currentMonth);
-      const budget = budgets.find(b => b.categoryId === categoryId);
-      const catInfo = getCategoryInfo(categoryId);
-      const { available } = getTotals(currentMonth);
-
-      const res = await fetch('/api/ai-insight-transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          description: concept || catInfo?.name || categoryId,
-          amount: numAmount,
-          category: catInfo?.name || categoryId,
-          budgetForCategory: budget ? { limit: budget.limit / 100, spent: budget.spent / 100 } : null,
-          available: (available - numAmount * 100) / 100,
-        }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.insight) {
-          setInsight(data.insight);
-          playAIInsight();
-        }
-      }
-    } catch { /* silent */ }
-    finally { setIsFetchingInsight(false); }
+    // AI insights disabled internally
   };
 
   // --- Save ---
@@ -215,10 +189,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
     setSaved(true);
 
-    // Fetch AI insight for expenses
-    if (txType === 'expense') {
-      await fetchInsight(numAmount);
-    }
+    // Fetch AI insight for expenses - disabled internally
+    // if (txType === 'expense') {
+    //   await fetchInsight(numAmount);
+    // }
 
     // Auto-close after delay
     autoCloseTimer.current = setTimeout(() => {
@@ -555,20 +529,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           )}
 
-          {/* AI Insight / Strict mode warning */}
-          {isFetchingInsight && (
-            <div className="flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px]">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <p className="text-sm text-[rgba(255,255,255,0.5)] italic">Analizando impacto...</p>
-            </div>
-          )}
-
-          {insight && !isFetchingInsight && (
-            <div className="flex items-start gap-2 animate-in fade-in slide-in-from-bottom-2 duration-700 bg-[rgba(0,255,136,0.04)] border border-[rgba(0,255,136,0.12)] rounded-[14px] px-[14px] py-[10px]">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-              <p className="text-sm text-[rgba(255,255,255,0.5)] leading-snug">{insight}</p>
-            </div>
-          )}
+          {/* AI Insight / Strict mode warning - disabled internally */}
 
           {/* Post-save confirmation */}
           {saved && !insight && !isFetchingInsight && (

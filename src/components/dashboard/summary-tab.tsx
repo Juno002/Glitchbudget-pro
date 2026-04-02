@@ -314,7 +314,7 @@ export default function SummaryTab() {
             loading={loading}
         />
         
-        {!loading && <AmbientInsight totals={totals} budgetStatus={budgetStatus} currentMonth={currentMonth} />}
+        {/* Ambient AI Insight disabled internally */}
 
         <div className="pt-2">
             <SaveStrategyChips />
