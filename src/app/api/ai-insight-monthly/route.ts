@@ -25,6 +25,8 @@ export async function POST(req: Request) {
         - NO uses viñetas ni saltos de línea. Escribe corrido.
         - Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").`;
 
+        // Safety bypass: Gemini generation disabled internally
+        /*
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompt,
@@ -34,6 +36,8 @@ export async function POST(req: Request) {
         });
 
         const insight = response.text?.trim() || 'Comparativa procesada.';
+        */
+        const insight = 'Análisis de comparativa desactivado localmente.';
         return NextResponse.json({ insight });
 
     } catch (e: any) {

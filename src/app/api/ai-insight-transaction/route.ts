@@ -43,12 +43,16 @@ Reglas estrictas:
 5. Todos los montos monetarios deben estar formateados con el prefijo "RD$" y usar separadores de miles (ejemplo: "RD$4,000", NUNCA "4000").
 `;
 
+    // Safety bypass: Gemini generation disabled internally
+    /*
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
     });
 
     const text = response.text || '';
+    */
+    const text = '';
 
     return NextResponse.json({ insight: text.trim() });
   } catch (error) {

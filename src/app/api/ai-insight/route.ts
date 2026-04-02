@@ -40,14 +40,14 @@ Reglas estrictas:
 4. Todos los montos monetarios en la alerta (si hay) deben usar el prefijo "RD$" y separadores de miles (ej: "RD$4,000").
 `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-
-    const text = response.text || '';
-
-    return NextResponse.json({ insight: text.trim() });
+    // Safety bypass: Gemini generation disabled internally
+    // const response = await ai.models.generateContent({
+    //   model: 'gemini-2.5-flash',
+    //   contents: prompt,
+    // });
+    // const text = response.text || '';
+    
+    return NextResponse.json({ insight: 'NO_ALERT' });
   } catch (error) {
     console.error('Error in AI Insight route:', error);
     return NextResponse.json(
