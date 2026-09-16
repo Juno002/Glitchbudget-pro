@@ -8,12 +8,12 @@ function getAudioContext() {
     audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
   if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
+    void audioCtx.resume().catch(() => {});
   }
   return audioCtx;
 }
 
-export function playExpense() {
+function playExpenseUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -35,7 +35,7 @@ export function playExpense() {
   osc.stop(ctx.currentTime + 0.2);
 }
 
-export function playIncome() {
+function playIncomeUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -60,7 +60,7 @@ export function playIncome() {
   osc.stop(ctx.currentTime + 0.3);
 }
 
-export function playBudgetExceeded() {
+function playBudgetExceededUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -91,7 +91,7 @@ export function playBudgetExceeded() {
   osc2.stop(ctx.currentTime + 0.35);
 }
 
-export function playGoalComplete() {
+function playGoalCompleteUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -121,7 +121,7 @@ export function playGoalComplete() {
   });
 }
 
-export function playAIInsight() {
+function playAIInsightUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -142,7 +142,7 @@ export function playAIInsight() {
   osc.stop(ctx.currentTime + 0.15);
 }
 
-export function playCoinDrop() {
+function playCoinDropUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -183,7 +183,7 @@ export function playCoinDrop() {
   osc2.stop(ctx.currentTime + 0.3);
 }
 
-export function playAchievementUnlock() {
+function playAchievementUnlockUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
 
@@ -226,4 +226,33 @@ export function playAchievementUnlock() {
   shimmerGain.connect(ctx.destination);
   shimmer.start(ctx.currentTime + 0.24);
   shimmer.stop(ctx.currentTime + 0.65);
+}
+
+// Optional audio must never change the outcome of a financial operation.
+export function playExpense() {
+  try { playExpenseUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playIncome() {
+  try { playIncomeUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playBudgetExceeded() {
+  try { playBudgetExceededUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playGoalComplete() {
+  try { playGoalCompleteUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playAIInsight() {
+  try { playAIInsightUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playCoinDrop() {
+  try { playCoinDropUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
+}
+
+export function playAchievementUnlock() {
+  try { playAchievementUnlockUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
 }

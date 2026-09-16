@@ -19,7 +19,6 @@
 - **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
 - **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
 - **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.
-- **IA Integrada (Opcional):** Análisis bajo demanda de tus finanzas (Gemini) para evitar consumo excesivo de tokens y ofrecer valor real cuando lo solicites.
 - **Glassmorphism UI:** Una experiencia visual premium con componentes translúcidos, sombras dinámicas y gradientes finamente trabajados.
 - **Interactividad Sonora (8-bit):** Respuestas auditivas retro (Web Audio API) al realizar registros financieros o completar metas.
 - **Persistencia de Datos Local-First:** Toda tu información se guarda de forma segura en **Dexie (IndexedDB)** directamente en tu navegador.
@@ -73,3 +72,11 @@ src/
 
 ---
 *GlitchBudget Pro: Diseñado para el Monje Financiero moderno. Privacidad total con IndexedDB, cálculos en centavos y una interfaz que se siente viva.*
+
+## Validación y datos locales
+
+Requiere Node.js 22 o superior. Ejecuta `npm ci`, `npm run check` y `npm run build`. La compilación genera los recursos de uso sin conexión; primero abre la versión de producción con conexión y espera a que se instale. Una actualización se activa al cerrar las pestañas anteriores.
+
+Los datos pertenecen al navegador y a la dirección donde abres la aplicación. No hay cuentas ni sincronización. Borrar los datos del sitio elimina también los respaldos locales: descarga periódicamente un JSON externo. Los respaldos no están cifrados.
+
+La revisión de calidad y sus límites están documentados en `docs/quality-review.md`.

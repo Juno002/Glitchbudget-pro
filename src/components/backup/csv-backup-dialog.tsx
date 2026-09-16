@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Upload, FileSpreadsheet } from 'lucide-react';
+import { ImportConfirmation } from './import-confirmation';
 import { friendlyError } from '@/lib/errors';
 import {
   exportIncomesCSV,
@@ -45,19 +46,25 @@ const backupActions: {
 ];
 
 export default function CsvBackupDialog() {
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const { toast } = useToast();
   const { setDataVersion } = useFinances();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentImportFn = useRef<((file: File) => Promise<void>) | null>(null);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && currentImportFn.current && !busy && window.confirm('La importación reemplazará esta tabla. Descarga un respaldo JSON antes de continuar. ¿Deseas importar?')) {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPendingFile(event.target.files?.[0] ?? null);
+    event.target.value = "";
+  };
+  const confirmImport = async () => {
+    const file = pendingFile;
+    if (file && currentImportFn.current && !busy) {
       setBusy(true);
       try {
         await currentImportFn.current(file);
         setDataVersion(v => v + 1);
+        setPendingFile(null);
         toast({
           title: 'Importación CSV exitosa',
           description: `Los datos de "${file.name}" se han restaurado.`,
@@ -117,6 +124,7 @@ export default function CsvBackupDialog() {
             className="hidden"
             accept=".csv"
         />
+        <ImportConfirmation file={pendingFile} scope="los registros de la tabla seleccionada" onCancel={() => setPendingFile(null)} onConfirm={confirmImport} />
         <DialogFooter>
           <p className="text-xs text-muted-foreground">Nota: La importación reemplazará todos los datos de la tabla seleccionada.</p>
         </DialogFooter>

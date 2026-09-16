@@ -39,9 +39,11 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
+import { ImportConfirmation } from './import-confirmation';
 import CsvBackupDialog from './csv-backup-dialog';
 
 export default function OpfsBackupDialog() {
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [open, setOpen] = useState(false);
   const {
     createBackup,
@@ -88,7 +90,7 @@ export default function OpfsBackupDialog() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (window.confirm('Restaurar este archivo reemplazará todos los datos actuales. ¿Deseas continuar?') && await importData(file)) setOpen(false); // Close dialog on successful restore
+      setPendingFile(file);
     }
     // Reset file input to allow selecting the same file again
     if(fileInputRef.current) fileInputRef.current.value = '';
@@ -126,7 +128,7 @@ export default function OpfsBackupDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={value => { if (!isWorking) setOpen(value); }}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <UploadCloud className="mr-2 h-4 w-4" />
@@ -141,7 +143,7 @@ export default function OpfsBackupDialog() {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
             <Button onClick={handleCreate} disabled={isWorking} className="w-full sm:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
               {isWorking ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -223,7 +225,7 @@ export default function OpfsBackupDialog() {
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>¿Eliminar copia de seguridad?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                           Esta acción eliminará permanentemente el archivo de copia de seguridad "{file.name}".
+                                           Esta acción eliminará permanentemente el archivo de copia de seguridad &quot;{file.name}&quot;.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
@@ -246,8 +248,9 @@ export default function OpfsBackupDialog() {
             </div>
         </ScrollArea>
         
+        <ImportConfirmation file={pendingFile} scope="todos tus datos actuales" onCancel={() => setPendingFile(null)} onConfirm={async () => { if (pendingFile && await importData(pendingFile)) { setPendingFile(null); setOpen(false); } }} />
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button disabled={isWorking} variant="outline" onClick={() => setOpen(false)}>
             Cerrar
           </Button>
         </DialogFooter>

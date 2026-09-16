@@ -22,16 +22,18 @@ import { playIncome } from '@/lib/sounds';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Compact Budget Item with Auto-Save ---
-function BudgetItem({ categoryId, currentPlan, spent, onSave }: { 
+function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   categoryId: string;
   currentPlan: number;
   spent: number;
-  onSave: (val: number) => Promise<void>;
+  onSave: (val: number) => Promise<boolean>;
 }) {
   const category = getCategoryInfo(categoryId);
   const [inputValue, setInputValue] = useState(String(currentPlan / 100));
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
 
   // Sync if external changes happen
   useEffect(() => {
@@ -47,15 +49,15 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
     if (num * 100 === currentPlan) return; // No change
 
     setStatus('saving');
-    await onSave(num);
-    setStatus('saved');
+    const success = await onSave(num);
+    setStatus(success ? 'saved' : 'idle');
     setTimeout(() => setStatus('idle'), 2000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);
     setStatus('idle');
-    
+
     // Optional: Auto-save on stop typing (debounce)
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
@@ -80,7 +82,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   const over = plan > 0 && spent > plan;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
@@ -127,7 +129,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
                 placeholder="0.00"
             />
         </div>
-        
+
         <div className="w-5 flex justify-center">
             {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
             {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary animate-in zoom-in" />}
@@ -145,7 +147,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
 }
 
 // --- New Budget Modal ---
-function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: string[], onSave: (categoryId: string, amount: number) => Promise<void> }) {
+function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: string[], onSave: (categoryId: string, amount: number) => Promise<boolean> }) {
   const [open, setOpen] = useState(false);
   const [selectedCatId, setSelectedCatId] = useState<string>('');
   const [amount, setAmount] = useState('');
@@ -162,9 +164,10 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
     const num = parseFloat(amount) || 0;
     if (num <= 0 || !selectedCatId) return;
     setSaving(true);
-    await onSave(selectedCatId, num);
-    playIncome();
+    const success = await onSave(selectedCatId, num);
     setSaving(false);
+    if (!success) return;
+    playIncome();
     setOpen(false);
     setSelectedCatId('');
     setAmount('');
@@ -206,8 +209,8 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                                     onClick={() => setSelectedCatId(cat.id)}
                                     className={cn(
                                         "flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all border",
-                                        isSelected 
-                                            ? "border-primary bg-primary/10 text-primary" 
+                                        isSelected
+                                            ? "border-primary bg-primary/10 text-primary"
                                             : "border-transparent hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground"
                                     )}
                                 >
@@ -271,29 +274,18 @@ export default function PlanningTab() {
   const { currentMonth, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState('budgets');
-  
+
   const budgetDetails = useMemo(() => getBudgetStatusDetails(currentMonth), [currentMonth, getBudgetStatusDetails]);
 
   // Handle single budget save
   const handleSaveBudget = async (categoryId: string, limitValue: number) => {
-    // updateAllBudgets expects an array of all updates. A bit heavy, but it's what we have.
-    // To preserve others, we map the current state and replace the changed one.
-    const currentPlans = budgetDetails.map(b => ({ categoryId: b.categoryId, limit: b.limit / 100 }));
-    const existingIdx = currentPlans.findIndex(p => p.categoryId === categoryId);
-    
-    if (existingIdx >= 0) {
-        currentPlans[existingIdx].limit = limitValue;
-    } else {
-        currentPlans.push({ categoryId, limit: limitValue });
-    }
-
-    await updateAllBudgets(currentMonth, currentPlans);
+    return updateAllBudgets(currentMonth, [{ categoryId, limit: limitValue }]);
   };
-  
+
   const { active, inactive } = useMemo(() => {
       const activeIds = new Set<string>();
       const inactiveIds = new Set<string>();
-      
+
       expenseCategories.forEach(catId => {
           const detail = budgetDetails.find(b => b.categoryId === catId);
           if ((detail?.limit ?? 0) > 0 || (detail?.spent ?? 0) > 0) {
@@ -352,8 +344,8 @@ export default function PlanningTab() {
                     {displayedCategories.map(catId => {
                         const detail = budgetDetails.find(b => b.categoryId === catId);
                         return (
-                            <BudgetItem 
-                                key={catId} 
+                            <BudgetItem
+                                key={`${currentMonth}-${catId}`}
                                 categoryId={catId}
                                 currentPlan={detail?.limit ?? 0}
                                 spent={detail?.spent ?? 0}

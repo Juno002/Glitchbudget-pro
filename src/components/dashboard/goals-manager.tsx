@@ -87,7 +87,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
             </DialogTrigger>
             <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden gap-0">
                 <DialogHeader className="p-6 pb-2">
-                    <DialogTitle>Aportar a "{goal.name}"</DialogTitle>
+                    <DialogTitle>Aportar a &quot;{goal.name}&quot;</DialogTitle>
                     <DialogDescription>
                         Planificado: {formatCurrency(goal.quota)}/mes<br/>
                         Disponible general: {formatCurrency(disposable)}
@@ -134,6 +134,7 @@ export default function GoalsManager() {
   const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<GoalFormValues>({
     resolver: zodResolver(goalSchema),
@@ -144,8 +145,8 @@ export default function GoalsManager() {
   const target = form.watch('target');
   const deadline = form.watch('date');
   
-  const suggestionProfiles: SuggestionProfile[] = ['conservative', 'balanced', 'aggressive'];
   const suggestions = useMemo(() => {
+      const suggestionProfiles: SuggestionProfile[] = ['conservative', 'balanced', 'aggressive'];
       if (!target || target <= 0) return [];
       return suggestionProfiles.map(p => ({
           profile: p,
@@ -268,7 +269,7 @@ export default function GoalsManager() {
                                             <AlertDialogHeader>
                                                 <AlertDialogTitle>¿Eliminar meta?</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    Esta acción es permanente. Se eliminará la meta "{goal.name}". Los fondos aportados no se devolverán automáticamente a tu balance.
+                                                    Esta acción es permanente. Se eliminará la meta &quot;{goal.name}&quot;. Los fondos aportados no se devolverán automáticamente a tu balance.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
@@ -345,7 +346,6 @@ export default function GoalsManager() {
                                         control={form.control}
                                         name="date"
                                         render={({ field }) => {
-                                            const inputRef = useRef<HTMLInputElement>(null);
                                             return (
                                             <FormItem>
                                                 <FormLabel className="text-xs">Fecha Límite</FormLabel>
@@ -447,7 +447,7 @@ export default function GoalsManager() {
                                     </div>
                                 )}
 
-                                <Button disabled={form.formState.isSubmitting} type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20" disabled={!isFormValid}>
+                                <Button disabled={form.formState.isSubmitting || !isFormValid} type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
                                     Crear Meta
                                 </Button>
                             </form>

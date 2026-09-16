@@ -95,7 +95,8 @@ const MonthlyComparisonTable = () => {
                         <TableBody>
                             {rows.map(row => {
                                 const diff = (row.curr || 0) - (row.prev || 0);
-                                const diffColor = diff > 0 ? 'text-green-600' : (diff < 0 ? 'text-red-600' : 'text-muted-foreground');
+                                const improves = row.label === 'Gastos' ? diff < 0 : diff > 0;
+                                const diffColor = diff === 0 ? 'text-muted-foreground' : improves ? 'text-green-600' : 'text-red-600';
                                 return (
                                     <TableRow key={row.label}>
                                         <TableCell>{row.label}</TableCell>
@@ -181,7 +182,7 @@ const BudgetStatusReport = () => {
                                     </div>
                                     <div className="flex items-center gap-1.5 text-xs font-medium">
                                         <span className={cn("h-2 w-2 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                        <span className="capitalize">{b.status}</span>
+                                        <span className="capitalize">{{ ok: 'En orden', alert: 'Cerca del límite', over: 'Excedido', unbudgeted: 'Sin presupuesto' }[b.status]}</span>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-3 gap-2 text-sm mt-1">

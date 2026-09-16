@@ -107,6 +107,111 @@ function Snapshot({
 
 
 
+const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, value: number }[], title: string, colors?: string[], delay?: number }) => {
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => { setIsClient(true) }, []);
+
+    // Default palette if none provided
+    const COLORS = colors || [
+        'hsl(var(--chart-1))',
+        'hsl(var(--chart-2))',
+        'hsl(var(--chart-3))',
+        'hsl(var(--chart-4))',
+        'hsl(var(--chart-5))',
+    ];
+
+    if(!isClient) return <Skeleton className="h-64 w-full" />;
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay, type: 'spring', stiffness: 200, damping: 20 }}
+        >
+        <Card className="hover:shadow-lg hover:shadow-[rgba(0,255,136,0.04)] transition-shadow duration-300">
+            <CardContent className="pt-6">
+                <div className="h-64 w-full">
+                    {data.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <RechartsTooltip
+                                    formatter={(value: number) => [formatCurrency(value), title]}
+                                    contentStyle={{
+                                        backgroundColor: 'rgba(10,10,20,0.9)',
+                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        borderRadius: '12px',
+                                        backdropFilter: 'blur(12px)',
+                                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                                    }}
+                                    itemStyle={{ color: 'rgba(255,255,255,0.8)' }}
+                                />
+                                <Legend />
+                                <Pie
+                                    data={data}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={80}
+                                    innerRadius={50}
+                                    labelLine={false}
+                                    animationBegin={delay * 1000}
+                                    animationDuration={800}
+                                    animationEasing="ease-out"
+                                    paddingAngle={3}
+                                    stroke="hsl(var(--background))"
+                                    strokeWidth={2}
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className="flex items-center justify-center h-full text-muted-foreground">Sin datos para mostrar.</div>
+                    )}
+                </div>
+            </CardContent>
+        </Card>
+        </motion.div>
+    );
+}
+
+const chipClass = (isActive: boolean) =>
+  `px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
+    isActive
+      ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_rgba(0,255,136,0.1)]'
+      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-[rgba(255,255,255,0.4)] hover:bg-black/10 dark:bg-white/10 hover:text-[rgba(255,255,255,0.8)]'
+  }`;
+
+const SaveStrategyChips = () => {
+    const { savePct, updateSettings } = useFinances();
+    return (
+        <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro <span className="text-[10px] opacity-60">(se resta del disponible)</span></p>
+            <div className="flex flex-wrap gap-2">
+                {[
+                    {label:'Ninguno 0%',      val:0.00},
+                    {label:'Conservador 5%',   val:0.05},
+                    {label:'Estándar 10%',     val:0.10},
+                    {label:'Agresivo 20%',     val:0.20},
+                ].map(opt => {
+                    const isActive = Math.abs(savePct - opt.val) < 0.01;
+                    return (
+                      <button key={opt.val}
+                      onClick={() => updateSettings({ savePct: opt.val })}
+                      className={chipClass(isActive)}>
+                      {opt.label}
+                      </button>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
+
 export default function SummaryTab() {
   const { getTotals, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, savePct } = useFinances();
   const [monthName, setMonthName] = useState('');
@@ -126,8 +231,8 @@ export default function SummaryTab() {
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>
         </div>
-        
-        <Snapshot 
+
+        <Snapshot
             totalIncome={totals.totalIncome}
             totalExpenses={totals.totalExpenses}
             available={totals.available}
@@ -135,7 +240,7 @@ export default function SummaryTab() {
             savePct={savePct}
             loading={loading}
         />
-        
+
         {/* Ambient AI Insight disabled internally */}
 
         <div className="pt-2">
@@ -143,20 +248,20 @@ export default function SummaryTab() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
-            <DonutChart 
-                data={expenseData} 
-                title="Gastos" 
-                colors={['#f43f5e', '#fb923c', '#fbbf24', '#a78bfa', '#f472b6']} 
+            <DonutChart
+                data={expenseData}
+                title="Gastos"
+                colors={['#f43f5e', '#fb923c', '#fbbf24', '#a78bfa', '#f472b6']}
             />
-            <DonutChart 
-                data={incomeData} 
-                title="Ingresos" 
-                colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']} 
+            <DonutChart
+                data={incomeData}
+                title="Ingresos"
+                colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']}
             />
         </div>
 
         <BudgetStatus />
-        
+
       </div>
   );
 }

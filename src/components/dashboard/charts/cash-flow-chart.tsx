@@ -57,7 +57,7 @@ function MobileFlowView({
     <div className="space-y-4">
       {/* Ingresos */}
       <div>
-        <div className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-2">
+        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Ingresos
         </div>
         <div className="space-y-1.5">
@@ -69,17 +69,17 @@ function MobileFlowView({
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-                className="flex items-center gap-2.5 p-2 rounded-lg border border-white/5 bg-white/[0.02]"
+                className="flex items-center gap-2.5 p-2 rounded-lg border border-foreground/10 bg-white/[0.02]"
               >
                 <span className="text-lg shrink-0">{s.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-xs font-medium text-white/70 truncate">{s.label}</span>
+                    <span className="text-xs font-medium text-muted-foreground truncate">{s.label}</span>
                     <span className="text-xs font-semibold tabular-nums ml-2" style={{ color: s.color }}>
                       {formatCurrency(s.value)}
                     </span>
                   </div>
-                  <div className="h-1 w-full rounded-full bg-white/5 mt-1 overflow-hidden">
+                  <div className="h-1 w-full rounded-full bg-foreground/5 mt-1 overflow-hidden">
                     <motion.div
                       className="h-full rounded-full"
                       style={{ background: s.color }}
@@ -97,14 +97,14 @@ function MobileFlowView({
 
       {/* Divider arrow */}
       <div className="flex items-center justify-center gap-2 py-1">
-        <div className="h-px flex-1 bg-white/5" />
-        <span className="text-white/20 text-sm">↓ se distribuye en ↓</span>
-        <div className="h-px flex-1 bg-white/5" />
+        <div className="h-px flex-1 bg-foreground/5" />
+        <span className="text-muted-foreground text-sm">↓ se distribuye en ↓</span>
+        <div className="h-px flex-1 bg-foreground/5" />
       </div>
 
       {/* Gastos / Destinos */}
       <div>
-        <div className="text-[11px] font-semibold text-white/40 uppercase tracking-wider mb-2">
+        <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
           Destinos
         </div>
         <div className="space-y-1.5">
@@ -116,17 +116,17 @@ function MobileFlowView({
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 + i * 0.05, type: 'spring', stiffness: 200, damping: 20 }}
-                className="flex items-center gap-2.5 p-2 rounded-lg border border-white/5 bg-white/[0.02]"
+                className="flex items-center gap-2.5 p-2 rounded-lg border border-foreground/10 bg-white/[0.02]"
               >
                 <span className="text-lg shrink-0">{d.icon}</span>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-xs font-medium text-white/70 truncate">{d.label}</span>
+                    <span className="text-xs font-medium text-muted-foreground truncate">{d.label}</span>
                     <span className="text-xs font-semibold tabular-nums ml-2" style={{ color: d.color }}>
                       {formatCurrency(d.value)}
                     </span>
                   </div>
-                  <div className="h-1 w-full rounded-full bg-white/5 mt-1 overflow-hidden">
+                  <div className="h-1 w-full rounded-full bg-foreground/5 mt-1 overflow-hidden">
                     <motion.div
                       className="h-full rounded-full"
                       style={{ background: d.color }}
@@ -368,7 +368,7 @@ export default function CashFlowChart() {
     });
 
     return { sources, destinations: dests, links, totalIncome };
-  }, [getIncomesByCategory, getExpensesByCategory, getTotals, currentMonth, goalContributions]);
+  }, [getIncomesByCategory, getExpensesByCategory, currentMonth, goalContributions]);
 
   if (!isClient) return null;
 

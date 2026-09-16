@@ -3,6 +3,7 @@ import { Syne, DM_Mono } from 'next/font/google';
 import './globals.css';
 import { FinanceProvider } from '@/contexts/finance-context';
 import { Toaster } from '@/components/ui/toaster';
+import { MotionPreferences } from '@/components/motion-preferences';
 import { PWARegistration } from '@/components/pwa-registration';
 
 const syne = Syne({ 
@@ -47,11 +48,11 @@ export default function RootLayout({
           <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[50%] rounded-full bg-[#ff2d78] opacity-10 blur-[120px]" />
         </div>
         
-        <FinanceProvider>
+        <MotionPreferences><FinanceProvider>
           {children}
           <Toaster />
           <PWARegistration />
-        </FinanceProvider>
+        </FinanceProvider></MotionPreferences>
       </body>
     </html>
   );

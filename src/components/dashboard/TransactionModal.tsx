@@ -24,6 +24,32 @@ interface TransactionModalProps {
 
 type TransactionType = 'income' | 'expense';
 
+  // --- Toolbar item component ---
+const ToolbarItem = ({ icon, label, active, children, popoverOpen, setPopoverOpen }: {
+    icon: React.ReactNode;
+    label: string;
+    active?: boolean;
+    children: React.ReactNode;
+    popoverOpen: boolean;
+    setPopoverOpen: (open: boolean) => void;
+  }) => (
+    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <PopoverTrigger asChild>
+        <button className={cn(
+          "flex flex-col items-center gap-1 flex-1 py-2 rounded-lg transition-colors text-xs",
+          active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+        )}>
+          {icon}
+          <span className="truncate max-w-[70px]">{label}</span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-2" align="center">
+        {children}
+      </PopoverContent>
+    </Popover>
+  );
+
+
 export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome }: TransactionModalProps) {
   const {
     addExpense, updateExpense, deleteExpense,
@@ -112,7 +138,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
   }, [txType, incomeCategories, expenseCategories]);
 
-  const selectedCat = getCategoryInfo(categoryId);
+  const selectedCat = categoryId ? getCategoryInfo(categoryId) : undefined;
   const canSave = Number.isFinite(Number(amount)) && Number(amount) >= 0.01 && categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
 
   const handleSave = async () => {
@@ -165,31 +191,6 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     }
   };
 
-  // --- Toolbar item component ---
-  const ToolbarItem = ({ icon, label, active, children, popoverOpen, setPopoverOpen }: {
-    icon: React.ReactNode;
-    label: string;
-    active?: boolean;
-    children: React.ReactNode;
-    popoverOpen: boolean;
-    setPopoverOpen: (open: boolean) => void;
-  }) => (
-    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <button className={cn(
-          "flex flex-col items-center gap-1 flex-1 py-2 rounded-lg transition-colors text-xs",
-          active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-        )}>
-          {icon}
-          <span className="truncate max-w-[70px]">{label}</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-2" align="center">
-        {children}
-      </PopoverContent>
-    </Popover>
-  );
-
   const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
 
   return (
@@ -223,6 +224,9 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             )}>RD$</span>
             <input
               type="number"
+              aria-label="Monto"
+              min="0.01"
+              step="0.01"
               inputMode="decimal"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -318,6 +322,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             <input
               ref={dateInputRef}
               type="date"
+              aria-label="Fecha del movimiento"
               value={date}
               onChange={(e) => { if (e.target.value) setDate(e.target.value); }}
               className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 opacity-0 pointer-events-none"

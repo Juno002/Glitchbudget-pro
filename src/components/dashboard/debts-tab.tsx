@@ -1,7 +1,7 @@
 'use client';
 
 import { localDate } from '@/lib/finance-calculations';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 export default function DebtsTab() {
   const { debts, expenses, debtPayments, addDebt, deleteDebt, addDebtPayment } = useFinances();
+  const savingRef = useRef(false);
+  const [saving, setSaving] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newDebt, setNewDebt] = useState({ name: '', principal: '', billingDay: '15', paymentDay: '30' });
 
@@ -24,8 +26,11 @@ export default function DebtsTab() {
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (savingRef.current) return;
     const limitCents = toCents(newDebt.principal);
     if (!newDebt.name || limitCents <= 0) return;
+    savingRef.current = true;
+    setSaving(true);
     const success = await addDebt({
       name: newDebt.name,
       type: 'credit_card',
@@ -36,6 +41,8 @@ export default function DebtsTab() {
       billingCycleDay: parseInt(newDebt.billingDay),
       paymentDueDay: parseInt(newDebt.paymentDay),
     });
+    savingRef.current = false;
+    setSaving(false);
     if (!success) return;
     setIsAddOpen(false);
     setNewDebt({ name: '', principal: '', billingDay: '15', paymentDay: '30' });
@@ -43,14 +50,19 @@ export default function DebtsTab() {
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (savingRef.current) return;
     const amtCents = toCents(paymentAmount);
     if (!paymentDebtId || amtCents <= 0) return;
     
+    savingRef.current = true;
+    setSaving(true);
     const success = await addDebtPayment({
       debtId: paymentDebtId,
       amount: amtCents,
       date: localDate(),
     });
+    savingRef.current = false;
+    setSaving(false);
     if (!success) return;
     setPaymentAmount('');
     setPaymentDebtId(null);
@@ -63,7 +75,7 @@ export default function DebtsTab() {
           <h2 className="text-xl font-bold tracking-tight">Tarjetas</h2>
           <p className="text-sm text-muted-foreground mt-1">Gestiona los límites de tus deudas activas</p>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <Dialog open={isAddOpen} onOpenChange={open => { if (!savingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
             <Button size="sm" className="bg-[#00e5ff]/20 text-[#00e5ff] hover:bg-[#00e5ff]/30">
               <Plus className="w-4 h-4 mr-2" /> Nueva Tarjeta
@@ -80,7 +92,7 @@ export default function DebtsTab() {
               </div>
               <div className="space-y-2">
                 <Label>Límite Aprobado (RD$)</Label>
-                <Input type="number" step="0.01" value={newDebt.principal} onChange={e => setNewDebt({...newDebt, principal: e.target.value})} placeholder="0.00" required />
+                <Input type="number" min="0.01" step="0.01" value={newDebt.principal} onChange={e => setNewDebt({...newDebt, principal: e.target.value})} placeholder="0.00" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -102,7 +114,7 @@ export default function DebtsTab() {
                   </Select>
                 </div>
               </div>
-              <Button type="submit" className="w-full">Guardar Tarjeta</Button>
+              <Button disabled={saving} type="submit" className="w-full">{saving ? 'Guardando…' : 'Guardar tarjeta'}</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -152,8 +164,8 @@ export default function DebtsTab() {
                     </p>
                   </div>
                   <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-good/5 border-good/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
-                    <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Balance Deudado'}</p>
-                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-good" : (currentDebt === 0 ? "text-slate-300 dark:text-slate-400" : "text-bad"))}>
+                    <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Saldo pendiente'}</p>
+                    <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-good" : (currentDebt === 0 ? "text-muted-foreground" : "text-bad"))}>
                       {formatCurrency(absoluteDebt)}
                     </p>
                   </div>
@@ -173,6 +185,8 @@ export default function DebtsTab() {
                 </div>
 
                 <Dialog open={paymentDebtId === debt.id} onOpenChange={(open) => {
+                  if (savingRef.current) return;
+                  setPaymentAmount('');
                   if (open) setPaymentDebtId(debt.id);
                   else setPaymentDebtId(null);
                 }}>
@@ -198,12 +212,12 @@ export default function DebtsTab() {
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
                       <div className="space-y-2">
                          <Label>Monto a Pagar o Abonar</Label>
-                         <Input type="number" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00" autoFocus required />
+                         <Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00" autoFocus required />
                       </div>
                       <p className="text-[11px] text-muted-foreground italic">
                         Los pagos reducen tu efectivo disponible global para saldar la deuda o aumentar tu límite temporal.
                       </p>
-                      <Button type="submit" className="w-full">Confirmar Transferencia</Button>
+                      <Button disabled={saving} type="submit" className="w-full">{saving ? 'Registrando…' : 'Confirmar pago'}</Button>
                     </form>
                   </DialogContent>
                 </Dialog>
