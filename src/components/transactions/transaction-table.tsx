@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { getCategoryInfo } from '@/lib/categories';
 import { format } from 'date-fns';
-import type { Income, Expense } from '@/lib/types';
+import type { Transaction } from '@/lib/types';
 
-type TransactionView = (Omit<Income, 'amount'> | Omit<Expense, 'amount'>) & { type: 'income' | 'expense', description: string, amount: number };
+type TransactionView = Transaction;
 
 interface TransactionTableProps {
   transactions: TransactionView[];
@@ -41,7 +41,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                         <TableCell className="font-medium">
                             {tx.description}
                             <div className="text-muted-foreground text-xs sm:hidden">
-                                {category?.name} - {format(new Date(tx.date), 'MMM d')}
+                                {category?.name} - {format(new Date(`${tx.date}T00:00:00`), 'MMM d')}
                             </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
@@ -52,7 +52,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                             </Badge>
                         )}
                         </TableCell>
-                        <TableCell className="hidden md:table-cell">{format(new Date(tx.date), 'MMM d, yyyy')}</TableCell>
+                        <TableCell className="hidden md:table-cell">{format(new Date(`${tx.date}T00:00:00`), 'MMM d, yyyy')}</TableCell>
                         <TableCell className={`text-right font-medium ${isIncome ? 'text-green-600' : 'text-foreground'}`}>
                         {isIncome ? '+' : '-'} {formatCurrency(tx.amount)}
                         </TableCell>

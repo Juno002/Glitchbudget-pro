@@ -1,7 +1,7 @@
 {
   "name": "GlitchBudget",
   "short_name": "GlitchBudget",
-  "description": "A simple and clean personal budget app to manage your finances.",
+  "description": "Tu presupuesto personal, con datos guardados en tu dispositivo.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0d0d0d",

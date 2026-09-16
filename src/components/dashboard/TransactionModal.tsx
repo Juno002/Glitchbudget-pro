@@ -5,13 +5,13 @@ import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { Expense, Income } from '@/lib/db';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2, CreditCard, Banknote } from 'lucide-react';
-import { playAIInsight, playExpense, playIncome } from '@/lib/sounds';
+import { localDate, isValidDate } from '@/lib/finance-calculations';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface TransactionModalProps {
@@ -29,16 +29,19 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     addExpense, updateExpense, deleteExpense,
     addIncomeItem, updateIncomeItem, deleteIncomeItem,
     expenseCategories, incomeCategories,
-    strictMode, getTotals, currentMonth, getBudgetStatusDetails,
-    debts,
+    debts: allDebts,
   } = useFinances();
+
+  const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card');
+  const [isSaving, setIsSaving] = useState(false);
+  const savingRef = useRef(false);
 
   // --- State ---
   const [txType, setTxType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [concept, setConcept] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(localDate());
   const [expenseSubtype, setExpenseSubtype] = useState<'Fijo' | 'Variable' | 'Ocasional'>('Variable');
   const [incomeSubtype, setIncomeSubtype] = useState<'extra' | 'gift'>('extra');
   const [frequency, setFrequency] = useState<'mensual' | 'quincenal' | 'semanal'>('mensual');
@@ -93,7 +96,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAmount('');
       setCategoryId('');
       setConcept('');
-      setDate(new Date().toISOString().slice(0, 10));
+      setDate(localDate());
       setExpenseSubtype('Variable');
       setIncomeSubtype('extra');
       setFrequency('mensual');
@@ -110,100 +113,56 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   }, [txType, incomeCategories, expenseCategories]);
 
   const selectedCat = getCategoryInfo(categoryId);
-  const canSave = Number(amount) > 0 && categoryId && !saved;
+  const canSave = Number.isFinite(Number(amount)) && Number(amount) >= 0.01 && categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
 
-  // --- AI Insight fetch ---
-  const fetchInsight = async (numAmount: number) => {
-    // AI insights disabled internally
-  };
-
-  // --- Save ---
   const handleSave = async () => {
-    const numAmount = Number(amount);
-    if (numAmount <= 0 || !categoryId) return;
-
-    // Strict mode check (only for new expenses)
-    if (!isEditing && txType === 'expense' && strictMode) {
-      const { available } = getTotals(currentMonth);
-      if (numAmount * 100 > available) {
-        // Can't use toast here directly, but addExpense won't be called
-        // The context's own strict mode toast won't fire since we block here
-        // We need to show feedback — use the insight area
-        setInsight('⚠️ Modo estricto: el monto excede tu saldo disponible. Reduce el monto o desactiva el modo estricto en configuración.');
+    if (!canSave || savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    setInsight(null);
+    try {
+      const numAmount = Number(amount);
+      let success: boolean;
+      if (txType === 'expense') {
+        const fields = {
+          concept, amount: numAmount, categoryId, date, type: expenseSubtype,
+          frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
+          paymentMethod, debtId: paymentMethod === 'credit' ? debtId : undefined,
+        };
+        success = editingExpense
+          ? await updateExpense({ ...editingExpense, ...fields })
+          : await addExpense(fields);
+      } else {
+        const fields = { description: concept, amount: numAmount, categoryId, date, type: incomeSubtype };
+        success = editingIncome
+          ? await updateIncomeItem({ ...editingIncome, ...fields })
+          : await addIncomeItem(fields);
+      }
+      if (!success) {
+        setInsight('No se guardó el movimiento. Revisa el aviso y corrige los datos; el formulario conserva lo que escribiste.');
         return;
       }
+      setSaved(true);
+      autoCloseTimer.current = setTimeout(onClose, 900);
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
     }
-
-    if (isEditing) {
-      if (editingExpense) {
-        updateExpense({
-          ...editingExpense,
-          concept,
-          amount: numAmount,
-          categoryId,
-          date,
-          type: expenseSubtype,
-          frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
-          paymentMethod,
-          debtId: paymentMethod === 'credit' ? debtId : undefined,
-        });
-        playExpense();
-      } else if (editingIncome) {
-        updateIncomeItem({
-          ...editingIncome,
-          description: concept,
-          amount: numAmount,
-          categoryId,
-          date,
-          type: incomeSubtype,
-        });
-        playIncome();
-      }
-      onClose();
-      return;
-    }
-
-    // New mode
-    if (txType === 'expense') {
-      addExpense({
-        concept,
-        amount: numAmount,
-        categoryId,
-        date,
-        type: expenseSubtype,
-        frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
-        paymentMethod,
-        debtId: paymentMethod === 'credit' ? debtId : undefined,
-      });
-      playExpense();
-    } else {
-      addIncomeItem({
-        description: concept,
-        amount: numAmount,
-        categoryId,
-        date,
-        type: incomeSubtype,
-      });
-      playIncome();
-    }
-
-    setSaved(true);
-
-    // Fetch AI insight for expenses - disabled internally
-    // if (txType === 'expense') {
-    //   await fetchInsight(numAmount);
-    // }
-
-    // Auto-close after delay
-    autoCloseTimer.current = setTimeout(() => {
-      onClose();
-    }, txType === 'expense' ? 5000 : 1500);
   };
 
-  const handleDelete = () => {
-    if (editingExpense) deleteExpense(editingExpense.id);
-    else if (editingIncome) deleteIncomeItem(editingIncome.id);
-    onClose();
+  const handleDelete = async () => {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    setIsSaving(true);
+    try {
+      const success = editingExpense ? await deleteExpense(editingExpense.id)
+        : editingIncome ? await deleteIncomeItem(editingIncome.id) : false;
+      if (success) onClose();
+      else setInsight('No se pudo eliminar el movimiento. Inténtalo de nuevo.');
+    } finally {
+      savingRef.current = false;
+      setIsSaving(false);
+    }
   };
 
   // --- Toolbar item component ---
@@ -234,12 +193,14 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
+    <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
       <DialogContent className="sm:max-w-[420px] p-0 gap-0 overflow-hidden">
         <DialogHeader className="sr-only">
+          <DialogDescription>Completa el monto, la categoría y la fecha del movimiento.</DialogDescription>
           <DialogTitle>{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
         </DialogHeader>
 
+        <fieldset disabled={isSaving || saved} className="contents">
         {/* Hero Amount Card */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -291,6 +252,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           >
             <div className="flex flex-col gap-1 min-w-[120px]">
               <button
+                disabled={isEditing}
                 onClick={() => { setTxType('expense'); setCategoryId(''); setTypeOpen(false); }}
                 className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
                   txType === 'expense' ? "bg-[rgba(255,45,120,0.1)] text-rose-400" : "hover:bg-black/10 dark:hover:bg-white/10"
@@ -299,6 +261,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 <TrendingDown className="h-4 w-4" /> Gasto
               </button>
               <button
+                disabled={isEditing}
                 onClick={() => { setTxType('income'); setCategoryId(''); setTypeOpen(false); }}
                 className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
                   txType === 'income' ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:hover:bg-white/10"
@@ -431,7 +394,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-lg p-1">
                <button
                  type="button"
-                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
+                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                  onClick={() => { setPaymentMethod('cash'); setDebtId(''); }}
                >
                  <Banknote className="h-4 w-4" /> Efectivo
@@ -441,7 +404,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                {debts.length === 1 ? (
                  <button
                    type="button"
-                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
+                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                    onClick={() => { setPaymentMethod('credit'); setDebtId(debts[0].id); }}
                  >
                    <CreditCard className="h-4 w-4" /> Tarjeta
@@ -451,7 +414,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                    <PopoverTrigger asChild>
                      <button
                        type="button"
-                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-white shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
+                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                      >
                        <CreditCard className="h-4 w-4" /> {paymentMethod === 'credit' && debtId ? debts.find(d => d.id === debtId)?.name || 'Tarjeta' : 'Pagar con Tarjeta'}
                      </button>
@@ -463,7 +426,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                          <button
                            key={d.id}
                            type="button"
-                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:bg-white/10 text-white")}
+                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:bg-white/10 text-foreground")}
                            onClick={() => { setPaymentMethod('credit'); setDebtId(d.id); }}
                          >
                            <CreditCard className="h-4 w-4" /> {d.name}
@@ -479,6 +442,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           {/* Concept input */}
           {!saved && (
             <Input
+              aria-label={txType === 'expense' ? 'Concepto' : 'Descripción'}
               placeholder={txType === 'expense' ? 'Concepto (opcional)' : 'Descripción (opcional)'}
               value={concept}
               onChange={(e) => setConcept(e.target.value)}
@@ -492,7 +456,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               {isEditing && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10">
+                    <Button aria-label="Eliminar movimiento" variant="outline" size="sm" className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
@@ -512,7 +476,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   </AlertDialogContent>
                 </AlertDialog>
               )}
-              <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}>
+              <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}>
               <Button
                 className={cn(
                   "flex-1 h-12 text-base font-semibold transition-all w-full",
@@ -523,13 +487,13 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 disabled={!canSave}
                 onClick={handleSave}
               >
-                {isEditing ? 'Guardar Cambios' : (txType === 'expense' ? 'Crear Gasto' : 'Crear Ingreso')}
+                {isSaving ? 'Guardando…' : isEditing ? 'Guardar Cambios' : (txType === 'expense' ? 'Crear Gasto' : 'Crear Ingreso')}
               </Button>
               </motion.div>
             </div>
           )}
 
-          {/* AI Insight / Strict mode warning - disabled internally */}
+          {insight && <p role="alert" className="text-sm text-destructive">{insight}</p>}
 
           {/* Post-save confirmation */}
           {saved && !insight && !isFetchingInsight && (
@@ -545,6 +509,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </motion.div>
           )}
         </div>
+        </fieldset>
       </DialogContent>
     </Dialog>
   );

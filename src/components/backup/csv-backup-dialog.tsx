@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,6 +45,7 @@ const backupActions: {
 ];
 
 export default function CsvBackupDialog() {
+  const [busy, setBusy] = useState(false);
   const { toast } = useToast();
   const { setDataVersion } = useFinances();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -52,7 +53,8 @@ export default function CsvBackupDialog() {
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && currentImportFn.current) {
+    if (file && currentImportFn.current && !busy && window.confirm('La importación reemplazará esta tabla. Descarga un respaldo JSON antes de continuar. ¿Deseas importar?')) {
+      setBusy(true);
       try {
         await currentImportFn.current(file);
         setDataVersion(v => v + 1);
@@ -68,6 +70,7 @@ export default function CsvBackupDialog() {
         });
       }
     }
+    setBusy(false);
     // Reset file input to allow selecting the same file again
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -97,10 +100,10 @@ export default function CsvBackupDialog() {
                 <div key={name} className="flex items-center justify-between p-2 rounded-md border">
                     <span className="font-medium">{label}</span>
                     <div className="flex gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => triggerImport(importFn)} title={`Importar ${label}`}>
+                        <Button variant="ghost" size="icon" disabled={busy} onClick={() => triggerImport(importFn)} aria-label={`Importar ${label}`} title={`Importar ${label}`}>
                             <Upload className="h-4 w-4 text-primary" />
                         </Button>
-                         <Button variant="ghost" size="icon" onClick={exportFn} title={`Exportar ${label}`}>
+                         <Button variant="ghost" size="icon" disabled={busy} onClick={async () => { setBusy(true); try { await exportFn(); } catch (error) { toast({ title: 'No se pudo exportar', description: friendlyError(error), variant: 'destructive' }); } finally { setBusy(false); } }} aria-label={`Exportar ${label}`} title={`Exportar ${label}`}>
                             <Download className="h-4 w-4" />
                         </Button>
                     </div>

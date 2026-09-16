@@ -1,5 +1,6 @@
 'use client';
 
+import { localDate } from '@/lib/finance-calculations';
 import { useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
@@ -21,11 +22,11 @@ export default function DebtsTab() {
 
   const activeDebts = debts?.filter(d => d.status === 'active') || [];
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const limitCents = toCents(newDebt.principal);
     if (!newDebt.name || limitCents <= 0) return;
-    addDebt({
+    const success = await addDebt({
       name: newDebt.name,
       type: 'credit_card',
       principal: limitCents,
@@ -35,20 +36,22 @@ export default function DebtsTab() {
       billingCycleDay: parseInt(newDebt.billingDay),
       paymentDueDay: parseInt(newDebt.paymentDay),
     });
+    if (!success) return;
     setIsAddOpen(false);
     setNewDebt({ name: '', principal: '', billingDay: '15', paymentDay: '30' });
   };
 
-  const handlePaymentSubmit = (e: React.FormEvent) => {
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amtCents = toCents(paymentAmount);
     if (!paymentDebtId || amtCents <= 0) return;
     
-    addDebtPayment({
+    const success = await addDebtPayment({
       debtId: paymentDebtId,
       amount: amtCents,
-      date: new Date().toISOString().slice(0, 10),
+      date: localDate(),
     });
+    if (!success) return;
     setPaymentAmount('');
     setPaymentDebtId(null);
   };

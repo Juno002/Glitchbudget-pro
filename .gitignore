@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+/public/precache-manifest.js
 
 # next.js
 /.next/

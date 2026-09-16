@@ -1,5 +1,6 @@
 'use client';
 
+import { expenseForMonth } from '@/lib/finance-calculations';
 import { useState, useMemo } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
@@ -39,7 +40,7 @@ export default function MovementsView() {
   // Merge into unified list
   const items: UnifiedItem[] = useMemo(() => {
     const incomeItems: UnifiedItem[] = (incomes || [])
-      .filter(i => i.month === filterMonth)
+      .filter(i => i.date.slice(0, 7) === filterMonth)
       .map(i => ({
         id: i.id,
         kind: 'income' as const,
@@ -52,12 +53,12 @@ export default function MovementsView() {
       }));
 
     const expenseItems: UnifiedItem[] = (expenses || [])
-      .filter(e => e.type === 'Fijo' || e.month === filterMonth)
+      .filter(e => expenseForMonth(e, filterMonth) > 0)
       .map(e => ({
         id: e.id,
         kind: 'expense' as const,
         label: e.concept || 'Gasto',
-        amount: e.amount,
+        amount: expenseForMonth(e, filterMonth),
         categoryId: e.categoryId,
         date: e.date,
         isFixed: e.type === 'Fijo',

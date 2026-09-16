@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
+import { localDate } from '@/lib/finance-calculations';
 import { useState, useMemo } from 'react';
 
 const formSchema = z.object({
@@ -39,17 +40,19 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
     return type === 'income' ? incomeCategories : expenseCategories;
   }, [type, incomeCategories, expenseCategories]);
 
-  function onSubmit(values: TransactionFormValues) {
+  async function onSubmit(values: TransactionFormValues) {
     const data = {
         amount: values.amount,
-        date: new Date().toISOString().slice(0,10),
+        date: localDate(),
         categoryId: values.categoryId,
     };
+    let success: boolean;
     if (values.type === 'income') {
-        addIncomeItem({ ...data, description: values.description, type: 'extra' });
+        success = await addIncomeItem({ ...data, description: values.description, type: 'extra' });
     } else {
-        addExpense({ ...data, concept: values.description, type: 'Variable' });
+        success = await addExpense({ ...data, concept: values.description, type: 'Variable' });
     }
+    if (!success) return;
     form.reset();
     setOpen(false);
   }
@@ -132,7 +135,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Guardar transacción</Button>
+        <Button disabled={form.formState.isSubmitting} type="submit" className="w-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Guardar transacción</Button>
       </form>
     </Form>
   );

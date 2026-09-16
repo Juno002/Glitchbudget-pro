@@ -9,6 +9,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type Recurring } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
+import { calculateTotals, expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
+import { saveExpense, saveIncome } from '@/lib/transaction-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -54,29 +56,29 @@ interface FinanceContextType {
   setStrictMode: (strict: boolean) => void;
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
-  addIncomeItem: (income: Omit<Income, "id" | "month">) => void;
-  updateIncomeItem: (income: Income) => void;
-  deleteIncomeItem: (id: string) => void;
-  addExpense: (expense: Omit<Expense, "id" | "month">) => void;
-  updateExpense: (expense: Expense) => void;
-  deleteExpense: (id: string) => void;
-  addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => void;
-  updateGoal: (goal: Goal) => void;
+  addIncomeItem: (income: Omit<Income, "id" | "month">) => Promise<boolean>;
+  updateIncomeItem: (income: Income) => Promise<boolean>;
+  deleteIncomeItem: (id: string) => Promise<boolean>;
+  addExpense: (expense: Omit<Expense, "id" | "month">) => Promise<boolean>;
+  updateExpense: (expense: Expense) => Promise<boolean>;
+  deleteExpense: (id: string) => Promise<boolean>;
+  addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => Promise<boolean>;
+  updateGoal: (goal: Goal) => Promise<boolean>;
   deleteGoal: (id: string) => void;
-  contributeToGoal: (id: string, amount: number) => void;
-  updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[]) => void;
-  transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => void;
+  contributeToGoal: (id: string, amount: number) => Promise<boolean>;
+  updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[]) => Promise<boolean>;
+  transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => Promise<boolean>;
   resetSettings: () => Promise<void>;
   updateSettings: (newSettings: Partial<Settings>) => void;
   
-  addDebt: (debt: Omit<Debt, 'id' | 'createdAt'>) => void;
-  updateDebt: (debt: Debt) => void;
-  deleteDebt: (id: string) => void;
-  addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => void;
+  addDebt: (debt: Omit<Debt, 'id' | 'createdAt'>) => Promise<boolean>;
+  updateDebt: (debt: Debt) => Promise<boolean>;
+  deleteDebt: (id: string) => Promise<boolean>;
+  addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => Promise<boolean>;
   
-  addRecurring: (recurring: Omit<Recurring, 'id'>) => void;
-  updateRecurring: (recurring: Recurring) => void;
-  deleteRecurring: (id: string) => void;
+  addRecurring: (recurring: Omit<Recurring, 'id'>) => Promise<boolean>;
+  updateRecurring: (recurring: Recurring) => Promise<boolean>;
+  deleteRecurring: (id: string) => Promise<boolean>;
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
@@ -107,10 +109,10 @@ interface FinanceContextType {
   // Backup Management
   createBackup: () => Promise<BackupFile | undefined>;
   listBackups: () => Promise<BackupFile[]>;
-  restoreBackup: (name: string) => Promise<void>;
+  restoreBackup: (name: string) => Promise<boolean>;
   deleteBackup: (name: string) => Promise<void>;
   getBackupFile: (name: string) => Promise<File | null>;
-  importData: (file: File) => Promise<void>;
+  importData: (file: File) => Promise<boolean>;
   exportData: () => Promise<void>;
   setDataVersion: React.Dispatch<React.SetStateAction<number>>;
 
@@ -123,7 +125,7 @@ const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
-  const [currentMonth, setCurrentMonthState] = useState(new Date().toISOString().slice(0, 7));
+  const [currentMonth, setCurrentMonthState] = useState(localDate().slice(0, 7));
   const { toast } = useToast();
   const [dataVersion, setDataVersion] = useState(0);
   const [isWorking, setIsWorking] = useState(false);
@@ -181,69 +183,17 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [activeSettings.theme]);
 
-  const monthlyFromBase = useCallback((freq: 'mensual' | 'quincenal' | 'semanal', amt: number) => {
-    amt = Number(amt) || 0;
-    if(freq==='quincenal') return amt*2;
-    if(freq==='semanal') return Math.round(amt*4.33);
-    return amt;
-  }, []);
+  const monthlyFromBase = monthlyAmount;
 
-  const getSpentAmount = useCallback((categoryId: string, month: string): number => {
-    if (!expenses) return 0;
-    return expenses
-      .filter(t => {
-        const isMatchingCategory = t.categoryId === categoryId;
-        const isCurrentMonthNonFixed = t.type !== 'Fijo' && t.month === month;
-        const isFixed = t.type === 'Fijo';
-        return isMatchingCategory && (isCurrentMonthNonFixed || isFixed)
-      })
-      .reduce((sum, t) => {
-          if (t.type === 'Fijo') {
-              return sum + monthlyFromBase(t.frequency || 'mensual', t.amount);
-          }
-          return sum + t.amount
-      }, 0);
-  }, [expenses, monthlyFromBase]);
-  
-  const getTotals = useCallback((month: string) => {
-    const baseFreq = activeSettings.baseIncome.freq;
-    const baseAmount = activeSettings.baseIncome.amount;
-    const baseIncome = monthlyFromBase(baseFreq, baseAmount);
-    
-    const additionalIncomes = (incomes || []).filter(i => i.month === month);
-    const totalAdditionalIncome = additionalIncomes.reduce((sum, i) => sum + i.amount, 0);
-    const totalIncome = baseIncome + totalAdditionalIncome;
-    
-    const totalExpenses = (expenses || [])
-      .filter(t => (t.type === 'Fijo' || t.month === month) && t.paymentMethod !== 'credit')
-      .reduce((sum, t) => {
-          if (t.type === 'Fijo') {
-              return sum + monthlyFromBase(t.frequency || 'mensual', t.amount);
-          }
-          return sum + t.amount;
-      }, 0);
+  const getSpentAmount = useCallback((categoryId: string, month: string): number =>
+    (expenses || []).filter(e => e.categoryId === categoryId)
+      .reduce((sum, e) => sum + expenseForMonth(e, month), 0), [expenses]);
 
-    const totalDebtPayments = (debtPayments || [])
-      .filter(dp => dp.date.slice(0, 7) === month)
-      .reduce((sum, dp) => sum + dp.amount, 0);
+  const getTotals = useCallback((month: string) => calculateTotals({
+    settings: activeSettings, incomes: incomes || [], expenses: expenses || [],
+    budgets: budgets || [], goalContributions: goalContributions || [], debtPayments: debtPayments || [],
+  }, month), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
 
-    const monthBudgets = (budgets || []).filter(b => b.month === month);
-    const planned_total = monthBudgets.reduce((sum, b) => sum + b.limit, 0);
-    
-    const totalGoalContributions = (goalContributions || [])
-      .filter(c => c.date.slice(0, 7) === month)
-      .reduce((sum, c) => sum + c.amount, 0);
-      
-    // Calculate available balance
-    const balance = totalIncome - totalExpenses - totalDebtPayments;
-    const suggestedSave = Math.round(totalIncome * activeSettings.savePct);
-    const commitments = planned_total + totalGoalContributions + suggestedSave;
-    const available = Math.max(0, balance - commitments);
-
-    return { totalIncome, totalExpenses, balance, available, planned_total, totalGoalContributions, commitments, suggestedSave };
-
-  }, [incomes, expenses, budgets, goalContributions, activeSettings, monthlyFromBase, debtPayments]);
-  
   const getMonthlyAverages = useCallback((numMonths = 3) => {
       const allTotalsByMonth: { [month: string]: { income: number, expense: number } } = {};
       const allTransactions = [...(incomes || []), ...(expenses || [])];
@@ -299,9 +249,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const updateSetting = useCallback(async (key: keyof Settings, value: any) => {
     try {
       await db.settings.update('general', { [key]: value });
+      return true;
     } catch (error) {
       console.error(`Failed to update setting ${key}:`, error);
       toast({ title: 'Error al guardar configuración', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
   
@@ -316,77 +268,71 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const setTheme = (theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme);
   const setStrictMode = (strict: boolean) => updateSetting('strictMode', strict);
   const setRolloverStrategy = (strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy);
-  const setBaseIncome = (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
-    updateSetting('baseIncome', { freq: baseIncome.freq, amount: toCents(baseIncome.amount) });
-    toast({ title: "Ingreso base guardado", description: "Tu ingreso principal ha sido actualizado." });
+  const setBaseIncome = async (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
+    const cents = toCents(baseIncome.amount);
+    if (!Number.isSafeInteger(cents) || cents < 0) {
+      toast({ title: 'Monto inválido', description: 'Introduce un ingreso positivo o cero.', variant: 'destructive' });
+      return;
+    }
+    if (await updateSetting('baseIncome', { freq: baseIncome.freq, amount: cents })) {
+      toast({ title: 'Ingreso base guardado' });
+    }
   };
-  
+
   const addIncomeItem = useCallback(async (income: Omit<Income, "id" | "month">) => {
     try {
-      const newIncome: Income = { ...income, id: uuidv4(), month: currentMonth, amount: toCents(income.amount) };
-      await db.incomes.add(newIncome);
+      await saveIncome({ ...income, id: uuidv4() });
       playIncome();
-      toast({ title: `Ingreso agregado`, description: `+${(newIncome.amount / 100).toFixed(2)}` });
+      toast({ title: 'Ingreso agregado' });
+      return true;
     } catch (error) {
       toast({ title: 'Error al agregar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
-  }, [currentMonth, toast]);
+  }, [toast]);
 
   const updateIncomeItem = useCallback(async (income: Income) => {
     try {
-      const updated: Income = { ...income, amount: toCents(income.amount) };
-      await db.incomes.put(updated);
+      await saveIncome(income, true);
       toast({ title: 'Ingreso actualizado' });
+      return true;
     } catch (error) {
       toast({ title: 'Error al actualizar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const deleteIncomeItem = async (id: string) => {
     try {
       await db.incomes.delete(id);
-      toast({ title: "Ingreso eliminado" });
+      toast({ title: 'Ingreso eliminado' });
+      return true;
     } catch (error) {
       toast({ title: 'Error al eliminar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   };
 
   const addExpense = useCallback(async (expense: Omit<Expense, "id" | "month">) => {
     try {
-      const amountCents = toCents(expense.amount);
-      const newExpense: Expense = { ...expense, id: uuidv4(), month: expense.date.slice(0,7), amount: amountCents };
-      
-      // Check budget limit Before saving
-      const monthDetails = getBudgetStatusDetails(newExpense.month);
-      const categoryBudget = monthDetails.find(b => b.categoryId === newExpense.categoryId);
-      let exceeded = false;
-      if (categoryBudget && categoryBudget.limit > 0) {
-          if (categoryBudget.remaining - amountCents < 0) {
-              exceeded = true;
-          }
-      }
-
-      await db.expenses.add(newExpense);
-      
-      if (exceeded) {
-          playBudgetExceeded();
-      } else {
-          playExpense();
-      }
-      
-      toast({ title: `Gasto agregado`, description: `-${(newExpense.amount / 100).toFixed(2)}` });
+      await saveExpense({ ...expense, id: uuidv4() });
+      playExpense();
+      toast({ title: 'Gasto agregado' });
+      return true;
     } catch (error) {
-       toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
+      toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const updateExpense = useCallback(async (expense: Expense) => {
     try {
-      const updated: Expense = { ...expense, amount: toCents(expense.amount) };
-      await db.expenses.put(updated);
+      await saveExpense(expense, true);
       toast({ title: 'Gasto actualizado' });
+      return true;
     } catch (error) {
       toast({ title: 'Error al actualizar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
@@ -394,54 +340,63 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       await db.expenses.delete(id);
       toast({ title: 'Gasto eliminado' });
+      return true;
     } catch (error) {
       toast({ title: 'Error al eliminar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   };
-  
+
   const addGoal = useCallback(async (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => {
     try {
       const newGoal: Goal = { 
           name: goal.name,
-          date: goal.date,
+          date: goal.date || undefined,
           target: toCents(goal.target),
           quota: toCents(goal.quota),
           id: uuidv4(), 
           saved: 0, 
-          startDate: new Date().toISOString().slice(0,10),
+          startDate: localDate(),
           status: 'active'
       };
       await db.goals.add(newGoal);
       toast({ title: '¡Meta creada!', description: `Tu meta "${newGoal.name}" fue añadida.` });
+      return true;
     } catch (error) {
       toast({ title: 'Error al crear meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
   
   const updateGoal = async (goal: Goal) => {
     try {
       await db.goals.put(goal);
+      return true;
     } catch (error) {
       toast({ title: 'Error al actualizar meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   };
 
-  const deleteGoal = (id: string) => db.transaction('rw', db.goals, db.goal_contributions, async () => {
+  const deleteGoal = async (id: string) => {
     try {
-      await db.goals.delete(id);
-      await db.goal_contributions.where('goalId').equals(id).delete();
+      await db.transaction('rw', db.goals, db.goal_contributions, async () => {
+        await db.goals.delete(id);
+        await db.goal_contributions.where('goalId').equals(id).delete();
+      });
       toast({ title: 'Meta eliminada' });
     } catch (error) {
       toast({ title: 'Error al eliminar meta', description: friendlyError(error), variant: 'destructive' });
     }
-  });
+  };
 
   const contributeToGoal = useCallback(async (id: string, amount: number) => {
     const amountInCents = toCents(amount);
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDate();
     const newContribution: GoalContribution = { id: uuidv4(), goalId: id, amount: amountInCents, date: today };
     
     try {
+      if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error('El aporte debe ser un monto positivo.');
       let isCompletedNow = false;
       await db.transaction('rw', db.goals, db.goal_contributions, async () => {
           const goal = await db.goals.get(id);
@@ -461,30 +416,37 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           playGoalComplete();
       }
       toast({ title: '¡Contribución exitosa!', description: `Has añadido ${(amountInCents / 100).toFixed(2)}.` });
+      return true;
     } catch (error: any) {
       toast({ title: 'Error al aportar a la meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const updateAllBudgets = useCallback(async (month: string, allBudgets: Omit<Budget, 'month'>[]) => {
     try {
       const budgetsToPut: Plan[] = allBudgets.map(b => ({ ...b, month, limit: toCents(b.limit) }));
-      await db.plans.bulkPut(budgetsToPut);
+      if (budgetsToPut.some(b => !Number.isSafeInteger(b.limit) || b.limit < 0)) throw new Error('Los presupuestos deben ser montos positivos o cero.');
+      await db.transaction('rw', db.plans, () => db.plans.bulkPut(budgetsToPut));
        toast({ title: '¡Presupuestos guardados!'});
+      return true;
     } catch (error) {
       toast({ title: 'Error al guardar presupuestos', description: friendlyError(error), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const transferBetweenBudgets = useCallback(async (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => {
     const amountInCents = toCents(amount);
     try {
-      if (amountInCents <= 0) throw new Error("El monto de la transferencia debe ser positivo.");
-      await db.transaction('rw', db.plans, async () => {
+      if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error("El monto de la transferencia debe ser positivo.");
+      if (fromCategoryId === toCategoryId) throw new Error('Selecciona dos categorías diferentes.');
+      await db.transaction('rw', db.plans, db.expenses, async () => {
           const fromBudget = await db.plans.get([month, fromCategoryId]);
           const toBudget = await db.plans.get([month, toCategoryId]);
 
-          if (!fromBudget || fromBudget.limit < amountInCents) {
+          const spent = (await db.expenses.toArray()).filter(e => e.categoryId === fromCategoryId).reduce((sum, e) => sum + expenseForMonth(e, month), 0);
+          if (!fromBudget || fromBudget.limit - spent < amountInCents) {
               throw new Error("Fondos insuficientes en el presupuesto de origen.");
           }
 
@@ -500,19 +462,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
             title: 'Transferencia exitosa',
             description: 'El monto ha sido transferido entre los presupuestos.',
       });
+      return true;
     } catch(error: any) {
       toast({
             title: 'Error en la transferencia',
             description: friendlyError(error),
             variant: 'destructive',
       });
+      return false;
     }
   }, [toast]);
   
   const getBudgetStatusDetails = useCallback((month: string) => {
     const monthBudgets = (budgets || []).filter(b => b.month === month);
     const budgetedCategoryIds = new Set(monthBudgets.map(b => b.categoryId));
-    const allRelevantCategoryIds = Array.from(new Set([...activeSettings.expenseCategories, ...budgetedCategoryIds]));
+    const allRelevantCategoryIds = Array.from(new Set([...activeSettings.expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => expenseForMonth(e, month) > 0).map(e => e.categoryId)]));
 
     return allRelevantCategoryIds.map(catId => {
       const budget = monthBudgets.find(b => b.categoryId === catId) || { month, categoryId: catId, limit: 0 };
@@ -526,7 +490,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
       return { ...budget, spent, remaining, status };
     });
-  }, [budgets, getSpentAmount, activeSettings.expenseCategories]);
+  }, [budgets, expenses, getSpentAmount, activeSettings.expenseCategories]);
   
   const getExpensesByCategory = useCallback((month: string) => {
     return (getBudgetStatusDetails(month) || [])
@@ -539,17 +503,17 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     if (activeSettings.baseIncome.amount > 0) {
       byCat['sueldo'] = monthlyFromBase(activeSettings.baseIncome.freq, activeSettings.baseIncome.amount);
     }
-    (incomes || []).filter(i => i.month === month).forEach(i => {
+    (incomes || []).filter(i => i.date.slice(0, 7) === month).forEach(i => {
         byCat[i.categoryId] = (byCat[i.categoryId] || 0) + i.amount;
     });
     return Object.entries(byCat).map(([name, value]) => ({ name, value }));
   }, [incomes, activeSettings.baseIncome, monthlyFromBase]);
 
   const getExpensesByType = useCallback((month: string) => {
-      const exps = (expenses || []).filter(e => e.type === 'Fijo' || e.month === month);
+      const exps = (expenses || []).filter(e => expenseForMonth(e, month) > 0);
       const groupT = exps.reduce((acc, e) => {
           const k = e.type;
-          const val = k === 'Fijo' ? monthlyFromBase(e.frequency || 'mensual', e.amount) : e.amount;
+          const val = expenseForMonth(e, month);
           if (!acc[k]) acc[k] = { total: 0, count: 0 };
           acc[k].total += val;
           acc[k].count += 1;
@@ -675,8 +639,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         await importDataJSON(fileContent);
         setDataVersion(v => v + 1);
         toast({ title: 'Restauración completada', description: `Datos restaurados desde ${name}` });
+      return true;
     } catch (error) {
         toast({ title: 'Error al restaurar', description: friendlyError(error), variant: 'destructive' });
+      return false;
     } finally {
         setIsWorking(false);
     }
@@ -715,7 +681,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `glitchbudget-backup-${new Date().toISOString().slice(0,10)}.json`;
+        a.download = `glitchbudget-backup-${localDate()}.json`;
         a.click();
         URL.revokeObjectURL(a.href);
         toast({ title: 'Exportación completada' });
@@ -733,8 +699,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         await importDataJSON(text);
         setDataVersion(v => v + 1);
         toast({ title: 'Datos restaurados', description: 'El dashboard se actualizará automáticamente.' });
+      return true;
     } catch (e: any) {
         toast({ title: 'Error al importar', description: friendlyError(e), variant: 'destructive' });
+      return false;
     } finally {
         setIsWorking(false);
     }
@@ -745,8 +713,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       const newDebt: Debt = { ...debt, id: uuidv4(), createdAt: new Date().toISOString() };
       await db.debts.add(newDebt);
       toast({ title: 'Deuda registrada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error al registrar', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
@@ -754,27 +724,40 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       await db.debts.put(debt);
       toast({ title: 'Deuda actualizada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error al actualizar', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const deleteDebt = useCallback(async (id: string) => {
     try {
-      await db.debts.delete(id);
+      await db.transaction('rw', db.debts, db.expenses, db.debt_payments, async () => {
+        const linkedExpense = await db.expenses.filter(e => e.debtId === id).count();
+        const linkedPayment = await db.debt_payments.where('debtId').equals(id).count();
+        if (linkedExpense || linkedPayment) throw new Error('Esta tarjeta tiene movimientos. Conserva su historial; no se puede eliminar.');
+        await db.debts.delete(id);
+      });
       toast({ title: 'Deuda eliminada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error al eliminar', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
   const addDebtPayment = useCallback(async (payment: Omit<DebtPayment, "id">) => {
     try {
+      if (!Number.isSafeInteger(payment.amount) || payment.amount <= 0) throw new Error('El pago debe ser un monto positivo.');
+      if (!await db.debts.get(payment.debtId)) throw new Error('La tarjeta ya no existe.');
       const newPayment: DebtPayment = { ...payment, id: uuidv4() };
       await db.debt_payments.add(newPayment);
       toast({ title: 'Pago registrado' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error al pagar', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
@@ -782,8 +765,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       await db.recurrents.add({ ...recurring, id: uuidv4() });
       toast({ title: 'Suscripción registrada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
@@ -791,8 +776,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       await db.recurrents.put(recurring);
       toast({ title: 'Suscripción actualizada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
 
@@ -800,8 +787,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       await db.recurrents.delete(id);
       toast({ title: 'Suscripción borrada' });
+      return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+      return false;
     }
   }, [toast]);
   

@@ -1,14 +1,14 @@
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import type { Recurring, Debt, DebtPayment, FxRate } from '@/lib/db';
+import { isValidDate } from './finance-calculations';
 
 // ---------- Esquema JSON v3 ----------
-const ISODate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/,'ISODate');
-const ISODateTime = z.string().regex(/^\d{4}-\d{2}-\d{2}T.*Z$/,'ISODateTime Z');
-const MonthID = z.string().regex(/^\d{4}-\d{2}$/,'MonthID YYYY-MM');
+const ISODate = z.string().refine(isValidDate, 'Fecha inválida');
+const ISODateTime = z.string().datetime();
+const MonthID = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/,'Mes inválido');
 const Id = z.string().min(1);
-const MoneyCents = z.number().int().nonnegative();
+const MoneyCents = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 
 const SettingsV3 = z.object({
   id: z.literal('general').default('general'),
@@ -16,6 +16,8 @@ const SettingsV3 = z.object({
   locale: z.string().default('es-DO'),
   theme: z.enum(['light','dark','system','serious']).optional(),
   strictMode: z.boolean().default(false),
+  savePct: z.number().min(0).max(1).default(0),
+  customCategoryIcons: z.record(z.string()).default({}),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
   baseIncome: z.object({ 
     freq: z.enum(['mensual','quincenal','semanal']).default('mensual'),
@@ -33,7 +35,8 @@ const PeriodV3 = z.object({
   createdAt: ISODateTime
 });
 
-const IncomeV3 = z.object({
+export const IncomeV3 = z.object({
+  type: z.enum(['extra', 'gift']).default('extra'),
   id: Id, month: MonthID, date: ISODate, categoryId: Id,
   amount: z.number().int().nonnegative(),
   description: z.string().default('ingreso'),
@@ -42,7 +45,9 @@ const IncomeV3 = z.object({
   amountBase: z.number().int().optional()
 });
 
-const ExpenseV3 = z.object({
+export const ExpenseV3 = z.object({
+  type: z.enum(['Fijo', 'Variable', 'Ocasional']).default('Variable'),
+  frequency: z.enum(['mensual', 'quincenal', 'semanal']).optional(),
   id: Id, month: MonthID, date: ISODate, categoryId: Id,
   amount: z.number().int().nonnegative(),
   concept: z.string().optional(),
@@ -50,15 +55,17 @@ const ExpenseV3 = z.object({
   fxRate: z.number().optional(),
   amountBase: z.number().int().optional(),
   paymentMethod: z.enum(['cash', 'credit']).optional(),
-  debtId: z.string().optional()
+  debtId: z.string().optional(),
+  recurringId: z.string().optional()
 });
 
-const PlanV3 = z.object({
+export const PlanV3 = z.object({
   month: MonthID, categoryId: Id,
   limit: z.number().int().nonnegative()
 });
 
-const GoalV3 = z.object({
+export const GoalV3 = z.object({
+  quota: MoneyCents.default(0),
   id: Id, name: z.string(),
   target: z.number().int().nonnegative(),
   saved: z.number().int().nonnegative().default(0),
@@ -67,16 +74,30 @@ const GoalV3 = z.object({
   status: z.enum(['active','completed']).default('active')
 });
 
-const GoalContribV3 = z.object({
+export const GoalContribV3 = z.object({
   id: Id, goalId: Id,
   amount: z.number().int().nonnegative(),
   date: ISODate
 });
 
-const RecurrentV3 = z.custom<Recurring>();
-const DebtV3 = z.custom<Debt>();
-const DebtPaymentV3 = z.custom<DebtPayment>();
-const FxRateV3 = z.custom<FxRate>();
+const RecurrentV3 = z.object({
+  id: Id, type: z.enum(['income', 'expense']), title: z.string(), categoryId: Id,
+  amount: MoneyCents, freq: z.enum(['weekly', 'biweekly', 'monthly']),
+  day: z.number().int().min(0).max(31).optional(), startDate: ISODate,
+  endDate: ISODate.optional(), active: z.boolean(),
+});
+const DebtV3 = z.object({
+  id: Id, name: z.string(), type: z.enum(['credit_card', 'loan']), principal: MoneyCents,
+  apr: z.number().finite().nonnegative(), minPayment: MoneyCents, createdAt: ISODateTime,
+  status: z.enum(['active', 'closed']), billingCycleDay: z.number().int().min(1).max(31).optional(),
+  paymentDueDay: z.number().int().min(1).max(31).optional(),
+});
+const DebtPaymentV3 = z.object({
+  id: Id, debtId: Id, date: z.union([ISODate, ISODateTime]), amount: MoneyCents, note: z.string().optional(),
+});
+const FxRateV3 = z.object({
+  id: Id, quote: Id, base: Id, rate: z.number().finite().positive(), updatedAt: ISODateTime,
+});
 
 const DumpV3 = z.object({
   v: z.literal(3),
@@ -103,25 +124,28 @@ function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 
 export async function exportDataJSON(): Promise<string> {
   // Lee todo de Dexie
-  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates] = await Promise.all([
-    db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0} }),
+  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates] = await db.transaction('r', db.tables, () => Promise.all([
+    db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
     db.periods.toArray(),
     db.incomes.toArray(),
     db.expenses.toArray(),
     db.plans.toArray(),
     db.goals.toArray(),
-    db.goal_contributions.toArray().catch(()=>[]),
-    db.recurrents.toArray().catch(()=>[]),
-    db.debts.toArray().catch(()=>[]),
-    db.debt_payments.toArray().catch(()=>[]),
-    db.fxRates.toArray().catch(()=>[]),
-  ]);
+    db.goal_contributions.toArray(),
+    db.recurrents.toArray(),
+    db.debts.toArray(),
+    db.debt_payments.toArray(),
+    db.fxRates.toArray(),
+  ]));
 
   // Mapea al contrato v3 (montos ya están en centavos en DB)
   const dump: DumpV3T = {
     v: 3,
     exportedAt: nowIsoZ(),
     settings: {
+      ...settings,
+      savePct: settings.savePct ?? 0,
+      customCategoryIcons: settings.customCategoryIcons ?? {},
       id: 'general',
       currency: settings.currency ?? 'DOP',
       locale: settings.locale ?? 'es-DO',
@@ -139,24 +163,27 @@ export async function exportDataJSON(): Promise<string> {
       id: p.id, year: p.year, month: p.month, createdAt: p.createdAt
     })),
     incomes: incomes.map(i => ({
+      type: i.type,
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
       amount: toCents(i.amount), description: i.description,
       currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
     })),
     expenses: expenses.map(e => ({
+      type: e.type, frequency: e.frequency,
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
       currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
-      paymentMethod: e.paymentMethod, debtId: e.debtId,
+      paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
     })),
     plans: plans.map(p => ({
       month: p.month, categoryId: p.categoryId,
       limit: toCents(p.limit)
     })),
     goals: goals.map(g => ({
+      quota: g.quota ?? 0,
       id: g.id, name: g.name,
       target: toCents(g.target), saved: toCents(g.saved ?? 0),
-      startDate: g.startDate, date: g.date, status: g.status ?? 'active'
+      startDate: g.startDate, date: g.date || undefined, status: g.status ?? 'active'
     })),
     goalContributions: goalContributions.map(gc => ({
       id: gc.id, goalId: gc.goalId, amount: toCents(gc.amount), date: gc.date
@@ -189,12 +216,20 @@ export async function importDataJSON(text: string): Promise<{
   const raw = JSON.parse(text);
   const d = DumpV3.parse(raw); // si no cumple, explota aquí con un mensaje útil
 
+  const goalIds = new Set(d.goals.map(g => g.id));
+  const debtIds = new Set((d.debts || []).map(debt => debt.id));
+  if (d.goalContributions.some(c => !goalIds.has(c.goalId))) throw new Error('El respaldo contiene aportes a metas inexistentes.');
+  if ((d.debtPayments || []).some(p => !debtIds.has(p.debtId))) throw new Error('El respaldo contiene pagos de tarjetas inexistentes.');
+  if (d.expenses.some(e => e.paymentMethod === 'credit' && (!e.debtId || !debtIds.has(e.debtId)))) {
+    throw new Error('El respaldo contiene gastos vinculados a tarjetas inexistentes.');
+  }
+
   // 2) Integridad referencial mínima: periods presentes
   //    Si faltan periods pero los periodId aparecen en incomes/expenses/plans, los creamos.
   const periodIds = uniq([
     ...d.periods.map(p => p.id),
-    ...d.incomes.map(i => i.month),
-    ...d.expenses.map(e => e.month),
+    ...d.incomes.map(i => i.date.slice(0, 7)),
+    ...d.expenses.map(e => e.date.slice(0, 7)),
     ...d.plans.map(p => p.month)
   ]);
   const periodsEnsured = periodIds.map(id => {
@@ -206,6 +241,7 @@ export async function importDataJSON(text: string): Promise<{
 
   // 3) Mapea a tu DB (nombres internos)
   const settingsRow = {
+    ...d.settings,
     id: 'general',
     currency: d.settings.currency ?? 'DOP',
     locale:   d.settings.locale   ?? 'es-DO',
@@ -221,16 +257,16 @@ export async function importDataJSON(text: string): Promise<{
   };
 
   const incomes = d.incomes.map(i => ({
-    id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
-    amount: i.amount, description: i.description, type: 'extra',
+    id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
+    amount: i.amount, description: i.description, type: i.type,
     currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
   }));
 
   const expenses = d.expenses.map(e => ({
-    id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
-    amount: e.amount, concept: e.concept ?? '', type: 'Variable',
+    id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
+    amount: e.amount, concept: e.concept ?? '', type: e.type, frequency: e.frequency,
     currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
-    paymentMethod: e.paymentMethod, debtId: e.debtId,
+    paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
   }));
 
   const plans = d.plans.map(p => ({
@@ -242,7 +278,7 @@ export async function importDataJSON(text: string): Promise<{
     id: g.id, name: g.name,
     target: g.target, saved: g.saved,
     startDate: g.startDate, date: g.date, status: g.status,
-    quota: 0 // quota is not in the backup, so we default to 0
+    quota: g.quota
   }));
 
   const goal_contributions = d.goalContributions.map(gc => ({

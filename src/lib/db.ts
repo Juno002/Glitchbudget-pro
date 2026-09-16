@@ -53,6 +53,7 @@ export interface Expense {
     amountBase?: number;
     paymentMethod?: 'cash' | 'credit';
     debtId?: string;
+    recurringId?: string;
 }
 
 export interface Plan {

@@ -88,8 +88,7 @@ export default function OpfsBackupDialog() {
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      await importData(file);
-      setOpen(false); // Close dialog on successful restore
+      if (window.confirm('Restaurar este archivo reemplazará todos los datos actuales. ¿Deseas continuar?') && await importData(file)) setOpen(false); // Close dialog on successful restore
     }
     // Reset file input to allow selecting the same file again
     if(fileInputRef.current) fileInputRef.current.value = '';
@@ -111,8 +110,7 @@ export default function OpfsBackupDialog() {
 
   const handleRestore = async (name: string) => {
     try {
-        await restoreBackup(name);
-        setOpen(false); // Close dialog on successful restore
+        if (await restoreBackup(name)) setOpen(false); // Close dialog on successful restore
     } catch (error) {
         // Toast is handled in context
     }
@@ -139,7 +137,7 @@ export default function OpfsBackupDialog() {
         <DialogHeader>
           <DialogTitle>Gestión de Copias</DialogTitle>
           <DialogDescription>
-            Crea, restaura y gestiona tus copias de seguridad. Puedes guardarlas localmente en el dispositivo o exportarlas como un archivo.
+            Tus datos están en este navegador. Descarga un respaldo JSON y guárdalo fuera del navegador: borrar los datos del sitio también elimina las copias locales. Los archivos se exportan sin cifrar.
           </DialogDescription>
         </DialogHeader>
         
@@ -152,7 +150,7 @@ export default function OpfsBackupDialog() {
               )}
               Crear Copia Local
             </Button>
-             <Button variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto">
+             <Button disabled={isWorking} variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto">
                 <FileUp className="mr-2 h-4 w-4" />
                 Restaurar desde JSON
             </Button>
@@ -163,7 +161,7 @@ export default function OpfsBackupDialog() {
                 className="hidden"
                 accept="application/json"
             />
-            <Button variant="outline" onClick={exportData} className="w-full sm:w-auto">
+            <Button disabled={isWorking} variant="outline" onClick={exportData} className="w-full sm:w-auto">
                 <Download className="mr-2 h-4 w-4" />
                 Exportar a JSON
             </Button>

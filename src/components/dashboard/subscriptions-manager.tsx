@@ -1,3 +1,4 @@
+import { localDate } from '@/lib/finance-calculations';
 import { useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
@@ -25,40 +26,43 @@ export default function SubscriptionsManager() {
   const pd = new Date();
   const todayDay = pd.getDate();
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amountCents = Math.round(Number(newSub.amount) * 100);
     if (!newSub.title || amountCents <= 0 || !newSub.categoryId) return;
     
-    addRecurring({
+    const success = await addRecurring({
       title: newSub.title,
       amount: amountCents,
       day: parseInt(newSub.day),
       freq: 'monthly',
-      startDate: new Date().toISOString().slice(0, 10),
+      startDate: localDate(),
       categoryId: newSub.categoryId,
       type: 'expense',
       active: true
     });
     
+    if (!success) return;
     setIsAddOpen(false);
     setNewSub({ title: '', amount: '', day: '1', categoryId: '' });
   };
 
-  const handleLogExpense = (sub: typeof activeSubs[0]) => {
+  const handleLogExpense = async (sub: typeof activeSubs[0]) => {
     // Add an expense for this subscription
-    const date = new Date();
-    if (sub.day) date.setDate(sub.day); // approx date
+    const [year, month] = currentMonth.split('-').map(Number);
+    const day = Math.min(sub.day || 1, new Date(year, month, 0).getDate());
+    const date = new Date(year, month - 1, day);
     
-    addExpense({
+    const success = await addExpense({
       concept: `Suscripción: ${sub.title}`,
+      recurringId: sub.id,
       amount: sub.amount / 100,
       categoryId: sub.categoryId,
-      date: date.toISOString().slice(0, 10),
-      type: 'Fijo',
-      frequency: 'mensual'
+      date: localDate(date),
+      type: 'Variable'
     });
     
+    if (!success) return;
     toast({ title: 'Suscripción pagada', description: `Se ha registrado el gasto para ${sub.title}.` });
   };
 
@@ -67,7 +71,7 @@ export default function SubscriptionsManager() {
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-lg font-bold">Mis Suscripciones</h3>
-          <p className="text-sm text-muted-foreground">Loggea tus gastos recurrentes manualmente</p>
+          <p className="text-sm text-muted-foreground">Registra el pago de tus suscripciones cada mes</p>
         </div>
         
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>

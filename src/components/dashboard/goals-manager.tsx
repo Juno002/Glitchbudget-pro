@@ -39,7 +39,7 @@ const contributionSchema = z.object({
 
 type ContributionFormValues = z.infer<typeof contributionSchema>;
 
-function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => void }) {
+function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => Promise<boolean> }) {
     const [open, setOpen] = useState(false);
     const { getDisposable } = useFinances();
     const { toast } = useToast();
@@ -50,7 +50,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
         defaultValues: { amount: (goal.quota || 0) / 100 },
     });
 
-    const onSubmit = (data: ContributionFormValues) => {
+    const onSubmit = async (data: ContributionFormValues) => {
         if ((data.amount * 100) > disposable) {
             toast({
                 title: 'Saldo disponible superado',
@@ -63,6 +63,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
         const addedCents = data.amount * 100;
         const willBeCompleted = (goal.saved + addedCents) >= goal.target;
 
+        if (!await onContribute(data.amount)) return;
         if (willBeCompleted && goal.saved < goal.target) {
              triggerGoalCompletionConfetti();
              playIncome(); // Sonido más triunfal
@@ -70,7 +71,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
              playCoinDrop();
         }
 
-        onContribute(data.amount);
+
         toast({
             title: willBeCompleted ? '¡Meta Completada! 🎉' : '¡Aporte Exitoso!',
             description: `Has sumado ${formatCurrency(addedCents)} a "${goal.name}".`
@@ -115,7 +116,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full h-12 text-base font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all">
+                            <Button disabled={form.formState.isSubmitting} type="submit" className="w-full h-12 text-base font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all">
                                 Confirmar Aporte
                             </Button>
                         </form>
@@ -170,8 +171,8 @@ export default function GoalsManager() {
     if (date) form.setValue('date', date);
   };
 
-  const onSubmit = (data: GoalFormValues) => {
-    addGoal({ ...data, quota: data.quota || 0 });
+  const onSubmit = async (data: GoalFormValues) => {
+    if (!await addGoal({ ...data, date: data.date || undefined, quota: data.quota || 0 })) return;
     playIncome();
     toast({ title: '¡Meta creada!', description: 'Tu nueva meta de ahorro ha sido añadida.' });
     setOpen(false);
@@ -446,7 +447,7 @@ export default function GoalsManager() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20" disabled={!isFormValid}>
+                                <Button disabled={form.formState.isSubmitting} type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20" disabled={!isFormValid}>
                                     Crear Meta
                                 </Button>
                             </form>

@@ -42,7 +42,7 @@ El menú de configuración (ícono de engranaje ⚙️) centraliza el control:
 - **Gestión de Categorías:** Crea categorías personalizadas eligiendo un icono del catálogo de Lucide (Cine, Café, Viajes, etc.).
 - **Modo Estricto:** Bloquea el registro de un gasto si excede tu saldo disponible.
 - **Estrategia de Rollover:** (Resetear, Acumular Sobrante o Acumular Deuda).
-- **Copia de Seguridad:** Exportar/Importar JSON cifrado y Backups locales vía **OPFS**.
+- **Copia de Seguridad:** Exportar/Importar JSON sin cifrar y Backups locales vía **OPFS**.
 
 ## 💻 Tech Stack
 

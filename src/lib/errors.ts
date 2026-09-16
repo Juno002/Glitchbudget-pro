@@ -1,4 +1,10 @@
+import { ZodError } from 'zod';
+
 export function friendlyError(e: unknown, fallback='Operación fallida'){
+  if (e instanceof ZodError) {
+    const issue = e.issues[0];
+    return `Revisa los datos${issue?.path.length ? ` (${issue.path.join('.')})` : ''}: ${issue?.message || fallback}`;
+  }
   if (e instanceof DOMException) {
     if (e.name === 'QuotaExceededError') {
       return 'No hay suficiente espacio de almacenamiento en el navegador. Intenta borrar datos de otros sitios.';

@@ -19,7 +19,7 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   title: 'GlitchBudget Pro',
-  description: 'A simple and clean personal budget app to manage your finances.',
+  description: 'Tu presupuesto personal, con datos guardados en tu dispositivo.',
   icons: [{ rel: 'icon', url: '/icon-192.png', type: 'image/png' }],
 };
 
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0d0d0d" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

@@ -48,15 +48,11 @@ export default function TransferDialog() {
     },
   });
 
-  const budgetsWithFunds = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
+  const budgetsWithFunds = getBudgetStatusDetails(currentMonth).filter(b => b.remaining > 0);
 
   async function onSubmit(values: TransferFormValues) {
     try {
-        await transferBetweenBudgets(currentMonth, values.fromCategoryId, values.toCategoryId, values.amount);
-        toast({
-            title: 'Transferencia exitosa',
-            description: 'El monto ha sido transferido entre los presupuestos.',
-        });
+        if (!await transferBetweenBudgets(currentMonth, values.fromCategoryId, values.toCategoryId, values.amount)) return;
         form.reset();
         setOpen(false);
     } catch (error: any) {
@@ -100,7 +96,7 @@ export default function TransferDialog() {
                     <SelectContent>
                       {budgetsWithFunds.map(b => {
                         const cat = getCategoryInfo(b.categoryId);
-                        return cat ? <SelectItem key={cat.id} value={cat.id}>{cat.name} ({formatCurrency(b.limit)})</SelectItem> : null
+                        return cat ? <SelectItem key={cat.id} value={cat.id}>{cat.name} ({formatCurrency(b.remaining)})</SelectItem> : null
                       })}
                     </SelectContent>
                   </Select>
@@ -145,7 +141,7 @@ export default function TransferDialog() {
               )}
             />
             <DialogFooter>
-                <Button type="submit" className="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Confirmar Transferencia</Button>
+                <Button disabled={form.formState.isSubmitting} type="submit" className="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Confirmar Transferencia</Button>
             </DialogFooter>
           </form>
         </Form>

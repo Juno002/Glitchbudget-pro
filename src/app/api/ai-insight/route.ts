@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
 
 // Initialize the Gemini client. It will automatically use the GEMINI_API_KEY
 // environment variable if not explicitly passed.
-const ai = new GoogleGenAI({});
 
 export async function POST(req: Request) {
   try {
