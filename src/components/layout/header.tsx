@@ -1,6 +1,8 @@
 
 'use client';
 
+import { localDate } from '@/lib/finance-calculations';
+import { HelpDialog } from './help-dialog';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '../ui/badge';
@@ -23,7 +25,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { db } from '@/lib/db';
-import { hasOPFS } from '@/lib/opfs';
+
 import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadge } from '@/components/dashboard/achievements-panel';
 import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
 import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
@@ -40,11 +42,9 @@ export default function Header() {
   const [baseFreq, setBaseFreq] = useState(baseIncomeSettings?.freq || 'mensual');
   const [baseAmount, setBaseAmount] = useState(String((baseIncomeSettings?.amount || 0) / 100));
   const { toast } = useToast();
-  const [opfsAvailable, setOpfsAvailable] = useState(false);
 
-  useEffect(() => {
-    hasOPFS().then(setOpfsAvailable);
-  }, []);
+
+
 
   // Theme toggle moved to explicit selector dialog
   
@@ -73,22 +73,22 @@ export default function Header() {
       <div className="flex w-full items-center gap-2 flex-wrap">
          <div className="flex items-center gap-2 mr-auto">
             <Link href="/" className="flex items-center gap-2">
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(0,255,136,0.08)] border border-primary/20 text-primary shadow-[0_0_15px_rgba(0,255,136,0.1)] transition-all hover:bg-primary/10">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(var(--primary)_/_0.08)] border border-primary/20 text-primary shadow-[0_0_15px_hsl(var(--primary)_/_0.1)] transition-all hover:bg-primary/10">
                     <span className="text-lg">💰</span>
                     <span className="font-syne font-bold tracking-wide">GlitchBudget Pro</span>
                 </div>
             </Link>
         </div>
-        <div className="flex items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto justify-between">
-            <div className="flex items-center gap-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
-                <Input id="month" type="month" value={currentMonth} onChange={(e) => setCurrentMonth(e.target.value)} className="w-auto h-9" />
-                <Button variant="outline" className="h-9" onClick={() => setCurrentMonth(new Date().toISOString().slice(0, 7))}>Este mes</Button>
+                <Input id="month" type="month" value={currentMonth} onChange={(e) => { if (e.target.value) setCurrentMonth(e.target.value); }} aria-label="Mes del presupuesto" className="min-w-0 w-[145px] sm:w-auto h-9" />
+                <Button variant="outline" className="h-9" onClick={() => setCurrentMonth(localDate().slice(0, 7))}>Este mes</Button>
             </div>
             
              <Dialog>
                <DialogTrigger asChild>
-                 <Button variant="outline" size="icon" className="relative">
+                 <Button variant="outline" size="icon" className="relative" aria-label="Ver logros">
                    <AchievementHeaderBadge />
                  </Button>
                </DialogTrigger>
@@ -105,30 +105,26 @@ export default function Header() {
 
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label="Ajustes">
                   { isWorking ? <Loader className="animate-spin" /> : <Settings className="h-4 w-4" /> }
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10">
-                    <div className="flex flex-1 items-center cursor-pointer" onClick={() => {
-                        const newStrictMode = !strictMode;
-                        setStrictMode(newStrictMode);
-                        toast({ title: `Modo estricto ${newStrictMode ? 'activado' : 'desactivado'}` });
-                    }}>
-                        <input type="checkbox" readOnly checked={strictMode} className="mr-2 cursor-pointer" />
+                    <label className="flex flex-1 items-center cursor-pointer gap-2">
+                        <input type="checkbox" checked={strictMode} onChange={e => setStrictMode(e.target.checked)} />
                         <span>Modo estricto</span>
-                    </div>
+                    </label>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <button className="ml-2 rounded-full p-1 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                            <button aria-label="Cómo funciona el modo estricto" className="ml-2 rounded-full p-1 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
                                 <Info className="h-4 w-4" />
                             </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-64" side="left">
                             <h4 className="font-semibold mb-2">Modo Estricto</h4>
                             <p className="text-xs text-muted-foreground">
-                                Impide guardar montos fijos que superen tus ingresos totales mensuales, protegiéndote matemáticamente de crear presupuestos irreales.
+                                Impide registrar gastos en efectivo, pagos y aportes que superen el disponible del mes. Tiene en cuenta lo reservado en presupuestos y ahorro.
                             </p>
                         </PopoverContent>
                     </Popover>
@@ -161,14 +157,14 @@ export default function Header() {
                                     <RadioGroupItem value="light" id="t2" />
                                     <Label htmlFor="t2" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Sun className="h-4 w-4 text-amber-500" /> Modo Claro</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Elegante inversión de colores para ambientes luminosos.</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Superficies claras y colores de alto contraste.</span>
                                     </Label>
                                 </div>
                                 <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="serious" id="t3" />
                                     <Label htmlFor="t3" className="flex flex-col cursor-pointer">
-                                        <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Serie Minimalista</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Tonos mate, sin neón ni distracciones. Ideal para ver reportes.</span>
+                                        <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Minimalista</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Superficies mate, tipografía sencilla y acentos discretos.</span>
                                     </Label>
                                 </div>
                             </RadioGroup>
@@ -290,16 +286,18 @@ export default function Header() {
                 </Dialog>
 
                 <DropdownMenuSeparator />
-                 {opfsAvailable && (
+                 {(
                     <>
                         <OpfsBackupDialog />
                         <DropdownMenuSeparator />
                     </>
                  )}
                 
+                <HelpDialog />
+                <DropdownMenuSeparator />
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
-                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-[rgba(255,45,120,0.9)] focus:bg-[rgba(255,45,120,0.15)] focus:text-[rgba(255,45,120,1)]">
+                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-[hsl(var(--bad)_/_0.9)] focus:bg-[hsl(var(--bad)_/_0.15)] focus:text-[hsl(var(--bad)_/_1)]">
                             <span>Limpiar datos</span>
                         </DropdownMenuItem>
                     </AlertDialogTrigger>

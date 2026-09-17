@@ -1,10 +1,12 @@
 import 'fake-indexeddb/auto';
+import { rollBudgetsIntoMonth } from '../src/lib/budget-rollover';
+
 import assert from 'node:assert/strict';
 import { after, beforeEach, test } from 'node:test';
 import { db, type Expense, type Settings } from '../src/lib/db';
 import { calculateTotals, expenseForMonth, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
-import { saveIncome, saveExpense } from '../src/lib/transaction-service';
+import { saveIncome, saveExpense, saveDebtPayment, saveGoalContribution } from '../src/lib/transaction-service';
 
 const settings: Settings = {
   id: 'general', theme: 'serious', strictMode: true, rolloverStrategy: 'reset',
@@ -154,4 +156,68 @@ test('a failed restore rolls back every table', async () => {
   await assert.rejects(importDataJSON(JSON.stringify(backup)));
   assert.deepEqual(await db.settings.get('general'), settings);
   assert.deepEqual(await db.expenses.get(expense.id), expense);
+});
+
+async function seedOutgoing() {
+  await db.settings.update('general', { baseIncome: { freq: 'mensual', amount: 10_000 }, savePct: 0 });
+  await db.debts.add({ id: 'card', name: 'Prueba', type: 'credit_card', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString(), status: 'active' });
+  await db.goals.add({ id: 'goal', name: 'Meta', target: 20_000, saved: 0, quota: 0, startDate: '2026-09-01', status: 'active' });
+}
+test('concurrent card payment and goal contribution cannot spend the same cash', async () => {
+  await seedOutgoing();
+  const results = await Promise.allSettled([
+    saveDebtPayment({ id: 'payment', debtId: 'card', amount: 8_000, date: '2026-09-17' }),
+    saveGoalContribution({ id: 'contribution', goalId: 'goal', amount: 8_000, date: '2026-09-17' }),
+  ]);
+  assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
+  assert.equal(await db.debt_payments.count() + await db.goal_contributions.count(), 1);
+});
+test('invalid outgoing dates and closed cards never create payments', async () => {
+  await seedOutgoing();
+  await assert.rejects(saveDebtPayment({ id: 'p', debtId: 'card', amount: 100, date: '2026-02-30' }));
+  await db.debts.update('card', { status: 'closed' });
+  await assert.rejects(saveDebtPayment({ id: 'p', debtId: 'card', amount: 100, date: '2026-09-17' }));
+  assert.equal(await db.debt_payments.count(), 0);
+});
+test('failed goal contribution leaves saved amount and history unchanged', async () => {
+  await seedOutgoing();
+  await assert.rejects(saveGoalContribution({ id: 'c', goalId: 'goal', amount: 20_000, date: '2026-09-17' }));
+  assert.equal((await db.goals.get('goal'))?.saved, 0);
+  assert.equal(await db.goal_contributions.count(), 0);
+});
+test('non-strict mode allows a payment beyond available cash', async () => {
+  await seedOutgoing();
+  await db.settings.update('general', { strictMode: false });
+  await saveDebtPayment({ id: 'p', debtId: 'card', amount: 20_000, date: '2026-09-17' });
+  assert.equal(await db.debt_payments.count(), 1);
+});
+test('rollover across December is atomic and idempotent', async () => {
+  await db.settings.update('general', { rolloverStrategy: 'accumulate_surplus' });
+  await db.plans.add({ month: '2026-12', categoryId: 'food', limit: 10_000 });
+  await db.expenses.add({ ...expense, date: '2026-12-15', month: '2026-12', amount: 4_000 });
+  const result = await Promise.all([rollBudgetsIntoMonth('2027-01'), rollBudgetsIntoMonth('2027-01')]);
+  assert.equal(result.filter(Boolean).length, 1);
+  assert.equal((await db.plans.get(['2027-01', 'food']))?.limit, 16_000);
+});
+test('debt rollover reduces the next budget without generating negative limits', async () => {
+  await db.settings.update('general', { rolloverStrategy: 'accumulate_debt' });
+  await db.plans.add({ month: '2026-09', categoryId: 'food', limit: 10_000 });
+  await db.expenses.add({ ...expense, amount: 25_000 });
+  await rollBudgetsIntoMonth('2026-10');
+  assert.equal((await db.plans.get(['2026-10', 'food']))?.limit, 0);
+});
+test('rollover preserves a manually prepared destination month', async () => {
+  await db.settings.update('general', { rolloverStrategy: 'accumulate_surplus' });
+  await db.plans.bulkAdd([{ month: '2026-09', categoryId: 'food', limit: 10_000 }, { month: '2026-10', categoryId: 'food', limit: 5_000 }]);
+  assert.equal(await rollBudgetsIntoMonth('2026-10'), false);
+  assert.equal((await db.plans.get(['2026-10', 'food']))?.limit, 5_000);
+});
+
+test('large local history survives a full JSON backup and restore', async () => {
+  await db.expenses.bulkAdd(Array.from({ length: 10_000 }, (_, index) => ({ ...expense, id: 'history-' + index, amount: 101 })));
+  const backup = await exportDataJSON();
+  await importDataJSON(backup);
+  assert.equal(await db.expenses.count(), 10_000);
+  const rows = await db.expenses.toArray();
+  assert.equal(calculateTotals({ ...snapshot(), expenses: rows }, '2026-09').totalExpenses, 1_010_000);
 });

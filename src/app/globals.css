@@ -10,7 +10,7 @@ body {
   :root {
     --background: 0 0% 3%; /* #080808 */
     --foreground: 0 0% 100%; /* #ffffff */
-    --card: 0 0% 100%; /* controlled by rgba */
+    --card: 0 0% 6%;
     --card-foreground: 0 0% 100%;
     --popover: 0 0% 3%;
     --popover-foreground: 0 0% 100%;
@@ -24,8 +24,8 @@ body {
     --accent-foreground: 0 0% 3%;
     --destructive: 338 100% 59%; /* #ff2d78 */
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100%; /* using rgba */
-    --input: 0 0% 100%; /* using rgba */
+    --border: 0 0% 18%;
+    --input: 0 0% 22%;
     --ring: 152 100% 50%;
     --chart-1: 152 100% 50%;
     --chart-2: 338 100% 59%;
@@ -44,7 +44,7 @@ body {
   .dark {
     --background: 0 0% 3%; /* #080808 */
     --foreground: 0 0% 100%; /* #ffffff */
-    --card: 0 0% 100%; /* controlled by rgba */
+    --card: 0 0% 6%;
     --card-foreground: 0 0% 100%;
     --popover: 0 0% 3%;
     --popover-foreground: 0 0% 100%;
@@ -58,8 +58,8 @@ body {
     --accent-foreground: 0 0% 3%;
     --destructive: 338 100% 59%; /* #ff2d78 */
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 100%; /* using rgba */
-    --input: 0 0% 100%; /* using rgba */
+    --border: 0 0% 18%;
+    --input: 0 0% 22%;
     --ring: 152 100% 50%;
     --chart-1: 152 100% 50%;
     --chart-2: 338 100% 59%;
@@ -75,9 +75,9 @@ body {
     --backdrop: rgba(8,8,8,0.85);
   }
   .light {
-    --background: 0 0% 98%; 
-    --foreground: 0 0% 9%; 
-    --card: 0 0% 100%; 
+    --background: 0 0% 98%;
+    --foreground: 0 0% 9%;
+    --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
@@ -102,35 +102,35 @@ body {
     --backdrop: rgba(250,250,250,0.85);
   }
   .serious {
-    --background: 0 0% 97%; 
-    --foreground: 0 0% 12%; 
-    --card: 0 0% 100%; 
+    --background: 0 0% 97%;
+    --foreground: 0 0% 12%;
+    --card: 0 0% 100%;
     --card-foreground: 0 0% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
     --primary: 0 0% 15%; /* Charcoal */
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 94%; 
+    --secondary: 215 20% 35%;
     --secondary-foreground: 0 0% 15%;
     --muted: 0 0% 92%;
     --muted-foreground: 0 0% 45%;
     --accent: 0 0% 94%;
     --accent-foreground: 0 0% 15%;
-    --destructive: 0 0% 30%; 
+    --destructive: 0 55% 40%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 88%;
     --input: 0 0% 88%;
     --ring: 0 0% 15%;
-    
+
     --chart-1: 0 0% 15%;
     --chart-2: 0 0% 35%;
     --chart-3: 0 0% 55%;
     --chart-4: 0 0% 75%;
     --chart-5: 0 0% 85%;
 
-    --good: 0 0% 35%; 
-    --bad: 0 0% 15%; 
-    --warning: 0 0% 55%; 
+    --good: 158 40% 28%;
+    --bad: 0 55% 40%;
+    --warning: 32 70% 32%;
     --gradient-primary: none;
     --gradient-accent: none;
     --backdrop: rgba(255,255,255,0.9);
@@ -174,3 +174,11 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Minimalist is an opaque, typography-led theme, not a color filter. */
+html.serious body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+html.serious .ambient-background { display: none; }
+html.serious [class*="backdrop-blur"] { backdrop-filter: none; }
+html.serious [class*="rounded-"] { border-radius: 12px; }
+html.light, html.serious { background: hsl(var(--background)); }
+html.light ::-webkit-scrollbar-thumb, html.serious ::-webkit-scrollbar-thumb { background: hsl(var(--border)); }

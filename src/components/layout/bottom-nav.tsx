@@ -16,7 +16,7 @@ const navItems = [
 export default function BottomNav() {
   const { activeTab, setActiveTab } = useTabs();
   const pathname = usePathname();
-  
+
   // Hide on any page other than the main dashboard routes
   if (pathname !== '/') return null;
 
@@ -32,8 +32,8 @@ export default function BottomNav() {
               onClick={() => setActiveTab(item.value)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 p-2 flex-1 rounded-[12px] transition-all duration-300",
-                isActive 
-                  ? "text-primary bg-primary/10 shadow-[0_0_15px_rgba(0,255,136,0.05)]" 
+                isActive
+                  ? "text-primary bg-primary/10 shadow-[0_0_15px_hsl(var(--primary)_/_0.05)]"
                   : "text-muted-foreground/60 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
               )}
             >

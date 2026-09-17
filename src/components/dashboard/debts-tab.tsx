@@ -77,7 +77,7 @@ export default function DebtsTab() {
         </div>
         <Dialog open={isAddOpen} onOpenChange={open => { if (!savingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-[#00e5ff]/20 text-[#00e5ff] hover:bg-[#00e5ff]/30">
+            <Button size="sm" className="bg-[hsl(var(--secondary))]/20 text-[hsl(var(--secondary))] hover:bg-[hsl(var(--secondary))]/30">
               <Plus className="w-4 h-4 mr-2" /> Nueva Tarjeta
             </Button>
           </DialogTrigger>

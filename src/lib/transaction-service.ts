@@ -68,3 +68,37 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
     else await db.expenses.add(row);
   });
 }
+
+const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const outgoingTables = [db.expenses, db.incomes, db.settings, db.plans, db.goal_contributions, db.debt_payments, db.debts, db.goals];
+async function requireAvailableCash(amount: number, date: string) {
+  const settings = await db.settings.get('general');
+  if (!settings?.strictMode) return;
+  const totals = calculateTotals({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7));
+  if (amount > totals.balance - totals.commitments) throw new Error('Modo estricto: el monto supera el dinero disponible de ese mes.');
+}
+export async function saveDebtPayment(payment: import('./db').DebtPayment) {
+  centsSchema.parse(payment.amount);
+  fields.date.parse(payment.date);
+  await db.transaction('rw', outgoingTables, async () => {
+    const debt = await db.debts.get(payment.debtId);
+    if (!debt || debt.status !== 'active') throw new Error('Selecciona una tarjeta activa.');
+    await requireAvailableCash(payment.amount, payment.date);
+    await db.debt_payments.add(payment);
+  });
+}
+export async function saveGoalContribution(contribution: import('./db').GoalContribution) {
+  centsSchema.parse(contribution.amount);
+  fields.date.parse(contribution.date);
+  return db.transaction('rw', outgoingTables, async () => {
+    const goal = await db.goals.get(contribution.goalId);
+    if (!goal) throw new Error('Meta no encontrada.');
+    await requireAvailableCash(contribution.amount, contribution.date);
+    const saved = goal.saved + contribution.amount;
+    if (!Number.isSafeInteger(saved)) throw new Error('El total supera el monto admitido.');
+    const status = saved >= goal.target ? 'completed' : 'active';
+    await db.goals.update(goal.id, { saved, status });
+    await db.goal_contributions.add(contribution);
+    return status === 'completed' && goal.status !== 'completed';
+  });
+}

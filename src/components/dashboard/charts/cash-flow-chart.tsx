@@ -333,7 +333,7 @@ export default function CashFlowChart() {
         id: 'dst-savings',
         label: 'Metas de Ahorro',
         value: monthContribs,
-        color: '#00ff88',
+        color: 'hsl(var(--primary))',
         icon: '🎯',
         type: 'destination',
       });
@@ -346,7 +346,7 @@ export default function CashFlowChart() {
         id: 'dst-available',
         label: 'Disponible',
         value: available,
-        color: '#00e5ff',
+        color: 'hsl(var(--secondary))',
         icon: '💰',
         type: 'destination',
       });

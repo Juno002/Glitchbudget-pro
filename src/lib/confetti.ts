@@ -1,6 +1,7 @@
 import confetti from 'canvas-confetti';
 
 export function triggerConfetti() {
+  if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('serious')) return;
   const duration = 3000;
   const end = Date.now() + duration;
 
@@ -29,6 +30,7 @@ export function triggerConfetti() {
 }
 
 export function triggerGoalCompletionConfetti() {
+  if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.classList.contains('serious')) return;
   const count = 200;
   const defaults = {
     origin: { y: 0.7 },

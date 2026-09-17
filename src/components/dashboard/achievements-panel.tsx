@@ -93,25 +93,25 @@ function XPBar({
       <div
         className="shrink-0 h-10 w-10 rounded-xl flex items-center justify-center text-sm font-bold"
         style={{
-          background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,229,255,0.10))',
-          border: '1px solid rgba(0,255,136,0.25)',
-          color: '#00ff88',
-          boxShadow: '0 0 16px rgba(0,255,136,0.08)',
+          background: 'linear-gradient(135deg, hsl(var(--primary) / 0.15), hsl(var(--secondary) / 0.10))',
+          border: '1px solid hsl(var(--primary) / 0.25)',
+          color: 'hsl(var(--primary))',
+          boxShadow: '0 0 16px hsl(var(--primary) / 0.08)',
         }}
       >
         {level}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline mb-1">
-          <span className="text-xs font-semibold text-white/80">{title}</span>
-          <span className="text-[10px] text-white/40 tabular-nums">
+          <span className="text-xs font-semibold text-foreground">{title}</span>
+          <span className="text-[10px] text-muted-foreground tabular-nums">
             {currentXP}/{nextXP} XP
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: 'linear-gradient(90deg, #00ff88, #00e5ff)' }}
+            style={{ background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)))' }}
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -145,7 +145,7 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
           <span className="text-2xl" role="img" aria-label={def.title}>
             {isUnlocked ? def.icon : '🔒'}
           </span>
-          <span className="text-[10px] font-semibold text-white/70 leading-tight line-clamp-1">
+          <span className="text-[10px] font-semibold text-muted-foreground leading-tight line-clamp-1">
             {def.title}
           </span>
           {isUnlocked && (
@@ -159,13 +159,13 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
         <div className="flex items-center gap-2">
           <span className="text-xl">{def.icon}</span>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-white/90 truncate">{def.title}</div>
+            <div className="text-sm font-semibold text-foreground truncate">{def.title}</div>
             <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: tier.text }}>
               {tierName} · {def.xp} XP
             </div>
           </div>
         </div>
-        <p className="text-xs text-white/50 leading-relaxed">{def.description}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{def.description}</p>
         {isUnlocked ? (
           <div className="flex items-center gap-1.5 pt-0.5">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -173,8 +173,8 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
           </div>
         ) : (
           <div className="flex items-center gap-1.5 pt-0.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
-            <span className="text-[10px] font-semibold text-white/30">Bloqueado</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-border" />
+            <span className="text-[10px] font-semibold text-muted-foreground">Bloqueado</span>
           </div>
         )}
       </PopoverContent>
@@ -201,8 +201,8 @@ export function AchievementsDialogContent() {
     <div className="space-y-4">
       {/* Header stats */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-white/50">Progreso</span>
-        <span className="text-xs text-white/40 tabular-nums">
+        <span className="text-sm text-muted-foreground">Progreso</span>
+        <span className="text-xs text-muted-foreground tabular-nums">
           {unlockedCount}/{totalCount} desbloqueados
         </span>
       </div>
@@ -229,7 +229,7 @@ export function AchievementsDialogContent() {
         if (tierAchievements.length === 0) return null;
         return (
           <div key={tier}>
-            <div className="text-[11px] font-semibold text-white/40 mb-2 uppercase tracking-wider">
+            <div className="text-[11px] font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
               {tierLabels[tier]}
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -300,7 +300,7 @@ export function AchievementHeaderBadge() {
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-sm">🏆</span>
-      <span className="text-[10px] font-bold tabular-nums" style={{ color: '#00ff88' }}>
+      <span className="text-[10px] font-bold tabular-nums" style={{ color: 'hsl(var(--primary))' }}>
         {levelInfo.level}
       </span>
     </div>

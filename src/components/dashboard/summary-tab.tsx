@@ -84,7 +84,7 @@ function Snapshot({
           animate="visible"
           variants={cardVariants}
         >
-          <Card className="p-3 hover:shadow-lg hover:shadow-[rgba(0,255,136,0.04)] transition-shadow duration-300">
+          <Card className="p-3 hover:shadow-lg hover:shadow-[hsl(var(--primary)_/_0.04)] transition-shadow duration-300">
             <CardContent className="p-0 flex items-center gap-3 min-w-0">
               <div className="shrink-0">{card.ring}</div>
               <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay, type: 'spring', stiffness: 200, damping: 20 }}
         >
-        <Card className="hover:shadow-lg hover:shadow-[rgba(0,255,136,0.04)] transition-shadow duration-300">
+        <Card className="hover:shadow-lg hover:shadow-[hsl(var(--primary)_/_0.04)] transition-shadow duration-300">
             <CardContent className="pt-6">
                 <div className="h-64 w-full">
                     {data.length > 0 ? (
@@ -138,12 +138,12 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
                                     formatter={(value: number) => [formatCurrency(value), title]}
                                     contentStyle={{
                                         backgroundColor: 'rgba(10,10,20,0.9)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        border: '1px solid hsl(var(--border))',
                                         borderRadius: '12px',
                                         backdropFilter: 'blur(12px)',
                                         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
                                     }}
-                                    itemStyle={{ color: 'rgba(255,255,255,0.8)' }}
+                                    itemStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 <Legend />
                                 <Pie
@@ -181,8 +181,8 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
 const chipClass = (isActive: boolean) =>
   `px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
     isActive
-      ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_rgba(0,255,136,0.1)]'
-      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-[rgba(255,255,255,0.4)] hover:bg-black/10 dark:bg-white/10 hover:text-[rgba(255,255,255,0.8)]'
+      ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_hsl(var(--primary)_/_0.1)]'
+      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-muted-foreground hover:bg-black/10 dark:bg-white/10 hover:text-foreground'
   }`;
 
 const SaveStrategyChips = () => {

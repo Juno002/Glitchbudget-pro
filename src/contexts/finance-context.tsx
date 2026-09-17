@@ -1,5 +1,6 @@
 
 'use client';
+import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import { defaultExpenseCategories as defaultExpenseCatIds, defaultIncomeCategories as defaultIncomeCatIds } from "@/lib/categories";
@@ -9,7 +10,7 @@ import { db, type Settings, type Income, type Expense, type Plan, type Debt, typ
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { calculateTotals, expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
-import { saveExpense, saveIncome } from '@/lib/transaction-service';
+import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution } from '@/lib/transaction-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -177,8 +178,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (activeSettings.theme) {
-        document.body.classList.remove('light', 'dark', 'serious');
-        document.body.classList.add(activeSettings.theme);
+        const theme = activeSettings.theme === 'system' ? 'dark' : activeSettings.theme;
+        document.body.classList.remove('light', 'dark', 'serious', 'system');
+        document.documentElement.classList.remove('light', 'dark', 'serious', 'system');
+        document.documentElement.classList.add(theme);
+        document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
     }
   }, [activeSettings.theme]);
 
@@ -357,21 +361,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     try {
       if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error('El aporte debe ser un monto positivo.');
-      let isCompletedNow = false;
-      await db.transaction('rw', db.goals, db.goal_contributions, async () => {
-          const goal = await db.goals.get(id);
-          if (goal) {
-              const newSaved = goal.saved + amountInCents;
-              const status = newSaved >= goal.target ? 'completed' : 'active';
-              if (status === 'completed' && goal.status !== 'completed') {
-                  isCompletedNow = true;
-              }
-              await db.goals.update(id, { saved: newSaved, status });
-              await db.goal_contributions.add(newContribution);
-          } else {
-            throw new Error("Meta no encontrada");
-          }
-      });
+      const isCompletedNow = await saveGoalContribution(newContribution);
       if (isCompletedNow) {
           playGoalComplete();
       }
@@ -534,34 +524,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const setCurrentMonth = useCallback(async (month: string) => {
     setCurrentMonthState(month);
 
-    if (!budgets || !activeSettings.rolloverStrategy || activeSettings.rolloverStrategy === 'reset') return;
-
-    const monthExists = await db.plans.where('month').equals(month).count() > 0;
-    if (monthExists) return;
-
-    const [prevYear, prevMonthNum] = month.split('-').map(Number);
-    const prevDate = new Date(prevYear, prevMonthNum - 2, 1);
-    const prevMonthStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}`;
-
-    const prevMonthStatus = getBudgetStatusDetails(prevMonthStr);
-    if (prevMonthStatus.length > 0) {
-        try {
-            const nextMonthBudgets: Plan[] = prevMonthStatus.map(catStatus => {
-                let newLimit = catStatus.limit;
-                if (activeSettings.rolloverStrategy === 'accumulate_surplus' && catStatus.remaining > 0) {
-                    newLimit += catStatus.remaining;
-                } else if (activeSettings.rolloverStrategy === 'accumulate_debt' && catStatus.remaining < 0) {
-                    newLimit += catStatus.remaining;
-                }
-                return { month, categoryId: catStatus.categoryId, limit: Math.max(0, newLimit) };
-            });
-            await db.plans.bulkPut(nextMonthBudgets);
-            toast({ title: "Cierre de mes completado", description: `Presupuestos para ${month} generados con la estrategia de ${activeSettings.rolloverStrategy}.` });
-        } catch(error) {
-            toast({ title: 'Error en el cierre de mes', description: friendlyError(error), variant: 'destructive' });
-        }
+    try {
+      const created = await rollBudgetsIntoMonth(month);
+      if (created) toast({ title: 'Presupuestos preparados', description: 'Se aplicó tu preferencia de cierre al mes seleccionado.' });
+    } catch (error) {
+      toast({ title: 'No se pudieron preparar los presupuestos', description: friendlyError(error), variant: 'destructive' });
     }
-  }, [activeSettings.rolloverStrategy, getBudgetStatusDetails, toast, budgets]);
+  }, [toast]);
 
   // OPFS Backup Management
   const createBackup = useCallback(async (): Promise<BackupFile | undefined> => {
@@ -709,10 +678,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addDebtPayment = useCallback(async (payment: Omit<DebtPayment, "id">) => {
     try {
-      if (!Number.isSafeInteger(payment.amount) || payment.amount <= 0) throw new Error('El pago debe ser un monto positivo.');
-      if (!await db.debts.get(payment.debtId)) throw new Error('La tarjeta ya no existe.');
       const newPayment: DebtPayment = { ...payment, id: crypto.randomUUID() };
-      await db.debt_payments.add(newPayment);
+      await saveDebtPayment(newPayment);
       toast({ title: 'Pago registrado' });
       return true;
     } catch (e: any) {

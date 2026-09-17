@@ -117,6 +117,8 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">RD$</span>
             <Input
                 type="number"
+                aria-label={`Presupuesto de ${category.name}`}
+                min="0" step="0.01"
                 inputMode="decimal"
                 value={inputValue}
                 onChange={handleChange}
@@ -240,6 +242,8 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">RD$</span>
                         <Input
                             type="number"
+                            aria-label="Límite mensual del presupuesto"
+                            min="0" step="0.01"
                             inputMode="decimal"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}

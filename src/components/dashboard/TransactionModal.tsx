@@ -210,8 +210,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           className={cn(
             "px-6 py-8 flex flex-col items-center gap-2 transition-colors",
             txType === 'expense'
-              ? "bg-[rgba(255,45,120,0.08)]"
-              : "bg-[rgba(0,255,136,0.08)]"
+              ? "bg-[hsl(var(--bad)_/_0.08)]"
+              : "bg-[hsl(var(--primary)_/_0.08)]"
           )}
         >
           <label className="text-xs text-muted-foreground">
@@ -259,7 +259,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 disabled={isEditing}
                 onClick={() => { setTxType('expense'); setCategoryId(''); setTypeOpen(false); }}
                 className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'expense' ? "bg-[rgba(255,45,120,0.1)] text-rose-400" : "hover:bg-black/10 dark:hover:bg-white/10"
+                  txType === 'expense' ? "bg-[hsl(var(--bad)_/_0.1)] text-rose-400" : "hover:bg-black/10 dark:hover:bg-white/10"
                 )}
               >
                 <TrendingDown className="h-4 w-4" /> Gasto
@@ -486,7 +486,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 className={cn(
                   "flex-1 h-12 text-base font-semibold transition-all w-full",
                   txType === 'expense'
-                    ? "bg-[rgba(255,45,120,0.12)] border border-[rgba(255,45,120,0.3)] text-[rgba(255,45,120,0.9)] hover:bg-[rgba(255,45,120,0.2)]"
+                    ? "bg-[hsl(var(--bad)_/_0.12)] border border-[hsl(var(--bad)_/_0.3)] text-[hsl(var(--bad)_/_0.9)] hover:bg-[hsl(var(--bad)_/_0.2)]"
                     : "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
                 )}
                 disabled={!canSave}
