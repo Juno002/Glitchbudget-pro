@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAchievements } from '@/hooks/use-achievements';
 import { getAchievementDef, TIER_COLORS, type AchievementDef } from '@/lib/achievements';
@@ -29,10 +31,12 @@ function AchievementToast({
       animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
       exit={{ opacity: 0, y: -20, scale: 0.9, filter: 'blur(4px)' }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[999] max-w-xs w-full px-4"
+      role="status"
+      aria-live="polite"
+      className="pointer-events-auto w-full max-w-sm min-w-0"
     >
       <div
-        className="flex items-center gap-3 px-4 py-3 rounded-2xl border backdrop-blur-xl"
+        className="relative flex items-center gap-3 pl-4 pr-12 py-4 rounded-2xl border backdrop-blur-xl max-h-[calc(100dvh-12rem)] overflow-y-auto"
         style={{
           background: `linear-gradient(135deg, ${tier.bg}, rgba(0,0,0,0.7))`,
           borderColor: tier.border,
@@ -54,14 +58,17 @@ function AchievementToast({
           >
             ¡Logro Desbloqueado!
           </div>
-          <div className="text-sm font-semibold text-white truncate">{achievement.title}</div>
-          <div className="text-[11px] text-white/50 leading-tight">{achievement.description}</div>
+          <div className="text-sm font-semibold text-white break-words">{achievement.title}</div>
+          <div className="text-xs text-white/75 leading-relaxed break-words">{achievement.description}</div>
         </div>
         <div className="shrink-0 text-right">
           <div className="text-xs font-bold" style={{ color: tier.text }}>
             +{achievement.xp} XP
           </div>
         </div>
+        <button type="button" onClick={onDismiss} aria-label="Cerrar aviso de logro" className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full text-white/75 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </motion.div>
   );
@@ -245,6 +252,10 @@ export function AchievementsDialogContent() {
 export function AchievementToastLayer() {
   const { newlyUnlocked, dismissNew } = useAchievements();
   const playedRef = useRef(new Set<string>());
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const currentId = newlyUnlocked[0];
+  const dismissCurrent = useCallback(() => { if (currentId) dismissNew(currentId); }, [currentId, dismissNew]);
 
   useEffect(() => {
     newlyUnlocked.forEach((id) => {
@@ -259,8 +270,11 @@ export function AchievementToastLayer() {
     });
   }, [newlyUnlocked]);
 
-  return (
-    <AnimatePresence>
+  if (!mounted) return null;
+  // Keep viewport positioning separate from Framer Motion transforms.
+  return createPortal(
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(10rem+env(safe-area-inset-bottom))] z-[100] flex justify-center px-4 sm:bottom-24">
+    <AnimatePresence mode="wait">
       {newlyUnlocked.length > 0 &&
         (() => {
           const def = getAchievementDef(newlyUnlocked[0]);
@@ -268,11 +282,13 @@ export function AchievementToastLayer() {
             <AchievementToast
               key={def.id}
               achievement={def}
-              onDismiss={() => dismissNew(def.id)}
+              onDismiss={dismissCurrent}
             />
           ) : null;
         })()}
     </AnimatePresence>
+    </div>,
+    document.body
   );
 }
 
