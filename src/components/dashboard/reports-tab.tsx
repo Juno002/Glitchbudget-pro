@@ -1,5 +1,6 @@
 'use client';
 
+import { debtBalance } from '@/lib/accounts';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -298,9 +299,7 @@ const CreditCardStatusReport = () => {
                 {/* MOBILE VIEW */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {activeCards.map(debt => {
-                        const ccExpenses = (expenses || []).filter(e => e.debtId === debt.id).reduce((sum, e) => sum + e.amount, 0);
-                        const ccPayments = (debtPayments || []).filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
-                        const currentDebt = ccExpenses - ccPayments;
+                        const currentDebt = debtBalance(debt, expenses || [], debtPayments || []);
                         const available = debt.principal - currentDebt;
                         const daysToCut = getDaysUntil(debt.billingCycleDay);
                         const daysToPay = getDaysUntil(debt.paymentDueDay);
@@ -356,9 +355,7 @@ const CreditCardStatusReport = () => {
                         </TableHeader>
                         <TableBody>
                             {activeCards.map(debt => {
-                                const ccExpenses = (expenses || []).filter(e => e.debtId === debt.id).reduce((sum, e) => sum + e.amount, 0);
-                                const ccPayments = (debtPayments || []).filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
-                                const currentDebt = ccExpenses - ccPayments;
+                                const currentDebt = debtBalance(debt, expenses || [], debtPayments || []);
                                 const available = debt.principal - currentDebt;
                                 const daysToPay = getDaysUntil(debt.paymentDueDay);
 

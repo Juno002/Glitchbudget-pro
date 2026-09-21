@@ -1,8 +1,10 @@
+import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
 import { calculateTotals, isValidDate, type FinanceSnapshot } from './finance-calculations';
 
 const fields = {
+  accountId: z.string().min(1).optional(),
   date: z.string().refine(isValidDate, 'Selecciona una fecha válida.'),
   categoryId: z.string().trim().min(1, 'Selecciona una categoría.'),
   amount: z.number().finite().positive('El monto debe ser mayor que cero.')
@@ -19,8 +21,14 @@ const expenseSchema = z.object({
 export async function saveIncome(input: Omit<Income, 'month'>, editing = false): Promise<void> {
   const value = incomeSchema.parse(input);
   const row: Income = { ...input, ...value, month: value.date.slice(0, 7) };
-  await db.transaction('rw', db.incomes, async () => {
+  await db.transaction('rw', [...accountTables, db.settings], async () => {
+    if (row.accountId) await requireAccount(row.accountId, row.date);
+    else if (!editing && await db.accounts.count()) throw new Error('Selecciona la cuenta donde recibiste el ingreso.');
     if (editing && !await db.incomes.get(row.id)) throw new Error('El ingreso ya no existe. Actualiza la lista.');
+    if (editing && (await db.settings.get('general'))?.strictMode) {
+      const before = await readAccountSnapshot();
+      requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: [...before.incomes.filter(i => i.id !== row.id), row] });
+    }
     if (editing) await db.incomes.put(row);
     else await db.incomes.add(row);
   });
@@ -30,11 +38,12 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
   const value = expenseSchema.parse(input);
   const row: Expense = {
     ...input, ...value, month: value.date.slice(0, 7),
+    accountId: value.paymentMethod === 'credit' ? undefined : value.accountId,
     debtId: value.paymentMethod === 'credit' ? value.debtId : undefined,
     frequency: value.type === 'Fijo' ? value.frequency || 'mensual' : undefined,
   };
   // Read and write in one transaction so two windows cannot spend the same available funds.
-  await db.transaction('rw', [db.expenses, db.incomes, db.settings, db.plans, db.goal_contributions, db.debt_payments, db.debts], async () => {
+  await db.transaction('rw', [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts], async () => {
     const existing = await db.expenses.get(row.id);
     if (row.recurringId) {
       const duplicate = await db.expenses.filter(e => e.id !== row.id && e.recurringId === row.recurringId && e.date.slice(0, 7) === row.month).first();
@@ -48,7 +57,15 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       }
     } else {
       const settings = await db.settings.get('general');
-      if (settings?.strictMode) {
+      if (row.accountId) {
+        await requireAccount(row.accountId, row.date);
+        const snapshot = await readAccountSnapshot();
+        const projected = { ...snapshot, expenses: [...snapshot.expenses.filter(e => e.id !== row.id), row] };
+        if (settings?.strictMode) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
+      } else if (!editing && await db.accounts.count()) {
+        throw new Error('Selecciona la cuenta desde la que pagaste.');
+      }
+      if (settings?.strictMode && !row.accountId) {
         const data: FinanceSnapshot = {
           settings: { ...settings, savePct: settings.savePct ?? 0 },
           incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(),
@@ -70,7 +87,7 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
 }
 
 const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
-const outgoingTables = [db.expenses, db.incomes, db.settings, db.plans, db.goal_contributions, db.debt_payments, db.debts, db.goals];
+const outgoingTables = [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
 async function requireAvailableCash(amount: number, date: string) {
   const settings = await db.settings.get('general');
   if (!settings?.strictMode) return;
@@ -83,7 +100,17 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   await db.transaction('rw', outgoingTables, async () => {
     const debt = await db.debts.get(payment.debtId);
     if (!debt || debt.status !== 'active') throw new Error('Selecciona una tarjeta activa.');
-    await requireAvailableCash(payment.amount, payment.date);
+    if (payment.accountId) {
+      await requireAccount(payment.accountId, payment.date);
+      const settings = await db.settings.get('general');
+      if (settings?.strictMode) {
+        const before = await readAccountSnapshot();
+        requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, payments: [...before.payments, payment] });
+      }
+    } else {
+      if (await db.accounts.count()) throw new Error('Selecciona la cuenta desde la que pagaste la tarjeta.');
+      await requireAvailableCash(payment.amount, payment.date);
+    }
     await db.debt_payments.add(payment);
   });
 }

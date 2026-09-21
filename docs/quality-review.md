@@ -47,8 +47,12 @@ Alcance: aplicación personal con datos locales, sin cuentas, sincronización ni
 
 ## Límites y decisiones de producto
 
-El disponible es efectivo libre del mes, no patrimonio ni saldo bancario. Las compras con tarjeta no descuentan efectivo hasta registrar el pago. Los gastos fijos son proyecciones mensuales desde su fecha inicial; editar uno afecta esas proyecciones. Antes de ampliar promesas de exactitud histórica debe definirse si se necesitan ocurrencias independientes y fecha de finalización.
+El disponible del mes es una proyección presupuestaria, no patrimonio ni saldo bancario. Desde el 21 de septiembre, «Mi dinero hoy» muestra por separado efectivo, bancos y deuda de tarjetas, con saldos iniciales y movimientos asignados. Las compras con tarjeta no descuentan efectivo hasta registrar el pago. Los gastos fijos son proyecciones mensuales desde su fecha inicial; editar uno afecta esas proyecciones. En las cuentas, cada movimiento registrado se contabiliza una sola vez. Véase accounts.md para el inicio del seguimiento y los respaldos v4.
 
 No hay cifrado de respaldos ni sincronización. Cambiar de origen, navegador o dispositivo cambia el almacenamiento visible. Borrar datos del sitio elimina también las copias OPFS. El respaldo externo JSON es la vía de traslado y recuperación.
 
 Los puertos locales 9003, 9004, 9005 y 9006 son pruebas con almacenamiento separado. 9003 puede contener un ingreso ficticio y 9006 un presupuesto ficticio de 500. No se usaron datos financieros reales para las pruebas nuevas.
+
+## Ampliación de cuentas — 21 de septiembre
+
+50 pruebas aprobadas, incluyendo migración v7 → v8, recuperación JSON v4, transferencias y protección de saldos con movimientos simultáneos o editados. Tipos y lint aprobados. Flujo de alta, retiro y gasto comprobado en navegador con datos ficticios en 9007. Diálogo revisado a 360 × 740, contenido desplazable y sin recorte horizontal; no sustituye la prueba del teclado en teléfono físico. Los pendientes comerciales y de instalación indicados arriba permanecen abiertos.

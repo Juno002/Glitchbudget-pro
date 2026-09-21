@@ -1,5 +1,7 @@
 'use client';
 
+import { AccountSelect } from './account-select';
+import { debtBalance } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -21,6 +23,7 @@ export default function DebtsTab() {
 
   const [paymentDebtId, setPaymentDebtId] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [accountId, setAccountId] = useState('');
 
   const activeDebts = debts?.filter(d => d.status === 'active') || [];
 
@@ -57,6 +60,7 @@ export default function DebtsTab() {
     savingRef.current = true;
     setSaving(true);
     const success = await addDebtPayment({
+      accountId: accountId || undefined,
       debtId: paymentDebtId,
       amount: amtCents,
       date: localDate(),
@@ -129,10 +133,7 @@ export default function DebtsTab() {
       ) : (
         <div className="grid gap-4">
           {activeDebts.map(debt => {
-            const ccExpenses = (expenses || []).filter(e => e.debtId === debt.id).reduce((sum, e) => sum + e.amount, 0);
-            const ccPayments = (debtPayments || []).filter(p => p.debtId === debt.id).reduce((sum, p) => sum + p.amount, 0);
-            
-            const currentDebt = ccExpenses - ccPayments; // Positive means we owe money, negative means we are in surplus
+            const currentDebt = debtBalance(debt, expenses || [], debtPayments || []); // Positive means we owe money, negative means we are in surplus
             const isSurplus = currentDebt < 0;
             const absoluteDebt = Math.abs(currentDebt);
             
@@ -210,6 +211,7 @@ export default function DebtsTab() {
                        </div>
                     )}
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
+                      <AccountSelect value={accountId} onChange={setAccountId} disabled={saving} />
                       <div className="space-y-2">
                          <Label>Monto a Pagar o Abonar</Label>
                          <Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00" autoFocus required />

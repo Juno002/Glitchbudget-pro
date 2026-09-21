@@ -1,3 +1,4 @@
+import { AccountSelect } from './account-select';
 import { localDate } from '@/lib/finance-calculations';
 import { useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -14,6 +15,7 @@ import { getCategoryInfo } from '@/lib/categories';
 export default function SubscriptionsManager() {
   const { recurrents, addRecurring, deleteRecurring, addExpense, currentMonth, expenseCategories } = useFinances();
   const { toast } = useToast();
+  const [accountId, setAccountId] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newSub, setNewSub] = useState({ title: '', amount: '', day: '1', categoryId: '' });
 
@@ -54,11 +56,12 @@ export default function SubscriptionsManager() {
     const date = new Date(year, month - 1, day);
     
     const success = await addExpense({
+      accountId: accountId || undefined,
       concept: `Suscripción: ${sub.title}`,
       recurringId: sub.id,
       amount: sub.amount / 100,
       categoryId: sub.categoryId,
-      date: localDate(date),
+      date: accountId ? localDate() : localDate(date),
       type: 'Variable'
     });
     
@@ -68,6 +71,7 @@ export default function SubscriptionsManager() {
 
   return (
     <div className="space-y-4">
+      <AccountSelect value={accountId} onChange={setAccountId} label="Cuenta para registrar los pagos de hoy" />
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-lg font-bold">Mis Suscripciones</h3>

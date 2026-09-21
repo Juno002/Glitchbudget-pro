@@ -1,5 +1,6 @@
 'use client';
 
+import { AccountSelect } from './account-select';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
@@ -73,6 +74,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [frequency, setFrequency] = useState<'mensual' | 'quincenal' | 'semanal'>('mensual');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [debtId, setDebtId] = useState('');
+  const [accountId, setAccountId] = useState('');
 
   // AI insight state
   const [insight, setInsight] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       return;
     }
 
+    setAccountId(editingExpense?.accountId || editingIncome?.accountId || '');
     if (mode === 'edit' && editingExpense) {
       setTxType('expense');
       setAmount(String(editingExpense.amount / 100));
@@ -151,7 +154,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       let success: boolean;
       if (txType === 'expense') {
         const fields = {
-          concept, amount: numAmount, categoryId, date, type: expenseSubtype,
+          accountId: accountId || undefined, concept, amount: numAmount, categoryId, date, type: expenseSubtype,
           frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
           paymentMethod, debtId: paymentMethod === 'credit' ? debtId : undefined,
         };
@@ -159,7 +162,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           ? await updateExpense({ ...editingExpense, ...fields })
           : await addExpense(fields);
       } else {
-        const fields = { description: concept, amount: numAmount, categoryId, date, type: incomeSubtype };
+        const fields = { accountId: accountId || undefined, description: concept, amount: numAmount, categoryId, date, type: incomeSubtype };
         success = editingIncome
           ? await updateIncomeItem({ ...editingIncome, ...fields })
           : await addIncomeItem(fields);
@@ -402,7 +405,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                  className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
                  onClick={() => { setPaymentMethod('cash'); setDebtId(''); }}
                >
-                 <Banknote className="h-4 w-4" /> Efectivo
+                 <Banknote className="h-4 w-4" /> Efectivo / banco
                </button>
                
                {/* Dropdown for credit cards if more than 1, otherwise just a button */}
@@ -444,6 +447,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           )}
 
+          {!saved && (txType === 'income' || paymentMethod !== 'credit') && <AccountSelect value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
           {/* Concept input */}
           {!saved && (
             <Input

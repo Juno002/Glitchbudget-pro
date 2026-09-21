@@ -135,6 +135,7 @@ test('JSON round trip preserves expense types, frequency, goal quotas and settin
 test('old v3 backups still restore with explicit defaults', async () => {
   await db.expenses.add(expense);
   const backup = JSON.parse(await exportDataJSON());
+  backup.v = 3; delete backup.accounts; delete backup.accountTransfers;
   delete backup.settings.savePct; delete backup.settings.customCategoryIcons;
   delete backup.expenses[0].type;
   await importDataJSON(JSON.stringify(backup));

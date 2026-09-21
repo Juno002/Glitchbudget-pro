@@ -27,6 +27,7 @@ export interface Period {
 }
 
 export interface Income {
+    accountId?: string;
     id: string;
     type: 'extra' | 'gift';
     description: string;
@@ -40,6 +41,7 @@ export interface Income {
 }
 
 export interface Expense {
+    accountId?: string;
     id: string;
     type: 'Fijo' | 'Variable' | 'Ocasional';
     concept: string;
@@ -97,6 +99,7 @@ export interface Recurring {
 }
 
 export interface Debt {
+  openingAdjustment?: number;
   id: string;
   name: string;
   type: 'credit_card' | 'loan';
@@ -110,6 +113,7 @@ export interface Debt {
 }
 
 export interface DebtPayment {
+  accountId?: string;
   id: string;
   debtId: string;
   date: string;                // ISO
@@ -126,7 +130,24 @@ export interface FxRate {
 }
 
 
+export interface Account {
+  id: string;
+  name: string;
+  type: 'cash' | 'bank';
+  openingBalance: number;
+  startDate: string;
+}
+export interface AccountTransfer {
+  id: string;
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: string;
+  note: string;
+}
 export class GlitchBudgetDB extends Dexie {
+  accounts!: Table<Account, string>;
+  account_transfers!: Table<AccountTransfer, string>;
   expenses!: Table<Expense, string>;
   incomes!: Table<Income, string>;
   goals!: Table<Goal, string>;
@@ -139,8 +160,9 @@ export class GlitchBudgetDB extends Dexie {
   debt_payments!: Table<DebtPayment, string>;
   fxRates!: Table<FxRate, string>;
 
-  constructor() {
-    super('GlitchBudgetDB');
+  constructor(name = 'GlitchBudgetDB') {
+    super(name);
+    this.version(8).stores({ accounts: 'id, type', account_transfers: 'id, fromAccountId, toAccountId, date', incomes: 'id, date, month, categoryId, type, accountId', expenses: 'id, date, month, categoryId, type, accountId', debt_payments: 'id, debtId, date, accountId' });
     this.version(7).stores({
       expenses: 'id, date, month, categoryId, type',
       incomes: 'id, date, month, categoryId, type',

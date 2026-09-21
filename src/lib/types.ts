@@ -8,6 +8,7 @@ export type Transaction = {
 };
 
 export interface Income {
+    accountId?: string;
     id: string;
     type: 'extra' | 'gift';
     description: string;
@@ -18,6 +19,7 @@ export interface Income {
 }
 
 export interface Expense {
+    accountId?: string;
     id: string;
     type: 'Fijo' | 'Variable' | 'Ocasional';
     concept: string;

@@ -1,5 +1,6 @@
 'use client';
 
+import AccountsOverview from './accounts-overview';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -68,7 +69,7 @@ function Snapshot({
   };
 
   const cards = [
-    { label: 'Disponible', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Libre para gastar tras presupuestos, metas y ahorro.' },
+    { label: 'Disponible del mes', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Disponible del presupuesto tras metas y ahorro. No es el saldo de tus bancos ni efectivo.' },
     { label: 'Ahorro', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% del ingreso apartado como ahorro. Se resta del disponible.` },
     { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={100 - spendingPct} ok /> },
     { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
@@ -228,6 +229,7 @@ export default function SummaryTab() {
 
   return (
       <div className="space-y-4">
+        <AccountsOverview />
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>
         </div>

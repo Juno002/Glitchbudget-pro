@@ -1,3 +1,4 @@
+import { accountSchema, transferSchema } from './accounts';
 
 import { z } from 'zod';
 import { db } from '@/lib/db';
@@ -36,6 +37,7 @@ const PeriodV3 = z.object({
 });
 
 export const IncomeV3 = z.object({
+  accountId: Id.optional(),
   type: z.enum(['extra', 'gift']).default('extra'),
   id: Id, month: MonthID, date: ISODate, categoryId: Id,
   amount: z.number().int().nonnegative(),
@@ -46,6 +48,7 @@ export const IncomeV3 = z.object({
 });
 
 export const ExpenseV3 = z.object({
+  accountId: Id.optional(),
   type: z.enum(['Fijo', 'Variable', 'Ocasional']).default('Variable'),
   frequency: z.enum(['mensual', 'quincenal', 'semanal']).optional(),
   id: Id, month: MonthID, date: ISODate, categoryId: Id,
@@ -87,12 +90,14 @@ const RecurrentV3 = z.object({
   endDate: ISODate.optional(), active: z.boolean(),
 });
 const DebtV3 = z.object({
+  openingAdjustment: z.number().int().min(-Number.MAX_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER).optional(),
   id: Id, name: z.string(), type: z.enum(['credit_card', 'loan']), principal: MoneyCents,
   apr: z.number().finite().nonnegative(), minPayment: MoneyCents, createdAt: ISODateTime,
   status: z.enum(['active', 'closed']), billingCycleDay: z.number().int().min(1).max(31).optional(),
   paymentDueDay: z.number().int().min(1).max(31).optional(),
 });
 const DebtPaymentV3 = z.object({
+  accountId: Id.optional(),
   id: Id, debtId: Id, date: z.union([ISODate, ISODateTime]), amount: MoneyCents, note: z.string().optional(),
 });
 const FxRateV3 = z.object({
@@ -100,7 +105,9 @@ const FxRateV3 = z.object({
 });
 
 const DumpV3 = z.object({
-  v: z.literal(3),
+  v: z.union([z.literal(3), z.literal(4)]),
+  accounts: z.array(accountSchema).optional(),
+  accountTransfers: z.array(transferSchema).optional(),
   exportedAt: ISODateTime,
   settings: SettingsV3,
   periods: z.array(PeriodV3),
@@ -124,7 +131,7 @@ function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 
 export async function exportDataJSON(): Promise<string> {
   // Lee todo de Dexie
-  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates] = await db.transaction('r', db.tables, () => Promise.all([
+  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates, accounts, accountTransfers] = await db.transaction('r', db.tables, () => Promise.all([
     db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
     db.periods.toArray(),
     db.incomes.toArray(),
@@ -136,11 +143,14 @@ export async function exportDataJSON(): Promise<string> {
     db.debts.toArray(),
     db.debt_payments.toArray(),
     db.fxRates.toArray(),
+    db.accounts.toArray(),
+    db.account_transfers.toArray(),
   ]));
 
   // Mapea al contrato v3 (montos ya están en centavos en DB)
   const dump: DumpV3T = {
-    v: 3,
+    v: 4,
+    accounts, accountTransfers,
     exportedAt: nowIsoZ(),
     settings: {
       ...settings,
@@ -166,13 +176,13 @@ export async function exportDataJSON(): Promise<string> {
       type: i.type,
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
       amount: toCents(i.amount), description: i.description,
-      currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+      accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
     })),
     expenses: expenses.map(e => ({
       type: e.type, frequency: e.frequency,
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
-      currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+      accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
       paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
     })),
     plans: plans.map(p => ({
@@ -216,6 +226,16 @@ export async function importDataJSON(text: string): Promise<{
   const raw = JSON.parse(text);
   const d = DumpV3.parse(raw); // si no cumple, explota aquí con un mensaje útil
 
+  if (d.v === 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
+  const accountMap = new Map((d.accounts || []).map(a => [a.id, a]));
+  for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
+    if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
+  }
+  for (const transfer of d.accountTransfers || []) {
+    for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
+      if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
+    }
+  }
   const goalIds = new Set(d.goals.map(g => g.id));
   const debtIds = new Set((d.debts || []).map(debt => debt.id));
   if (d.goalContributions.some(c => !goalIds.has(c.goalId))) throw new Error('El respaldo contiene aportes a metas inexistentes.');
@@ -259,13 +279,13 @@ export async function importDataJSON(text: string): Promise<{
   const incomes = d.incomes.map(i => ({
     id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
     amount: i.amount, description: i.description, type: i.type,
-    currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+    accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
   }));
 
   const expenses = d.expenses.map(e => ({
     id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
     amount: e.amount, concept: e.concept ?? '', type: e.type, frequency: e.frequency,
-    currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+    accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
     paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
   }));
 
@@ -307,8 +327,12 @@ export async function importDataJSON(text: string): Promise<{
         db.debts.clear(),
         db.debt_payments.clear(),
         db.fxRates.clear(),
+        db.accounts.clear(),
+        db.account_transfers.clear(),
       ]);
       await db.settings.put(settingsRow as any);
+      if (d.accounts?.length) await db.accounts.bulkAdd(d.accounts);
+      if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
       if (incomes.length) await db.incomes.bulkAdd(incomes as any);
       if (expenses.length) await db.expenses.bulkAdd(expenses as any);

@@ -1,5 +1,6 @@
 'use client';
 
+import { AccountSelect } from '@/components/dashboard/account-select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -23,6 +24,7 @@ const formSchema = z.object({
 type TransactionFormValues = z.infer<typeof formSchema>;
 
 export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const [accountId, setAccountId] = useState('');
   const { addIncomeItem, addExpense, incomeCategories, expenseCategories } = useFinances();
   const [type, setType] = useState<'income' | 'expense'>('expense');
 
@@ -48,9 +50,9 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
     };
     let success: boolean;
     if (values.type === 'income') {
-        success = await addIncomeItem({ ...data, description: values.description, type: 'extra' });
+        success = await addIncomeItem({ ...data, accountId: accountId || undefined, description: values.description, type: 'extra' });
     } else {
-        success = await addExpense({ ...data, concept: values.description, type: 'Variable' });
+        success = await addExpense({ ...data, accountId: accountId || undefined, concept: values.description, type: 'Variable' });
     }
     if (!success) return;
     form.reset();
@@ -60,6 +62,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <AccountSelect value={accountId} onChange={setAccountId} label={type === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} />
         <FormField
           control={form.control}
           name="type"
