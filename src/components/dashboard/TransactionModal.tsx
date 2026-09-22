@@ -198,7 +198,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
-      <DialogContent className="sm:max-w-[420px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[420px] p-0 gap-0 overflow-x-hidden overflow-y-auto">
         <DialogHeader className="sr-only">
           <DialogDescription>Completa el monto, la categoría y la fecha del movimiento.</DialogDescription>
           <DialogTitle>{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>

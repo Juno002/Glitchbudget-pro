@@ -41,10 +41,17 @@ export async function requireAccount(id: string | undefined, movementDate: strin
 export async function addAccount(input: Account, editing = false) {
   const account = accountSchema.parse(input);
   if (!editing && account.startDate !== localDate()) throw new Error('Introduce el saldo actual para comenzar el seguimiento hoy.');
-  await db.transaction('rw', accountTables, async () => {
+  await db.transaction('rw', [...accountTables, db.settings], async () => {
     if (editing) {
       const existing = await db.accounts.get(account.id);
       if (!existing || existing.startDate !== account.startDate) throw new Error('No se puede cambiar la fecha inicial de la cuenta.');
+      if ((await db.settings.get('general'))?.strictMode && account.openingBalance < existing.openingBalance) {
+        const snapshot = await readAccountSnapshot();
+        const dates = new Set([localDate(), ...accountEntries(existing, snapshot, '9999-12-31').map(r => r.date)]);
+        if ([...dates].some(d => accountBalance(account, snapshot, d) < Math.min(0, accountBalance(existing, snapshot, d)))) {
+          throw new Error('Saldo insuficiente: el saldo inicial dejaría sin fondos movimientos registrados.');
+        }
+      }
       await db.accounts.put(account);
     } else await db.accounts.add(account);
   });

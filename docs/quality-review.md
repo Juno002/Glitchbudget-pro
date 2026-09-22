@@ -56,3 +56,12 @@ Los puertos locales 9003, 9004, 9005 y 9006 son pruebas con almacenamiento separ
 ## Ampliación de cuentas — 21 de septiembre
 
 50 pruebas aprobadas, incluyendo migración v7 → v8, recuperación JSON v4, transferencias y protección de saldos con movimientos simultáneos o editados. Tipos y lint aprobados. Flujo de alta, retiro y gasto comprobado en navegador con datos ficticios en 9007. Diálogo revisado a 360 × 740, contenido desplazable y sin recorte horizontal; no sustituye la prueba del teclado en teléfono físico. Los pendientes comerciales y de instalación indicados arriba permanecen abiertos.
+
+## Revisión de regresiones — 22 de septiembre
+
+- El formulario de movimiento sobrescribía el desplazamiento vertical con overflow-hidden. Reproducido a 360 × 400: contenido de 394 px en 367 px disponibles, botón recortado. Corregido y comprobado desplazamiento hasta el botón completo.
+- El mes del historial solo tomaba el selector global al montar la pantalla. Ahora se sincroniza cuando cambia el mes global; comprobado septiembre → agosto → septiembre.
+- Las opciones de categoría se calculaban sobre la lista ya filtrada, ocultando alternativas. Ahora usan todos los movimientos del período; una categoría ausente al cambiar de mes vuelve a «Todas», comprobado desde interfaz.
+- Eliminar ingresos y reducir saldos iniciales podía dejar una cuenta negativa pese al modo estricto. Ambas rutas comprueban los movimientos registrados dentro de la transacción; la corrección sin modo estricto sigue permitida.
+
+53 pruebas aprobadas, tipos, lint y compilación de producción correctos. Vista previa 9007 actualizada, sin errores de consola en el recorrido comprobado. Esta revisión no sustituye el piloto ni las pruebas pendientes en dispositivos físicos.

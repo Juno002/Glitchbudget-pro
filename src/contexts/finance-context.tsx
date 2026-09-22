@@ -10,7 +10,7 @@ import { db, type Settings, type Income, type Expense, type Plan, type Debt, typ
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { calculateTotals, expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
-import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution } from '@/lib/transaction-service';
+import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome } from '@/lib/transaction-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -268,7 +268,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteIncomeItem = useCallback(async (id: string) => {
     try {
-      await db.incomes.delete(id);
+      await removeIncome(id);
       toast({ title: 'Ingreso eliminado' });
       return true;
     } catch (error) {

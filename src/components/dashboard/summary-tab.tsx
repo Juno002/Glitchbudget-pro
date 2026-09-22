@@ -1,6 +1,5 @@
 'use client';
 
-import AccountsOverview from './accounts-overview';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -229,7 +228,6 @@ export default function SummaryTab() {
 
   return (
       <div className="space-y-4">
-        <AccountsOverview />
         <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>
         </div>

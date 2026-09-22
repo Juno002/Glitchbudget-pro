@@ -4,7 +4,7 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 ## Uso
 
-1. En Resumen, abre Configurar mis saldos. Crea Efectivo y cada banco con el saldo actual. No hacen falta números de cuenta ni credenciales.
+1. En Movimientos, abre Configurar mis saldos. Crea Efectivo y cada banco con el saldo actual. No hacen falta números de cuenta ni credenciales.
 2. Incluye en el saldo inicial las operaciones que ya hiciste hoy. Los movimientos antiguos quedan sin cuenta para no contarlos dos veces.
 3. Los ingresos nuevos piden cuenta de destino; los gastos y pagos de tarjeta, cuenta de origen. Las compras a crédito piden la tarjeta y no descuentan bancos.
 4. Para sacar efectivo del banco, usa Gestionar cuentas → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. Una comisión se registra como gasto separado.

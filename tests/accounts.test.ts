@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import Dexie from 'dexie';
 import { db, GlitchBudgetDB, type Account } from '../src/lib/db';
 import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt } from '../src/lib/accounts';
-import { saveIncome, saveExpense, saveDebtPayment } from '../src/lib/transaction-service';
+import { saveIncome, saveExpense, saveDebtPayment, removeIncome } from '../src/lib/transaction-service';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { localDate } from '../src/lib/finance-calculations';
 const today = localDate();
@@ -16,6 +16,30 @@ beforeEach(async()=>{
   await addAccount(bank);await addAccount(cash);
 });
 after(()=>db.close());
+test('deleting spent income is rejected atomically in strict mode',async()=>{
+  await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra',accountId:'cash'});
+  await saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Variable',accountId:'cash'});
+  await assert.rejects(removeIncome('i'),/Saldo insuficiente/);
+  assert.ok(await db.incomes.get('i'));
+  assert.equal(accountBalance(cash,await readAccountSnapshot()),0);
+});
+test('unspent income can be deleted and non-strict correction may leave a negative balance',async()=>{
+  await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra',accountId:'cash'});
+  await removeIncome('i');
+  assert.equal(await db.incomes.count(),0);
+  await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra',accountId:'cash'});
+  await saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Variable',accountId:'cash'});
+  await db.settings.update('general',{strictMode:false});
+  await removeIncome('i');
+  assert.equal(accountBalance(cash,await readAccountSnapshot()),-10_000);
+});
+test('opening balance corrections respect funds already spent in strict mode',async()=>{
+  await saveExpense({id:'e',date:today,amount:800,categoryId:'food',concept:'Compra',type:'Variable',accountId:'bank'});
+  await assert.rejects(addAccount({...bank,openingBalance:50_000},true),/Saldo insuficiente/);
+  assert.equal((await db.accounts.get('bank'))?.openingBalance,100_000);
+  await addAccount({...bank,name:'Banco corregido',openingBalance:90_000},true);
+  assert.equal(accountBalance((await db.accounts.get('bank'))!,await readAccountSnapshot()),10_000);
+});
 test('backdated spending cannot consume funds needed by a later recorded expense',async()=>{
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   const later=localDate(tomorrow);

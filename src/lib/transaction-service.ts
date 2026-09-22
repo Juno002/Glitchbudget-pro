@@ -34,6 +34,16 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
   });
 }
 
+export async function removeIncome(id: string): Promise<void> {
+  await db.transaction('rw', [...accountTables, db.settings], async () => {
+    if ((await db.settings.get('general'))?.strictMode) {
+      const before = await readAccountSnapshot();
+      requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: before.incomes.filter(i => i.id !== id) });
+    }
+    await db.incomes.delete(id);
+  });
+}
+
 export async function saveExpense(input: Omit<Expense, 'month'>, editing = false): Promise<void> {
   const value = expenseSchema.parse(input);
   const row: Expense = {

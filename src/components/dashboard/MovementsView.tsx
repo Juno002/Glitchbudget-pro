@@ -1,7 +1,7 @@
 'use client';
 
 import { expenseForMonth } from '@/lib/finance-calculations';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -31,6 +31,7 @@ export default function MovementsView() {
   const [filterMonth, setFilterMonth] = useState(currentMonth);
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterCategory, setFilterCategory] = useState('all');
+  useEffect(() => { setFilterMonth(currentMonth); }, [currentMonth]);
 
   // Edit modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -38,7 +39,7 @@ export default function MovementsView() {
   const [editingIncome, setEditingIncome] = useState<Income | undefined>();
 
   // Merge into unified list
-  const items: UnifiedItem[] = useMemo(() => {
+  const periodItems: UnifiedItem[] = useMemo(() => {
     const incomeItems: UnifiedItem[] = (incomes || [])
       .filter(i => i.date.slice(0, 7) === filterMonth)
       .map(i => ({
@@ -65,15 +66,7 @@ export default function MovementsView() {
         raw: e,
       }));
 
-    let merged = [...incomeItems, ...expenseItems];
-
-    // Apply filters
-    if (filterType !== 'all') {
-      merged = merged.filter(i => i.kind === filterType);
-    }
-    if (filterCategory !== 'all') {
-      merged = merged.filter(i => i.categoryId === filterCategory);
-    }
+    const merged = [...incomeItems, ...expenseItems];
 
     // Sort: fixed first (pinned), then by date desc
     merged.sort((a, b) => {
@@ -83,13 +76,21 @@ export default function MovementsView() {
     });
 
     return merged;
-  }, [incomes, expenses, filterMonth, filterType, filterCategory]);
+  }, [incomes, expenses, filterMonth]);
+
+  const items = useMemo(() => periodItems.filter(i =>
+    (filterType === 'all' || i.kind === filterType) && (filterCategory === 'all' || i.categoryId === filterCategory)
+  ), [periodItems, filterType, filterCategory]);
 
   // Unique categories present in current data
   const presentCategories = useMemo(() => {
-    const ids = new Set(items.map(i => i.categoryId));
+    const ids = new Set(periodItems.map(i => i.categoryId));
     return Array.from(ids).map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
-  }, [items]);
+  }, [periodItems]);
+
+  useEffect(() => {
+    if (filterCategory !== 'all' && !presentCategories.some(c => c.id === filterCategory)) setFilterCategory('all');
+  }, [presentCategories, filterCategory]);
 
   const handleItemClick = (item: UnifiedItem) => {
     if (item.kind === 'expense') {
@@ -136,6 +137,7 @@ export default function MovementsView() {
 
         <Input
           type="month"
+          aria-label="Mes del historial"
           value={filterMonth}
           onChange={(e) => setFilterMonth(e.target.value)}
           className="w-auto"
