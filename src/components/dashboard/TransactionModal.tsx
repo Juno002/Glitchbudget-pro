@@ -460,6 +460,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           )}
 
           {/* Action buttons */}
+          {!saved && Number(amount) > 0 && !categoryId && <p className="text-xs text-muted-foreground" role="status">Selecciona una categoría para continuar.</p>}
           {!saved && (
             <div className="flex gap-2">
               {isEditing && (

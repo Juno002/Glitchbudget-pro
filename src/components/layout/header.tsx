@@ -30,7 +30,7 @@ import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadg
 import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
 import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
 
-export default function Header() {
+export default function Header({ onNewMovement }: { onNewMovement?: () => void }) {
   const { 
     theme, setTheme, 
     strictMode, setStrictMode, 
@@ -79,11 +79,15 @@ export default function Header() {
                 </div>
             </Link>
         </div>
+        {onNewMovement && <Button className="md:hidden shrink-0" size="icon" onClick={onNewMovement} aria-label="Nuevo movimiento"><Plus className="h-5 w-5" /></Button>}
         <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
-                <Input id="month" type="month" value={currentMonth} onChange={(e) => { if (e.target.value) setCurrentMonth(e.target.value); }} aria-label="Mes del presupuesto" className="min-w-0 w-[145px] sm:w-auto h-9" />
-                <Button variant="outline" className="h-9" onClick={() => setCurrentMonth(localDate().slice(0, 7))}>Este mes</Button>
+                <div className="relative min-w-0 w-[104px] sm:w-[145px] h-9 rounded-full border border-input bg-background focus-within:ring-2 focus-within:ring-ring">
+                  <span aria-hidden="true" className="flex h-full items-center justify-center px-2 text-xs sm:text-sm capitalize pointer-events-none">{new Date(`${currentMonth}-02T12:00:00`).toLocaleDateString('es-DO', { month: 'short', year: 'numeric' })}</span>
+                  <Input id="month" type="month" value={currentMonth} onChange={(e) => { if (e.target.value) setCurrentMonth(e.target.value); }} aria-label="Mes del presupuesto" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                </div>
+                <Button variant="outline" className="h-9 px-2 text-xs sm:text-sm" onClick={() => setCurrentMonth(localDate().slice(0, 7))}>Este mes</Button>
             </div>
             
              <Dialog>

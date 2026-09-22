@@ -1,6 +1,7 @@
 'use client';
 
 import { useFinances } from "@/contexts/finance-context";
+import { getCategoryInfo } from '@/lib/categories';
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { playAIInsight } from '@/lib/sounds';
@@ -130,6 +131,7 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
         >
         <Card className="hover:shadow-lg hover:shadow-[hsl(var(--primary)_/_0.04)] transition-shadow duration-300">
             <CardContent className="pt-6">
+                <h3 className="text-base font-semibold mb-3">{title} por categoría</h3>
                 <div className="h-64 w-full">
                     {data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
@@ -137,7 +139,7 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
                                 <RechartsTooltip
                                     formatter={(value: number) => [formatCurrency(value), title]}
                                     contentStyle={{
-                                        backgroundColor: 'rgba(10,10,20,0.9)',
+                                        backgroundColor: 'hsl(var(--popover))',
                                         border: '1px solid hsl(var(--border))',
                                         borderRadius: '12px',
                                         backdropFilter: 'blur(12px)',
@@ -145,7 +147,7 @@ const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, 
                                     }}
                                     itemStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
-                                <Legend />
+                                <Legend formatter={(value) => getCategoryInfo(String(value))?.name || String(value)} />
                                 <Pie
                                     data={data}
                                     dataKey="value"

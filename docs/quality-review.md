@@ -65,3 +65,9 @@ Los puertos locales 9003, 9004, 9005 y 9006 son pruebas con almacenamiento separ
 - Eliminar ingresos y reducir saldos iniciales podía dejar una cuenta negativa pese al modo estricto. Ambas rutas comprueban los movimientos registrados dentro de la transacción; la corrección sin modo estricto sigue permitida.
 
 53 pruebas aprobadas, tipos, lint y compilación de producción correctos. Vista previa 9007 actualizada, sin errores de consola en el recorrido comprobado. Esta revisión no sustituye el piloto ni las pruebas pendientes en dispositivos físicos.
+
+## Ajustes a partir de capturas del teléfono — 22 de septiembre
+
+Las capturas aportadas muestran mes truncado, botón flotante sobre importes, pestañas inactivas con mayor fondo que la activa y formulario desplazado fuera de pantalla al abrir el teclado. Se abrevia el mes conservando el año, el botón de alta móvil pasa a la cabecera y las pestañas resaltan únicamente la opción activa. Los gráficos reciben títulos, nombres de categorías legibles y tooltip con superficie del tema.
+
+Los diálogos normales y de confirmación se dimensionan con visualViewport (altura y desplazamiento), con actualización al abrir teclado o desplazar la vista. Verificado en navegador a 320 × 400: diálogo entre y=16 e y=384, desplazamiento interno y aviso de categoría pendiente. Esta simulación no confirma por sí sola el comportamiento del teclado físico; queda pendiente repetir en el teléfono de las capturas.

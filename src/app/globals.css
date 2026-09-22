@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+.viewport-dialog {
+  top: calc(var(--visible-top, 0px) + var(--visible-height, 100dvh) / 2);
+  max-height: calc(var(--visible-height, 100dvh) - 2rem);
+  overscroll-behavior: contain;
+}
+
 body {
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,sans-serif;
 }

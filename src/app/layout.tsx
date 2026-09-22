@@ -5,6 +5,7 @@ import { FinanceProvider } from '@/contexts/finance-context';
 import { Toaster } from '@/components/ui/toaster';
 import { MotionPreferences } from '@/components/motion-preferences';
 import { PWARegistration } from '@/components/pwa-registration';
+import { VisibleViewport } from '@/components/visible-viewport';
 
 const syne = Syne({ 
   subsets: ['latin'], 
@@ -41,6 +42,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={`${syne.variable} ${dmMono.variable} font-body bg-background text-foreground relative overflow-x-hidden min-h-screen`}>
+        <VisibleViewport />
         {/* Background Gradients */}
         <div className="ambient-background fixed inset-0 pointer-events-none -z-10">
           <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary opacity-10 blur-[120px]" />
