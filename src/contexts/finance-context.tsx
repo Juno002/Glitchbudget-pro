@@ -182,7 +182,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         document.body.classList.remove('light', 'dark', 'serious', 'system');
         document.documentElement.classList.remove('light', 'dark', 'serious', 'system');
         document.documentElement.classList.add(theme);
-        document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light';
+        // "only" opts out of automatic darkening in Chromium-based mobile browsers.
+        document.documentElement.style.colorScheme = theme === 'dark' ? 'only dark' : 'only light';
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080808' : theme === 'serious' ? '#f7f7f7' : '#fafafa');
     }
   }, [activeSettings.theme]);
 

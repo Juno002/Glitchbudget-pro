@@ -186,5 +186,6 @@ html.serious body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 
 html.serious .ambient-background { display: none; }
 html.serious [class*="backdrop-blur"] { backdrop-filter: none; }
 html.serious [class*="rounded-"] { border-radius: 12px; }
-html.light, html.serious { background: hsl(var(--background)); }
+html.light, html.serious { background: hsl(var(--background)); color-scheme: only light; }
+html.dark { color-scheme: only dark; }
 html.light ::-webkit-scrollbar-thumb, html.serious ::-webkit-scrollbar-thumb { background: hsl(var(--border)); }
