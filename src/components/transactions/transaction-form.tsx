@@ -62,7 +62,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <AccountSelect value={accountId} onChange={setAccountId} label={type === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} />
+        {type === 'income' ? <p className="text-sm text-muted-foreground">El ingreso se suma a Efectivo.</p> : <AccountSelect cashDefault value={accountId} onChange={setAccountId} />}
         <FormField
           control={form.control}
           name="type"

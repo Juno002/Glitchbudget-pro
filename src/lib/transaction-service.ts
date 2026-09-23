@@ -1,4 +1,4 @@
-import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds } from './accounts';
+import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
 import { calculateTotals, isValidDate, type FinanceSnapshot } from './finance-calculations';
@@ -22,9 +22,11 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
   const value = incomeSchema.parse(input);
   const row: Income = { ...input, ...value, month: value.date.slice(0, 7) };
   await db.transaction('rw', [...accountTables, db.settings], async () => {
+    const existing = editing ? await db.incomes.get(row.id) : undefined;
+    if (editing && !existing) throw new Error('El ingreso ya no existe. Actualiza la lista.');
+    if (!editing) row.accountId = (await ensureCashAccount(row.date)).id;
+    else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) await requireAccount(row.accountId, row.date);
-    else if (!editing && await db.accounts.count()) throw new Error('Selecciona la cuenta donde recibiste el ingreso.');
-    if (editing && !await db.incomes.get(row.id)) throw new Error('El ingreso ya no existe. Actualiza la lista.');
     if (editing && (await db.settings.get('general'))?.strictMode) {
       const before = await readAccountSnapshot();
       requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: [...before.incomes.filter(i => i.id !== row.id), row] });
@@ -67,13 +69,12 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       }
     } else {
       const settings = await db.settings.get('general');
+      if (!row.accountId && (!editing || existing?.accountId || existing?.paymentMethod === 'credit')) row.accountId = existing?.accountId || (await ensureCashAccount(row.date)).id;
       if (row.accountId) {
         await requireAccount(row.accountId, row.date);
         const snapshot = await readAccountSnapshot();
         const projected = { ...snapshot, expenses: [...snapshot.expenses.filter(e => e.id !== row.id), row] };
         if (settings?.strictMode) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
-      } else if (!editing && await db.accounts.count()) {
-        throw new Error('Selecciona la cuenta desde la que pagaste.');
       }
       if (settings?.strictMode && !row.accountId) {
         const data: FinanceSnapshot = {
@@ -110,6 +111,7 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   await db.transaction('rw', outgoingTables, async () => {
     const debt = await db.debts.get(payment.debtId);
     if (!debt || debt.status !== 'active') throw new Error('Selecciona una tarjeta activa.');
+    payment = { ...payment, accountId: payment.accountId || (await ensureCashAccount(payment.date)).id };
     if (payment.accountId) {
       await requireAccount(payment.accountId, payment.date);
       const settings = await db.settings.get('general');
@@ -117,9 +119,6 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
         const before = await readAccountSnapshot();
         requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, payments: [...before.payments, payment] });
       }
-    } else {
-      if (await db.accounts.count()) throw new Error('Selecciona la cuenta desde la que pagaste la tarjeta.');
-      await requireAvailableCash(payment.amount, payment.date);
     }
     await db.debt_payments.add(payment);
   });

@@ -51,9 +51,6 @@ export default function SubscriptionsManager() {
 
   const handleLogExpense = async (sub: typeof activeSubs[0]) => {
     // Add an expense for this subscription
-    const [year, month] = currentMonth.split('-').map(Number);
-    const day = Math.min(sub.day || 1, new Date(year, month, 0).getDate());
-    const date = new Date(year, month - 1, day);
     
     const success = await addExpense({
       accountId: accountId || undefined,
@@ -61,7 +58,7 @@ export default function SubscriptionsManager() {
       recurringId: sub.id,
       amount: sub.amount / 100,
       categoryId: sub.categoryId,
-      date: accountId ? localDate() : localDate(date),
+      date: localDate(),
       type: 'Variable'
     });
     
@@ -71,7 +68,7 @@ export default function SubscriptionsManager() {
 
   return (
     <div className="space-y-4">
-      <AccountSelect value={accountId} onChange={setAccountId} label="Cuenta para registrar los pagos de hoy" />
+      <AccountSelect cashDefault value={accountId} onChange={setAccountId} label="Cuenta para registrar los pagos de hoy" />
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-lg font-bold">Mis Suscripciones</h3>

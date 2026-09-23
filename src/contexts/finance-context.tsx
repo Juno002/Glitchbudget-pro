@@ -11,6 +11,7 @@ import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { calculateTotals, expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome } from '@/lib/transaction-service';
+import { ensureCashAccount } from '@/lib/accounts';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -139,6 +140,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const debts = useLiveQuery(() => db.debts.toArray(), [dataVersion]);
   const debtPayments = useLiveQuery(() => db.debt_payments.toArray(), [dataVersion]);
   const recurrents = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
+  const accounts = useLiveQuery(() => db.accounts.toArray(), [dataVersion]);
+  useEffect(() => {
+    if (accounts && !accounts.some(a => a.isDefaultCash)) {
+      void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
+    }
+  }, [accounts, toast]);
 
   const settings = useMemo(() => {
     const s: Partial<Settings> = rawSettings ?? {};

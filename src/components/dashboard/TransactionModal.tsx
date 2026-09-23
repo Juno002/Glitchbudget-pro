@@ -447,7 +447,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           )}
 
-          {!saved && (txType === 'income' || paymentMethod !== 'credit') && <AccountSelect value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
+          {!saved && txType === 'income' && !isEditing && <p className="text-sm text-muted-foreground">El ingreso se suma a Efectivo. Puedes transferirlo después a un banco.</p>}
+          {!saved && (txType === 'income' ? isEditing : paymentMethod !== 'credit') && <AccountSelect cashDefault={!isEditing} value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
           {/* Concept input */}
           {!saved && (
             <Input

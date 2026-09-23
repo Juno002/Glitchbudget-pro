@@ -3,7 +3,23 @@ import { db, type Account, type Income, type Expense, type DebtPayment, type Acc
 import { isValidDate, localDate } from './finance-calculations';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
-export const accountSchema = z.object({ id: z.string().min(1), name: z.string().trim().min(1).max(80), type: z.enum(['cash', 'bank']), openingBalance: cents, startDate: date });
+export const accountSchema = z.object({ id: z.string().min(1), name: z.string().trim().min(1).max(80), type: z.enum(['cash', 'bank']), openingBalance: cents, startDate: date, isDefaultCash: z.boolean().optional() }).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+export function defaultCashAccount(accounts: Account[]) {
+  return accounts.find(a => a.isDefaultCash && a.type === 'cash') || accounts.filter(a => a.type === 'cash').sort((a,b) => a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id))[0];
+}
+export async function ensureCashAccount(startDate = localDate()): Promise<Account> {
+  return db.transaction('rw', db.accounts, async () => {
+    const accounts = await db.accounts.toArray();
+    const existing = defaultCashAccount(accounts);
+    if (existing) {
+      if (!existing.isDefaultCash) await db.accounts.update(existing.id, { isDefaultCash: true });
+      return { ...existing, isDefaultCash: true };
+    }
+    const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', openingBalance: 0, startDate, isDefaultCash: true };
+    await db.accounts.add(account);
+    return account;
+  });
+}
 export const transferSchema = z.object({ id: z.string().min(1), fromAccountId: z.string().min(1), toAccountId: z.string().min(1), amount: cents.refine(v => v > 0, 'Introduce un monto positivo.'), date, note: z.string().trim().max(250) }).refine(t => t.fromAccountId !== t.toAccountId, 'Selecciona dos cuentas diferentes.');
 export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
 export function accountEntries(account: Account, data: AccountSnapshot, through = localDate()) {
@@ -45,6 +61,8 @@ export async function addAccount(input: Account, editing = false) {
     if (editing) {
       const existing = await db.accounts.get(account.id);
       if (!existing || existing.startDate !== account.startDate) throw new Error('No se puede cambiar la fecha inicial de la cuenta.');
+      if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
+      account.isDefaultCash = existing.isDefaultCash;
       if ((await db.settings.get('general'))?.strictMode && account.openingBalance < existing.openingBalance) {
         const snapshot = await readAccountSnapshot();
         const dates = new Set([localDate(), ...accountEntries(existing, snapshot, '9999-12-31').map(r => r.date)]);
@@ -53,7 +71,10 @@ export async function addAccount(input: Account, editing = false) {
         }
       }
       await db.accounts.put(account);
-    } else await db.accounts.add(account);
+    } else {
+      if (account.isDefaultCash && (await db.accounts.toArray()).some(a => a.isDefaultCash)) throw new Error('Ya existe una cuenta de efectivo predeterminada.');
+      await db.accounts.add(account);
+    }
   });
 }
 export async function saveTransfer(input: AccountTransfer, editing = false) {

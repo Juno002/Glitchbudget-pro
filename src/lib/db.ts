@@ -131,6 +131,7 @@ export interface FxRate {
 
 
 export interface Account {
+  isDefaultCash?: boolean;
   id: string;
   name: string;
   type: 'cash' | 'bank';

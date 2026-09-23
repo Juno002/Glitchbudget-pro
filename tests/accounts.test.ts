@@ -3,7 +3,7 @@ import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import Dexie from 'dexie';
 import { db, GlitchBudgetDB, type Account } from '../src/lib/db';
-import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt } from '../src/lib/accounts';
+import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt, ensureCashAccount } from '../src/lib/accounts';
 import { saveIncome, saveExpense, saveDebtPayment, removeIncome } from '../src/lib/transaction-service';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { localDate } from '../src/lib/finance-calculations';
@@ -70,14 +70,16 @@ test('account spending uses opening cash even when monthly projected income is z
   await saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Fijo',accountId:'bank'});
   assert.equal(accountBalance(bank,await readAccountSnapshot()),90_000);
 });
-test('income credits its selected destination and editing moves it without duplication',async()=>{
+test('income defaults to cash and an explicit correction moves it only once',async()=>{
   const income={id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra' as const,accountId:'bank'};
-  await saveIncome(income);await saveIncome({...income,accountId:'cash'},true);
-  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),100_000);assert.equal(accountBalance(cash,data),10_000);
+  await saveIncome(income);assert.equal((await db.incomes.get('i'))?.accountId,'cash');
+  await saveIncome(income,true);
+  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),110_000);assert.equal(accountBalance(cash,data),0);
 });
-test('new cash movements require an account once tracking starts',async()=>{
-  await assert.rejects(saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra'}),/cuenta/);
-  await assert.rejects(saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Variable'}),/cuenta/);
+test('income is immediately spendable from default cash',async()=>{
+  await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra'});
+  await saveExpense({id:'e',date:today,amount:40,categoryId:'food',concept:'Compra',type:'Variable'});
+  assert.equal((await db.expenses.get('e'))?.accountId,'cash');assert.equal(accountBalance(cash,await readAccountSnapshot()),6000);
 });
 test('concurrent transfer and spending cannot overdraw a strict account',async()=>{
   const results=await Promise.allSettled([saveTransfer({...transfer,amount:80_000}),saveExpense({id:'e',date:today,amount:800,categoryId:'food',concept:'Compra',type:'Variable',accountId:'bank'})]);
@@ -106,7 +108,8 @@ test('v4 backup preserves accounts, movements and transfers',async()=>{
   const backup=await exportDataJSON();assert.equal(JSON.parse(backup).v,4);
   await importDataJSON(backup);
   assert.equal(await db.accounts.count(),2);assert.equal(await db.account_transfers.count(),1);
-  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),80_000);assert.equal(accountBalance(cash,data),30_000);
+  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),70_000);assert.equal(accountBalance(cash,data),40_000);
+  assert.equal((await db.accounts.get("cash"))?.isDefaultCash,true);
 });
 test('orphan account references in backup fail without replacing data',async()=>{
   await saveTransfer(transfer);const backup=JSON.parse(await exportDataJSON());backup.accounts=[];
@@ -148,4 +151,26 @@ test('version 7 migration preserves old records without assigning them to new ac
     assert.equal(await migrated.accounts.count(),0);
     assert.equal(await migrated.account_transfers.count(),0);
   } finally {await migrated.delete();}
+});
+
+test('concurrent initialization creates only one cash account',async()=>{
+  await db.accounts.clear();const results=await Promise.all([ensureCashAccount(),ensureCashAccount(),ensureCashAccount()]);
+  assert.equal(new Set(results.map(a=>a.id)).size,1);assert.equal(await db.accounts.count(),1);
+});
+test('existing cash balance is preserved and cannot become a bank',async()=>{
+  await db.accounts.update('cash',{openingBalance:12345});const account=await ensureCashAccount();
+  assert.equal(account.id,'cash');assert.equal(account.openingBalance,12345);await assert.rejects(addAccount({...account,type:'bank'},true));
+});
+test('salary, deposit, withdrawal, credit purchase and payment conserve money',async()=>{
+  await saveIncome({id:'salary',date:today,amount:1000,categoryId:'salary',description:'Quincena',type:'extra'});
+  await saveTransfer({id:'deposit',fromAccountId:'cash',toAccountId:'bank',amount:60000,date:today,note:''});
+  await saveTransfer({id:'withdraw',fromAccountId:'bank',toAccountId:'cash',amount:10000,date:today,note:''});
+  await db.debts.add({id:'card',name:'Visa',type:'credit_card',principal:100000,apr:0,minPayment:0,createdAt:new Date().toISOString(),status:'active'});
+  await saveExpense({id:'purchase',date:today,amount:200,categoryId:'food',concept:'Compra',type:'Variable',paymentMethod:'credit',debtId:'card'});
+  assert.equal(accountBalance(cash,await readAccountSnapshot()),50000);
+  await saveDebtPayment({id:'pay',date:today,amount:20000,debtId:'card'});
+  const data=await readAccountSnapshot();assert.equal(accountBalance(cash,data),30000);assert.equal(accountBalance(bank,data),150000);
+  assert.equal(debtBalance((await db.debts.get('card'))!,data.expenses,data.payments),0);
+  await assert.rejects(saveIncome({id:'salary',date:today,amount:1000,categoryId:'salary',description:'Duplicado',type:'extra'}));
+  assert.equal(accountBalance(cash,await readAccountSnapshot()),30000);
 });

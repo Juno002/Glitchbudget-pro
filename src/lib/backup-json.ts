@@ -228,6 +228,7 @@ export async function importDataJSON(text: string): Promise<{
 
   if (d.v === 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
   const accountMap = new Map((d.accounts || []).map(a => [a.id, a]));
+  if ((d.accounts || []).filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
   }

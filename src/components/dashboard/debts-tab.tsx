@@ -211,7 +211,7 @@ export default function DebtsTab() {
                        </div>
                     )}
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
-                      <AccountSelect value={accountId} onChange={setAccountId} disabled={saving} />
+                      <AccountSelect cashDefault value={accountId} onChange={setAccountId} disabled={saving} />
                       <div className="space-y-2">
                          <Label>Monto a Pagar o Abonar</Label>
                          <Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00" autoFocus required />

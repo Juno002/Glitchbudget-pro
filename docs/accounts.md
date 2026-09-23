@@ -4,9 +4,9 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 ## Uso
 
-1. En Movimientos, abre Configurar mis saldos. Crea Efectivo y cada banco con el saldo actual. No hacen falta números de cuenta ni credenciales.
+1. Efectivo se crea automáticamente en cero; si ya existía una cuenta de efectivo, se conserva su saldo y se usa como predeterminada. En Movimientos, pulsa esa cuenta y Editar cuenta para indicar el dinero que tenías al iniciar el seguimiento. Crea cada banco desde Gestionar cuentas con su saldo actual. No hacen falta números de cuenta ni credenciales.
 2. Incluye en el saldo inicial las operaciones que ya hiciste hoy. Los movimientos antiguos quedan sin cuenta para no contarlos dos veces.
-3. Los ingresos nuevos piden cuenta de destino; los gastos y pagos de tarjeta, cuenta de origen. Las compras a crédito piden la tarjeta y no descuentan bancos.
+3. Todo ingreso nuevo se deposita en Efectivo. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar el ingreso al banco, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
 4. Para sacar efectivo del banco, usa Gestionar cuentas → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. Una comisión se registra como gasto separado.
 5. Conciliar deuda actual permite introducir lo que debes en cada tarjeta, independientemente de sus movimientos anteriores. Un saldo negativo significa saldo a favor.
 6. Pulsa una cuenta para consultar sus 50 movimientos recientes y editar sus datos. Las transferencias se pueden editar desde ese historial.
@@ -23,7 +23,7 @@ En modo estricto, un gasto con cuenta comprueba el saldo de esa cuenta. Los movi
 
 Base de datos v8: añade accounts y account_transfers; los movimientos anteriores no reciben una cuenta automáticamente. Las nuevas relaciones son opcionales para conservar el historial.
 
-Respaldo JSON v4: incluye cuentas, transferencias, referencias de movimientos y ajuste inicial de tarjetas. Se aceptan respaldos v3 antiguos, que restauran sin cuentas. Importar reemplaza el contenido actual, igual que antes. Versiones viejas de la app no pueden leer un respaldo v4; usa la versión actualizada para restaurarlo.
+Respaldo JSON v4: conserva la cuenta de efectivo predeterminada e incluye cuentas, transferencias, referencias de movimientos y ajuste inicial de tarjetas. Se aceptan respaldos v3 antiguos, que restauran sin cuentas. Importar reemplaza el contenido actual, igual que antes. Versiones viejas de la app no pueden leer un respaldo v4; usa la versión actualizada para restaurarlo.
 
 CSV de ingresos/gastos conserva accountId; para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
 

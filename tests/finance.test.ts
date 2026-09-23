@@ -80,22 +80,25 @@ test('invalid amounts and dates never enter storage', async () => {
   assert.equal(await db.expenses.count(), 0);
 });
 test('strict mode lets a user spend reserved category funds', async () => {
+  await saveIncome({ id:'funds',date:'2026-09-01',amount:1000,type:'extra',description:'',categoryId:'salary' });
   await db.plans.add({ month: '2026-09', categoryId: 'food', limit: 900_000 });
   await saveExpense({ ...expense, amount: 1000 });
   assert.equal(await db.expenses.count(), 1);
 });
-test('strict mode rejects spending reserved for another category', async () => {
+test('projected salary cannot fund an actual cash expense', async () => {
   await db.plans.add({ month: '2026-09', categoryId: 'rent', limit: 900_000 });
-  await assert.rejects(saveExpense({ ...expense, amount: 1000 }), /Modo estricto/);
+  await assert.rejects(saveExpense({ ...expense, amount: 1000 }), /Saldo insuficiente/);
   assert.equal(await db.expenses.count(), 0);
 });
-test('strict mode uses the transaction month, not the visible month', async () => {
+test('actual cash carries across months without another salary deposit', async () => {
   await db.settings.update('general', { baseIncome: { freq: 'mensual', amount: 0 }, savePct: 0 });
   await saveIncome({ id: 'i', date: '2026-08-01', amount: 1000, type: 'extra', description: '', categoryId: 'salary' });
   await saveExpense({ ...expense, amount: 900, date: '2026-08-31' });
-  await assert.rejects(saveExpense({ ...expense, id: 'next', amount: 1, date: '2026-09-01' }), /Modo estricto/);
+  await saveExpense({ ...expense, id: 'next', amount: 100, date: '2026-09-01' });
+  await assert.rejects(saveExpense({ ...expense, id: 'over', amount: 0.01, date: '2026-09-01' }), /Saldo insuficiente/);
 });
 test('concurrent writes cannot overspend a strict cash balance', async () => {
+  await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
   await db.settings.update('general', { baseIncome: { freq: 'mensual', amount: 10_000 }, savePct: 0 });
   const results = await Promise.allSettled([
     saveExpense({ ...expense, id: 'a', amount: 80 }), saveExpense({ ...expense, id: 'b', amount: 80 }),
@@ -115,6 +118,7 @@ test('editing a deleted movement does not recreate it', async () => {
   await assert.rejects(saveExpense({ ...expense, amount: 1 }, true), /ya no existe/);
 });
 test('a subscription cannot be logged twice in the same month', async () => {
+  await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
   await saveExpense({ ...expense, recurringId: 'subscription', amount: 10 });
   await assert.rejects(saveExpense({ ...expense, id: 'second', recurringId: 'subscription', amount: 10 }), /ya tiene un pago/);
   await saveExpense({ ...expense, id: 'next-month', date: '2026-10-01', recurringId: 'subscription', amount: 10 });
@@ -164,11 +168,12 @@ async function seedOutgoing() {
   await db.debts.add({ id: 'card', name: 'Prueba', type: 'credit_card', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString(), status: 'active' });
   await db.goals.add({ id: 'goal', name: 'Meta', target: 20_000, saved: 0, quota: 0, startDate: '2026-09-01', status: 'active' });
 }
-test('concurrent card payment and goal contribution cannot spend the same cash', async () => {
+test('concurrent card payments cannot spend the same actual cash', async () => {
   await seedOutgoing();
+  await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
   const results = await Promise.allSettled([
     saveDebtPayment({ id: 'payment', debtId: 'card', amount: 8_000, date: '2026-09-17' }),
-    saveGoalContribution({ id: 'contribution', goalId: 'goal', amount: 8_000, date: '2026-09-17' }),
+    saveDebtPayment({ id: 'payment2', debtId: 'card', amount: 8_000, date: '2026-09-17' }),
   ]);
   assert.equal(results.filter(r => r.status === 'fulfilled').length, 1);
   assert.equal(await db.debt_payments.count() + await db.goal_contributions.count(), 1);
