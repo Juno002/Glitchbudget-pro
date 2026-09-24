@@ -4,7 +4,7 @@ import { rollBudgetsIntoMonth } from '../src/lib/budget-rollover';
 import assert from 'node:assert/strict';
 import { after, beforeEach, test } from 'node:test';
 import { db, type Expense, type Settings } from '../src/lib/db';
-import { calculateTotals, expenseForMonth, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
+import { calculateTotals, calculateRecordedTotals, recordedCategories, expenseForMonth, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { saveIncome, saveExpense, saveDebtPayment, saveGoalContribution } from '../src/lib/transaction-service';
 
@@ -226,4 +226,18 @@ test('large local history survives a full JSON backup and restore', async () => 
   assert.equal(await db.expenses.count(), 10_000);
   const rows = await db.expenses.toArray();
   assert.equal(calculateTotals({ ...snapshot(), expenses: rows }, '2026-09').totalExpenses, 1_010_000);
+});
+
+test('recorded totals never turn salary forecasts or fixed frequencies into actual movements',()=>{
+  const data=snapshot();data.expenses=[{...expense,type:'Fijo',frequency:'quincenal'}];
+  const september=calculateRecordedTotals(data,'2026-09');
+  assert.equal(september.totalIncome,0);assert.equal(september.totalExpenses,100000);assert.equal(september.balance,-100000);
+  assert.equal(recordedCategories(data.expenses,'2026-09')[0].value,100000);
+  assert.equal(calculateRecordedTotals(data,'2026-10').totalExpenses,0);assert.deepEqual(recordedCategories(data.expenses,'2026-10'),[]);
+});
+test('card purchases consume category budget once and repayments do not repeat the expense',()=>{
+  const data=snapshot();data.settings={...data.settings,baseIncome:{freq:'mensual',amount:0},savePct:0};
+  data.incomes=[{id:'i',date:'2026-09-01',month:'2026-09',amount:1000000,categoryId:'salary',description:'Cobro',type:'extra'}];
+  data.expenses=[{...expense,paymentMethod:'credit',debtId:'card'}];data.debtPayments=[{id:'p',date:'2026-09-17',debtId:'card',amount:100000}];
+  const t=calculateRecordedTotals(data,'2026-09');assert.equal(t.totalExpenses,100000);assert.equal(t.commitments,300000);assert.equal(t.balance,900000);assert.equal(t.cashFlow,900000);assert.equal(t.available,600000);
 });

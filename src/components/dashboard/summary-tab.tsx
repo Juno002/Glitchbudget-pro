@@ -49,6 +49,7 @@ function Snapshot({
 }: {
   totalIncome: number; totalExpenses: number; available: number; suggestedSave: number; savePct: number; loading: boolean
 }) {
+  const position = useFinances().getPosition();
   const spendingPct = Math.min(100, Math.round((totalExpenses / Math.max(1, totalIncome)) * 100));
   const currentSavePct = Math.min(100, Math.round((suggestedSave / Math.max(1, totalIncome)) * 100));
 
@@ -69,9 +70,9 @@ function Snapshot({
   };
 
   const cards = [
-    { label: 'Disponible del mes', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={100} ok />, info: 'Disponible del presupuesto tras metas y ahorro. No es el saldo de tus bancos ni efectivo.' },
-    { label: 'Ahorro', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% del ingreso apartado como ahorro. Se resta del disponible.` },
-    { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={100 - spendingPct} ok /> },
+    { label: 'Dinero en cuentas hoy', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={available > 0 ? 100 : 0} ok={available >= 0} />, info: `Efectivo: ${formatCurrency(position.cash)}. Bancos: ${formatCurrency(position.bank)}. Total real de hoy, igual que en Movimientos. No incluye crédito disponible ni descuenta deudas o reservas del presupuesto.` },
+    { label: 'Ahorro sugerido', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% de los ingresos registrados del mes. Es una propuesta; no mueve dinero entre cuentas.` },
+    { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={totalIncome > 0 ? 100 - spendingPct : 0} ok /> },
     { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
   ];
 
@@ -191,7 +192,7 @@ const SaveStrategyChips = () => {
     const { savePct, updateSettings } = useFinances();
     return (
         <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro <span className="text-[10px] opacity-60">(se resta del disponible)</span></p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro sugerido <span className="text-[10px] opacity-60">(no mueve dinero)</span></p>
             <div className="flex flex-wrap gap-2">
                 {[
                     {label:'Ninguno 0%',      val:0.00},
@@ -215,7 +216,7 @@ const SaveStrategyChips = () => {
 
 
 export default function SummaryTab() {
-  const { getTotals, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, savePct } = useFinances();
+  const { getTotals, getPosition, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, savePct } = useFinances();
   const [monthName, setMonthName] = useState('');
 
   useEffect(() => {
@@ -237,7 +238,7 @@ export default function SummaryTab() {
         <Snapshot
             totalIncome={totals.totalIncome}
             totalExpenses={totals.totalExpenses}
-            available={totals.available}
+            available={getPosition().liquid}
             suggestedSave={totals.suggestedSave}
             savePct={savePct}
             loading={loading}

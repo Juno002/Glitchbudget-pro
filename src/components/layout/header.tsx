@@ -222,12 +222,12 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                     <DialogTrigger asChild>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                             <Briefcase className="mr-2 h-4 w-4" />
-                            <span>Ingreso Principal</span>
+                            <span>Ingreso previsto</span>
                         </DropdownMenuItem>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>💼 Ingreso Principal</DialogTitle>
+                            <DialogTitle>💼 Ingreso previsto</DialogTitle>
                             <DialogDescription>
                                 Establece tu sueldo o ingreso recurrente principal.
                             </DialogDescription>
@@ -258,7 +258,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                                 }}
                                 className="w-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
                             >
-                                Guardar Ingreso Principal
+                                Guardar Ingreso previsto
                             </Button>
                         </div>
                     </DialogContent>

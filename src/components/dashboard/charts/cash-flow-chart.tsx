@@ -300,11 +300,10 @@ export default function CashFlowChart() {
     const incomeData = getIncomesByCategory(currentMonth);
     const expenseData = getExpensesByCategory(currentMonth);
 
-    const monthContribs = (goalContributions || [])
-      .filter((c) => c.date.slice(0, 7) === currentMonth)
-      .reduce((sum, c) => sum + c.amount, 0);
-
-    const totalIncome = incomeData.reduce((s, d) => s + d.value, 0);
+    const recordedIncome = incomeData.reduce((s,d) => s+d.value,0);
+    const recordedExpenses = expenseData.reduce((s,d) => s+d.value,0);
+    const deficit = Math.max(0,recordedExpenses-recordedIncome);
+    const totalIncome = recordedIncome + deficit;
     if (totalIncome <= 0) return { sources: [], destinations: [], links: [], totalIncome: 0 };
 
     const sources: FlowNode[] = incomeData.map((d, i) => ({
@@ -316,6 +315,7 @@ export default function CashFlowChart() {
       type: 'source',
     }));
 
+    if (deficit > 0) sources.push({ id:'src-deficit', label:'Déficit del mes', value:deficit, color:'#f43f5e', icon:'↘', type:'source' });
     const dests: FlowNode[] = [];
     expenseData.forEach((d, i) => {
       dests.push({
@@ -328,23 +328,11 @@ export default function CashFlowChart() {
       });
     });
 
-    if (monthContribs > 0) {
-      dests.push({
-        id: 'dst-savings',
-        label: 'Metas de Ahorro',
-        value: monthContribs,
-        color: 'hsl(var(--primary))',
-        icon: '🎯',
-        type: 'destination',
-      });
-    }
-
-    const totalExpenses = expenseData.reduce((s, d) => s + d.value, 0);
-    const available = Math.max(0, totalIncome - totalExpenses - monthContribs);
+    const available = Math.max(0, recordedIncome-recordedExpenses);
     if (available > 0) {
       dests.push({
         id: 'dst-available',
-        label: 'Disponible',
+        label: 'Excedente del mes',
         value: available,
         color: 'hsl(var(--secondary))',
         icon: '💰',
@@ -368,7 +356,7 @@ export default function CashFlowChart() {
     });
 
     return { sources, destinations: dests, links, totalIncome };
-  }, [getIncomesByCategory, getExpensesByCategory, currentMonth, goalContributions]);
+  }, [getIncomesByCategory, getExpensesByCategory, currentMonth]);
 
   if (!isClient) return null;
 
@@ -376,12 +364,12 @@ export default function CashFlowChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>💸 Flujo de Dinero</CardTitle>
-          <CardDescription>Visualiza cómo se distribuyen tus ingresos.</CardDescription>
+          <CardTitle>Resultado del mes</CardTitle>
+          <CardDescription>Ingresos y gastos registrados, incluidas las compras con tarjeta.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-            Aún no hay datos de ingresos para este mes.
+            Aún no hay ingresos ni gastos registrados en este mes.
           </div>
         </CardContent>
       </Card>
@@ -396,8 +384,8 @@ export default function CashFlowChart() {
     >
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>💸 Flujo de Dinero</CardTitle>
-          <CardDescription>Cómo se distribuyen tus ingresos del mes.</CardDescription>
+          <CardTitle>Resultado del mes</CardTitle>
+          <CardDescription>Ingresos frente a gastos. Transferencias y pagos de tarjeta no repiten ingresos ni compras; el excedente no es el saldo de tus cuentas.</CardDescription>
         </CardHeader>
         <CardContent className="p-3 md:p-6">
           {isMobile ? (

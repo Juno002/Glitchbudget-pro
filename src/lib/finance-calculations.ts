@@ -53,3 +53,29 @@ export function calculateTotals(data: FinanceSnapshot, month: string) {
   const available = Math.max(0, balance - commitments);
   return { totalIncome, totalExpenses, balance, available, planned_total, totalGoalContributions, commitments, suggestedSave };
 }
+
+/** Recorded activity: a fixed purchase is counted once, on its actual date. */
+export function recordedExpenseForMonth(expense: Expense, month: string): number {
+  return expense.date.slice(0, 7) === month ? expense.amount : 0;
+}
+export function recordedCategories(rows: Array<Income | Expense>, month: string) {
+  const groups = new Map<string, number>();
+  rows.filter(row => row.date.slice(0, 7) === month).forEach(row => groups.set(row.categoryId, (groups.get(row.categoryId) || 0) + row.amount));
+  return Array.from(groups, ([name, value]) => ({ name, value }));
+}
+export function calculateRecordedTotals(data: FinanceSnapshot, month: string) {
+  const totalIncome = data.incomes.filter(i => i.date.slice(0, 7) === month).reduce((s,i) => s+i.amount,0);
+  const monthExpenses = data.expenses.filter(e => e.date.slice(0,7) === month);
+  const totalExpenses = monthExpenses.reduce((s,e) => s+e.amount,0);
+  const cashExpenses = monthExpenses.filter(e => e.paymentMethod !== 'credit').reduce((s,e) => s+e.amount,0);
+  const creditExpenses = totalExpenses - cashExpenses;
+  const totalDebtPayments = data.debtPayments.filter(p => p.date.slice(0,7) === month).reduce((s,p) => s+p.amount,0);
+  const monthBudgets = data.budgets.filter(b => b.month === month);
+  const planned_total = monthBudgets.reduce((s,b) => s+b.limit,0);
+  const remainingBudgets = monthBudgets.reduce((s,b) => s+Math.max(0,b.limit-monthExpenses.filter(e => e.categoryId===b.categoryId).reduce((sum,e) => sum+e.amount,0)),0);
+  const totalGoalContributions = data.goalContributions.filter(c => c.date.slice(0,7) === month).reduce((s,c) => s+c.amount,0);
+  const suggestedSave = Math.round(totalIncome * data.settings.savePct);
+  const commitments = remainingBudgets + totalGoalContributions + suggestedSave;
+  const balance = totalIncome-totalExpenses;
+  return { totalIncome, totalExpenses, cashExpenses, creditExpenses, totalDebtPayments, cashFlow: totalIncome-cashExpenses-totalDebtPayments, balance, available: balance-commitments, planned_total, totalGoalContributions, commitments, suggestedSave };
+}

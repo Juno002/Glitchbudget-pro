@@ -1,5 +1,5 @@
 import { db } from './db';
-import { expenseForMonth, isValidDate, localDate } from './finance-calculations';
+import { recordedExpenseForMonth as expenseForMonth, isValidDate, localDate } from './finance-calculations';
 
 export async function rollBudgetsIntoMonth(month: string): Promise<boolean> {
   if (!isValidDate(month + '-01')) throw new Error('Selecciona un mes válido.');

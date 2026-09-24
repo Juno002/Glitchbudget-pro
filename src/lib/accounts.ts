@@ -111,3 +111,12 @@ export async function reconcileDebt(id: string, balance: number) {
     await db.debts.update(id, { openingAdjustment });
   });
 }
+
+export function accountPosition(accounts: Account[], debts: import('./db').Debt[], data: AccountSnapshot, through = localDate()) {
+  const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+accountBalance(a,data,through),0);
+  const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+accountBalance(a,data,through),0);
+  const balances = debts.filter(d => d.type === 'credit_card').map(d => ({...d, balance: debtBalance(d,data.expenses,data.payments,through)}));
+  const owed = balances.reduce((sum,d) => sum+Math.max(0,d.balance),0);
+  const credit = balances.reduce((sum,d) => sum+Math.max(0,-d.balance),0);
+  return { cash, bank, liquid: cash+bank, owed, credit, net: cash+bank+credit-owed, balances };
+}

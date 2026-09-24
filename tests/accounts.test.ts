@@ -3,10 +3,10 @@ import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import Dexie from 'dexie';
 import { db, GlitchBudgetDB, type Account } from '../src/lib/db';
-import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt, ensureCashAccount } from '../src/lib/accounts';
+import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt, ensureCashAccount, accountPosition } from '../src/lib/accounts';
 import { saveIncome, saveExpense, saveDebtPayment, removeIncome } from '../src/lib/transaction-service';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
-import { localDate } from '../src/lib/finance-calculations';
+import { localDate, calculateRecordedTotals, recordedCategories } from '../src/lib/finance-calculations';
 const today = localDate();
 const bank: Account = { id:'bank', name:'Banco', type:'bank', openingBalance:100_000, startDate:today };
 const cash: Account = { id:'cash', name:'Efectivo', type:'cash', openingBalance:0, startDate:today };
@@ -173,4 +173,28 @@ test('salary, deposit, withdrawal, credit purchase and payment conserve money',a
   assert.equal(debtBalance((await db.debts.get('card'))!,data.expenses,data.payments),0);
   await assert.rejects(saveIncome({id:'salary',date:today,amount:1000,categoryId:'salary',description:'Duplicado',type:'extra'}));
   assert.equal(accountBalance(cash,await readAccountSnapshot()),30000);
+});
+
+test('account balances, monthly indicators and charts reconcile through the complete money cycle',async()=>{
+  const month=today.slice(0,7);
+  const report=async()=>{
+    const snapshot=await readAccountSnapshot();
+    const totals=calculateRecordedTotals({ settings:(await db.settings.get('general'))!, incomes:snapshot.incomes, expenses:snapshot.expenses, debtPayments:snapshot.payments, budgets:[], goalContributions:[] },month);
+    assert.equal(recordedCategories(snapshot.incomes,month).reduce((s,r)=>s+r.value,0),totals.totalIncome);
+    assert.equal(recordedCategories(snapshot.expenses,month).reduce((s,r)=>s+r.value,0),totals.totalExpenses);
+    return { totals, position:accountPosition(await db.accounts.toArray(),await db.debts.toArray(),snapshot) };
+  };
+  await db.settings.update('general',{baseIncome:{freq:'quincenal',amount:50000}});
+  assert.equal((await report()).totals.totalIncome,0);
+  assert.equal((await report()).position.liquid,100000);
+  await saveIncome({id:'salary',date:today,amount:500,categoryId:'salary',description:'Quincena',type:'extra'});
+  await saveTransfer({id:'deposit',fromAccountId:'cash',toAccountId:'bank',amount:20000,date:today,note:''});
+  assert.equal((await report()).totals.totalIncome,50000);
+  assert.equal((await report()).position.liquid,150000);
+  await db.debts.add({id:'card',name:'Visa',type:'credit_card',principal:100000,apr:0,minPayment:0,createdAt:new Date().toISOString(),status:'active'});
+  await saveExpense({id:'credit',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Variable',paymentMethod:'credit',debtId:'card'});
+  let r=await report();assert.equal(r.totals.totalExpenses,10000);assert.equal(r.position.owed,10000);assert.equal(r.position.net,140000);
+  await saveDebtPayment({id:'payment',date:today,amount:10000,debtId:'card'});
+  r=await report();assert.equal(r.totals.totalExpenses,10000);assert.equal(r.totals.totalDebtPayments,10000);assert.equal(r.totals.cashFlow,40000);assert.equal(r.position.net,140000);assert.equal(r.position.owed,0);assert.equal(r.position.liquid,140000);
+  const before=await report();await importDataJSON(await exportDataJSON());assert.deepEqual(await report(),before);
 });

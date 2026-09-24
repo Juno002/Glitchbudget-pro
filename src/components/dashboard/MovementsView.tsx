@@ -1,6 +1,9 @@
 'use client';
 
-import { expenseForMonth } from '@/lib/finance-calculations';
+import { recordedExpenseForMonth as expenseForMonth } from '@/lib/finance-calculations';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@/lib/db';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useState, useMemo, useEffect } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { getCategoryInfo } from '@/lib/categories';
@@ -15,21 +18,25 @@ import TransactionModal from './TransactionModal';
 
 type UnifiedItem = {
   id: string;
-  kind: 'income' | 'expense';
+  kind: 'income' | 'expense' | 'transfer' | 'payment' | 'saving' | 'opening';
+  detail?: string;
   label: string;         // concept or description
   amount: number;        // in cents
   categoryId: string;
   date: string;
   isFixed: boolean;
-  raw: Expense | Income;
+  raw?: Expense | Income;
 };
 
 export default function MovementsView() {
-  const { incomes, expenses, currentMonth, expenseCategories, incomeCategories } = useFinances();
+  const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 
+  const accountData = useLiveQuery(() => db.transaction('r', db.accounts, db.account_transfers, async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray() })));
+  const [detailItem, setDetailItem] = useState<UnifiedItem | null>(null);
   // Local filters
   const [filterMonth, setFilterMonth] = useState(currentMonth);
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense' | 'other'>('all');
+  const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   useEffect(() => { setFilterMonth(currentMonth); }, [currentMonth]);
 
@@ -66,21 +73,26 @@ export default function MovementsView() {
         raw: e,
       }));
 
-    const merged = [...incomeItems, ...expenseItems];
+    const name = (id?: string) => accountData?.accounts.find(a => a.id === id)?.name || 'Sin cuenta';
+    const others: UnifiedItem[] = [
+      ...(accountData?.transfers || []).map(t => ({ id:t.id, kind:'transfer' as const, label:t.note || 'Transferencia', amount:t.amount, categoryId:'', date:t.date, isFixed:false, detail:name(t.fromAccountId)+' → '+name(t.toAccountId)+' · No es ingreso ni gasto.' })),
+      ...(debtPayments || []).map(p => ({ id:p.id, kind:'payment' as const, label:'Pago de '+((debts || []).find(d=>d.id===p.debtId)?.name || 'tarjeta'), amount:p.amount, categoryId:'', date:p.date.slice(0,10), isFixed:false, detail:name(p.accountId)+' · Reduce el saldo y la deuda; no repite el gasto de la compra.' })),
+      ...(goalContributions || []).map(c => ({ id:c.id, kind:'saving' as const, label:'Aporte a '+((goals || []).find(g=>g.id===c.goalId)?.name || 'meta'), amount:c.amount, categoryId:'', date:c.date.slice(0,10), isFixed:false, detail:'Reserva para una meta. No es un gasto ni una transferencia entre cuentas.' })),
+      ...(accountData?.accounts || []).filter(a=>a.openingBalance!==0).map(a => ({ id:a.id, kind:'opening' as const, label:'Saldo inicial · '+a.name, amount:a.openingBalance, categoryId:'', date:a.startDate, isFixed:false, detail:'Dinero existente al iniciar el seguimiento. Se incluye en el saldo, no en los ingresos del mes.' })),
+    ].filter(t => t.date.slice(0,7) === filterMonth);
+    const merged = [...incomeItems, ...expenseItems, ...others];
 
     // Sort: fixed first (pinned), then by date desc
     merged.sort((a, b) => {
-      if (a.isFixed && !b.isFixed) return -1;
-      if (!a.isFixed && b.isFixed) return 1;
       return b.date.localeCompare(a.date);
     });
 
     return merged;
-  }, [incomes, expenses, filterMonth]);
+  }, [incomes, expenses, filterMonth, accountData, debtPayments, debts, goalContributions, goals]);
 
   const items = useMemo(() => periodItems.filter(i =>
-    (filterType === 'all' || i.kind === filterType) && (filterCategory === 'all' || i.categoryId === filterCategory)
-  ), [periodItems, filterType, filterCategory]);
+    (filterType === 'all' || i.kind === filterType || (filterType === 'other' && i.kind !== 'income' && i.kind !== 'expense')) && (filterCategory === 'all' || i.categoryId === filterCategory) && (i.label+' '+(i.detail || '')).toLocaleLowerCase('es').includes(search.toLocaleLowerCase('es'))
+  ), [periodItems, filterType, filterCategory, search]);
 
   // Unique categories present in current data
   const presentCategories = useMemo(() => {
@@ -93,6 +105,7 @@ export default function MovementsView() {
   }, [presentCategories, filterCategory]);
 
   const handleItemClick = (item: UnifiedItem) => {
+    if (item.kind !== 'income' && item.kind !== 'expense') { setDetailItem(item); return; }
     if (item.kind === 'expense') {
       setEditingExpense(item.raw as Expense);
       setEditingIncome(undefined);
@@ -113,6 +126,7 @@ export default function MovementsView() {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Historial de Movimientos</h3>
 
+      <Input aria-label="Buscar movimientos" placeholder="Buscar movimientos…" value={search} onChange={e => setSearch(e.target.value)} />
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
         <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)} className="w-full sm:flex-1">
@@ -120,6 +134,7 @@ export default function MovementsView() {
             <TabsTrigger className="flex-1 whitespace-nowrap" value="all">Todos</TabsTrigger>
             <TabsTrigger className="flex-1 whitespace-nowrap" value="income">Ingresos</TabsTrigger>
             <TabsTrigger className="flex-1 whitespace-nowrap" value="expense">Gastos</TabsTrigger>
+            <TabsTrigger className="flex-1 whitespace-nowrap" value="other">Otros</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -155,6 +170,7 @@ export default function MovementsView() {
             const cat = getCategoryInfo(item.categoryId);
             const Icon = cat?.icon;
             const isIncome = item.kind === 'income';
+            const neutral = item.kind !== 'income' && item.kind !== 'expense';
 
             return (
               <button
@@ -174,7 +190,7 @@ export default function MovementsView() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium truncate">{item.label}</div>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="truncate">{cat?.name}</span>
+                    <span className="truncate">{item.detail || cat?.name}{item.kind === 'expense' && (item.raw as Expense)?.paymentMethod === 'credit' ? ' · Tarjeta' : ''}</span>
                     {item.isFixed && (
                       <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-medium">
                         <Pin className="h-2.5 w-2.5" /> Fijo
@@ -187,12 +203,12 @@ export default function MovementsView() {
                 <div className="shrink-0 text-right">
                   <div className={cn(
                     "text-sm font-semibold tabular-nums",
-                    isIncome ? "text-emerald-500" : "text-rose-500"
+                    neutral ? 'text-foreground' : isIncome ? "text-emerald-500" : "text-rose-500"
                   )}>
-                    {isIncome ? '+' : '-'}{formatCurrency(item.amount)}
+                    {neutral ? '' : isIncome ? '+' : '-'}{formatCurrency(item.amount)}
                   </div>
                   <div className="text-[10px] text-muted-foreground">
-                    {item.isFixed ? 'Recurrente' : new Date(item.date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+                    {new Date(item.date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
                   </div>
                 </div>
               </button>
@@ -201,6 +217,7 @@ export default function MovementsView() {
         </div>
       )}
 
+      <Dialog open={!!detailItem} onOpenChange={open => { if (!open) setDetailItem(null); }}><DialogContent><DialogHeader><DialogTitle>{detailItem?.label}</DialogTitle><DialogDescription>{detailItem?.detail}</DialogDescription></DialogHeader><p>{formatCurrency(detailItem?.amount || 0)} · {detailItem?.date}</p>{detailItem?.kind === 'transfer' && <p className="text-sm text-muted-foreground">Puedes editar la transferencia en Mi dinero hoy, abriendo la cuenta de origen o destino.</p>}</DialogContent></Dialog>
       {/* Edit modal */}
       <TransactionModal
         open={modalOpen}

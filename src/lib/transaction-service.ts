@@ -1,7 +1,7 @@
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
-import { calculateTotals, isValidDate, type FinanceSnapshot } from './finance-calculations';
+import { calculateTotals, calculateRecordedTotals, isValidDate, type FinanceSnapshot } from './finance-calculations';
 
 const fields = {
   accountId: z.string().min(1).optional(),
@@ -102,7 +102,7 @@ const outgoingTables = [...accountTables, db.settings, db.plans, db.goal_contrib
 async function requireAvailableCash(amount: number, date: string) {
   const settings = await db.settings.get('general');
   if (!settings?.strictMode) return;
-  const totals = calculateTotals({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7));
+  const totals = calculateRecordedTotals({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7));
   if (amount > totals.balance - totals.commitments) throw new Error('Modo estricto: el monto supera el dinero disponible de ese mes.');
 }
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {

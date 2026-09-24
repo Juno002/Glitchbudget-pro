@@ -72,15 +72,16 @@ const MonthlyComparisonTable = () => {
     const rows = [
         { label: 'Ingresos', prev: prevTotals.totalIncome, curr: currentTotals.totalIncome },
         { label: 'Gastos', prev: prevTotals.totalExpenses, curr: currentTotals.totalExpenses },
-        { label: 'Balance', prev: prevTotals.balance, curr: currentTotals.balance },
-        { label: 'Disponible', prev: prevTotals.available, curr: currentTotals.available }
+        { label: 'Resultado (ingresos − gastos)', prev: prevTotals.balance, curr: currentTotals.balance },
+        { label: 'Pagos de tarjeta', prev: prevTotals.totalDebtPayments, curr: currentTotals.totalDebtPayments },
+        { label: 'Flujo de efectivo del mes', prev: prevTotals.cashFlow, curr: currentTotals.cashFlow }
     ];
 
     return (
         <Card>
             <CardHeader>
                 <CardTitle>📊 Comparativa mensual</CardTitle>
-                <CardDescription>Compara tus finanzas con el mes anterior.</CardDescription>
+                <CardDescription>Operaciones registradas. Las compras a crédito son gastos; sus pagos solo afectan al flujo de efectivo.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="overflow-x-auto">

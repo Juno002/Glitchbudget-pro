@@ -9,9 +9,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type Recurring } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
-import { calculateTotals, expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
+import { calculateRecordedTotals, recordedCategories, recordedExpenseForMonth as expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome } from '@/lib/transaction-service';
-import { ensureCashAccount } from '@/lib/accounts';
+import { ensureCashAccount, accountPosition } from '@/lib/accounts';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -83,17 +83,8 @@ interface FinanceContextType {
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
-  getTotals: (month: string) => {
-    totalIncome: number;
-    totalExpenses: number;
-    balance: number;
-    available: number;
-    planned_total: number;
-    totalGoalContributions: number;
-    commitments: number;
-    suggestedSave: number;
-  };
-  getSpentAmount: (categoryId: string, month: string) => number;
+  getTotals: (month: string) => ReturnType<typeof calculateRecordedTotals>;
+  getPosition: () => ReturnType<typeof accountPosition>;
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
@@ -131,16 +122,28 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [dataVersion, setDataVersion] = useState(0);
   const [isWorking, setIsWorking] = useState(false);
 
-  const expenses = useLiveQuery(() => db.expenses.toArray(), [dataVersion]);
-  const incomes = useLiveQuery(() => db.incomes.toArray(), [dataVersion]);
-  const goals = useLiveQuery(() => db.goals.toArray(), [dataVersion]);
-  const goalContributions = useLiveQuery(() => db.goal_contributions.toArray(), [dataVersion]);
-  const budgets = useLiveQuery(() => db.plans.toArray(), [dataVersion]);
+  const financialData = useLiveQuery(() => db.transaction('r', db.tables, async () => ({
+    expenses: await db.expenses.toArray(),
+    incomes: await db.incomes.toArray(),
+    goals: await db.goals.toArray(),
+    goalContributions: await db.goal_contributions.toArray(),
+    budgets: await db.plans.toArray(),
+    debts: await db.debts.toArray(),
+    debtPayments: await db.debt_payments.toArray(),
+    transfers: await db.account_transfers.toArray(),
+    accounts: await db.accounts.toArray(),
+  })), [dataVersion]);
+  const expenses = financialData?.expenses;
+  const incomes = financialData?.incomes;
+  const goals = financialData?.goals;
+  const goalContributions = financialData?.goalContributions;
+  const budgets = financialData?.budgets;
+  const debts = financialData?.debts;
+  const debtPayments = financialData?.debtPayments;
+  const transfers = financialData?.transfers;
+  const accounts = financialData?.accounts;
   const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
-  const debts = useLiveQuery(() => db.debts.toArray(), [dataVersion]);
-  const debtPayments = useLiveQuery(() => db.debt_payments.toArray(), [dataVersion]);
   const recurrents = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
-  const accounts = useLiveQuery(() => db.accounts.toArray(), [dataVersion]);
   useEffect(() => {
     if (accounts && !accounts.some(a => a.isDefaultCash)) {
       void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
@@ -162,7 +165,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
   }, [rawSettings]);
 
-  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents]);
+  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents, accounts, transfers].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents, accounts, transfers]);
 
   useEffect(() => {
     async function initializeDB() {
@@ -195,13 +198,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [activeSettings.theme]);
 
-  const monthlyFromBase = monthlyAmount;
 
   const getSpentAmount = useCallback((categoryId: string, month: string): number =>
     (expenses || []).filter(e => e.categoryId === categoryId)
       .reduce((sum, e) => sum + expenseForMonth(e, month), 0), [expenses]);
 
-  const getTotals = useCallback((month: string) => calculateTotals({
+  const getTotals = useCallback((month: string) => calculateRecordedTotals({
     settings: activeSettings, incomes: incomes || [], expenses: expenses || [],
     budgets: budgets || [], goalContributions: goalContributions || [], debtPayments: debtPayments || [],
   }, month), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
@@ -451,22 +453,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     });
   }, [budgets, expenses, getSpentAmount, activeSettings.expenseCategories]);
 
-  const getExpensesByCategory = useCallback((month: string) => {
-    return (getBudgetStatusDetails(month) || [])
-        .filter(b => b.spent > 0)
-        .map(b => ({ name: b.categoryId, value: b.spent }));
-  }, [getBudgetStatusDetails]);
-
-  const getIncomesByCategory = useCallback((month: string) => {
-    const byCat: { [key: string]: number } = {};
-    if (activeSettings.baseIncome.amount > 0) {
-      byCat['sueldo'] = monthlyFromBase(activeSettings.baseIncome.freq, activeSettings.baseIncome.amount);
-    }
-    (incomes || []).filter(i => i.date.slice(0, 7) === month).forEach(i => {
-        byCat[i.categoryId] = (byCat[i.categoryId] || 0) + i.amount;
-    });
-    return Object.entries(byCat).map(([name, value]) => ({ name, value }));
-  }, [incomes, activeSettings.baseIncome, monthlyFromBase]);
+  const getExpensesByCategory = useCallback((month: string) => recordedCategories(expenses || [], month), [expenses]);
+  const getIncomesByCategory = useCallback((month: string) => recordedCategories(incomes || [], month), [incomes]);
+  const getPosition = useCallback(() => accountPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }), [accounts, debts, incomes, expenses, debtPayments, transfers]);
 
   const getExpensesByType = useCallback((month: string) => {
       const exps = (expenses || []).filter(e => expenseForMonth(e, month) > 0);
@@ -774,6 +763,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getMonthlyAverages,
     getDisposable,
     getTotals,
+    getPosition,
     getSpentAmount,
     getExpensesByCategory,
     getIncomesByCategory,
@@ -803,7 +793,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updateAllBudgets, transferBetweenBudgets, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,
     addRecurring, updateRecurring, deleteRecurring,
-    getMonthlyAverages, getDisposable, getTotals, getSpentAmount,
+    getMonthlyAverages, getDisposable, getTotals, getPosition, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,
