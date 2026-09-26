@@ -181,11 +181,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [rawSettings]);
 
   const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories]);
-  const currentPeriod = useMemo(() => periodForId(currentMonth, activeSettings), [currentMonth, activeSettings.periodStartDay]);
+  const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings.periodStartDay]);
 
   useEffect(() => {
-    setCurrentMonthState(periodContaining(localDate(), activeSettings).id);
-  }, [activeSettings.periodStartDay]);
+    setCurrentMonthState(periodContaining(localDate(), settings).id);
+  }, [settings.periodStartDay]);
 
   useEffect(() => {
     async function initializeDB() {
