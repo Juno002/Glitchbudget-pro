@@ -72,9 +72,9 @@ test('account spending uses opening cash even when monthly projected income is z
   await saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',nature:'Fijo',accountId:'bank'});
   assert.equal(accountBalance(bank,await readAccountSnapshot()),90_000);
 });
-test('income defaults to cash and an explicit correction moves it only once',async()=>{
+test('income respects an explicit destination account from creation and does not double-move on edit',async()=>{
   const income={id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra' as const,accountId:'bank'};
-  await saveIncome(income);assert.equal((await db.incomes.get('i'))?.accountId,'cash');
+  await saveIncome(income);assert.equal((await db.incomes.get('i'))?.accountId,'bank');
   await saveIncome(income,true);
   const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),110_000);assert.equal(accountBalance(cash,data),0);
 });
@@ -110,7 +110,7 @@ test('v4 backup preserves accounts, movements and transfers',async()=>{
   const backup=await exportDataJSON();assert.equal(JSON.parse(backup).v,6);
   await importDataJSON(backup);
   assert.equal(await db.accounts.count(),2);assert.equal(await db.account_transfers.count(),1);
-  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),70_000);assert.equal(accountBalance(cash,data),40_000);
+  const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),80_000);assert.equal(accountBalance(cash,data),30_000);
   assert.equal((await db.accounts.get("cash"))?.isDefaultCash,true);
 });
 test('orphan account references in backup fail without replacing data',async()=>{
