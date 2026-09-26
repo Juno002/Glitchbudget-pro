@@ -77,7 +77,7 @@ export default function TransferDialog() {
         <DialogHeader>
           <DialogTitle>Transferir Fondos</DialogTitle>
           <DialogDescription>
-            Mueve montos entre tus categorías de presupuesto para el mes actual.
+            Mueve montos entre tus categorías de presupuesto para el período seleccionado.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
