@@ -183,7 +183,7 @@ export async function exportDataJSON(): Promise<string> {
       strictMode: settings.strictMode ?? false,
       ...normalizeFinancialPolicies(settings),
       rolloverStrategy: (settings.rolloverStrategy as ('reset' | 'accumulate_surplus' | 'accumulate_debt')) ?? 'reset',
-      periodStartDay: settings.periodStartDay ?? 1,
+      ...(settings.periodStartDay !== undefined ? { periodStartDay: settings.periodStartDay } : {}),
       baseIncome: { 
         freq: (settings.baseIncome?.freq as ('mensual' | 'quincenal' | 'semanal')) ?? 'mensual',
         amount: Math.max(0, Number(settings.baseIncome?.amount ?? 0))
