@@ -108,6 +108,17 @@ export interface RecurringRule {
   active: boolean;
 }
 
+export type PlannedOccurrenceStatus = 'pending' | 'confirmed' | 'skipped';
+
+export interface PlannedOccurrence {
+  id: string;
+  ruleId: string;
+  scheduledDate: string; // YYYY-MM-DD
+  status: PlannedOccurrenceStatus;
+  /** Present only after a future lifecycle step links this occurrence to an actual movement. */
+  transactionId?: string;
+}
+
 export interface Debt {
   openingAdjustment?: number;
   id: string;
