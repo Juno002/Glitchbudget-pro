@@ -27,7 +27,7 @@ const SettingsV3 = z.object({
   savePct: z.number().min(0).max(1).default(0),
   customCategoryIcons: z.record(z.string()).optional(),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
-  periodStartDay: z.number().int().min(1).max(31).default(1),
+  periodStartDay: z.number().int().min(1).max(31).optional(),
   baseIncome: z.object({ 
     freq: z.enum(['mensual','quincenal','semanal']).default('mensual'),
     amount: MoneyCents 
@@ -297,7 +297,6 @@ export async function importDataJSON(text: string): Promise<{
     strictMode: d.settings.strictMode ?? false,
     ...normalizeFinancialPolicies(d.settings),
     rolloverStrategy: d.settings.rolloverStrategy ?? 'reset',
-    periodStartDay: d.settings.periodStartDay ?? 1,
     baseIncome: { 
       amount: Math.max(0, Number(d.settings.baseIncome?.amount ?? 0)),
       freq: d.settings.baseIncome?.freq ?? 'mensual',
