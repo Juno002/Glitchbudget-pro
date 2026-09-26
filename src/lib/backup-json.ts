@@ -151,7 +151,7 @@ function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 export async function exportDataJSON(): Promise<string> {
   // Lee todo de Dexie
   const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates, accounts, accountTransfers, categories] = await db.transaction('r', db.tables, () => Promise.all([
-    db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
+    db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', periodStartDay: 1, expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
     db.periods.toArray(),
     db.incomes.toArray(),
     db.expenses.toArray(),
