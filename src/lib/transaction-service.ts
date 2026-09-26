@@ -31,7 +31,8 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
     if (editing && !existing) throw new Error('El ingreso ya no existe. Actualiza la lista.');
     await requireCategory(row.categoryId, 'income', existing?.categoryId);
     await requireRecurringProvenance(row.recurringRuleId, 'income', existing?.recurringRuleId);
-    if (!editing) row.accountId = (await ensureCashAccount(row.date)).id;
+    // Efectivo es el destino predeterminado, no una obligación: respeta una cuenta elegida explícitamente.
+    if (!editing) row.accountId = row.accountId || (await ensureCashAccount(row.date)).id;
     else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) await requireAccount(row.accountId, row.date);
     if (editing && (await readFinancialPolicies()).preventNegativeAccountBalance) {

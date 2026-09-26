@@ -17,8 +17,9 @@ import type { RecurringRule } from '../src/domain/models';
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'));
 const schema = JSON.parse(readFileSync(new URL('./fixtures/dexie-v7.json', import.meta.url), 'utf8')).schema;
 const clean = (value: unknown) => JSON.parse(JSON.stringify(value));
-const snapshot = (database = db) => database.transaction('r', database.tables, async () =>
-  Object.fromEntries(await Promise.all(database.tables.map(async table => [table.name, await table.toArray()]))));
+const snapshot = async (database: GlitchBudgetDB = db): Promise<Record<string, any[]>> =>
+  database.transaction('r', database.tables, async () =>
+    Object.fromEntries(await Promise.all(database.tables.map(async table => [table.name, await table.toArray()]))) as Record<string, any[]>);
 function metrics(data: Record<string, any[]>) {
   const financial = { settings:data.settings[0], incomes:data.incomes, expenses:data.expenses, budgets:data.plans, goalContributions:data.goal_contributions, debtPayments:data.debt_payments };
   return {
@@ -26,16 +27,16 @@ function metrics(data: Record<string, any[]>) {
     september:selectMonthlyMetrics(financial,'2026-09'), october:selectMonthlyMetrics(financial,'2026-10'),
   };
 }
-const rule = (id='rule', cadence:RecurringRule['cadence']='monthly'):RecurringRule => ({ id,direction:'expense',title:'Alquiler',categoryId:'food',amount:5000,cadence,startDate:'2026-09-01',active:true });
+const rule = (id='phase5-rule', cadence:RecurringRule['cadence']='monthly'):RecurringRule => ({ id,direction:'expense',title:'Alquiler',categoryId:'food',amount:5000,cadence,startDate:'2026-09-01',active:true });
 const expense = { id:'payment',date:'2026-09-10',categoryId:'food',amount:50,concept:'Pago real',nature:'Fijo' as const,accountId:'cash' };
 beforeEach(async()=>{ await importDataJSON(JSON.stringify(fixture)); });
 after(()=>db.close());
 
 test('v9 -> v10 preserves every financial field and metric, removes frequency and creates no rules',async()=>{
   const data=await snapshot();
-  data.expenses=data.expenses.map((row,index)=>{const {nature,recurringRuleId,...rest}=row;return {...rest,type:index?'Variable':'Fijo',frequency:'mensual',...(index?{recurringId:'removed-rule'}:{})};});
+  data.expenses=data.expenses.map((row: any,index: number)=>{const {nature,recurringRuleId,...rest}=row;return {...rest,type:index?'Variable':'Fijo',frequency:'mensual',...(index?{recurringId:'removed-rule'}:{})};});
   data.expenses.push({...data.expenses[0],id:'occasional',type:'Ocasional',frequency:'semanal',amount:1});
-  data.recurrents=data.recurrents.map(({direction,cadence,...rest})=>({...rest,type:direction,freq:cadence}));
+  data.recurrents=data.recurrents.map(({direction,cadence,...rest}: any)=>({...rest,type:direction,freq:cadence}));
   const before=metrics(data);const name='phase5-migration-'+crypto.randomUUID();const old=new Dexie(name);
   old.version(9).stores({...schema,accounts:'id, type',account_transfers:'id, fromAccountId, toAccountId, date',categories:'id, type'});
   for(const [table,rows] of Object.entries(data)) await old.table(table).bulkAdd(rows);
@@ -46,7 +47,7 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
     for(const table of Object.keys(data).filter(t=>!['expenses','recurrents'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
-    assert.equal(migrated.expenses.find(e=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
+    assert.equal(migrated.expenses.find((e: any)=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
   }finally{await current.delete();}
 });
 
@@ -110,10 +111,10 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
 });
 
 test('v6 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
-  await saveRecurringRule(rule());await saveExpense({...expense,recurringRuleId:'rule'});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
+  const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
   assert.equal(dump.v,6);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
-  await importDataJSON(JSON.stringify(dump));assert.deepEqual(await snapshot(),before);
-  for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(await snapshot(),before);}
+  await importDataJSON(JSON.stringify(dump));assert.deepEqual(clean(await snapshot()),clean(before));
+  for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(clean(await snapshot()),clean(before));}
 });
 
 test('CSV imports legacy and canonical actual expenses without creating rules',async()=>{

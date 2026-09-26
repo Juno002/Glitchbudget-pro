@@ -71,6 +71,17 @@ test('income month follows the selected date on create and edit', async () => {
   await saveIncome({ ...income, amount: 123.45, date: '2026-10-01' }, true);
   assert.equal((await db.incomes.get('i'))!.month, '2026-10');
 });
+
+test('new income respects an explicit destination account and defaults to cash only when omitted', async () => {
+  await db.accounts.add({ id: 'bank', name: 'Qik', type: 'bank', openingBalance: 0, startDate: '2026-09-01' });
+  await saveIncome({ id: 'bank-income', accountId: 'bank', date: '2026-09-02', amount: 100, type: 'extra', description: 'Depósito', categoryId: 'salary' });
+  assert.equal((await db.incomes.get('bank-income'))?.accountId, 'bank');
+
+  await saveIncome({ id: 'cash-income', date: '2026-09-03', amount: 50, type: 'extra', description: 'Efectivo', categoryId: 'salary' });
+  const cash = (await db.accounts.toArray()).find(account => account.isDefaultCash);
+  assert.ok(cash);
+  assert.equal((await db.incomes.get('cash-income'))?.accountId, cash.id);
+});
 test('expense month follows the date when edited', async () => {
   await db.expenses.add(expense);
   await saveExpense({ ...expense, amount: 1000, date: '2026-08-31' }, true);

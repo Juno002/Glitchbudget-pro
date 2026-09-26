@@ -2375,6 +2375,8 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 ↓
 7  Recurrence / Planned Payments engine
 ↓
+7.5 UX Architecture & Design System
+↓
 8  Quick Add 2.0
 ↓
 9  Budgets 2.0
