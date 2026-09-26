@@ -255,7 +255,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       toast({ title: 'Error al guardar configuración', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
-  }, [toast, activeSettings.periodStartDay]);
+  }, [toast]);
 
   const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
       try {
@@ -473,7 +473,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       });
       return false;
     }
-  }, [toast]);
+  }, [toast, activeSettings.periodStartDay]);
 
   const getBudgetStatusDetails = useCallback((periodId: string) => {
     const period = periodForId(periodId, activeSettings);
@@ -532,7 +532,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     try {
       const created = await rollBudgetsIntoMonth(month);
-      if (created) toast({ title: 'Presupuestos preparados', description: 'Se aplicó tu preferencia de cierre al mes seleccionado.' });
+      if (created) toast({ title: 'Presupuestos preparados', description: 'Se aplicó tu preferencia de cierre al período seleccionado.' });
     } catch (error) {
       toast({ title: 'No se pudieron preparar los presupuestos', description: friendlyError(error), variant: 'destructive' });
     }
