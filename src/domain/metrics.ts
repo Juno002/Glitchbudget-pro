@@ -1,34 +1,76 @@
 import type { Income, Expense } from './models';
 import type { FinanceSnapshot } from './snapshot';
+import { contains, periodForId, type DateRange, type PeriodRange } from './periods';
 
-/** Recorded activity: a fixed purchase is counted once, on its actual date. */
-export function recordedExpenseForMonth(expense: Expense, month: string): number {
-  return expense.date.slice(0, 7) === month ? expense.amount : 0;
+/** Recorded activity: an actual purchase is counted once, on its recorded date. */
+export function recordedExpenseForPeriod(expense: Expense, period: DateRange): number {
+  return contains(period, expense.date) ? expense.amount : 0;
 }
-export function recordedCategories(rows: Array<Income | Expense>, month: string) {
+
+/** @deprecated Calendar-month compatibility wrapper. New consumers should pass a DateRange. */
+export function recordedExpenseForMonth(expense: Expense, month: string): number {
+  return recordedExpenseForPeriod(expense, periodForId(month, { periodStartDay: 1 }));
+}
+
+export function recordedCategoriesForPeriod(rows: Array<Income | Expense>, period: DateRange) {
   const groups = new Map<string, number>();
-  rows.filter(row => row.date.slice(0, 7) === month).forEach(row => groups.set(row.categoryId, (groups.get(row.categoryId) || 0) + row.amount));
+  rows.filter(row => contains(period, row.date)).forEach(row => groups.set(row.categoryId, (groups.get(row.categoryId) || 0) + row.amount));
   return Array.from(groups, ([name, value]) => ({ name, value }));
 }
-export function selectMonthlyMetrics(data: FinanceSnapshot, month: string) {
-  const recordedIncome = data.incomes.filter(i => i.date.slice(0, 7) === month).reduce((s,i) => s+i.amount,0);
-  const monthExpenses = data.expenses.filter(e => e.date.slice(0,7) === month);
-  const spending = monthExpenses.reduce((s,e) => s+e.amount,0);
-  const cashSpending = monthExpenses.filter(e => e.paymentMethod !== 'credit').reduce((s,e) => s+e.amount,0);
+
+/** @deprecated Calendar-month compatibility wrapper. */
+export function recordedCategories(rows: Array<Income | Expense>, month: string) {
+  return recordedCategoriesForPeriod(rows, periodForId(month, { periodStartDay: 1 }));
+}
+
+export function selectPeriodMetrics(data: FinanceSnapshot, period: PeriodRange) {
+  const periodIncome = data.incomes.filter(i => contains(period, i.date));
+  const periodExpenses = data.expenses.filter(e => contains(period, e.date));
+  const recordedIncome = periodIncome.reduce((s,i) => s+i.amount,0);
+  const spending = periodExpenses.reduce((s,e) => s+e.amount,0);
+  const cashSpending = periodExpenses.filter(e => e.paymentMethod !== 'credit').reduce((s,e) => s+e.amount,0);
   const cardSpending = spending - cashSpending;
-  const cardPayments = data.debtPayments.filter(p => p.date.slice(0,7) === month).reduce((s,p) => s+p.amount,0);
-  const monthBudgets = data.budgets.filter(b => b.month === month);
-  const plannedBudgetTotal = monthBudgets.reduce((s,b) => s+b.limit,0);
-  const remainingBudgets = monthBudgets.reduce((s,b) => s+selectBudgetRemaining(b.limit, selectCategorySpending(monthExpenses, b.categoryId, month)).unspentBudgetReservation,0);
-  const goalContributions = data.goalContributions.filter(c => c.date.slice(0,7) === month).reduce((s,c) => s+c.amount,0);
+  const cardPayments = data.debtPayments.filter(p => contains(period, p.date)).reduce((s,p) => s+p.amount,0);
+  const periodBudgets = data.budgets.filter(b => b.month === period.id);
+  const plannedBudgetTotal = periodBudgets.reduce((s,b) => s+b.limit,0);
+  const remainingBudgets = periodBudgets.reduce((s,b) =>
+    s + selectBudgetRemaining(b.limit, selectCategorySpendingForPeriod(periodExpenses, b.categoryId, period)).unspentBudgetReservation, 0);
+  const goalContributions = data.goalContributions.filter(c => contains(period, c.date)).reduce((s,c) => s+c.amount,0);
   const suggestedSave = Math.round(recordedIncome * data.settings.savePct);
   const planningReservations = remainingBudgets + goalContributions + suggestedSave;
-  const monthlyResult = recordedIncome-spending;
-  return { recordedIncome, spending, cashSpending, cardSpending, cardPayments, cashFlow: recordedIncome-cashSpending-cardPayments, monthlyResult, monthlyPlanningMargin: monthlyResult-planningReservations, plannedBudgetTotal, goalContributions, planningReservations, suggestedSave };
+  const periodResult = recordedIncome-spending;
+  return {
+    recordedIncome,
+    spending,
+    cashSpending,
+    cardSpending,
+    cardPayments,
+    cashFlow: recordedIncome-cashSpending-cardPayments,
+    monthlyResult: periodResult,
+    periodResult,
+    monthlyPlanningMargin: periodResult-planningReservations,
+    periodPlanningMargin: periodResult-planningReservations,
+    plannedBudgetTotal,
+    goalContributions,
+    planningReservations,
+    suggestedSave,
+  };
 }
+
+/** @deprecated Calendar-month compatibility wrapper. */
+export function selectMonthlyMetrics(data: FinanceSnapshot, month: string) {
+  return selectPeriodMetrics(data, periodForId(month, { periodStartDay: 1 }));
+}
+
+export function selectCategorySpendingForPeriod(expenses: Expense[], categoryId: string, period: DateRange) {
+  return expenses.filter(e => e.categoryId === categoryId).reduce((sum, e) => sum + recordedExpenseForPeriod(e, period), 0);
+}
+
+/** @deprecated Calendar-month compatibility wrapper. */
 export function selectCategorySpending(expenses: Expense[], categoryId: string, month: string) {
-  return expenses.filter(e => e.categoryId === categoryId).reduce((sum, e) => sum + recordedExpenseForMonth(e, month), 0);
+  return selectCategorySpendingForPeriod(expenses, categoryId, periodForId(month, { periodStartDay: 1 }));
 }
+
 export function selectBudgetRemaining(limit: number, spending: number) {
   const budgetRemaining = limit - spending;
   return { budgetRemaining, unspentBudgetReservation: Math.max(0, budgetRemaining) };
@@ -38,7 +80,7 @@ export function selectRolloverLimit(limit: number, spending: number, strategy: '
   const adjustment = strategy === 'accumulate_surplus' ? Math.max(0, budgetRemaining) : Math.min(0, budgetRemaining);
   return Math.max(0, limit + adjustment);
 }
-/** Explanatory chart split of the monthly result, not a cash-flow selector. */
+/** Explanatory chart split of the period result, not a cash-flow selector. */
 export function selectMonthlyResultSplit(recordedIncome: number, spending: number) {
   return { surplus: Math.max(0, recordedIncome - spending), deficit: Math.max(0, spending - recordedIncome) };
 }
