@@ -33,9 +33,9 @@ after(()=>db.close());
 
 test('v9 -> v10 preserves every financial field and metric, removes frequency and creates no rules',async()=>{
   const data=await snapshot();
-  data.expenses=data.expenses.map((row,index)=>{const {nature,recurringRuleId,...rest}=row;return {...rest,type:index?'Variable':'Fijo',frequency:'mensual',...(index?{recurringId:'removed-rule'}:{})};});
+  data.expenses=data.expenses.map((row: any,index: number)=>{const {nature,recurringRuleId,...rest}=row;return {...rest,type:index?'Variable':'Fijo',frequency:'mensual',...(index?{recurringId:'removed-rule'}:{})};});
   data.expenses.push({...data.expenses[0],id:'occasional',type:'Ocasional',frequency:'semanal',amount:1});
-  data.recurrents=data.recurrents.map(({direction,cadence,...rest})=>({...rest,type:direction,freq:cadence}));
+  data.recurrents=data.recurrents.map(({direction,cadence,...rest}: any)=>({...rest,type:direction,freq:cadence}));
   const before=metrics(data);const name='phase5-migration-'+crypto.randomUUID();const old=new Dexie(name);
   old.version(9).stores({...schema,accounts:'id, type',account_transfers:'id, fromAccountId, toAccountId, date',categories:'id, type'});
   for(const [table,rows] of Object.entries(data)) await old.table(table).bulkAdd(rows);
@@ -46,7 +46,7 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
     for(const table of Object.keys(data).filter(t=>!['expenses','recurrents'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
-    assert.equal(migrated.expenses.find(e=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
+    assert.equal(migrated.expenses.find((e: any)=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
   }finally{await current.delete();}
 });
 
