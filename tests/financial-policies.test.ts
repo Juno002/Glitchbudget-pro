@@ -104,10 +104,11 @@ test('simultaneous budget writes serialize and cannot both cross the limit',asyn
  await budget();const result=await Promise.allSettled([saveExpense({...expense,id:'a',amount:400}),saveExpense({...expense,id:'b',amount:400})]);
  assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal(await db.expenses.count(),2);
 });
-test('pure budget policy preserves inputs and month/category boundaries',()=>{
+test('pure budget policy preserves inputs and period/category boundaries',()=>{
  const plan={month,categoryId:'food',limit:500_000};const input={...expense,amount:100_000,month};const rows=[old,{...old,id:'other',date:'2026-10-20'}];const frozen=JSON.stringify(rows);
- assert.equal(evaluateBudgetOverspending(rows,input,plan,'block').decision,'block');assert.equal(JSON.stringify(rows),frozen);
- assert.equal(evaluateBudgetOverspending(rows,{...input,categoryId:'other'},undefined,'block').decision,'allow');
+ const period={id:month,start:month+'-01',end:month+'-30'};
+ assert.equal(evaluateBudgetOverspending(rows,input,plan,'block',period).decision,'block');assert.equal(JSON.stringify(rows),frozen);
+ assert.equal(evaluateBudgetOverspending(rows,{...input,categoryId:'other'},undefined,'block',period).decision,'allow');
 });
 test('legacy strict converts once; changing old flag cannot override explicit policies',async()=>{
  for(const strictMode of [true,false]){
