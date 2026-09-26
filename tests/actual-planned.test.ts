@@ -27,7 +27,7 @@ function metrics(data: Record<string, any[]>) {
     september:selectMonthlyMetrics(financial,'2026-09'), october:selectMonthlyMetrics(financial,'2026-10'),
   };
 }
-const rule = (id='rule', cadence:RecurringRule['cadence']='monthly'):RecurringRule => ({ id,direction:'expense',title:'Alquiler',categoryId:'food',amount:5000,cadence,startDate:'2026-09-01',active:true });
+const rule = (id='phase5-rule', cadence:RecurringRule['cadence']='monthly'):RecurringRule => ({ id,direction:'expense',title:'Alquiler',categoryId:'food',amount:5000,cadence,startDate:'2026-09-01',active:true });
 const expense = { id:'payment',date:'2026-09-10',categoryId:'food',amount:50,concept:'Pago real',nature:'Fijo' as const,accountId:'cash' };
 beforeEach(async()=>{ await importDataJSON(JSON.stringify(fixture)); });
 after(()=>db.close());
@@ -111,7 +111,7 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
 });
 
 test('v6 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
-  await saveRecurringRule(rule());await saveExpense({...expense,recurringRuleId:'rule'});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
+  const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
   assert.equal(dump.v,6);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
   await importDataJSON(JSON.stringify(dump));assert.deepEqual(await snapshot(),before);
   for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(await snapshot(),before);}
