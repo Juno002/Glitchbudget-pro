@@ -45,7 +45,8 @@ export function validatePlannedOccurrenceSet(rows: PlannedOccurrence[]): void {
 export async function addPendingOccurrence(input: Pick<PlannedOccurrence, 'id' | 'ruleId' | 'scheduledDate'>): Promise<PlannedOccurrence> {
   const row = plannedOccurrenceSchema.parse({ ...input, status: 'pending' }) as PlannedOccurrence;
   return db.transaction('rw', db.recurrents, db.planned_occurrences, async () => {
-    if (!await db.recurrents.get(row.ruleId)) throw new Error('La regla recurrente no existe.');
+    const rule = await db.recurrents.get(row.ruleId);
+    if (!rule || !rule.active) throw new Error('La regla recurrente no existe o está inactiva.');
     try {
       await db.planned_occurrences.add(row);
     } catch (error) {
