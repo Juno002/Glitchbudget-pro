@@ -92,6 +92,19 @@ test('pending occurrence storage enforces unique rule plus scheduled date', asyn
   assert.equal(await db.planned_occurrences.count(), 2);
 });
 
+test('pending occurrence creation requires an active source rule', async () => {
+  await db.recurrents.update('rule', { active: false });
+  await assert.rejects(
+    addPendingOccurrence({ id:'inactive', ruleId:'rule', scheduledDate:'2026-09-15' }),
+    /inactiva/
+  );
+  await assert.rejects(
+    addPendingOccurrence({ id:'missing', ruleId:'missing', scheduledDate:'2026-09-15' }),
+    /no existe/
+  );
+  assert.equal(await db.planned_occurrences.count(), 0);
+});
+
 test('occurrence model constrains transaction links to confirmed state', () => {
   assert.throws(() => plannedOccurrenceSchema.parse({ id:'a', ruleId:'rule', scheduledDate:'2026-09-15', status:'confirmed' }), /movimiento real/);
   assert.throws(() => plannedOccurrenceSchema.parse({ id:'b', ruleId:'rule', scheduledDate:'2026-09-15', status:'pending', transactionId:'tx' }), /Solo una ocurrencia confirmada/);
