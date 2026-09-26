@@ -80,3 +80,11 @@ Requiere Node.js 22 o superior. Ejecuta `npm ci`, `npm run check` y `npm run bui
 Los datos pertenecen al navegador y a la dirección donde abres la aplicación. No hay cuentas ni sincronización. Borrar los datos del sitio elimina también los respaldos locales: descarga periódicamente un JSON externo. Los respaldos no están cifrados.
 
 La revisión de calidad y sus límites están documentados en `docs/quality-review.md`.
+
+## Distribución estática (roadmap, fase 1)
+
+Ejecuta `npm run build` y publica exclusivamente la carpeta `out/` en un hosting estático HTTPS, desde la raíz del dominio. No requiere Next en producción, rutas API ni variables de entorno. Para una vista previa local: `npm start -- --port 9011`. El servidor de vista previa solo escucha en este equipo.
+
+El manifiesto offline se genera dentro de `out/` después de exportar. Publica toda la carpeta de forma atómica y sirve `sw.js`, `precache-manifest.js` y HTML con revalidación (Cache-Control: no-cache). Las fuentes se descargan durante el build con next/font y se incluyen en los archivos locales; el navegador no contacta Google Fonts.
+
+`npm run check:local` forma parte del check de CI y rechaza primitivas de red, rutas de servidor y SDK remotos conocidos en el código de aplicación. No sustituye una auditoría de dependencias ni detecta código deliberadamente ofuscado.

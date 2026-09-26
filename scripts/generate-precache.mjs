@@ -1,17 +1,19 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 async function files(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
-  const nested = await Promise.all(entries.map(entry => {
+  return (await Promise.all(entries.map(entry => {
     const filename = path.join(directory, entry.name);
     return entry.isDirectory() ? files(filename) : [filename];
-  }));
-  return nested.flat();
+  }))).flat();
 }
-const build = (await readFile('.next/BUILD_ID', 'utf8')).trim();
-const staticFiles = (await files('.next/static')).filter(file => !file.endsWith('.map'));
-const urls = ['/', '/transactions', '/manifest.json', '/icon-192.png', '/icon-512.png', '/logo.svg',
-  ...staticFiles.map(file => '/' + file.replaceAll('\\', '/').replace('.next/', '_next/'))];
-await writeFile('public/precache-manifest.js', `self.__PRECACHE = ${JSON.stringify({ build, urls })};\n`);
-console.log(`Offline manifest: ${urls.length} resources.`);
+const assets = (await files('out')).filter(file => !/\.(?:map)$/.test(file) && !['sw.js', 'precache-manifest.js'].includes(path.basename(file))).sort();
+const hash = createHash('sha256');
+for (const file of assets) { hash.update(file); hash.update(await readFile(file)); }
+hash.update(await readFile('public/sw.js'));
+const urls = assets.map(file => '/' + path.relative('out', file).split(path.sep).join('/'));
+const manifest = { build: hash.digest('hex').slice(0, 20), urls };
+await writeFile('out/precache-manifest.js', `self.__PRECACHE = ${JSON.stringify(manifest)};\n`);
+console.log(`Static offline manifest: ${urls.length} resources in out/.`);

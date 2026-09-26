@@ -9,9 +9,6 @@ import { getCategoryInfo } from "@/lib/categories";
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import { useState, useEffect } from "react";
-import { Button } from "../ui/button";
-import { useToast } from "@/hooks/use-toast";
 import CashFlowChart from "./charts/cash-flow-chart";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
@@ -62,12 +59,6 @@ const MonthlyComparisonTable = () => {
         return { prevMonth, currentTotals, prevTotals };
     }, [currentMonth, getTotals]);
 
-    const [insight, setInsight] = useState<string | null>(null);
-
-    useEffect(() => {
-        setInsight(null);
-        // AI insights disabled internally
-    }, [currentTotals, prevTotals]);
 
     const rows = [
         { label: 'Ingresos', prev: prevTotals.totalIncome, curr: currentTotals.totalIncome },

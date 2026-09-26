@@ -121,27 +121,6 @@ function playGoalCompleteUnsafe() {
   });
 }
 
-function playAIInsightUnsafe() {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-
-  osc.type = 'sine';
-  // Soft tick/chime
-  osc.frequency.setValueAtTime(1200, ctx.currentTime);
-  
-  gain.gain.setValueAtTime(0.05, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.15);
-}
-
 function playCoinDropUnsafe() {
   const ctx = getAudioContext();
   if (!ctx) return;
@@ -245,9 +224,6 @@ export function playGoalComplete() {
   try { playGoalCompleteUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
 }
 
-export function playAIInsight() {
-  try { playAIInsightUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }
-}
 
 export function playCoinDrop() {
   try { playCoinDropUnsafe(); } catch { /* Audio can be unavailable or blocked. */ }

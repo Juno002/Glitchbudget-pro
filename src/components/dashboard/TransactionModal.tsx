@@ -76,9 +76,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [debtId, setDebtId] = useState('');
   const [accountId, setAccountId] = useState('');
 
-  // AI insight state
-  const [insight, setInsight] = useState<string | null>(null);
-  const [isFetchingInsight, setIsFetchingInsight] = useState(false);
+  // Local validation and persistence errors
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -97,8 +96,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       // Cleanup on close
       if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
       setSaved(false);
-      setInsight(null);
-      setIsFetchingInsight(false);
+      setSubmitError(null);
       return;
     }
 
@@ -133,7 +131,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setDebtId('');
     }
     setSaved(false);
-    setInsight(null);
+    setSubmitError(null);
   }, [open, mode, editingExpense, editingIncome]);
 
   const categories = useMemo(() => {
@@ -148,7 +146,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     if (!canSave || savingRef.current) return;
     savingRef.current = true;
     setIsSaving(true);
-    setInsight(null);
+    setSubmitError(null);
     try {
       const numAmount = Number(amount);
       let success: boolean;
@@ -168,7 +166,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           : await addIncomeItem(fields);
       }
       if (!success) {
-        setInsight('No se guardó el movimiento. Revisa el aviso y corrige los datos; el formulario conserva lo que escribiste.');
+        setSubmitError('No se guardó el movimiento. Revisa el aviso y corrige los datos; el formulario conserva lo que escribiste.');
         return;
       }
       setSaved(true);
@@ -187,7 +185,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       const success = editingExpense ? await deleteExpense(editingExpense.id)
         : editingIncome ? await deleteIncomeItem(editingIncome.id) : false;
       if (success) onClose();
-      else setInsight('No se pudo eliminar el movimiento. Inténtalo de nuevo.');
+      else setSubmitError('No se pudo eliminar el movimiento. Inténtalo de nuevo.');
     } finally {
       savingRef.current = false;
       setIsSaving(false);
@@ -504,10 +502,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           )}
 
-          {insight && <p role="alert" className="text-sm text-destructive">{insight}</p>}
+          {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
 
           {/* Post-save confirmation */}
-          {saved && !insight && !isFetchingInsight && (
+          {saved && !submitError && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}

@@ -4,7 +4,6 @@ import { useFinances } from "@/contexts/finance-context";
 import { getCategoryInfo } from '@/lib/categories';
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
-import { playAIInsight } from '@/lib/sounds';
 import { Skeleton } from "@/components/ui/skeleton";
 import { format, differenceInDays, endOfMonth } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -244,7 +243,6 @@ export default function SummaryTab() {
             loading={loading}
         />
 
-        {/* Ambient AI Insight disabled internally */}
 
         <div className="pt-2">
             <SaveStrategyChips />

@@ -8,7 +8,7 @@
 - Balance Visualization: Display the current balance, showing available funds.
 - Budget Limit Setting: Set monthly budget limits for different categories. This acts as a tool for expense monitoring, indicating budget status and alerting the user when approaching or exceeding limits, incorporating/withholding these status updates based on the user's chosen frequency setting.
 - Transaction History: View and filter past transactions.
-- Summary Dashboard: AI powered insights based on transaction history.
+- Summary Dashboard: Local summaries based on recorded transactions.
 
 ## Style Guidelines:
 
