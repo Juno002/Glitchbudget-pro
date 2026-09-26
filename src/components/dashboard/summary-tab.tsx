@@ -5,8 +5,9 @@ import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, differenceInDays, endOfMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { formatPeriodRange } from '@/lib/period-format';
 import { useEffect, useState } from "react";
 import { motion } from 'framer-motion';
 import BudgetStatus from "./budget-status";
@@ -216,12 +217,12 @@ const SaveStrategyChips = () => {
 
 
 export default function SummaryTab() {
-  const { getTotals, getPosition, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, savePct } = useFinances();
+  const { getTotals, getPosition, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, currentPeriod, periodStartDay, savePct } = useFinances();
   const [monthName, setMonthName] = useState('');
 
   useEffect(() => {
-    setMonthName(formatMonth(currentMonth));
-  }, [currentMonth]);
+    setMonthName(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
+  }, [currentMonth, currentPeriod, periodStartDay]);
 
   const totals = getTotals(currentMonth);
   const expenseData = getExpensesByCategory(currentMonth);
@@ -232,7 +233,7 @@ export default function SummaryTab() {
   return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Resumen de {monthName}</h2>
+            <h2 className="text-2xl font-bold">{periodStartDay === 1 ? `Resumen de ${monthName}` : `Resumen · ${monthName}`}</h2>
         </div>
 
         <Snapshot
