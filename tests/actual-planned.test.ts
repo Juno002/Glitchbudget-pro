@@ -17,8 +17,9 @@ import type { RecurringRule } from '../src/domain/models';
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'));
 const schema = JSON.parse(readFileSync(new URL('./fixtures/dexie-v7.json', import.meta.url), 'utf8')).schema;
 const clean = (value: unknown) => JSON.parse(JSON.stringify(value));
-const snapshot = (database = db) => database.transaction('r', database.tables, async () =>
-  Object.fromEntries(await Promise.all(database.tables.map(async table => [table.name, await table.toArray()]))));
+const snapshot = async (database: GlitchBudgetDB = db): Promise<Record<string, any[]>> =>
+  database.transaction('r', database.tables, async () =>
+    Object.fromEntries(await Promise.all(database.tables.map(async table => [table.name, await table.toArray()]))) as Record<string, any[]>);
 function metrics(data: Record<string, any[]>) {
   const financial = { settings:data.settings[0], incomes:data.incomes, expenses:data.expenses, budgets:data.plans, goalContributions:data.goal_contributions, debtPayments:data.debt_payments };
   return {
