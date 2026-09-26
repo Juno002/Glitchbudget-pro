@@ -7,7 +7,7 @@ export interface Settings {
   preventNegativeAccountBalance?: boolean;
   budgetOverspendingBehavior?: 'allow' | 'warn' | 'block';
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
-  /** Day 1..31 on which the financial month starts. Default: 1. */
+  /** Day 1..31 on which each financial period starts. Default: 1. */
   periodStartDay?: number;
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
   expenseCategories?: string[];
@@ -24,8 +24,9 @@ export interface Settings {
   savePct: number; // Porcentaje de ahorro sugerido
 }
 
+/** Legacy persisted calendar marker; financial ranges are resolved by domain/periods.ts. */
 export interface Period {
-    id: string, // YYYY-MM
+    id: string, // YYYY-MM compatibility id
     year: number,
     month: number,
     createdAt: string
@@ -67,7 +68,7 @@ export interface Expense {
 }
 
 export interface Plan {
-  month: string; // YYYY-MM
+  month: string; // YYYY-MM period id; field name retained for storage compatibility
   categoryId: string;
   limit: number;
 };
