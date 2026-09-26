@@ -1,0 +1,169 @@
+{
+  "v": 4,
+  "exportedAt": "2026-09-01T12:00:00.000Z",
+  "settings": {
+    "id": "general",
+    "currency": "DOP",
+    "locale": "es-DO",
+    "theme": "light",
+    "strictMode": true,
+    "savePct": 0.1,
+    "customCategoryIcons": {
+      "food": "Pizza"
+    },
+    "rolloverStrategy": "reset",
+    "baseIncome": {
+      "freq": "mensual",
+      "amount": 500000
+    },
+    "incomeCategories": [
+      "salary"
+    ],
+    "expenseCategories": [
+      "food"
+    ]
+  },
+  "periods": [
+    {
+      "id": "2026-09",
+      "year": 2026,
+      "month": 9,
+      "createdAt": "2026-09-01T12:00:00.000Z"
+    }
+  ],
+  "incomes": [
+    {
+      "id": "income",
+      "month": "2026-09",
+      "date": "2026-09-02",
+      "categoryId": "salary",
+      "amount": 100000,
+      "description": "Cobro ficticio",
+      "type": "extra",
+      "accountId": "cash"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "cash-expense",
+      "month": "2026-09",
+      "date": "2026-09-03",
+      "categoryId": "food",
+      "amount": 10000,
+      "concept": "Compra ficticia",
+      "type": "Fijo",
+      "frequency": "mensual",
+      "paymentMethod": "cash",
+      "accountId": "cash"
+    },
+    {
+      "id": "card-expense",
+      "month": "2026-09",
+      "date": "2026-09-03",
+      "categoryId": "food",
+      "amount": 20000,
+      "concept": "Compra a crédito ficticia",
+      "type": "Variable",
+      "paymentMethod": "credit",
+      "debtId": "card"
+    }
+  ],
+  "plans": [
+    {
+      "month": "2026-09",
+      "categoryId": "food",
+      "limit": 50000
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal",
+      "name": "Meta ficticia",
+      "target": 100000,
+      "saved": 5000,
+      "quota": 5000,
+      "startDate": "2026-09-01",
+      "status": "active"
+    }
+  ],
+  "goalContributions": [
+    {
+      "id": "contribution",
+      "goalId": "goal",
+      "amount": 5000,
+      "date": "2026-09-04"
+    }
+  ],
+  "recurrents": [
+    {
+      "id": "rule",
+      "type": "expense",
+      "title": "Servicio ficticio",
+      "categoryId": "food",
+      "amount": 1000,
+      "freq": "monthly",
+      "day": 15,
+      "startDate": "2026-09-01",
+      "active": true
+    }
+  ],
+  "debts": [
+    {
+      "id": "card",
+      "name": "Tarjeta ficticia",
+      "type": "credit_card",
+      "principal": 200000,
+      "apr": 0,
+      "minPayment": 1000,
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "status": "active",
+      "openingAdjustment": 30000
+    }
+  ],
+  "debtPayments": [
+    {
+      "id": "payment",
+      "debtId": "card",
+      "amount": 10000,
+      "date": "2026-09-05",
+      "accountId": "bank",
+      "note": "Pago ficticio"
+    }
+  ],
+  "fxRates": [
+    {
+      "id": "USD->DOP",
+      "quote": "USD",
+      "base": "DOP",
+      "rate": 60,
+      "updatedAt": "2026-09-01T12:00:00.000Z"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "cash",
+      "name": "Efectivo",
+      "type": "cash",
+      "openingBalance": 20000,
+      "startDate": "2026-09-01",
+      "isDefaultCash": true
+    },
+    {
+      "id": "bank",
+      "name": "Banco ficticio",
+      "type": "bank",
+      "openingBalance": 200000,
+      "startDate": "2026-09-01"
+    }
+  ],
+  "accountTransfers": [
+    {
+      "id": "transfer",
+      "fromAccountId": "cash",
+      "toAccountId": "bank",
+      "amount": 30000,
+      "date": "2026-09-04",
+      "note": "Depósito ficticio"
+    }
+  ]
+}
