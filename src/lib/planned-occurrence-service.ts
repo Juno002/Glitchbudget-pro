@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { db } from './db';
 import { isValidDate } from './finance-calculations';
 import type { PlannedOccurrence } from '../domain/models';
+import type { DateRange } from '../domain/periods';
+import { plannedOccurrenceId, scheduledDatesForRule, validateDateRange } from '../domain/recurrence';
 
 const Id = z.string().min(1);
 
@@ -56,5 +58,41 @@ export async function addPendingOccurrence(input: Pick<PlannedOccurrence, 'id' |
       throw error;
     }
     return row;
+  });
+}
+
+
+/**
+ * Fase 7B: materializa únicamente ocurrencias pending que falten en el rango.
+ * No sobrescribe pending existentes ni estados confirmed/skipped.
+ * La generación es idempotente para la combinación ruleId + scheduledDate.
+ */
+export async function materializePendingOccurrences(range: DateRange): Promise<PlannedOccurrence[]> {
+  validateDateRange(range);
+  return db.transaction('rw', db.recurrents, db.planned_occurrences, async () => {
+    const rules = (await db.recurrents.toArray()).filter(rule => rule.active);
+    const created: PlannedOccurrence[] = [];
+
+    for (const rule of rules) {
+      for (const scheduledDate of scheduledDatesForRule(rule, range)) {
+        const existing = await db.planned_occurrences
+          .where('[ruleId+scheduledDate]')
+          .equals([rule.id, scheduledDate])
+          .first();
+        if (existing) continue;
+
+        const row = plannedOccurrenceSchema.parse({
+          id: plannedOccurrenceId(rule.id, scheduledDate),
+          ruleId: rule.id,
+          scheduledDate,
+          status: 'pending',
+        }) as PlannedOccurrence;
+
+        await db.planned_occurrences.add(row);
+        created.push(row);
+      }
+    }
+
+    return created;
   });
 }
