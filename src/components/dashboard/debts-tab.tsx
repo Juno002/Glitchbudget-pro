@@ -1,7 +1,7 @@
 'use client';
 
 import { AccountSelect } from './account-select';
-import { debtBalance } from '@/lib/accounts';
+import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
 import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -133,11 +133,11 @@ export default function DebtsTab() {
       ) : (
         <div className="grid gap-4">
           {activeDebts.map(debt => {
-            const currentDebt = debtBalance(debt, expenses || [], debtPayments || []); // Positive means we owe money, negative means we are in surplus
+            const currentDebt = selectCardSignedBalance(debt, expenses || [], debtPayments || [], localDate()); // Positive means we owe money, negative means we are in surplus
             const isSurplus = currentDebt < 0;
             const absoluteDebt = Math.abs(currentDebt);
             
-            const availableLimit = debt.principal - currentDebt;
+            const availableLimit = selectCardAvailableLimit(debt.principal, currentDebt);
             const percentUsed = Math.min(100, Math.max(0, (currentDebt / debt.principal) * 100));
 
             return (

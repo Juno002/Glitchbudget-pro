@@ -1,7 +1,8 @@
+import { legacyExpensePolicyRejects, legacyGoalContributionPolicyRejects } from '../policies/legacy-finance';
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
-import { calculateTotals, calculateRecordedTotals, isValidDate, type FinanceSnapshot } from './finance-calculations';
+import { isValidDate, type FinanceSnapshot } from './finance-calculations';
 
 const fields = {
   accountId: z.string().min(1).optional(),
@@ -83,11 +84,7 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
           budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(),
           debtPayments: await db.debt_payments.toArray(),
         };
-        const before = calculateTotals(data, row.month);
-        const after = calculateTotals({ ...data, expenses: [...data.expenses.filter(e => e.id !== row.id), row] }, row.month);
-        const freeBefore = before.balance - before.commitments;
-        const freeAfter = after.balance - after.commitments;
-        if (freeAfter < 0 && (!editing || freeAfter < freeBefore)) {
+        if (legacyExpensePolicyRejects(data, { ...data, expenses: [...data.expenses.filter(e => e.id !== row.id), row] }, row.month, editing)) {
           throw new Error('Modo estricto: este gasto supera el dinero disponible para su mes y categoría. Ajusta el presupuesto o el monto.');
         }
       }
@@ -99,11 +96,11 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
 
 const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const outgoingTables = [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
-async function requireAvailableCash(amount: number, date: string) {
+async function requireLegacyGoalContributionPolicy(amount: number, date: string) {
   const settings = await db.settings.get('general');
   if (!settings?.strictMode) return;
-  const totals = calculateRecordedTotals({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7));
-  if (amount > totals.balance - totals.commitments) throw new Error('Modo estricto: el monto supera el dinero disponible de ese mes.');
+  const rejected = legacyGoalContributionPolicyRejects({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7), amount);
+  if (rejected) throw new Error('Modo estricto: el monto supera el dinero disponible de ese mes.');
 }
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   centsSchema.parse(payment.amount);
@@ -129,7 +126,7 @@ export async function saveGoalContribution(contribution: import('./db').GoalCont
   return db.transaction('rw', outgoingTables, async () => {
     const goal = await db.goals.get(contribution.goalId);
     if (!goal) throw new Error('Meta no encontrada.');
-    await requireAvailableCash(contribution.amount, contribution.date);
+    await requireLegacyGoalContributionPolicy(contribution.amount, contribution.date);
     const saved = goal.saved + contribution.amount;
     if (!Number.isSafeInteger(saved)) throw new Error('El total supera el monto admitido.');
     const status = saved >= goal.target ? 'completed' : 'active';

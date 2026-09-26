@@ -1,5 +1,6 @@
+import { selectCategorySpending, selectRolloverLimit } from '../domain/metrics';
 import { db } from './db';
-import { recordedExpenseForMonth as expenseForMonth, isValidDate, localDate } from './finance-calculations';
+import { isValidDate, localDate } from './finance-calculations';
 
 export async function rollBudgetsIntoMonth(month: string): Promise<boolean> {
   if (!isValidDate(month + '-01')) throw new Error('Selecciona un mes válido.');
@@ -13,10 +14,8 @@ export async function rollBudgetsIntoMonth(month: string): Promise<boolean> {
     if (!plans.length) return false;
     const expenses = await db.expenses.toArray();
     const next = plans.map(plan => {
-      const spent = expenses.filter(e => e.categoryId === plan.categoryId).reduce((sum, e) => sum + expenseForMonth(e, previousMonth), 0);
-      const remaining = plan.limit - spent;
-      const adjustment = strategy === 'accumulate_surplus' ? Math.max(0, remaining) : Math.min(0, remaining);
-      const limit = Math.max(0, plan.limit + adjustment);
+      const spent = selectCategorySpending(expenses, plan.categoryId, previousMonth);
+      const limit = selectRolloverLimit(plan.limit, spent, strategy);
       if (!Number.isSafeInteger(limit)) throw new Error('El presupuesto supera el monto admitido.');
       return { ...plan, month, limit };
     });

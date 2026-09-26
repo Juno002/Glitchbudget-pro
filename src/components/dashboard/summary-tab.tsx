@@ -44,9 +44,9 @@ const Ring = ({ pct, ok = true }: { pct: number, ok?: boolean }) => (
 
 
 function Snapshot({
-  totalIncome, totalExpenses, available, suggestedSave, savePct, loading
+  totalIncome, totalExpenses, liquidAssets, suggestedSave, savePct, loading
 }: {
-  totalIncome: number; totalExpenses: number; available: number; suggestedSave: number; savePct: number; loading: boolean
+  totalIncome: number; totalExpenses: number; liquidAssets: number; suggestedSave: number; savePct: number; loading: boolean
 }) {
   const position = useFinances().getPosition();
   const spendingPct = Math.min(100, Math.round((totalExpenses / Math.max(1, totalIncome)) * 100));
@@ -69,7 +69,7 @@ function Snapshot({
   };
 
   const cards = [
-    { label: 'Dinero en cuentas hoy', value: available, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={available > 0 ? 100 : 0} ok={available >= 0} />, info: `Efectivo: ${formatCurrency(position.cash)}. Bancos: ${formatCurrency(position.bank)}. Total real de hoy, igual que en Movimientos. No incluye crédito disponible ni descuenta deudas o reservas del presupuesto.` },
+    { label: 'Dinero en cuentas hoy', value: liquidAssets, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={liquidAssets > 0 ? 100 : 0} ok={liquidAssets >= 0} />, info: `Efectivo: ${formatCurrency(position.cash)}. Bancos: ${formatCurrency(position.bank)}. Total real de hoy, igual que en Movimientos. No incluye crédito disponible ni descuenta deudas o reservas del presupuesto.` },
     { label: 'Ahorro sugerido', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% de los ingresos registrados del mes. Es una propuesta; no mueve dinero entre cuentas.` },
     { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={totalIncome > 0 ? 100 - spendingPct : 0} ok /> },
     { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
@@ -235,9 +235,9 @@ export default function SummaryTab() {
         </div>
 
         <Snapshot
-            totalIncome={totals.totalIncome}
-            totalExpenses={totals.totalExpenses}
-            available={getPosition().liquid}
+            totalIncome={totals.recordedIncome}
+            totalExpenses={totals.spending}
+            liquidAssets={getPosition().liquidAssets}
             suggestedSave={totals.suggestedSave}
             savePct={savePct}
             loading={loading}

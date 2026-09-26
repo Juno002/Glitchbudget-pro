@@ -25,7 +25,7 @@ const CustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
 
 export default function PercentageSpentRing() {
     const { getTotals, currentMonth } = useFinances();
-    const { totalIncome, totalExpenses } = getTotals(currentMonth);
+    const { recordedIncome: totalIncome, spending: totalExpenses } = getTotals(currentMonth);
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {

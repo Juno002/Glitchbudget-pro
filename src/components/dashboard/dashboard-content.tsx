@@ -31,8 +31,8 @@ function AchievementMonkMode() {
         }
         const mStr = `${y}-${String(m).padStart(2, '0')}`;
         const t = getTotals(mStr);
-        if (t.totalIncome === 0) { isMonk = false; break; }
-        const ratio = t.totalExpenses / t.totalIncome;
+        if (t.recordedIncome === 0) { isMonk = false; break; }
+        const ratio = t.spending / t.recordedIncome;
         if (ratio > 0.20 || ratio < 0) { isMonk = false; break; } // Negative check to prevent glitches
     }
     setQualifies(isMonk);

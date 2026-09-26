@@ -1,4 +1,5 @@
 'use client';
+import { selectBudgetRemaining } from '@/domain/metrics';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { monthlyAmount } from '@/lib/finance-calculations';
@@ -78,7 +79,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   };
 
   const plan = currentPlan;
-  const left = Math.max(0, plan - spent);
+  const left = selectBudgetRemaining(plan, spent).unspentBudgetReservation;
   const pct = plan ? Math.min(100, Math.round((spent / plan) * 100)) : 0;
   const over = plan > 0 && spent > plan;
 
@@ -325,7 +326,7 @@ export default function PlanningTab() {
 
         {/* --- PRESUPUESTOS TAB --- */}
         <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{formatCurrency(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{formatCurrency(getTotals(currentMonth).totalIncome)}</strong></p><p>Margen del mes tras reservas: <strong>{formatCurrency(getTotals(currentMonth).available)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
+            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{formatCurrency(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{formatCurrency(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del mes tras reservas: <strong>{formatCurrency(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
             <Card>
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                     <div className="space-y-1">

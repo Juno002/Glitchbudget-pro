@@ -1,5 +1,6 @@
-
 'use client';
+import { selectMonthlyMetrics, recordedCategories, recordedExpenseForMonth as expenseForMonth, selectCategorySpending, selectBudgetRemaining } from '@/domain/metrics';
+import { selectPosition } from '@/domain/ledger';
 import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
@@ -9,9 +10,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type Recurring } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
-import { calculateRecordedTotals, recordedCategories, recordedExpenseForMonth as expenseForMonth, localDate, monthlyAmount } from '@/lib/finance-calculations';
+import { localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome } from '@/lib/transaction-service';
-import { ensureCashAccount, accountPosition } from '@/lib/accounts';
+import { ensureCashAccount } from '@/lib/accounts';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -83,8 +84,8 @@ interface FinanceContextType {
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
-  getTotals: (month: string) => ReturnType<typeof calculateRecordedTotals>;
-  getPosition: () => ReturnType<typeof accountPosition>;
+  getTotals: (month: string) => ReturnType<typeof selectMonthlyMetrics>;
+  getPosition: () => ReturnType<typeof selectPosition>;
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
@@ -200,10 +201,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
 
   const getSpentAmount = useCallback((categoryId: string, month: string): number =>
-    (expenses || []).filter(e => e.categoryId === categoryId)
-      .reduce((sum, e) => sum + expenseForMonth(e, month), 0), [expenses]);
+    selectCategorySpending(expenses || [], categoryId, month), [expenses]);
 
-  const getTotals = useCallback((month: string) => calculateRecordedTotals({
+  const getTotals = useCallback((month: string) => selectMonthlyMetrics({
     settings: activeSettings, incomes: incomes || [], expenses: expenses || [],
     budgets: budgets || [], goalContributions: goalContributions || [], debtPayments: debtPayments || [],
   }, month), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
@@ -211,8 +211,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const getMonthlyAverages = useCallback((numMonths = 3) => {
     const months = Array.from(new Set([currentMonth, ...[...(incomes || []), ...(expenses || [])].map(t => t.date.slice(0, 7))]))
       .filter(month => month <= currentMonth).sort().slice(-numMonths);
-    const totalIncome = months.reduce((sum, month) => sum + getTotals(month).totalIncome, 0);
-    const totalExpenses = months.reduce((sum, month) => sum + (expenses || []).reduce((subtotal, e) => subtotal + expenseForMonth(e, month), 0), 0);
+    const totalIncome = months.reduce((sum, month) => sum + getTotals(month).recordedIncome, 0);
+    const totalExpenses = months.reduce((sum, month) => sum + getTotals(month).spending, 0);
     return { incomeAvgMonthly: totalIncome / months.length, expenseAvgMonthly: totalExpenses / months.length };
   }, [incomes, expenses, currentMonth, getTotals]);
 
@@ -406,7 +406,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
           const fromBudget = await db.plans.get([month, fromCategoryId]);
           const toBudget = await db.plans.get([month, toCategoryId]);
 
-          const spent = (await db.expenses.toArray()).filter(e => e.categoryId === fromCategoryId).reduce((sum, e) => sum + expenseForMonth(e, month), 0);
+          const spent = selectCategorySpending(await db.expenses.toArray(), fromCategoryId, month);
           if (!fromBudget || fromBudget.limit - spent < amountInCents) {
               throw new Error("Fondos insuficientes en el presupuesto de origen.");
           }
@@ -442,7 +442,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     return allRelevantCategoryIds.map(catId => {
       const budget = monthBudgets.find(b => b.categoryId === catId) || { month, categoryId: catId, limit: 0 };
       const spent = getSpentAmount(budget.categoryId, month);
-      const remaining = budget.limit - spent;
+      const remaining = selectBudgetRemaining(budget.limit, spent).budgetRemaining;
       let status: 'ok' | 'alert' | 'over' | 'unbudgeted' = 'ok';
 
       if (budget.limit === 0) status = 'unbudgeted';
@@ -455,7 +455,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const getExpensesByCategory = useCallback((month: string) => recordedCategories(expenses || [], month), [expenses]);
   const getIncomesByCategory = useCallback((month: string) => recordedCategories(incomes || [], month), [incomes]);
-  const getPosition = useCallback(() => accountPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }), [accounts, debts, incomes, expenses, debtPayments, transfers]);
+  const getPosition = useCallback(() => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()), [accounts, debts, incomes, expenses, debtPayments, transfers]);
 
   const getExpensesByType = useCallback((month: string) => {
       const exps = (expenses || []).filter(e => expenseForMonth(e, month) > 0);

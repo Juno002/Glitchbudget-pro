@@ -1,8 +1,9 @@
 'use client';
+import { selectPosition } from '@/domain/ledger';
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
-import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt, accountPosition } from '@/lib/accounts';
+import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { formatCurrency, toCents } from '@/lib/utils';
 import { friendlyError } from '@/lib/errors';
@@ -40,7 +41,7 @@ export default function AccountsOverview() {
   if (!data) return null;
   const today = localDate();
   const cards = data.debts.filter(d => d.type === 'credit_card');
-  const { cash, bank, balances, owed, credit } = accountPosition(data.accounts, data.debts, data, today);
+  const { cash, bank, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
   const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
   const account = data.accounts.find(a => a.id === selected);
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
@@ -78,10 +79,10 @@ export default function AccountsOverview() {
     <details className="group"><summary className="cursor-pointer text-sm text-muted-foreground">Ver cuentas y deuda</summary><div className="space-y-3 pt-3">
     {!data.accounts.length ? <p className="text-sm text-muted-foreground">Efectivo se prepara automáticamente. Puedes añadir bancos cuando lo necesites.</p> : <>
       {unassigned > 0 && <details className="rounded-xl border p-3 text-sm"><summary className="cursor-pointer font-medium">{unassigned} movimientos anteriores sin cuenta</summary><p className="mt-2 text-muted-foreground">Se conservan en los reportes, pero no modifican tus saldos. Incluye el dinero que te quedaba al comenzar el seguimiento en el saldo inicial de Efectivo (Ver cuentas y deuda → Efectivo → Ajustar saldo inicial). Si un movimiento posterior a esa fecha no está incluido en el saldo inicial, puedes editarlo en el historial y asignarle Efectivo. No vuelvas a registrar el ingreso: se contaría dos veces.</p></details>}
-      <div className="grid grid-cols-2 gap-3">{[['Deuda de tarjetas',owed],['Saldo neto registrado',cash+bank+credit-owed]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{formatCurrency(Number(value))}</p></div>)}</div>
+      <div className="grid grid-cols-2 gap-3">{[['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{formatCurrency(Number(value))}</p></div>)}</div>
       <p className="text-xs text-muted-foreground">El saldo neto incluye solo las cuentas y tarjetas registradas. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {formatCurrency(credit)}.</>}</p>
       <div className="grid sm:grid-cols-2 gap-2">{data.accounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · Desde {a.startDate}</span></span><strong>{formatCurrency(accountBalance(a,data))}</strong></button>)}</div>
-      {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.balance >= 0 ? 'deuda' : 'saldo a favor'} {formatCurrency(Math.abs(d.balance))}</p>)}
+      {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.signedBalance >= 0 ? 'deuda' : 'saldo a favor'} {formatCurrency(Math.abs(d.signedBalance))}</p>)}
       {account && <div className="border-t pt-3 space-y-2"><h3 className="font-semibold">Movimientos de {account.name}</h3><Button variant="outline" onClick={()=>{setEditingAccount(account.id);setName(account.name);setOpening(String(account.openingBalance/100));if(account.type === 'cash') setCashOpen(true); else setOpen(true);}}>{account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar banco'}</Button><p className="text-xs text-muted-foreground">Saldo inicial: {formatCurrency(account.openingBalance)} · {account.startDate}</p>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const t=data.transfers.find(t=>t.id===r.id);if(t){setEditingAccount('');setName('');setOpening('');setEditingTransfer(t.id);setFrom(t.fromAccountId);setTo(t.toAccountId);setAmount(String(t.amount/100));setDate(t.date);setNote(t.note);setOpen(true);}}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{formatCurrency(r.amount)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>

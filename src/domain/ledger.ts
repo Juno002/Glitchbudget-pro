@@ -1,0 +1,30 @@
+import type { Account, Income, Expense, DebtPayment, AccountTransfer, Debt } from './models';
+export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
+export function selectAccountEntries(account: Account, data: AccountSnapshot, through: string) {
+  const entries = [
+    ...data.incomes.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.amount, description: r.description || 'Ingreso', kind: 'income' })),
+    ...data.expenses.filter(r => r.accountId === account.id && r.paymentMethod !== 'credit').map(r => ({ id: r.id, date: r.date, amount: -r.amount, description: r.concept || 'Gasto', kind: 'expense' })),
+    ...data.payments.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date.slice(0, 10), amount: -r.amount, description: r.note || 'Pago de tarjeta', kind: 'payment' })),
+    ...data.transfers.filter(r => r.fromAccountId === account.id || r.toAccountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.fromAccountId === account.id ? -r.amount : r.amount, description: r.note || 'Transferencia entre cuentas', kind: 'transfer' })),
+  ];
+  return entries.filter(r => r.date >= account.startDate && r.date <= through).sort((a,b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
+}
+export function selectAccountBalance(account: Account, data: AccountSnapshot, through: string) {
+  if (through < account.startDate) return 0;
+  return account.openingBalance + selectAccountEntries(account, data, through).reduce((sum,r) => sum + r.amount, 0);
+}
+export function selectCardSignedBalance(debt: Debt, expenses: Expense[], payments: DebtPayment[], through: string) {
+  return (debt.openingAdjustment ?? 0) + expenses.filter(e => e.debtId === debt.id && e.paymentMethod === 'credit' && e.date <= through).reduce((s,e) => s + e.amount, 0) - payments.filter(p => p.debtId === debt.id && p.date.slice(0,10) <= through).reduce((s,p) => s + p.amount, 0);
+}
+export function selectPosition(accounts: Account[], debts: Debt[], data: AccountSnapshot, through: string) {
+  const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
+  const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
+  const balances = debts.filter(d => d.type === 'credit_card').map(d => ({...d, signedBalance: selectCardSignedBalance(d,data.expenses,data.payments,through)}));
+  const liabilities = balances.reduce((sum,d) => sum+Math.max(0,d.signedBalance),0);
+  const cardPositiveBalance = balances.reduce((sum,d) => sum+Math.max(0,-d.signedBalance),0);
+  return { cash, bank, liquidAssets: cash+bank, liabilities, cardPositiveBalance, netWorth: cash+bank+cardPositiveBalance-liabilities, balances };
+}
+/** Borrowing headroom, never part of liquid assets or net worth. */
+export function selectCardAvailableLimit(limit: number, signedBalance: number) {
+  return limit - signedBalance;
+}

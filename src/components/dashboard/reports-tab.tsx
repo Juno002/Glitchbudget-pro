@@ -1,6 +1,7 @@
 'use client';
 
-import { debtBalance } from '@/lib/accounts';
+import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
+import { localDate } from '@/lib/finance-calculations';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -9,7 +10,7 @@ import { getCategoryInfo } from "@/lib/categories";
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import CashFlowChart from "./charts/cash-flow-chart";
+import MonthlyResultChart from "./charts/monthly-result-chart";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
@@ -61,10 +62,10 @@ const MonthlyComparisonTable = () => {
 
 
     const rows = [
-        { label: 'Ingresos', prev: prevTotals.totalIncome, curr: currentTotals.totalIncome },
-        { label: 'Gastos', prev: prevTotals.totalExpenses, curr: currentTotals.totalExpenses },
-        { label: 'Resultado (ingresos − gastos)', prev: prevTotals.balance, curr: currentTotals.balance },
-        { label: 'Pagos de tarjeta', prev: prevTotals.totalDebtPayments, curr: currentTotals.totalDebtPayments },
+        { label: 'Ingresos', prev: prevTotals.recordedIncome, curr: currentTotals.recordedIncome },
+        { label: 'Gastos', prev: prevTotals.spending, curr: currentTotals.spending },
+        { label: 'Resultado (ingresos − gastos)', prev: prevTotals.monthlyResult, curr: currentTotals.monthlyResult },
+        { label: 'Pagos de tarjeta', prev: prevTotals.cardPayments, curr: currentTotals.cardPayments },
         { label: 'Flujo de efectivo del mes', prev: prevTotals.cashFlow, curr: currentTotals.cashFlow }
     ];
 
@@ -291,8 +292,8 @@ const CreditCardStatusReport = () => {
                 {/* MOBILE VIEW */}
                 <div className="grid grid-cols-1 gap-4 md:hidden">
                     {activeCards.map(debt => {
-                        const currentDebt = debtBalance(debt, expenses || [], debtPayments || []);
-                        const available = debt.principal - currentDebt;
+                        const currentDebt = selectCardSignedBalance(debt, expenses || [], debtPayments || [], localDate());
+                        const available = selectCardAvailableLimit(debt.principal, currentDebt);
                         const daysToCut = getDaysUntil(debt.billingCycleDay);
                         const daysToPay = getDaysUntil(debt.paymentDueDay);
 
@@ -347,8 +348,8 @@ const CreditCardStatusReport = () => {
                         </TableHeader>
                         <TableBody>
                             {activeCards.map(debt => {
-                                const currentDebt = debtBalance(debt, expenses || [], debtPayments || []);
-                                const available = debt.principal - currentDebt;
+                                const currentDebt = selectCardSignedBalance(debt, expenses || [], debtPayments || [], localDate());
+                                const available = selectCardAvailableLimit(debt.principal, currentDebt);
                                 const daysToPay = getDaysUntil(debt.paymentDueDay);
 
                                 return (
@@ -389,7 +390,7 @@ export default function ReportsTab() {
   return (
     <div className="space-y-6">
         <h2 className="text-2xl font-bold">Reportes</h2>
-        <CashFlowChart />
+        <MonthlyResultChart />
         <MonthlyComparisonTable />
         <CreditCardStatusReport />
         <BudgetStatusReport />

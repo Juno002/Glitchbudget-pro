@@ -1,4 +1,5 @@
 'use client';
+import { selectMonthlyResultSplit } from '@/domain/metrics';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -36,7 +37,7 @@ function getNodeEmoji(id: string): string {
     vivienda: '🏠', transporte: '🚗', alimentacion: '🍽️', servicios: '⚡',
     salud: '💊', entretenimiento: '🎮', ropa: '👕', educacion: '📚',
     'regalos-gastos': '🎁', ahorro: '🐷', otros: '📦',
-    savings: '🎯', available: '💰',
+    savings: '🎯', monthlySurplus: '💰',
   };
   return map[id] || '•';
 }
@@ -275,11 +276,11 @@ function DesktopSankeyView({
 }
 
 // ─── Main Component ─────────────────────────────────────────
-export default function CashFlowChart() {
+export default function MonthlyResultChart() {
   const {
+    getTotals,
     getIncomesByCategory,
     getExpensesByCategory,
-    getTotals,
     currentMonth,
     goals,
     goalContributions,
@@ -300,9 +301,8 @@ export default function CashFlowChart() {
     const incomeData = getIncomesByCategory(currentMonth);
     const expenseData = getExpensesByCategory(currentMonth);
 
-    const recordedIncome = incomeData.reduce((s,d) => s+d.value,0);
-    const recordedExpenses = expenseData.reduce((s,d) => s+d.value,0);
-    const deficit = Math.max(0,recordedExpenses-recordedIncome);
+    const { recordedIncome, spending: recordedExpenses } = getTotals(currentMonth);
+    const { deficit, surplus } = selectMonthlyResultSplit(recordedIncome, recordedExpenses);
     const totalIncome = recordedIncome + deficit;
     if (totalIncome <= 0) return { sources: [], destinations: [], links: [], totalIncome: 0 };
 
@@ -328,12 +328,12 @@ export default function CashFlowChart() {
       });
     });
 
-    const available = Math.max(0, recordedIncome-recordedExpenses);
-    if (available > 0) {
+    const monthlySurplus = surplus;
+    if (monthlySurplus > 0) {
       dests.push({
         id: 'dst-available',
         label: 'Excedente del mes',
-        value: available,
+        value: monthlySurplus,
         color: 'hsl(var(--secondary))',
         icon: '💰',
         type: 'destination',
@@ -356,7 +356,7 @@ export default function CashFlowChart() {
     });
 
     return { sources, destinations: dests, links, totalIncome };
-  }, [getIncomesByCategory, getExpensesByCategory, currentMonth]);
+  }, [getTotals, getIncomesByCategory, getExpensesByCategory, currentMonth]);
 
   if (!isClient) return null;
 

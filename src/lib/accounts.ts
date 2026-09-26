@@ -1,3 +1,4 @@
+import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectPosition } from '../domain/ledger';
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
@@ -21,20 +22,10 @@ export async function ensureCashAccount(startDate = localDate()): Promise<Accoun
   });
 }
 export const transferSchema = z.object({ id: z.string().min(1), fromAccountId: z.string().min(1), toAccountId: z.string().min(1), amount: cents.refine(v => v > 0, 'Introduce un monto positivo.'), date, note: z.string().trim().max(250) }).refine(t => t.fromAccountId !== t.toAccountId, 'Selecciona dos cuentas diferentes.');
-export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
-export function accountEntries(account: Account, data: AccountSnapshot, through = localDate()) {
-  const entries = [
-    ...data.incomes.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.amount, description: r.description || 'Ingreso', kind: 'income' })),
-    ...data.expenses.filter(r => r.accountId === account.id && r.paymentMethod !== 'credit').map(r => ({ id: r.id, date: r.date, amount: -r.amount, description: r.concept || 'Gasto', kind: 'expense' })),
-    ...data.payments.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date.slice(0, 10), amount: -r.amount, description: r.note || 'Pago de tarjeta', kind: 'payment' })),
-    ...data.transfers.filter(r => r.fromAccountId === account.id || r.toAccountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.fromAccountId === account.id ? -r.amount : r.amount, description: r.note || 'Transferencia entre cuentas', kind: 'transfer' })),
-  ];
-  return entries.filter(r => r.date >= account.startDate && r.date <= through).sort((a,b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
-}
-export function accountBalance(account: Account, data: AccountSnapshot, through = localDate()) {
-  if (through < account.startDate) return 0;
-  return account.openingBalance + accountEntries(account, data, through).reduce((sum,r) => sum + r.amount, 0);
-}
+export type { AccountSnapshot } from '../domain/ledger';
+import type { AccountSnapshot } from '../domain/ledger';
+export const accountEntries = (account: Account, data: AccountSnapshot, through = localDate()) => selectAccountEntries(account, data, through);
+export const accountBalance = (account: Account, data: AccountSnapshot, through = localDate()) => selectAccountBalance(account, data, through);
 export function requirePreservedAccountFunds(accounts: Account[], before: AccountSnapshot, after: AccountSnapshot) {
   for (const account of accounts) {
     const dates = new Set([localDate(), ...accountEntries(account, before, '9999-12-31').map(r => r.date), ...accountEntries(account, after, '9999-12-31').map(r => r.date)]);
@@ -97,9 +88,7 @@ export async function saveTransfer(input: AccountTransfer, editing = false) {
   });
 }
 
-export function debtBalance(debt: import('./db').Debt, expenses: Expense[], payments: DebtPayment[], through = localDate()) {
-  return (debt.openingAdjustment ?? 0) + expenses.filter(e => e.debtId === debt.id && e.paymentMethod === 'credit' && e.date <= through).reduce((s,e) => s + e.amount, 0) - payments.filter(p => p.debtId === debt.id && p.date.slice(0,10) <= through).reduce((s,p) => s + p.amount, 0);
-}
+export const debtBalance = (debt: import('./db').Debt, expenses: Expense[], payments: DebtPayment[], through = localDate()) => selectCardSignedBalance(debt, expenses, payments, through);
 export async function reconcileDebt(id: string, balance: number) {
   if (!Number.isSafeInteger(balance)) throw new Error('Introduce un saldo válido.');
   await db.transaction('rw', db.debts, db.expenses, db.debt_payments, async () => {
@@ -112,11 +101,8 @@ export async function reconcileDebt(id: string, balance: number) {
   });
 }
 
+/** Compatibility shape for pre-domain callers; no financial formulas here. */
 export function accountPosition(accounts: Account[], debts: import('./db').Debt[], data: AccountSnapshot, through = localDate()) {
-  const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+accountBalance(a,data,through),0);
-  const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+accountBalance(a,data,through),0);
-  const balances = debts.filter(d => d.type === 'credit_card').map(d => ({...d, balance: debtBalance(d,data.expenses,data.payments,through)}));
-  const owed = balances.reduce((sum,d) => sum+Math.max(0,d.balance),0);
-  const credit = balances.reduce((sum,d) => sum+Math.max(0,-d.balance),0);
-  return { cash, bank, liquid: cash+bank, owed, credit, net: cash+bank+credit-owed, balances };
+ const p = selectPosition(accounts, debts, data, through);
+ return { cash:p.cash, bank:p.bank, liquid:p.liquidAssets, owed:p.liabilities, credit:p.cardPositiveBalance, net:p.netWorth, balances:p.balances.map(({signedBalance, ...card}) => ({...card, balance:signedBalance})) };
 }
