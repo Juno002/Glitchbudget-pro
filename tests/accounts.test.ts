@@ -4,7 +4,7 @@ import { test, beforeEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import Dexie from 'dexie';
 import { db, GlitchBudgetDB, type Account } from '../src/lib/db';
-import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt, ensureCashAccount, accountPosition } from '../src/lib/accounts';
+import { accountBalance, addAccount, readAccountSnapshot, saveTransfer, debtBalance, reconcileDebt, ensureCashAccount, accountPosition, defaultCashAccount } from '../src/lib/accounts';
 import { saveIncome, saveExpense, saveDebtPayment, removeIncome } from '../src/lib/transaction-service';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { localDate, calculateRecordedTotals, recordedCategories } from '../src/lib/finance-calculations';
@@ -111,7 +111,7 @@ test('v4 backup preserves accounts, movements and transfers',async()=>{
   await importDataJSON(backup);
   assert.equal(await db.accounts.count(),2);assert.equal(await db.account_transfers.count(),1);
   const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),80_000);assert.equal(accountBalance(cash,data),30_000);
-  assert.equal((await db.accounts.get("cash"))?.isDefaultCash,true);
+  assert.equal(defaultCashAccount(await db.accounts.toArray())?.id,'cash');
 });
 test('orphan account references in backup fail without replacing data',async()=>{
   await saveTransfer(transfer);const backup=JSON.parse(await exportDataJSON());backup.accounts=[];
