@@ -7,6 +7,7 @@ import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAcc
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
 import { isValidDate } from './finance-calculations';
+import { periodContaining } from '../domain/periods';
 
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
@@ -88,7 +89,9 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
         if (policies.preventNegativeAccountBalance) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
       }
     }
-    const evaluation = evaluateBudgetOverspending(await db.expenses.toArray(), row, await db.plans.get([row.month, row.categoryId]), policies.budgetOverspendingBehavior);
+    const settings = await db.settings.get('general');
+    const budgetPeriod = periodContaining(row.date, settings || {});
+    const evaluation = evaluateBudgetOverspending(await db.expenses.toArray(), row, await db.plans.get([budgetPeriod.id, row.categoryId]), policies.budgetOverspendingBehavior, budgetPeriod);
     if (evaluation.decision === 'block') throw new Error('Este gasto crea o aumenta el exceso del presupuesto de su categoría.');
     if (evaluation.decision === 'warn' && budgetConfirmation !== evaluation.confirmation) throw new BudgetWarning(evaluation);
     if (editing) await db.expenses.put(row);
