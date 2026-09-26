@@ -1,8 +1,9 @@
+// Frozen Phase 2 oracle for documenting intentional behavior changes; not production code.
 // Frozen acceptance policy. Forecasts here are NOT assets or real payment capacity.
-import type { Expense, Settings } from '../domain/models';
-import type { FinanceSnapshot as RecordedSnapshot } from '../domain/snapshot';
+import type { Expense, Settings } from '../../src/domain/models';
+import type { FinanceSnapshot as RecordedSnapshot } from '../../src/domain/snapshot';
 export interface FinanceSnapshot extends RecordedSnapshot { settings: Pick<Settings, 'baseIncome' | 'savePct'> }
-import { selectMonthlyMetrics } from '../domain/metrics';
+import { selectMonthlyMetrics } from '../../src/domain/metrics';
 export function monthlyAmount(freq: string, amount: number): number {
   return freq === 'quincenal' ? amount * 2 : freq === 'semanal' ? Math.round(amount * 4.33) : amount;
 }

@@ -33,7 +33,7 @@ import IncomeCategoryManager from '@/components/dashboard/income-category-manage
 export default function Header({ onNewMovement }: { onNewMovement?: () => void }) {
   const { 
     theme, setTheme, 
-    strictMode, setStrictMode, 
+    preventNegativeAccountBalance, setPreventNegativeAccountBalance, budgetOverspendingBehavior, setBudgetOverspendingBehavior,
     currentMonth, setCurrentMonth, 
     rolloverStrategy, setRolloverStrategy,
     baseIncome: baseIncomeSettings, setBaseIncome,
@@ -116,24 +116,29 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
               <DropdownMenuContent align="end">
                 <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10">
                     <label className="flex flex-1 items-center cursor-pointer gap-2">
-                        <input type="checkbox" checked={strictMode} onChange={e => setStrictMode(e.target.checked)} />
-                        <span>Modo estricto</span>
+                        <input type="checkbox" checked={preventNegativeAccountBalance} onChange={e => setPreventNegativeAccountBalance(e.target.checked)} />
+                        <span>Proteger saldo de cuentas</span>
                     </label>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <button aria-label="Cómo funciona el modo estricto" className="ml-2 rounded-full p-1 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
+                            <button aria-label="Cómo funciona el control de saldo" className="ml-2 rounded-full p-1 text-muted-foreground hover:bg-black/5 dark:hover:bg-white/10 hover:text-foreground transition-colors focus:outline-none" onClick={(e) => e.stopPropagation()}>
                                 <Info className="h-4 w-4" />
                             </button>
                         </PopoverTrigger>
                         <PopoverContent className="w-64" side="left">
-                            <h4 className="font-semibold mb-2">Modo Estricto</h4>
+                            <h4 className="font-semibold mb-2">Protección de saldo real</h4>
                             <p className="text-xs text-muted-foreground">
-                                Impide registrar gastos en efectivo, pagos y aportes que superen el disponible del mes. Tiene en cuenta lo reservado en presupuestos y ahorro.
+                                Impide crear o empeorar saldos negativos en cuentas. No utiliza ingresos previstos, presupuestos ni aportes a metas.
                             </p>
                         </PopoverContent>
                     </Popover>
                 </div>
 
+                <label className="flex flex-col gap-2 px-2 py-2 text-sm">Al exceder un presupuesto
+                  <select aria-label="Al exceder un presupuesto" value={budgetOverspendingBehavior} onChange={e => setBudgetOverspendingBehavior(e.target.value as 'allow' | 'warn' | 'block')}>
+                    <option value="allow">Permitir</option><option value="warn">Pedir confirmación</option><option value="block">Bloquear</option>
+                  </select>
+                </label>
                 <Dialog>
                     <DialogTrigger asChild>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>

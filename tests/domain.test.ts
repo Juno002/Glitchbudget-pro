@@ -5,7 +5,7 @@ import { selectPosition, selectAccountBalance, selectCardAvailableLimit, type Ac
 import { selectMonthlyMetrics, selectBudgetRemaining, selectRolloverLimit, selectMonthlyResultSplit } from '../src/domain/metrics';
 import type { FinanceSnapshot } from '../src/domain/snapshot';
 import type { Account, Debt, Income, Expense } from '../src/domain/models';
-import { legacyExpensePolicyRejects, legacyGoalContributionPolicyRejects, type FinanceSnapshot as PolicySnapshot } from '../src/policies/legacy-finance';
+import { legacyExpensePolicyRejects, legacyGoalContributionPolicyRejects, type FinanceSnapshot as PolicySnapshot } from './reference/phase2-finance';
 const date = '2026-09-26', month = '2026-09';
 const accounts: Account[] = [ {id:'cash',name:'Cash',type:'cash',openingBalance:100000,startDate:'2026-09-01'}, {id:'bank',name:'Bank',type:'bank',openingBalance:0,startDate:'2026-09-01'} ];
 const card: Debt = {id:'card',name:'Card',type:'credit_card',principal:500000,apr:0,minPayment:0,createdAt:date,status:'active'};

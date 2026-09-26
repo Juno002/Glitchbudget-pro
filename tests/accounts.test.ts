@@ -29,7 +29,7 @@ test('unspent income can be deleted and non-strict correction may leave a negati
   assert.equal(await db.incomes.count(),0);
   await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra',accountId:'cash'});
   await saveExpense({id:'e',date:today,amount:100,categoryId:'food',concept:'Compra',type:'Variable',accountId:'cash'});
-  await db.settings.update('general',{strictMode:false});
+  await db.settings.update('general',{preventNegativeAccountBalance:false});
   await removeIncome('i');
   assert.equal(accountBalance(cash,await readAccountSnapshot()),-10_000);
 });

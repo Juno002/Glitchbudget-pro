@@ -1,8 +1,9 @@
+import { legacyProjectedTotals as calculateTotals, legacyProjectedExpenseForMonth as expenseForMonth } from './reference/phase2-finance';
 import 'fake-indexeddb/auto';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
-import { calculateTotals, calculateRecordedTotals, type FinanceSnapshot } from '../src/lib/finance-calculations';
+import { calculateRecordedTotals, type FinanceSnapshot } from '../src/lib/finance-calculations';
 import { accountPosition } from '../src/lib/accounts';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'));

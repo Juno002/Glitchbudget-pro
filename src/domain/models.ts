@@ -2,7 +2,10 @@
 export interface Settings {
   id: 'general'; // Singleton ID for settings
   theme: 'light' | 'dark' | 'system' | 'serious';
-  strictMode: boolean;
+  /** Legacy backup compatibility only. */
+  strictMode?: boolean;
+  preventNegativeAccountBalance?: boolean;
+  budgetOverspendingBehavior?: 'allow' | 'warn' | 'block';
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
   expenseCategories: string[];
   incomeCategories: string[];

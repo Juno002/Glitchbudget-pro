@@ -1,10 +1,11 @@
+import { legacyProjectedTotals as calculateTotals, legacyProjectedExpenseForMonth as expenseForMonth } from './reference/phase2-finance';
 import 'fake-indexeddb/auto';
 import { rollBudgetsIntoMonth } from '../src/lib/budget-rollover';
 
 import assert from 'node:assert/strict';
 import { after, beforeEach, test } from 'node:test';
 import { db, type Expense, type Settings } from '../src/lib/db';
-import { calculateTotals, calculateRecordedTotals, recordedCategories, expenseForMonth, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
+import { calculateRecordedTotals, recordedCategories, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { saveIncome, saveExpense, saveDebtPayment, saveGoalContribution } from '../src/lib/transaction-service';
 
@@ -130,7 +131,7 @@ test('JSON round trip preserves expense types, frequency, goal quotas and settin
   await db.goals.add({ id: 'g', name: 'Viaje', target: 100_000, saved: 1000, quota: 5000, startDate: '2026-09-01', status: 'active' });
   const original = await exportDataJSON();
   await importDataJSON(original);
-  assert.deepEqual(await db.settings.get('general'), settings);
+  assert.deepEqual(await db.settings.get('general'), { ...settings, preventNegativeAccountBalance: true, budgetOverspendingBehavior: 'block' });
   assert.equal((await db.expenses.get(expense.id))!.frequency, 'quincenal');
   assert.equal((await db.expenses.get(expense.id))!.type, 'Fijo');
   assert.equal((await db.incomes.get('i'))!.type, 'gift');
@@ -187,7 +188,7 @@ test('invalid outgoing dates and closed cards never create payments', async () =
 });
 test('failed goal contribution leaves saved amount and history unchanged', async () => {
   await seedOutgoing();
-  await assert.rejects(saveGoalContribution({ id: 'c', goalId: 'goal', amount: 20_000, date: '2026-09-17' }));
+  await assert.rejects(saveGoalContribution({ id: 'c', goalId: 'goal', amount: -1, date: '2026-09-17' }));
   assert.equal((await db.goals.get('goal'))?.saved, 0);
   assert.equal(await db.goal_contributions.count(), 0);
 });

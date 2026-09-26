@@ -1,3 +1,5 @@
+import { accountFundsWorsen } from '../policies/account-protection';
+import { readFinancialPolicies } from './policy-settings';
 import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectPosition } from '../domain/ledger';
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
@@ -28,8 +30,7 @@ export const accountEntries = (account: Account, data: AccountSnapshot, through 
 export const accountBalance = (account: Account, data: AccountSnapshot, through = localDate()) => selectAccountBalance(account, data, through);
 export function requirePreservedAccountFunds(accounts: Account[], before: AccountSnapshot, after: AccountSnapshot) {
   for (const account of accounts) {
-    const dates = new Set([localDate(), ...accountEntries(account, before, '9999-12-31').map(r => r.date), ...accountEntries(account, after, '9999-12-31').map(r => r.date)]);
-    if ([...dates].some(d => accountBalance(account, after, d) < Math.min(0, accountBalance(account, before, d)))) {
+    if (accountFundsWorsen(account, account, before, after, localDate())) {
       throw new Error('Saldo insuficiente: el cambio dejaría sin saldo este movimiento o movimientos posteriores.');
     }
   }
@@ -54,10 +55,9 @@ export async function addAccount(input: Account, editing = false) {
       if (!existing || existing.startDate !== account.startDate) throw new Error('No se puede cambiar la fecha inicial de la cuenta.');
       if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
       account.isDefaultCash = existing.isDefaultCash;
-      if ((await db.settings.get('general'))?.strictMode && account.openingBalance < existing.openingBalance) {
+      if ((await readFinancialPolicies()).preventNegativeAccountBalance && account.openingBalance < existing.openingBalance) {
         const snapshot = await readAccountSnapshot();
-        const dates = new Set([localDate(), ...accountEntries(existing, snapshot, '9999-12-31').map(r => r.date)]);
-        if ([...dates].some(d => accountBalance(account, snapshot, d) < Math.min(0, accountBalance(existing, snapshot, d)))) {
+        if (accountFundsWorsen(existing, account, snapshot, snapshot, localDate())) {
           throw new Error('Saldo insuficiente: el saldo inicial dejaría sin fondos movimientos registrados.');
         }
       }
@@ -71,8 +71,8 @@ export async function addAccount(input: Account, editing = false) {
 export async function saveTransfer(input: AccountTransfer, editing = false) {
   const transfer = transferSchema.parse(input);
   if (transfer.date > localDate()) throw new Error('Registra las transferencias cuando se hayan realizado.');
-  await db.transaction('rw', accountTables, async () => {
-    const from = await requireAccount(transfer.fromAccountId, transfer.date);
+  await db.transaction('rw', [...accountTables, db.settings], async () => {
+    await requireAccount(transfer.fromAccountId, transfer.date);
     await requireAccount(transfer.toAccountId, transfer.date);
     const snapshot = await readAccountSnapshot();
     const before = { ...snapshot };
@@ -80,9 +80,8 @@ export async function saveTransfer(input: AccountTransfer, editing = false) {
       if (!await db.account_transfers.get(transfer.id)) throw new Error('La transferencia ya no existe.');
       snapshot.transfers = snapshot.transfers.filter(t => t.id !== transfer.id);
     }
-    if (accountBalance(from, snapshot, transfer.date) < transfer.amount) throw new Error('Saldo insuficiente en la cuenta de origen.');
     const projected = { ...snapshot, transfers: [...snapshot.transfers, transfer] };
-    requirePreservedAccountFunds(await db.accounts.toArray(), before, projected);
+    if ((await readFinancialPolicies()).preventNegativeAccountBalance) requirePreservedAccountFunds(await db.accounts.toArray(), before, projected);
     if (editing) await db.account_transfers.put(transfer);
     else await db.account_transfers.add(transfer);
   });

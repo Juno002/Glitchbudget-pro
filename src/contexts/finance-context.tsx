@@ -1,5 +1,9 @@
 'use client';
 import { selectMonthlyMetrics, recordedCategories, recordedExpenseForMonth as expenseForMonth, selectCategorySpending, selectBudgetRemaining } from '@/domain/metrics';
+import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
+import { readFinancialPolicies } from '@/lib/policy-settings';
+import { withBudgetConfirmation } from '@/lib/expense-confirmation';
+import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
 import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 
@@ -22,7 +26,8 @@ import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@
 const DEFAULT_SETTINGS: Settings = {
   id: 'general',
   theme: 'dark',
-  strictMode: true,
+  preventNegativeAccountBalance: true,
+  budgetOverspendingBehavior: 'block',
   rolloverStrategy: 'reset',
   expenseCategories: defaultExpenseCatIds,
   incomeCategories: defaultIncomeCatIds,
@@ -38,7 +43,8 @@ export type BackupFile = { name: string; lastModified: number };
 
 interface FinanceContextType {
   theme: 'light' | 'dark' | 'serious';
-  strictMode: boolean;
+  preventNegativeAccountBalance: boolean;
+  budgetOverspendingBehavior: BudgetOverspendingBehavior;
   rolloverStrategy: RolloverStrategy;
   incomes: Income[] | undefined;
   baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number };
@@ -55,7 +61,8 @@ interface FinanceContextType {
   recurrents: Recurring[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
-  setStrictMode: (strict: boolean) => void;
+  setPreventNegativeAccountBalance: (value: boolean) => void;
+  setBudgetOverspendingBehavior: (value: BudgetOverspendingBehavior) => void;
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
   addIncomeItem: (income: Omit<Income, "id" | "month">) => Promise<boolean>;
@@ -156,6 +163,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     return {
       ...DEFAULT_SETTINGS,
       ...s,
+      ...normalizeFinancialPolicies(rawSettings ?? DEFAULT_SETTINGS),
       baseIncome: {
         amount: Math.max(0, Number(s?.baseIncome?.amount ?? 0)),
         freq: s?.baseIncome?.freq ?? 'mensual'
@@ -171,7 +179,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function initializeDB() {
         if (rawSettings === undefined) return; // Dexie query still pending
-        if (rawSettings !== null) return; // Settings already exist
+        if (rawSettings !== null) {
+          await db.transaction('rw', db.settings, readFinancialPolicies);
+          return;
+        }
         // rawSettings is null => no record in DB, seed defaults
         console.log("No settings found, initializing database with default settings.");
         try {
@@ -185,7 +196,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     initializeDB().catch(()=>{});
   }, [rawSettings, toast]);
 
-  const activeSettings = useMemo(() => settings || DEFAULT_SETTINGS, [settings]);
+  const activeSettings = settings;
+  const { confirm: confirmBudget, dialog: budgetConfirmationDialog } = useBudgetConfirmation(activeSettings.currency, activeSettings.locale);
 
   useEffect(() => {
     if (activeSettings.theme) {
@@ -241,7 +253,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
 
   const setTheme = useCallback((theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme), [updateSetting]);
-  const setStrictMode = useCallback((strict: boolean) => updateSetting('strictMode', strict), [updateSetting]);
+  const setPreventNegativeAccountBalance = useCallback((value: boolean) => updateSetting('preventNegativeAccountBalance', value), [updateSetting]);
+  const setBudgetOverspendingBehavior = useCallback((value: BudgetOverspendingBehavior) => updateSetting('budgetOverspendingBehavior', value), [updateSetting]);
   const setRolloverStrategy = useCallback((strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy), [updateSetting]);
   const setBaseIncome = useCallback(async (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
     const cents = toCents(baseIncome.amount);
@@ -290,7 +303,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addExpense = useCallback(async (expense: Omit<Expense, "id" | "month">) => {
     try {
-      await saveExpense({ ...expense, id: crypto.randomUUID() });
+      const input = { ...expense, id: crypto.randomUUID() };
+      if (!await withBudgetConfirmation(token => saveExpense(input, false, token), confirmBudget)) return false;
       playExpense();
       toast({ title: 'Gasto agregado' });
       return true;
@@ -298,18 +312,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
-  }, [toast]);
+  }, [toast, confirmBudget]);
 
   const updateExpense = useCallback(async (expense: Expense) => {
     try {
-      await saveExpense(expense, true);
+      if (!await withBudgetConfirmation(token => saveExpense(expense, true, token), confirmBudget)) return false;
       toast({ title: 'Gasto actualizado' });
       return true;
     } catch (error) {
       toast({ title: 'Error al actualizar gasto', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
-  }, [toast]);
+  }, [toast, confirmBudget]);
 
   const deleteExpense = useCallback(async (id: string) => {
     try {
@@ -721,7 +735,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
-    strictMode: activeSettings.strictMode,
+    preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
+    budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
     baseIncome: activeSettings.baseIncome,
     expenseCategories: activeSettings.expenseCategories,
@@ -736,7 +751,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debtPayments,
     recurrents,
     setTheme,
-    setStrictMode,
+    setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
     setBaseIncome,
     addIncomeItem,
@@ -787,7 +802,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     isWorking,
   }), [
     activeSettings, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurrents,
-    setTheme, setStrictMode, setRolloverStrategy, setBaseIncome, updateSettings,
+    setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
@@ -803,6 +818,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   return (
     <FinanceContext.Provider value={value}>
       {children}
+      {budgetConfirmationDialog}
     </FinanceContext.Provider>
   );
 }

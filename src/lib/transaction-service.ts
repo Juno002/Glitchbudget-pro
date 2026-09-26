@@ -1,8 +1,9 @@
-import { legacyExpensePolicyRejects, legacyGoalContributionPolicyRejects } from '../policies/legacy-finance';
+import { readFinancialPolicies } from './policy-settings';
+import { evaluateBudgetOverspending, BudgetWarning } from '../policies/budget-overspending';
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
-import { isValidDate, type FinanceSnapshot } from './finance-calculations';
+import { isValidDate } from './finance-calculations';
 
 const fields = {
   accountId: z.string().min(1).optional(),
@@ -28,7 +29,7 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
     if (!editing) row.accountId = (await ensureCashAccount(row.date)).id;
     else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) await requireAccount(row.accountId, row.date);
-    if (editing && (await db.settings.get('general'))?.strictMode) {
+    if (editing && (await readFinancialPolicies()).preventNegativeAccountBalance) {
       const before = await readAccountSnapshot();
       requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: [...before.incomes.filter(i => i.id !== row.id), row] });
     }
@@ -39,7 +40,7 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
 
 export async function removeIncome(id: string): Promise<void> {
   await db.transaction('rw', [...accountTables, db.settings], async () => {
-    if ((await db.settings.get('general'))?.strictMode) {
+    if ((await readFinancialPolicies()).preventNegativeAccountBalance) {
       const before = await readAccountSnapshot();
       requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: before.incomes.filter(i => i.id !== id) });
     }
@@ -47,7 +48,7 @@ export async function removeIncome(id: string): Promise<void> {
   });
 }
 
-export async function saveExpense(input: Omit<Expense, 'month'>, editing = false): Promise<void> {
+export async function saveExpense(input: Omit<Expense, 'month'>, editing = false, budgetConfirmation?: string): Promise<void> {
   const value = expenseSchema.parse(input);
   const row: Expense = {
     ...input, ...value, month: value.date.slice(0, 7),
@@ -63,32 +64,25 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       if (duplicate) throw new Error('Esta suscripción ya tiene un pago registrado en ese mes.');
     }
     if (editing && !existing) throw new Error('El gasto ya no existe. Actualiza la lista.');
+    const policies = await readFinancialPolicies();
     if (row.paymentMethod === 'credit') {
       const card = row.debtId ? await db.debts.get(row.debtId) : undefined;
       if (!card || card.status !== 'active' || card.type !== 'credit_card') {
         throw new Error('Selecciona una tarjeta de crédito activa.');
       }
     } else {
-      const settings = await db.settings.get('general');
+
       if (!row.accountId && (!editing || existing?.accountId || existing?.paymentMethod === 'credit')) row.accountId = existing?.accountId || (await ensureCashAccount(row.date)).id;
       if (row.accountId) {
         await requireAccount(row.accountId, row.date);
         const snapshot = await readAccountSnapshot();
         const projected = { ...snapshot, expenses: [...snapshot.expenses.filter(e => e.id !== row.id), row] };
-        if (settings?.strictMode) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
-      }
-      if (settings?.strictMode && !row.accountId) {
-        const data: FinanceSnapshot = {
-          settings: { ...settings, savePct: settings.savePct ?? 0 },
-          incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(),
-          budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(),
-          debtPayments: await db.debt_payments.toArray(),
-        };
-        if (legacyExpensePolicyRejects(data, { ...data, expenses: [...data.expenses.filter(e => e.id !== row.id), row] }, row.month, editing)) {
-          throw new Error('Modo estricto: este gasto supera el dinero disponible para su mes y categoría. Ajusta el presupuesto o el monto.');
-        }
+        if (policies.preventNegativeAccountBalance) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
       }
     }
+    const evaluation = evaluateBudgetOverspending(await db.expenses.toArray(), row, await db.plans.get([row.month, row.categoryId]), policies.budgetOverspendingBehavior);
+    if (evaluation.decision === 'block') throw new Error('Este gasto crea o aumenta el exceso del presupuesto de su categoría.');
+    if (evaluation.decision === 'warn' && budgetConfirmation !== evaluation.confirmation) throw new BudgetWarning(evaluation);
     if (editing) await db.expenses.put(row);
     else await db.expenses.add(row);
   });
@@ -96,12 +90,6 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
 
 const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const outgoingTables = [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
-async function requireLegacyGoalContributionPolicy(amount: number, date: string) {
-  const settings = await db.settings.get('general');
-  if (!settings?.strictMode) return;
-  const rejected = legacyGoalContributionPolicyRejects({ settings, incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray(), debtPayments: await db.debt_payments.toArray() }, date.slice(0, 7), amount);
-  if (rejected) throw new Error('Modo estricto: el monto supera el dinero disponible de ese mes.');
-}
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   centsSchema.parse(payment.amount);
   fields.date.parse(payment.date);
@@ -111,8 +99,8 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
     payment = { ...payment, accountId: payment.accountId || (await ensureCashAccount(payment.date)).id };
     if (payment.accountId) {
       await requireAccount(payment.accountId, payment.date);
-      const settings = await db.settings.get('general');
-      if (settings?.strictMode) {
+
+      if ((await readFinancialPolicies()).preventNegativeAccountBalance) {
         const before = await readAccountSnapshot();
         requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, payments: [...before.payments, payment] });
       }
@@ -126,7 +114,7 @@ export async function saveGoalContribution(contribution: import('./db').GoalCont
   return db.transaction('rw', outgoingTables, async () => {
     const goal = await db.goals.get(contribution.goalId);
     if (!goal) throw new Error('Meta no encontrada.');
-    await requireLegacyGoalContributionPolicy(contribution.amount, contribution.date);
+
     const saved = goal.saved + contribution.amount;
     if (!Number.isSafeInteger(saved)) throw new Error('El total supera el monto admitido.');
     const status = saved >= goal.target ? 'completed' : 'active';

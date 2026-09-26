@@ -1,3 +1,4 @@
+import { normalizeFinancialPolicies } from '../policies/settings';
 import { accountSchema, transferSchema } from './accounts';
 
 import { z } from 'zod';
@@ -17,6 +18,8 @@ const SettingsV3 = z.object({
   locale: z.string().default('es-DO'),
   theme: z.enum(['light','dark','system','serious']).optional(),
   strictMode: z.boolean().default(false),
+  preventNegativeAccountBalance: z.boolean().optional(),
+  budgetOverspendingBehavior: z.enum(['allow', 'warn', 'block']).optional(),
   savePct: z.number().min(0).max(1).default(0),
   customCategoryIcons: z.record(z.string()).default({}),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
@@ -161,6 +164,7 @@ export async function exportDataJSON(): Promise<string> {
       locale: settings.locale ?? 'es-DO',
       theme: (settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
       strictMode: settings.strictMode ?? false,
+      ...normalizeFinancialPolicies(settings),
       rolloverStrategy: (settings.rolloverStrategy as ('reset' | 'accumulate_surplus' | 'accumulate_debt')) ?? 'reset',
       baseIncome: { 
         freq: (settings.baseIncome?.freq as ('mensual' | 'quincenal' | 'semanal')) ?? 'mensual',
@@ -268,6 +272,7 @@ export async function importDataJSON(text: string): Promise<{
     locale:   d.settings.locale   ?? 'es-DO',
     theme:    (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
     strictMode: d.settings.strictMode ?? false,
+    ...normalizeFinancialPolicies(d.settings),
     rolloverStrategy: d.settings.rolloverStrategy ?? 'reset',
     baseIncome: { 
       amount: Math.max(0, Number(d.settings.baseIncome?.amount ?? 0)),

@@ -1,8 +1,9 @@
 // Compatibility boundary for existing callers and backup characterization tests.
 import { selectMonthlyMetrics } from '../domain/metrics';
-import type { FinanceSnapshot } from '../policies/legacy-finance';
-export type { FinanceSnapshot } from '../policies/legacy-finance';
-export { legacyProjectedTotals as calculateTotals, legacyProjectedExpenseForMonth as expenseForMonth, monthlyAmount } from '../policies/legacy-finance';
+import type { FinanceSnapshot as RecordedSnapshot } from '../domain/snapshot';
+import type { Settings } from '../domain/models';
+export interface FinanceSnapshot extends RecordedSnapshot { settings: Pick<Settings, 'baseIncome' | 'savePct'> }
+export { monthlyAmount } from './planning-forecast';
 export { recordedExpenseForMonth, recordedCategories } from '../domain/metrics';
 
 /** Calendar dates must use the user's timezone, not UTC. */
