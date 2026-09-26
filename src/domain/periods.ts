@@ -24,8 +24,13 @@ export function normalizePeriodStartDay(value: unknown): number {
   return Number.isInteger(day) && day >= 1 && day <= 31 ? day : 1;
 }
 
+function isLeapYear(year: number): boolean {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
 function daysInMonth(year: number, month: number): number {
-  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (month === 2) return isLeapYear(year) ? 29 : 28;
+  return [4, 6, 9, 11].includes(month) ? 30 : 31;
 }
 
 function parseMonthId(id: string): { year: number; month: number } {
@@ -67,9 +72,27 @@ function anchorForMonth(id: string, startDay: number): string {
 }
 
 function addDays(value: string, delta: number): string {
-  const { year, month, day } = parseDate(value);
-  const date = new Date(Date.UTC(year, month - 1, day + delta));
-  return formatDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
+  let { year, month, day } = parseDate(value);
+  let remaining = Math.trunc(delta);
+  while (remaining > 0) {
+    day += 1;
+    if (day > daysInMonth(year, month)) {
+      day = 1;
+      month += 1;
+      if (month > 12) { month = 1; year += 1; }
+    }
+    remaining -= 1;
+  }
+  while (remaining < 0) {
+    day -= 1;
+    if (day < 1) {
+      month -= 1;
+      if (month < 1) { month = 12; year -= 1; }
+      day = daysInMonth(year, month);
+    }
+    remaining += 1;
+  }
+  return formatDate(year, month, day);
 }
 
 /**
