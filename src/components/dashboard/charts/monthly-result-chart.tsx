@@ -316,7 +316,7 @@ export default function MonthlyResultChart() {
       type: 'source',
     }));
 
-    if (deficit > 0) sources.push({ id:'src-deficit', label:'Déficit del mes', value:deficit, color:'#f43f5e', icon:'↘', type:'source' });
+    if (deficit > 0) sources.push({ id:'src-deficit', label:'Déficit del período', value:deficit, color:'#f43f5e', icon:'↘', type:'source' });
     const dests: FlowNode[] = [];
     expenseData.forEach((d, i) => {
       dests.push({
@@ -333,7 +333,7 @@ export default function MonthlyResultChart() {
     if (monthlySurplus > 0) {
       dests.push({
         id: 'dst-available',
-        label: 'Excedente del mes',
+        label: 'Excedente del período',
         value: monthlySurplus,
         color: 'hsl(var(--secondary))',
         icon: '💰',
@@ -365,12 +365,12 @@ export default function MonthlyResultChart() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Resultado del mes</CardTitle>
+          <CardTitle>Resultado del período</CardTitle>
           <CardDescription>Ingresos y gastos registrados, incluidas las compras con tarjeta.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-48 text-muted-foreground text-sm">
-            Aún no hay ingresos ni gastos registrados en este mes.
+            Aún no hay ingresos ni gastos registrados en este período.
           </div>
         </CardContent>
       </Card>
@@ -385,8 +385,8 @@ export default function MonthlyResultChart() {
     >
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>Resultado del mes</CardTitle>
-          <CardDescription>Ingresos frente a gastos. Transferencias y pagos de tarjeta no repiten ingresos ni compras; el excedente no es el saldo de tus cuentas.</CardDescription>
+          <CardTitle>Resultado del período</CardTitle>
+          <CardDescription>Ingresos frente a gastos. Transferencias y pagos de tarjeta no repiten ingresos ni compras; el excedente del período no es el saldo de tus cuentas.</CardDescription>
         </CardHeader>
         <CardContent className="p-3 md:p-6">
           {isMobile ? (
