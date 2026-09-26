@@ -152,6 +152,35 @@ test('JSON round trip preserves expense nature, goal quotas and settings', async
   assert.equal((await db.incomes.get('i'))!.type, 'gift');
   assert.equal((await db.goals.get('g'))!.quota, 5000);
 });
+test('period start day round-trips in v6 and invalid values reject atomically', async () => {
+  await db.settings.update('general', { periodStartDay: 25 });
+  const backup = JSON.parse(await exportDataJSON());
+  assert.equal(backup.settings.periodStartDay, 25);
+  await importDataJSON(JSON.stringify(backup));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, 25);
+
+  const invalid = structuredClone(backup);
+  invalid.settings.periodStartDay = 32;
+  await assert.rejects(importDataJSON(JSON.stringify(invalid)));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, 25);
+
+  const legacy = structuredClone(backup);
+  delete legacy.settings.periodStartDay;
+  await importDataJSON(JSON.stringify(legacy));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, undefined);
+});
+
+test('budget rollover uses the previous financial period date range', async () => {
+  await db.settings.update('general', { periodStartDay: 25, rolloverStrategy: 'accumulate_surplus' });
+  await db.plans.add({ month: '2026-09', categoryId: 'food', limit: 50_000 });
+  await db.expenses.bulkAdd([
+    { id:'inside', month:'2026-08', date:'2026-08-26', categoryId:'food', amount:30_000, concept:'Dentro', nature:'Variable' },
+    { id:'outside', month:'2026-09', date:'2026-09-25', categoryId:'food', amount:40_000, concept:'Siguiente', nature:'Variable' },
+  ]);
+  assert.equal(await rollBudgetsIntoMonth('2026-10'), true);
+  assert.equal((await db.plans.get(['2026-10','food']))?.limit, 70_000);
+});
+
 test('old v3 backups still restore with explicit defaults', async () => {
   await db.expenses.add(expense);
   const backup = JSON.parse(await exportDataJSON());
