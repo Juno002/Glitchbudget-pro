@@ -7,28 +7,7 @@ export type Transaction = {
   date: string; // ISO string YYYY-MM-DD
 };
 
-export interface Income {
-    accountId?: string;
-    id: string;
-    type: 'extra' | 'gift';
-    description: string;
-    amount: number; // Stored as positive cents
-    date: string; // YYYY-MM-DD
-    categoryId: string;
-    month: string;
-}
-
-export interface Expense {
-    accountId?: string;
-    id: string;
-    type: 'Fijo' | 'Variable' | 'Ocasional';
-    concept: string;
-    amount: number; // Stored as positive cents
-    date: string; // YYYY-MM-DD
-    frequency?: 'mensual' | 'quincenal' | 'semanal';
-    categoryId: string;
-    month: string;
-}
+export type { Income, Expense } from '../domain/models';
 
 export type Category = {
   id: string;

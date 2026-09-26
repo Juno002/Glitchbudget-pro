@@ -2,15 +2,16 @@
 // Frozen acceptance policy. Forecasts here are NOT assets or real payment capacity.
 import type { Expense, Settings } from '../../src/domain/models';
 import type { FinanceSnapshot as RecordedSnapshot } from '../../src/domain/snapshot';
-export interface FinanceSnapshot extends RecordedSnapshot { settings: Pick<Settings, 'baseIncome' | 'savePct'> }
+type OracleExpense = Expense & { frequency?: 'mensual'|'quincenal'|'semanal' };
+export interface FinanceSnapshot extends RecordedSnapshot { expenses: OracleExpense[]; settings: Pick<Settings, 'baseIncome' | 'savePct'> }
 import { selectMonthlyMetrics } from '../../src/domain/metrics';
 export function monthlyAmount(freq: string, amount: number): number {
   return freq === 'quincenal' ? amount * 2 : freq === 'semanal' ? Math.round(amount * 4.33) : amount;
 }
 
-export function legacyProjectedExpenseForMonth(expense: Expense, month: string): number {
+export function legacyProjectedExpenseForMonth(expense: OracleExpense, month: string): number {
   const startMonth = expense.date.slice(0, 7);
-  if (expense.type === 'Fijo') {
+  if (expense.nature === 'Fijo') {
     return startMonth <= month ? monthlyAmount(expense.frequency || 'mensual', expense.amount) : 0;
   }
   return startMonth === month ? expense.amount : 0;

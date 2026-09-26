@@ -1,3 +1,5 @@
+import { withoutLegacyCategories } from '../src/domain/categories';
+import { seedTestCategories } from './category-fixture';
 import { legacyProjectedTotals as calculateTotals, legacyProjectedExpenseForMonth as expenseForMonth } from './reference/phase2-finance';
 import 'fake-indexeddb/auto';
 import { rollBudgetsIntoMonth } from '../src/lib/budget-rollover';
@@ -17,7 +19,7 @@ const settings: Settings = {
 };
 const expense: Expense = {
   id: 'expense', month: '2026-09', date: '2026-09-16', categoryId: 'food',
-  amount: 100_000, concept: 'Comida', type: 'Variable', paymentMethod: 'cash',
+  amount: 100_000, concept: 'Comida', nature: 'Variable', paymentMethod: 'cash',
 };
 const snapshot = (): FinanceSnapshot => ({
   settings: { ...settings, savePct: 0 }, incomes: [], expenses: [expense],
@@ -28,6 +30,7 @@ beforeEach(async () => {
   await db.transaction('rw', db.tables, async () => { for (const table of db.tables) await table.clear(); });
   await db.settings.put(settings);
 });
+beforeEach(seedTestCategories);
 after(() => db.close());
 
 test('spending within a budget does not reserve the same money twice', () => {
@@ -49,8 +52,8 @@ test('debt payments, contributions and savings are each deducted once', () => {
   data.goalContributions = [{ id: 'c', goalId: 'goal', date: '2026-09-01', amount: 20_000 }];
   assert.equal(calculateTotals(data, '2026-09').available, 470_000);
 });
-test('fixed expenses start in their actual month, with the correct frequency', () => {
-  const fixed = { ...expense, type: 'Fijo' as const, frequency: 'quincenal' as const };
+test('frozen legacy oracle characterizes the retired fixed-frequency projection', () => {
+  const fixed = { ...expense, nature: 'Fijo' as const, frequency: 'quincenal' as const };
   assert.equal(expenseForMonth(fixed, '2026-08'), 0);
   assert.equal(expenseForMonth(fixed, '2026-09'), 200_000);
   assert.equal(expenseForMonth(fixed, '2026-10'), 200_000);
@@ -118,22 +121,23 @@ test('credit spending requires an active card and does not spend cash', async ()
 test('editing a deleted movement does not recreate it', async () => {
   await assert.rejects(saveExpense({ ...expense, amount: 1 }, true), /ya no existe/);
 });
-test('a subscription cannot be logged twice in the same month', async () => {
+test('legacy monthly subscription guard prevents repeated UI payments', async () => {
+  await db.recurrents.add({id:'subscription',direction:'expense',title:'Plan',categoryId:'food',amount:1000,cadence:'monthly',startDate:'2026-09-01',active:true});
   await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
-  await saveExpense({ ...expense, recurringId: 'subscription', amount: 10 });
-  await assert.rejects(saveExpense({ ...expense, id: 'second', recurringId: 'subscription', amount: 10 }), /ya tiene un pago/);
-  await saveExpense({ ...expense, id: 'next-month', date: '2026-10-01', recurringId: 'subscription', amount: 10 });
+  await saveExpense({ ...expense, recurringRuleId: 'subscription', amount: 10 });
+  await assert.rejects(saveExpense({ ...expense, id: 'second', recurringRuleId: 'subscription', amount: 10 }), /ya tiene un pago/);
+  await saveExpense({ ...expense, id: 'next-month', date: '2026-10-01', recurringRuleId: 'subscription', amount: 10 });
   assert.equal(await db.expenses.count(), 2);
 });
-test('JSON round trip preserves expense types, frequency, goal quotas and settings', async () => {
-  await db.expenses.add({ ...expense, type: 'Fijo', frequency: 'quincenal' });
+test('JSON round trip preserves expense nature, goal quotas and settings', async () => {
+  await db.expenses.add({ ...expense, nature: 'Fijo' });
   await db.incomes.add({ id: 'i', date: '2026-09-01', month: '2026-09', amount: 125, categoryId: 'salary', type: 'gift', description: 'Regalo' });
   await db.goals.add({ id: 'g', name: 'Viaje', target: 100_000, saved: 1000, quota: 5000, startDate: '2026-09-01', status: 'active' });
   const original = await exportDataJSON();
   await importDataJSON(original);
-  assert.deepEqual(await db.settings.get('general'), { ...settings, preventNegativeAccountBalance: true, budgetOverspendingBehavior: 'block' });
-  assert.equal((await db.expenses.get(expense.id))!.frequency, 'quincenal');
-  assert.equal((await db.expenses.get(expense.id))!.type, 'Fijo');
+  assert.deepEqual(await db.settings.get('general'), { ...withoutLegacyCategories(settings), preventNegativeAccountBalance: true, budgetOverspendingBehavior: 'block' });
+  assert.equal('frequency' in (await db.expenses.get(expense.id))!, false);
+  assert.equal((await db.expenses.get(expense.id))!.nature, 'Fijo');
   assert.equal((await db.incomes.get('i'))!.type, 'gift');
   assert.equal((await db.goals.get('g'))!.quota, 5000);
 });
@@ -144,7 +148,7 @@ test('old v3 backups still restore with explicit defaults', async () => {
   delete backup.settings.savePct; delete backup.settings.customCategoryIcons;
   delete backup.expenses[0].type;
   await importDataJSON(JSON.stringify(backup));
-  assert.equal((await db.expenses.get(expense.id))!.type, 'Variable');
+  assert.equal((await db.expenses.get(expense.id))!.nature, 'Variable');
   assert.equal((await db.settings.get('general'))!.savePct, 0);
 });
 test('invalid backup records are rejected before any data is replaced', async () => {
@@ -230,7 +234,7 @@ test('large local history survives a full JSON backup and restore', async () => 
 });
 
 test('recorded totals never turn salary forecasts or fixed frequencies into actual movements',()=>{
-  const data=snapshot();data.expenses=[{...expense,type:'Fijo',frequency:'quincenal'}];
+  const data=snapshot();data.expenses=[{...expense,nature:'Fijo'}];
   const september=calculateRecordedTotals(data,'2026-09');
   assert.equal(september.totalIncome,0);assert.equal(september.totalExpenses,100000);assert.equal(september.balance,-100000);
   assert.equal(recordedCategories(data.expenses,'2026-09')[0].value,100000);

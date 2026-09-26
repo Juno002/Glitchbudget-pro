@@ -10,7 +10,7 @@ const date = '2026-09-26', month = '2026-09';
 const accounts: Account[] = [ {id:'cash',name:'Cash',type:'cash',openingBalance:100000,startDate:'2026-09-01'}, {id:'bank',name:'Bank',type:'bank',openingBalance:0,startDate:'2026-09-01'} ];
 const card: Debt = {id:'card',name:'Card',type:'credit_card',principal:500000,apr:0,minPayment:0,createdAt:date,status:'active'};
 const income: Income = {id:'income',accountId:'cash',amount:20000,date,month,categoryId:'salary',type:'extra',description:''};
-const expense: Expense = {id:'expense',accountId:'cash',amount:5000,date,month,categoryId:'food',type:'Variable',concept:'',paymentMethod:'cash'};
+const expense: Expense = {id:'expense',accountId:'cash',amount:5000,date,month,categoryId:'food',nature:'Variable',concept:'',paymentMethod:'cash'};
 function empty(): AccountSnapshot { return {incomes:[],expenses:[],payments:[],transfers:[]}; }
 function financial(data: AccountSnapshot): FinanceSnapshot { return {incomes:data.incomes,expenses:data.expenses,debtPayments:data.payments,settings:{savePct:0},budgets:[],goalContributions:[]}; }
 const position = (data: AccountSnapshot, cards = [card]) => selectPosition(accounts,cards,data,date);
@@ -53,7 +53,7 @@ test('legacy expense policy preserves forecast, fixed frequency and edit deficit
   const before=policy();const after={...before,expenses:[{...expense,amount:12000}]};assert.equal(legacyExpensePolicyRejects(before,after,month,false),true);assert.equal(legacyExpensePolicyRejects(before,{...before,expenses:[expense]},month,false),false);
   assert.equal(legacyExpensePolicyRejects(after,after,month,true),false);
   assert.equal(legacyExpensePolicyRejects(after,{...after,expenses:[{...expense,amount:13000}]},month,true),true);
-  assert.equal(legacyExpensePolicyRejects(before,{...before,expenses:[{...expense,amount:6000,type:'Fijo',frequency:'quincenal'}]},'2026-10',false),true);
+  assert.equal(legacyExpensePolicyRejects(before,{...before,expenses:[{...expense,amount:6000,nature:'Fijo',frequency:'quincenal'}]},'2026-10',false),true);
 });
 test('legacy goal gate uses monthly margin, not opening cash, and includes reservations', () => {
   const p=policy();assert.equal(position(empty()).liquidAssets,100000);assert.equal(legacyGoalContributionPolicyRejects(p,month,1),true);

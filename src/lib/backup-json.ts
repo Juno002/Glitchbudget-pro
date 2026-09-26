@@ -1,3 +1,7 @@
+import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
+import { recurringRuleSchema } from './recurring-rule-service';
+import { reconstructCategories, withoutLegacyCategories, appliesTo } from '../domain/categories';
+import { categorySchema, validateCategorySet } from './category-service';
 import { normalizeFinancialPolicies } from '../policies/settings';
 import { accountSchema, transferSchema } from './accounts';
 
@@ -21,14 +25,14 @@ const SettingsV3 = z.object({
   preventNegativeAccountBalance: z.boolean().optional(),
   budgetOverspendingBehavior: z.enum(['allow', 'warn', 'block']).optional(),
   savePct: z.number().min(0).max(1).default(0),
-  customCategoryIcons: z.record(z.string()).default({}),
+  customCategoryIcons: z.record(z.string()).optional(),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
   baseIncome: z.object({ 
     freq: z.enum(['mensual','quincenal','semanal']).default('mensual'),
     amount: MoneyCents 
   }).default({ freq: 'mensual', amount: 0 }),
-  incomeCategories: z.array(z.string()).default([]),
-  expenseCategories: z.array(z.string()).default([])
+  incomeCategories: z.array(z.string()).optional(),
+  expenseCategories: z.array(z.string()).optional()
 }).passthrough(); // conserva claves futuras sin romper
 
 
@@ -64,6 +68,10 @@ export const ExpenseV3 = z.object({
   debtId: z.string().optional(),
   recurringId: z.string().optional()
 });
+
+export const IncomeV6 = IncomeV3.extend({ recurringRuleId: Id.optional() });
+export const ExpenseV6 = ExpenseV3.omit({type:true,frequency:true,recurringId:true}).extend({nature:z.enum(['Fijo','Variable','Ocasional']),recurringRuleId:Id.optional()}).strict();
+export const ExpenseCSV = z.union([ExpenseV6, ExpenseV3.strict().transform(row=>migrateActualExpense({...row,concept:row.concept??''}))]);
 
 export const PlanV3 = z.object({
   month: MonthID, categoryId: Id,
@@ -108,7 +116,8 @@ const FxRateV3 = z.object({
 });
 
 const DumpV3 = z.object({
-  v: z.union([z.literal(3), z.literal(4)]),
+  v: z.union([z.literal(3), z.literal(4), z.literal(5)]),
+  categories: z.array(categorySchema).optional(),
   accounts: z.array(accountSchema).optional(),
   accountTransfers: z.array(transferSchema).optional(),
   exportedAt: ISODateTime,
@@ -124,7 +133,13 @@ const DumpV3 = z.object({
   debtPayments: z.array(DebtPaymentV3).optional(),
   fxRates: z.array(FxRateV3).optional(),
 });
-type DumpV3T = z.infer<typeof DumpV3>;
+const DumpV6 = DumpV3.extend({ v:z.literal(6), incomes:z.array(IncomeV6), expenses:z.array(ExpenseV6), recurrents:z.array(recurringRuleSchema) });
+type DumpV6T = z.infer<typeof DumpV6>;
+function parseBackup(raw:unknown) {
+ if ((raw as {v?:number})?.v===6) return DumpV6.parse(raw);
+ const legacy=DumpV3.parse(raw);
+ return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule)};
+}
 
 // ---------- Helpers ----------
 const toCents = (n: number) => Math.round(n);
@@ -134,7 +149,7 @@ function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 
 export async function exportDataJSON(): Promise<string> {
   // Lee todo de Dexie
-  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates, accounts, accountTransfers] = await db.transaction('r', db.tables, () => Promise.all([
+  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, debts, debtPayments, fxRates, accounts, accountTransfers, categories] = await db.transaction('r', db.tables, () => Promise.all([
     db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
     db.periods.toArray(),
     db.incomes.toArray(),
@@ -148,17 +163,18 @@ export async function exportDataJSON(): Promise<string> {
     db.fxRates.toArray(),
     db.accounts.toArray(),
     db.account_transfers.toArray(),
+    db.categories.toArray(),
   ]));
 
-  // Mapea al contrato v3 (montos ya están en centavos en DB)
-  const dump: DumpV3T = {
-    v: 4,
+  // Current v6 contract; amounts remain in cents.
+  const dump: DumpV6T = {
+    v: 6,
+    categories,
     accounts, accountTransfers,
     exportedAt: nowIsoZ(),
     settings: {
       ...settings,
       savePct: settings.savePct ?? 0,
-      customCategoryIcons: settings.customCategoryIcons ?? {},
       id: 'general',
       currency: settings.currency ?? 'DOP',
       locale: settings.locale ?? 'es-DO',
@@ -170,8 +186,6 @@ export async function exportDataJSON(): Promise<string> {
         freq: (settings.baseIncome?.freq as ('mensual' | 'quincenal' | 'semanal')) ?? 'mensual',
         amount: Math.max(0, Number(settings.baseIncome?.amount ?? 0))
       },
-      incomeCategories: Array.isArray(settings.incomeCategories) ? settings.incomeCategories : [],
-      expenseCategories: Array.isArray(settings.expenseCategories) ? settings.expenseCategories : []
     },
     periods: periods.map(p => ({
       id: p.id, year: p.year, month: p.month, createdAt: p.createdAt
@@ -179,15 +193,15 @@ export async function exportDataJSON(): Promise<string> {
     incomes: incomes.map(i => ({
       type: i.type,
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
-      amount: toCents(i.amount), description: i.description,
+      amount: toCents(i.amount), description: i.description, recurringRuleId:i.recurringRuleId,
       accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
     })),
     expenses: expenses.map(e => ({
-      type: e.type, frequency: e.frequency,
+      nature: e.nature,
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
       accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
-      paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
+      paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
     })),
     plans: plans.map(p => ({
       month: p.month, categoryId: p.categoryId,
@@ -209,7 +223,10 @@ export async function exportDataJSON(): Promise<string> {
   };
 
   // Valida antes de entregar
-  DumpV3.parse(dump);
+  dump.settings = withoutLegacyCategories(dump.settings);
+  validateCategorySet(categories);
+  validateCategoryReferences(dump, categories);
+  DumpV6.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -228,9 +245,13 @@ export async function importDataJSON(text: string): Promise<{
 }> {
   // 1) Parse + valida contrato v3
   const raw = JSON.parse(text);
-  const d = DumpV3.parse(raw); // si no cumple, explota aquí con un mensaje útil
+  const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
 
-  if (d.v === 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
+  if (d.v >= 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
+  if(d.v>=5 && !d.categories) throw new Error('El respaldo no contiene categorías.');
+  const categories=d.v>=5 ? d.categories! : reconstructCategories({settings:d.settings,incomes:d.incomes,expenses:d.expenses,plans:d.plans,recurrents:d.recurrents.map(r=>({categoryId:r.categoryId,type:r.direction}))});
+  validateCategorySet(categories);
+  validateCategoryReferences(d, categories);
   const accountMap = new Map((d.accounts || []).map(a => [a.id, a]));
   if ((d.accounts || []).filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
@@ -284,15 +305,15 @@ export async function importDataJSON(text: string): Promise<{
 
   const incomes = d.incomes.map(i => ({
     id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
-    amount: i.amount, description: i.description, type: i.type,
+    amount: i.amount, description: i.description, type: i.type, recurringRuleId: 'recurringRuleId' in i ? i.recurringRuleId : undefined,
     accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
   }));
 
   const expenses = d.expenses.map(e => ({
     id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
-    amount: e.amount, concept: e.concept ?? '', type: e.type, frequency: e.frequency,
+    amount: e.amount, concept: e.concept ?? '', nature: e.nature,
     accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
-    paymentMethod: e.paymentMethod, debtId: e.debtId, recurringId: e.recurringId,
+    paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
   }));
 
   const plans = d.plans.map(p => ({
@@ -322,6 +343,7 @@ export async function importDataJSON(text: string): Promise<{
     db.tables,
     async () => {
       await Promise.all([
+        db.categories.clear(),
         db.settings.clear(),
         db.periods.clear(),
         db.incomes.clear(),
@@ -336,7 +358,8 @@ export async function importDataJSON(text: string): Promise<{
         db.accounts.clear(),
         db.account_transfers.clear(),
       ]);
-      await db.settings.put(settingsRow as any);
+      await db.settings.put(withoutLegacyCategories(settingsRow) as any);
+      if(categories.length) await db.categories.bulkAdd(categories);
       if (d.accounts?.length) await db.accounts.bulkAdd(d.accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
@@ -363,4 +386,10 @@ export async function importDataJSON(text: string): Promise<{
     settings: cs, periods: cp, incomes: ci, expenses: ce, plans: cpl, goals: cg, goal_contributions: cgc,
     recurrents: cr, debts: cd, debt_payments: cdp, fxRates: cfr,
   }};
+}
+
+function validateCategoryReferences(data: Pick<DumpV6T, 'incomes'|'expenses'|'plans'|'recurrents'>, categories: import('../domain/models').Category[]) {
+ const map=new Map(categories.map(c=>[c.id,c]));
+ const check=(id:string,type:'income'|'expense')=>{const row=map.get(id);if(!row || !appliesTo(row,type))throw new Error('El respaldo contiene una categoría inexistente o incompatible: '+id);};
+ data.incomes.forEach(r=>check(r.categoryId,'income'));data.expenses.forEach(r=>check(r.categoryId,'expense'));data.plans.forEach(r=>check(r.categoryId,'expense'));data.recurrents?.forEach(r=>check(r.categoryId,r.direction));
 }

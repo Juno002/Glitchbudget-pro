@@ -1,10 +1,13 @@
 
 import Dexie, { type Table } from 'dexie';
+import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
+import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
 
-import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, Recurring, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
-export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, Recurring, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
+import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
+export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
 
 export class GlitchBudgetDB extends Dexie {
+  categories!: Table<Category, string>;
   accounts!: Table<Account, string>;
   account_transfers!: Table<AccountTransfer, string>;
   expenses!: Table<Expense, string>;
@@ -14,13 +17,35 @@ export class GlitchBudgetDB extends Dexie {
   plans!: Table<Plan, [string, string]>; // Compound key [month, categoryId]
   settings!: Table<Settings, 'general'>;
   periods!: Table<Period, string>;
-  recurrents!: Table<Recurring, string>;
+  recurrents!: Table<RecurringRule, string>;
   debts!: Table<Debt, string>;
   debt_payments!: Table<DebtPayment, string>;
   fxRates!: Table<FxRate, string>;
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
+    this.version(10).stores({
+      expenses: 'id, date, month, categoryId, nature, accountId',
+      recurrents: 'id, direction, categoryId, cadence, active, startDate, endDate',
+    }).upgrade(async tx => {
+      await tx.table('expenses').toCollection().modify(old => {
+        const actual = migrateActualExpense(old);
+        delete old.type; delete old.frequency; delete old.recurringId;
+        Object.assign(old, actual);
+      });
+      await tx.table('recurrents').toCollection().modify(old => {
+        const rule = migrateRecurringRule(old);
+        delete old.type; delete old.freq;
+        Object.assign(old, rule);
+      });
+    });
+    this.version(9).stores({categories:'id, type'}).upgrade(async tx => {
+      const settings=await tx.table('settings').get('general');
+      const categories=reconstructCategories({settings, incomes:await tx.table('incomes').toArray(), expenses:await tx.table('expenses').toArray(), plans:await tx.table('plans').toArray(), recurrents:await tx.table('recurrents').toArray()});
+      await tx.table('categories').bulkAdd(categories);
+      if(settings) await tx.table('settings').put(withoutLegacyCategories(settings));
+    });
+    this.on('populate', tx => tx.table('categories').bulkAdd(reconstructCategories({})).then(()=>undefined));
     this.version(8).stores({ accounts: 'id, type', account_transfers: 'id, fromAccountId, toAccountId, date', incomes: 'id, date, month, categoryId, type, accountId', expenses: 'id, date, month, categoryId, type, accountId', debt_payments: 'id, debtId, date, accountId' });
     this.version(7).stores({
       expenses: 'id, date, month, categoryId, type',

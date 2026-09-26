@@ -1,13 +1,14 @@
+import { preserveImportedCategories } from './category-service';
 import { requireAccount } from './accounts';
 import { db } from './db';
 import { z } from 'zod';
-import { IncomeV3, ExpenseV3, PlanV3, GoalV3, GoalContribV3 } from './backup-json';
+import { IncomeV6, ExpenseCSV, PlanV3, GoalV3, GoalContribV3 } from './backup-json';
 import { parseCSV, encodeCSV, decodeCSVField } from './csv';
 import { localDate } from './finance-calculations';
 
 const columns = {
-  incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId'],
-  expenses: ['id', 'month', 'date', 'categoryId', 'amount', 'concept', 'type', 'frequency', 'paymentMethod', 'debtId', 'currency', 'fxRate', 'amountBase', 'recurringId', 'accountId'],
+  incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId'],
+  expenses: ['id', 'month', 'date', 'categoryId', 'amount', 'concept', 'nature', 'paymentMethod', 'debtId', 'currency', 'fxRate', 'amountBase', 'recurringRuleId', 'accountId'],
   plans: ['month', 'categoryId', 'limit'],
   goals: ['id', 'name', 'target', 'saved', 'date', 'quota', 'startDate', 'status'],
   goal_contributions: ['id', 'goalId', 'amount', 'date'],
@@ -27,7 +28,7 @@ async function exportTable(name: ExportTable) {
 
 async function readRows<T>(file: File, name: ExportTable, schema: z.ZodType<T, z.ZodTypeDef, unknown>): Promise<T[]> {
   const [header, ...lines] = parseCSV(await file.text());
-  const required = columns[name].slice(0, name === 'incomes' ? 7 : name === 'expenses' ? 8 : undefined);
+  const required = columns[name].slice(0, name === 'incomes' ? 7 : name === 'expenses' ? 6 : undefined);
   if (!header || new Set(header).size !== header.length || required.some(key => !header.includes(key))) {
     throw new Error('El CSV no tiene las columnas necesarias para esta tabla.');
   }
@@ -50,29 +51,32 @@ export const exportGoalsCSV = () => exportTable('goals');
 export const exportGoalContribCSV = () => exportTable('goal_contributions');
 
 export async function importIncomesCSV(file: File) {
-  const rows = await readRows(file, 'incomes', IncomeV3);
-  await db.transaction('rw', db.incomes, db.accounts, async () => {
+  const rows = await readRows(file, 'incomes', IncomeV6);
+  await db.transaction('rw', db.incomes, db.accounts, db.categories, async () => {
     for (const row of rows) if (row.accountId) await requireAccount(row.accountId, row.date);
+    await preserveImportedCategories(rows,'income');
     await db.incomes.clear();
     await db.incomes.bulkAdd(rows.map(row => ({ ...row, month: row.date.slice(0, 7) })));
   });
 }
 export async function importExpensesCSV(file: File) {
-  const rows = await readRows(file, 'expenses', ExpenseV3);
-  await db.transaction('rw', db.expenses, db.debts, db.accounts, async () => {
+  const rows = await readRows(file, 'expenses', ExpenseCSV);
+  await db.transaction('rw', db.expenses, db.debts, db.accounts, db.categories, async () => {
     for (const row of rows) {
       if (row.accountId) await requireAccount(row.accountId, row.date);
       if (row.paymentMethod === 'credit' && (!row.debtId || !await db.debts.get(row.debtId))) {
         throw new Error('El CSV contiene una tarjeta desconocida. Restaura el respaldo JSON completo.');
       }
     }
+    await preserveImportedCategories(rows,'expense');
     await db.expenses.clear();
     await db.expenses.bulkAdd(rows.map(row => ({ ...row, concept: row.concept ?? '', month: row.date.slice(0, 7) })));
   });
 }
 export async function importPlansCSV(file: File) {
   const rows = await readRows(file, 'plans', PlanV3);
-  await db.transaction('rw', db.plans, async () => {
+  await db.transaction('rw', db.plans, db.categories, async () => {
+    await preserveImportedCategories(rows,'expense');
     await db.plans.clear(); await db.plans.bulkAdd(rows);
   });
 }

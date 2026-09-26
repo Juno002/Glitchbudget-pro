@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency, cn } from '@/lib/utils';
 import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft, Plus } from 'lucide-react';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { Skeleton } from '../ui/skeleton';
 import ExpenseCategoryManager from './expense-category-manager';
 import TransferDialog from './transfer-dialog';
@@ -30,6 +30,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   spent: number;
   onSave: (val: number) => Promise<boolean>;
 }) {
+  const getCategoryInfo = useCategoryResolver();
   const category = getCategoryInfo(categoryId);
   const [inputValue, setInputValue] = useState(String(currentPlan / 100));
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -152,6 +153,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
 
 // --- New Budget Modal ---
 function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: string[], onSave: (categoryId: string, amount: number) => Promise<boolean> }) {
+  const getCategoryInfo = useCategoryResolver();
   const [open, setOpen] = useState(false);
   const [selectedCatId, setSelectedCatId] = useState<string>('');
   const [amount, setAmount] = useState('');
@@ -292,7 +294,7 @@ export default function PlanningTab() {
       const activeIds = new Set<string>();
       const inactiveIds = new Set<string>();
 
-      expenseCategories.forEach(catId => {
+      Array.from(new Set([...expenseCategories, ...budgetDetails.filter(b => b.limit > 0 || b.spent > 0).map(b => b.categoryId)])).forEach(catId => {
           const detail = budgetDetails.find(b => b.categoryId === catId);
           if ((detail?.limit ?? 0) > 0 || (detail?.spent ?? 0) > 0) {
               activeIds.add(catId);

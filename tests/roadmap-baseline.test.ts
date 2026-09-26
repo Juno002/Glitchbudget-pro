@@ -1,3 +1,5 @@
+import { migrateActualExpense, migrateRecurringRule } from '../src/domain/actual-planned-migration';
+import { withoutLegacyCategories } from '../src/domain/categories';
 import 'fake-indexeddb/auto';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -22,10 +24,12 @@ for (const version of [6, 7]) {
     const current = new GlitchBudgetDB(name);
     try {
       await current.open();
-      assert.equal(current.verno, 8);
+      assert.equal(current.verno, 10);
       for (const [table, rows] of Object.entries(source.tables)) {
-        const expected = structuredClone(rows) as any[];
-        if (version === 6 && table === 'settings') expected[0].customCategoryIcons = {};
+        let expected = structuredClone(rows) as any[];
+        if (table === 'expenses') expected=expected.map(migrateActualExpense);
+        if (table === 'recurrents') expected=expected.map(migrateRecurringRule);
+        if (table === 'settings') expected[0] = withoutLegacyCategories(expected[0]);
         const sort = (a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b));
         assert.deepEqual(clean(await current.table(table).toArray()).sort(sort), expected.sort(sort), table);
       }
@@ -48,7 +52,7 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables and f
   const source = fixture('backup-v4');
   await importDataJSON(JSON.stringify(source));
   const before = await snapshot();
-  assert.equal(Object.keys(before).length, 13);
+  assert.equal(Object.keys(before).length, 14);
   for (const rows of Object.values(before)) assert.ok((rows as any[]).length > 0);
   const financial = await metrics();
   assert.equal(financial.position.cash, 80000);

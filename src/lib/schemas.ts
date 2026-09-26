@@ -8,8 +8,7 @@ export const ExpenseInputSchema = z.object({
   categoryId: z.string().min(1, 'La categoría es requerida.'),
   amount: money,
   date: isoDate,
-  type: z.enum(['Fijo', 'Variable', 'Ocasional']),
-  frequency: z.enum(['mensual', 'quincenal', 'semanal']).optional(),
+  nature: z.enum(['Fijo', 'Variable', 'Ocasional']),
 });
 
 export type ExpenseInput = z.infer<typeof ExpenseInputSchema>;

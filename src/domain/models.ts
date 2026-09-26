@@ -7,9 +7,12 @@ export interface Settings {
   preventNegativeAccountBalance?: boolean;
   budgetOverspendingBehavior?: 'allow' | 'warn' | 'block';
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
-  expenseCategories: string[];
-  incomeCategories: string[];
-  customCategoryIcons?: { [catId: string]: string }; // Map of catId -> iconName
+  /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
+  expenseCategories?: string[];
+  /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
+  incomeCategories?: string[];
+  /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
+  customCategoryIcons?: { [catId: string]: string };
   currency: string;
   locale: string;
   baseIncome: {
@@ -26,7 +29,9 @@ export interface Period {
     createdAt: string
 }
 
+/** An actual recorded receipt; forecasts are never stored here. */
 export interface Income {
+    recurringRuleId?: string;
     accountId?: string;
     id: string;
     type: 'extra' | 'gift';
@@ -40,14 +45,14 @@ export interface Income {
     amountBase?: number;
 }
 
+/** An actual dated purchase, counted once regardless of its nature. */
 export interface Expense {
     accountId?: string;
     id: string;
-    type: 'Fijo' | 'Variable' | 'Ocasional';
+    nature: 'Fijo' | 'Variable' | 'Ocasional';
     concept: string;
     amount: number; // Stored as positive cents
     date: string; // YYYY-MM-DD
-    frequency?: 'mensual' | 'quincenal' | 'semanal';
     categoryId: string;
     month: string;
     currency?: string;
@@ -55,7 +60,8 @@ export interface Expense {
     amountBase?: number;
     paymentMethod?: 'cash' | 'credit';
     debtId?: string;
-    recurringId?: string;
+    /** Origin only; never repeats this actual transaction. */
+    recurringRuleId?: string;
 }
 
 export interface Plan {
@@ -85,13 +91,14 @@ export interface GoalContribution {
 
 export type Budget = Plan;
 
-export interface Recurring {
+/** Planning only; changes to a rule never change actual transactions. */
+export interface RecurringRule {
   id: string;
-  type: 'income' | 'expense';
+  direction: 'income' | 'expense';
   title: string;
   categoryId: string;
   amount: number;              // centavos, positivo
-  freq: 'weekly' | 'biweekly' | 'monthly';
+  cadence: 'weekly' | 'biweekly' | 'monthly';
   day?: number;                // monthly: 1..28, weekly: 0..6
   startDate: string;           // YYYY-MM-DD
   endDate?: string;
@@ -145,4 +152,14 @@ export interface AccountTransfer {
   amount: number;
   date: string;
   note: string;
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  type: 'expense' | 'income' | 'both';
+  iconName: string;
+  archived: boolean;
+  expenseOrder?: number;
+  incomeOrder?: number;
 }

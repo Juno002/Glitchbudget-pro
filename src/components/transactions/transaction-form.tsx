@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { localDate } from '@/lib/finance-calculations';
 import { useState, useMemo } from 'react';
 
@@ -24,6 +24,7 @@ const formSchema = z.object({
 type TransactionFormValues = z.infer<typeof formSchema>;
 
 export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const getCategoryInfo = useCategoryResolver();
   const [accountId, setAccountId] = useState('');
   const { addIncomeItem, addExpense, incomeCategories, expenseCategories } = useFinances();
   const [type, setType] = useState<'income' | 'expense'>('expense');
@@ -52,7 +53,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
     if (values.type === 'income') {
         success = await addIncomeItem({ ...data, accountId: accountId || undefined, description: values.description, type: 'extra' });
     } else {
-        success = await addExpense({ ...data, accountId: accountId || undefined, concept: values.description, type: 'Variable' });
+        success = await addExpense({ ...data, accountId: accountId || undefined, concept: values.description, nature: 'Variable' });
     }
     if (!success) return;
     form.reset();

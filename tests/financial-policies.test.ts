@@ -1,3 +1,4 @@
+import { seedTestCategories } from './category-fixture';
 import 'fake-indexeddb/auto';
 import assert from 'node:assert/strict';
 import { beforeEach, after, test } from 'node:test';
@@ -13,7 +14,7 @@ import { withBudgetConfirmation } from '../src/lib/expense-confirmation';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 const date='2026-09-20', month='2026-09';
 const cash={id:'cash',name:'Efectivo',type:'cash' as const,openingBalance:1_000_000,startDate:'2026-09-01',isDefaultCash:true};
-const expense={id:'new',date,categoryId:'food',amount:1000,concept:'Prueba',type:'Variable' as const,accountId:'cash'};
+const expense={id:'new',date,categoryId:'food',amount:1000,concept:'Prueba',nature:'Variable' as const,accountId:'cash'};
 const old: Expense={...expense,id:'old',month,amount:450_000};
 beforeEach(async()=>{
  await db.transaction('rw',db.tables,async()=>{for(const t of db.tables)await t.clear();});
@@ -22,6 +23,7 @@ beforeEach(async()=>{
  await db.goals.add({id:'goal',name:'Meta',target:2_000_000,saved:0,quota:0,startDate:date,status:'active'});
  await db.debts.add({id:'card',name:'Tarjeta',type:'credit_card',principal:1_000_000,apr:0,minPayment:0,status:'active',createdAt:date+'T00:00:00.000Z'});
 });
+beforeEach(seedTestCategories);
 after(()=>db.close());
 async function monthly(){return selectMonthlyMetrics({settings:{savePct:0},incomes:await db.incomes.toArray(),expenses:await db.expenses.toArray(),budgets:await db.plans.toArray(),goalContributions:await db.goal_contributions.toArray(),debtPayments:await db.debt_payments.toArray()},month);}
 async function position(){return selectPosition(await db.accounts.toArray(),await db.debts.toArray(),await readAccountSnapshot(),date);}

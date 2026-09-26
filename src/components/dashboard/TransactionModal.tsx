@@ -3,7 +3,7 @@
 import { AccountSelect } from './account-select';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { Expense, Income } from '@/lib/db';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -52,6 +52,7 @@ const ToolbarItem = ({ icon, label, active, children, popoverOpen, setPopoverOpe
 
 
 export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome }: TransactionModalProps) {
+  const getCategoryInfo = useCategoryResolver();
   const {
     addExpense, updateExpense, deleteExpense,
     addIncomeItem, updateIncomeItem, deleteIncomeItem,
@@ -71,7 +72,6 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [date, setDate] = useState(localDate());
   const [expenseSubtype, setExpenseSubtype] = useState<'Fijo' | 'Variable' | 'Ocasional'>('Variable');
   const [incomeSubtype, setIncomeSubtype] = useState<'extra' | 'gift'>('extra');
-  const [frequency, setFrequency] = useState<'mensual' | 'quincenal' | 'semanal'>('mensual');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [debtId, setDebtId] = useState('');
   const [accountId, setAccountId] = useState('');
@@ -107,8 +107,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setCategoryId(editingExpense.categoryId);
       setConcept(editingExpense.concept);
       setDate(editingExpense.date);
-      setExpenseSubtype(editingExpense.type);
-      setFrequency(editingExpense.frequency || 'mensual');
+      setExpenseSubtype(editingExpense.nature);
       setPaymentMethod(editingExpense.paymentMethod || 'cash');
       setDebtId(editingExpense.debtId || '');
     } else if (mode === 'edit' && editingIncome) {
@@ -126,7 +125,6 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setDate(localDate());
       setExpenseSubtype('Variable');
       setIncomeSubtype('extra');
-      setFrequency('mensual');
       setPaymentMethod('cash');
       setDebtId('');
     }
@@ -137,7 +135,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const categories = useMemo(() => {
     const ids = txType === 'income' ? incomeCategories : expenseCategories;
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
-  }, [txType, incomeCategories, expenseCategories]);
+  }, [txType, incomeCategories, expenseCategories, getCategoryInfo]);
 
   const selectedCat = categoryId ? getCategoryInfo(categoryId) : undefined;
   const canSave = Number.isFinite(Number(amount)) && Number(amount) >= 0.01 && categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
@@ -152,8 +150,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       let success: boolean;
       if (txType === 'expense') {
         const fields = {
-          accountId: accountId || undefined, concept, amount: numAmount, categoryId, date, type: expenseSubtype,
-          frequency: expenseSubtype === 'Fijo' ? frequency : undefined,
+          accountId: accountId || undefined, concept, amount: numAmount, categoryId, date, nature: expenseSubtype,
           paymentMethod, debtId: paymentMethod === 'credit' ? debtId : undefined,
         };
         success = editingExpense
@@ -341,6 +338,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             <div className="flex flex-col gap-1 min-w-[130px]">
               {txType === 'expense' ? (
                 <>
+                  <span className="px-3 text-xs text-muted-foreground">Naturaleza</span>
                   {(['Variable', 'Ocasional', 'Fijo'] as const).map(t => (
                     <button
                       key={t}
@@ -352,21 +350,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       {t}
                     </button>
                   ))}
-                  {expenseSubtype === 'Fijo' && (
-                    <div className="border-t border-black/10 dark:border-white/10 mt-1 pt-1">
-                      {(['mensual', 'quincenal', 'semanal'] as const).map(f => (
-                        <button
-                          key={f}
-                          onClick={() => { setFrequency(f); setSubtypeOpen(false); }}
-                          className={cn("px-3 py-1.5 rounded-lg text-xs w-full text-left transition-colors capitalize",
-                            frequency === f ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
-                          )}
-                        >
-                          {f}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+
                 </>
               ) : (
                 <>

@@ -1,6 +1,6 @@
 import { AccountSelect } from './account-select';
 import { localDate } from '@/lib/finance-calculations';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,16 +10,19 @@ import { PlayCircle, ShieldAlert, CheckCircle2, CalendarDays, Plus, Trash2 } fro
 import { formatCurrency, cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 
 export default function SubscriptionsManager() {
-  const { recurrents, addRecurring, deleteRecurring, addExpense, currentMonth, expenseCategories } = useFinances();
+  const getCategoryInfo = useCategoryResolver();
+  const { recurringRules, addRecurringRule, deleteRecurringRule, addExpense, currentMonth, expenseCategories } = useFinances();
   const { toast } = useToast();
+  const paymentLock = useRef(false);
+  const [paying, setPaying] = useState(false);
   const [accountId, setAccountId] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newSub, setNewSub] = useState({ title: '', amount: '', day: '1', categoryId: '' });
 
-  const activeSubs = recurrents?.filter(r => r.active && r.type === 'expense') || [];
+  const activeSubs = recurringRules?.filter(r => r.active && r.direction === 'expense') || [];
   
   // Sort by day
   const sortedSubs = [...activeSubs].sort((a, b) => (a.day || 0) - (b.day || 0));
@@ -33,14 +36,14 @@ export default function SubscriptionsManager() {
     const amountCents = Math.round(Number(newSub.amount) * 100);
     if (!newSub.title || amountCents <= 0 || !newSub.categoryId) return;
     
-    const success = await addRecurring({
+    const success = await addRecurringRule({
       title: newSub.title,
       amount: amountCents,
       day: parseInt(newSub.day),
-      freq: 'monthly',
+      cadence: 'monthly',
       startDate: localDate(),
       categoryId: newSub.categoryId,
-      type: 'expense',
+      direction: 'expense',
       active: true
     });
     
@@ -50,20 +53,24 @@ export default function SubscriptionsManager() {
   };
 
   const handleLogExpense = async (sub: typeof activeSubs[0]) => {
-    // Add an expense for this subscription
+    // The legacy UI confirms monthly subscriptions only; occurrences belong to Phase 7.
+    if (paymentLock.current || sub.cadence !== 'monthly') return;
+    paymentLock.current = true; setPaying(true);
+    try {
     
     const success = await addExpense({
       accountId: accountId || undefined,
       concept: `Suscripción: ${sub.title}`,
-      recurringId: sub.id,
+      recurringRuleId: sub.id,
       amount: sub.amount / 100,
       categoryId: sub.categoryId,
       date: localDate(),
-      type: 'Variable'
+      nature: 'Variable'
     });
     
     if (!success) return;
     toast({ title: 'Suscripción pagada', description: `Se ha registrado el gasto para ${sub.title}.` });
+    } finally { paymentLock.current = false; setPaying(false); }
   };
 
   return (
@@ -72,7 +79,7 @@ export default function SubscriptionsManager() {
       <div className="flex justify-between items-center mb-2">
         <div>
           <h3 className="text-lg font-bold">Mis Suscripciones</h3>
-          <p className="text-sm text-muted-foreground">Registra el pago de tus suscripciones cada mes</p>
+          <p className="text-sm text-muted-foreground">Estas reglas son previsiones. Solo registrar un pago crea un gasto real.</p>
         </div>
         
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -146,6 +153,7 @@ export default function SubscriptionsManager() {
                   <div>
                     <h4 className="font-semibold text-sm">{sub.title}</h4>
                     <p className="text-xs text-muted-foreground font-mono">{formatCurrency(sub.amount)}</p>
+                    {sub.cadence !== 'monthly' && <p className="text-xs text-muted-foreground">Regla {sub.cadence === 'weekly' ? 'semanal' : 'quincenal'}: registra el gasto desde Nuevo movimiento.</p>}
                   </div>
                 </div>
                 
@@ -153,12 +161,13 @@ export default function SubscriptionsManager() {
                    <Button 
                       size="sm" 
                       variant="secondary" 
+                      disabled={paying || sub.cadence !== 'monthly'}
                       onClick={() => handleLogExpense(sub)} 
                       className="h-8 text-[11px] bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
                    >
-                     <CheckCircle2 className="w-3 h-3 mr-1" /> Loggear
+                     <CheckCircle2 className="w-3 h-3 mr-1" /> Registrar pago
                    </Button>
-                   <Button variant="ghost" size="icon" className="h-8 w-8 text-bad/50 hover:bg-bad/10 hover:text-bad" onClick={() => deleteRecurring(sub.id)}>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 text-bad/50 hover:bg-bad/10 hover:text-bad" onClick={() => deleteRecurringRule(sub.id)}>
                      <Trash2 className="w-4 h-4" />
                    </Button>
                 </div>

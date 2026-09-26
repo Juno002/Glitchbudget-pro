@@ -6,13 +6,14 @@ import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { formatCurrency, cn } from "@/lib/utils";
-import { getCategoryInfo } from "@/lib/categories";
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
+  const getCategoryInfo = useCategoryResolver();
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
     return (
         <Card>
@@ -146,6 +147,7 @@ const ExpenseByTypeTable = () => {
 }
 
 const BudgetStatusReport = () => {
+  const getCategoryInfo = useCategoryResolver();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
 

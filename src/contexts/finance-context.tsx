@@ -1,4 +1,8 @@
 'use client';
+import { saveRecurringRule, removeRecurringRule } from '@/lib/recurring-rule-service';
+import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
+import { createCategory, resetCategories, requireCategory, savePlans } from '@/lib/category-service';
+
 import { selectMonthlyMetrics, recordedCategories, recordedExpenseForMonth as expenseForMonth, selectCategorySpending, selectBudgetRemaining } from '@/domain/metrics';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
 import { readFinancialPolicies } from '@/lib/policy-settings';
@@ -8,10 +12,9 @@ import { selectPosition } from '@/domain/ledger';
 import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
-import { defaultExpenseCategories as defaultExpenseCatIds, defaultIncomeCategories as defaultIncomeCatIds } from "@/lib/categories";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type Recurring } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
@@ -29,9 +32,6 @@ const DEFAULT_SETTINGS: Settings = {
   preventNegativeAccountBalance: true,
   budgetOverspendingBehavior: 'block',
   rolloverStrategy: 'reset',
-  expenseCategories: defaultExpenseCatIds,
-  incomeCategories: defaultIncomeCatIds,
-  customCategoryIcons: {},
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
   locale: "es-DO",
@@ -58,7 +58,7 @@ interface FinanceContextType {
 
   debts: Debt[] | undefined;
   debtPayments: DebtPayment[] | undefined;
-  recurrents: Recurring[] | undefined;
+  recurringRules: RecurringRule[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setPreventNegativeAccountBalance: (value: boolean) => void;
@@ -85,9 +85,9 @@ interface FinanceContextType {
   deleteDebt: (id: string) => Promise<boolean>;
   addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => Promise<boolean>;
 
-  addRecurring: (recurring: Omit<Recurring, 'id'>) => Promise<boolean>;
-  updateRecurring: (recurring: Recurring) => Promise<boolean>;
-  deleteRecurring: (id: string) => Promise<boolean>;
+  addRecurringRule: (recurring: Omit<RecurringRule, 'id'>) => Promise<boolean>;
+  updateRecurringRule: (recurring: RecurringRule) => Promise<boolean>;
+  deleteRecurringRule: (id: string) => Promise<boolean>;
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
@@ -98,10 +98,10 @@ interface FinanceContextType {
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
   getBudgetStatusDetails: (month: string) => Array<Budget & { spent: number; remaining: number; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
 
-  addIncomeCategory: (category: string, iconName?: string) => void;
-  resetIncomeCategories: () => void;
-  addExpenseCategory: (category: string, iconName?: string) => void;
-  resetExpenseCategories: () => void;
+  addIncomeCategory: (category: string, iconName?: string) => Promise<void>;
+  resetIncomeCategories: () => Promise<void>;
+  addExpenseCategory: (category: string, iconName?: string) => Promise<void>;
+  resetExpenseCategories: () => Promise<void>;
 
   currentMonth: string;
   setCurrentMonth: (month: string) => void;
@@ -151,7 +151,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const transfers = financialData?.transfers;
   const accounts = financialData?.accounts;
   const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
-  const recurrents = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
+  const categories = useLiveQuery(() => db.categories.toArray(), [dataVersion]);
+  const expenseCategories = useMemo(() => activeCategories(categories || [], 'expense').map(c => c.id), [categories]);
+  const incomeCategories = useMemo(() => activeCategories(categories || [], 'income').map(c => c.id), [categories]);
+  const recurringRules = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
   useEffect(() => {
     if (accounts && !accounts.some(a => a.isDefaultCash)) {
       void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
@@ -168,13 +171,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         amount: Math.max(0, Number(s?.baseIncome?.amount ?? 0)),
         freq: s?.baseIncome?.freq ?? 'mensual'
       },
-      expenseCategories: Array.isArray((s as any).expenseCategories) ? (s as any).expenseCategories : defaultExpenseCatIds,
-      incomeCategories: Array.isArray((s as any).incomeCategories) ? (s as any).incomeCategories : defaultIncomeCatIds,
       savePct: s.savePct ?? DEFAULT_SETTINGS.savePct,
     };
   }, [rawSettings]);
 
-  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents, accounts, transfers].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurrents, accounts, transfers]);
+  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories]);
 
   useEffect(() => {
     async function initializeDB() {
@@ -246,7 +247,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
       try {
-          await db.settings.update('general', newSettings);
+          await db.settings.update('general', withoutLegacyCategories(newSettings));
       } catch (error) {
           toast({ title: 'Error al actualizar', description: friendlyError(error), variant: 'destructive' });
       }
@@ -402,7 +403,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       const budgetsToPut: Plan[] = allBudgets.map(b => ({ ...b, month, limit: toCents(b.limit) }));
       if (budgetsToPut.some(b => !Number.isSafeInteger(b.limit) || b.limit < 0)) throw new Error('Los presupuestos deben ser montos positivos o cero.');
-      await db.transaction('rw', db.plans, () => db.plans.bulkPut(budgetsToPut));
+      await savePlans(budgetsToPut);
        toast({ title: '¡Presupuestos guardados!'});
       return true;
     } catch (error) {
@@ -416,10 +417,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
       if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error("El monto de la transferencia debe ser positivo.");
       if (fromCategoryId === toCategoryId) throw new Error('Selecciona dos categorías diferentes.');
-      await db.transaction('rw', db.plans, db.expenses, async () => {
+      await db.transaction('rw', db.plans, db.expenses, db.categories, async () => {
           const fromBudget = await db.plans.get([month, fromCategoryId]);
           const toBudget = await db.plans.get([month, toCategoryId]);
 
+          await requireCategory(fromCategoryId, 'expense', fromBudget?.categoryId);
+          await requireCategory(toCategoryId, 'expense', toBudget?.categoryId);
           const spent = selectCategorySpending(await db.expenses.toArray(), fromCategoryId, month);
           if (!fromBudget || fromBudget.limit - spent < amountInCents) {
               throw new Error("Fondos insuficientes en el presupuesto de origen.");
@@ -451,7 +454,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const getBudgetStatusDetails = useCallback((month: string) => {
     const monthBudgets = (budgets || []).filter(b => b.month === month);
     const budgetedCategoryIds = new Set(monthBudgets.map(b => b.categoryId));
-    const allRelevantCategoryIds = Array.from(new Set([...activeSettings.expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => expenseForMonth(e, month) > 0).map(e => e.categoryId)]));
+    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => expenseForMonth(e, month) > 0).map(e => e.categoryId)]));
 
     return allRelevantCategoryIds.map(catId => {
       const budget = monthBudgets.find(b => b.categoryId === catId) || { month, categoryId: catId, limit: 0 };
@@ -465,7 +468,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
       return { ...budget, spent, remaining, status };
     });
-  }, [budgets, expenses, getSpentAmount, activeSettings.expenseCategories]);
+  }, [budgets, expenses, getSpentAmount, expenseCategories]);
 
   const getExpensesByCategory = useCallback((month: string) => recordedCategories(expenses || [], month), [expenses]);
   const getIncomesByCategory = useCallback((month: string) => recordedCategories(incomes || [], month), [incomes]);
@@ -474,7 +477,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const getExpensesByType = useCallback((month: string) => {
       const exps = (expenses || []).filter(e => expenseForMonth(e, month) > 0);
       const groupT = exps.reduce((acc, e) => {
-          const k = e.type;
+          const k = e.nature;
           const val = expenseForMonth(e, month);
           if (!acc[k]) acc[k] = { total: 0, count: 0 };
           acc[k].total += val;
@@ -487,45 +490,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }));
   }, [expenses]);
 
-  const addIncomeCategory = useCallback((category: string, iconName?: string) => {
-    const catId = category.toLowerCase().replace(/\s/g, '-');
-    if (!activeSettings.incomeCategories.includes(catId)) {
-      const updates: Partial<Settings> = {
-        incomeCategories: [...activeSettings.incomeCategories, catId]
-      };
-      if (iconName) {
-        updates.customCategoryIcons = {
-          ...activeSettings.customCategoryIcons,
-          [catId]: iconName
-        };
-      }
-      updateSettings(updates);
-    }
-  }, [activeSettings, updateSettings]);
-  const resetIncomeCategories = useCallback(() => {
-    updateSettings({
-        incomeCategories: defaultIncomeCatIds,
-        customCategoryIcons: {} // Clear custom icons on reset? Or keep them? User said reset, so we'll likely clear.
-    });
-  }, [updateSettings]);
-
-  const addExpenseCategory = useCallback((categoryName: string, iconName?: string) => {
-    if (!categoryName.trim()) return;
-    const catId = categoryName.trim().toLowerCase().replace(/\s/g, '-');
-    if (!activeSettings.expenseCategories.includes(catId)) {
-      const updates: Partial<Settings> = {
-        expenseCategories: [...activeSettings.expenseCategories, catId]
-      };
-      if (iconName) {
-        updates.customCategoryIcons = {
-          ...activeSettings.customCategoryIcons,
-          [catId]: iconName
-        };
-      }
-      updateSettings(updates);
-    }
-  }, [activeSettings, updateSettings]);
-  const resetExpenseCategories = useCallback(() => updateSetting('expenseCategories', defaultExpenseCatIds), [updateSetting]);
+  const addIncomeCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'income',iconName); }, []);
+  const addExpenseCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'expense',iconName); }, []);
+  const resetIncomeCategories = useCallback(async () => { await resetCategories('income'); }, []);
+  const resetExpenseCategories = useCallback(async () => { await resetCategories('expense'); }, []);
 
   const resetSettings = useCallback(async () => {
     await db.settings.clear();
@@ -700,9 +668,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addRecurring = useCallback(async (recurring: Omit<Recurring, "id">) => {
+  const addRecurringRule = useCallback(async (recurring: Omit<RecurringRule, "id">) => {
     try {
-      await db.recurrents.add({ ...recurring, id: crypto.randomUUID() });
+      await saveRecurringRule({ ...recurring, id: crypto.randomUUID() });
       toast({ title: 'Suscripción registrada' });
       return true;
     } catch (e: any) {
@@ -711,9 +679,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const updateRecurring = useCallback(async (recurring: Recurring) => {
+  const updateRecurringRule = useCallback(async (recurring: RecurringRule) => {
     try {
-      await db.recurrents.put(recurring);
+      await saveRecurringRule(recurring, true);
       toast({ title: 'Suscripción actualizada' });
       return true;
     } catch (e: any) {
@@ -722,9 +690,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const deleteRecurring = useCallback(async (id: string) => {
+  const deleteRecurringRule = useCallback(async (id: string) => {
     try {
-      await db.recurrents.delete(id);
+      await removeRecurringRule(id);
       toast({ title: 'Suscripción borrada' });
       return true;
     } catch (e: any) {
@@ -739,8 +707,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
     baseIncome: activeSettings.baseIncome,
-    expenseCategories: activeSettings.expenseCategories,
-    incomeCategories: activeSettings.incomeCategories,
+    expenseCategories: expenseCategories,
+    incomeCategories: incomeCategories,
     savePct: activeSettings.savePct,
     incomes,
     expenses,
@@ -749,7 +717,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     budgets,
     debts,
     debtPayments,
-    recurrents,
+    recurringRules,
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
@@ -772,9 +740,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updateDebt,
     deleteDebt,
     addDebtPayment,
-    addRecurring,
-    updateRecurring,
-    deleteRecurring,
+    addRecurringRule,
+    updateRecurringRule,
+    deleteRecurringRule,
     getMonthlyAverages,
     getDisposable,
     getTotals,
@@ -801,13 +769,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurrents,
+    activeSettings, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules,
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,
-    addRecurring, updateRecurring, deleteRecurring,
+    addRecurringRule, updateRecurringRule, deleteRecurringRule,
     getMonthlyAverages, getDisposable, getTotals, getPosition, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,

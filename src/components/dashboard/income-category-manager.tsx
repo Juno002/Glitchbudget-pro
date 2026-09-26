@@ -1,4 +1,7 @@
 'use client';
+import CategoryMaintenance from './category-maintenance';
+import { friendlyError } from '@/lib/errors';
+
 
 import { useState } from "react";
 import { useFinances } from "@/contexts/finance-context";
@@ -15,23 +18,19 @@ export default function IncomeCategoryManager() {
     const [selectedIcon, setSelectedIcon] = useState('circle-dollar-sign');
     const { toast } = useToast();
 
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
         if (!newCategory.trim()) {
             toast({ title: 'Nombre de categoría vacío', variant: 'destructive' });
             return;
         }
-        if (incomeCategories.includes(newCategory.trim())) {
-            toast({ title: 'La categoría ya existe', variant: 'destructive' });
-            return;
-        }
-        addIncomeCategory(newCategory.trim(), selectedIcon);
+        try { await addIncomeCategory(newCategory.trim(), selectedIcon); } catch (error) { toast({title:'No se guardó la categoría', description:friendlyError(error),variant:'destructive'}); return; }
         setNewCategory('');
         setSelectedIcon('circle-dollar-sign');
         toast({ title: 'Categoría de ingresos agregada' });
     };
 
-    const handleReset = () => {
-        resetIncomeCategories();
+    const handleReset = async () => {
+        try { await resetIncomeCategories(); } catch(error) { toast({title:'No se restablecieron las categorías',description:friendlyError(error),variant:'destructive'}); return; }
         toast({ title: "Categorías de ingresos restablecidas" });
     }
 
@@ -62,7 +61,7 @@ export default function IncomeCategoryManager() {
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Esto restablecerá tus categorías de ingresos a las predeterminadas. Esta acción no se puede deshacer.
+                                        Esto restablecerá tus categorías de ingresos a las predeterminadas. Las categorías propias se archivarán conservando el historial y podrán reactivarse. Las compartidas con ingresos y gastos se conservarán.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -73,6 +72,7 @@ export default function IncomeCategoryManager() {
                         </AlertDialog>
                     </div>
                 </div>
+                <CategoryMaintenance direction="income" />
             </CardContent>
         </Card>
     );

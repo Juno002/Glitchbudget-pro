@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRightLeft } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
@@ -35,6 +35,7 @@ const formSchema = z.object({
 type TransferFormValues = z.infer<typeof formSchema>;
 
 export default function TransferDialog() {
+  const getCategoryInfo = useCategoryResolver();
   const [open, setOpen] = useState(false);
   const { expenseCategories, transferBetweenBudgets, getBudgetStatusDetails, currentMonth } = useFinances();
   const { toast } = useToast();

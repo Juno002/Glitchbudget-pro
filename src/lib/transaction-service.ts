@@ -1,3 +1,6 @@
+import { requireRecurringProvenance } from './recurring-rule-service';
+import { legacyMonthlySubscriptionGuard } from './legacy-monthly-subscription-guard';
+import { requireCategory } from './category-service';
 import { readFinancialPolicies } from './policy-settings';
 import { evaluateBudgetOverspending, BudgetWarning } from '../policies/budget-overspending';
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
@@ -6,26 +9,28 @@ import { db, type Expense, type Income } from './db';
 import { isValidDate } from './finance-calculations';
 
 const fields = {
+  recurringRuleId: z.string().min(1).optional(),
   accountId: z.string().min(1).optional(),
   date: z.string().refine(isValidDate, 'Selecciona una fecha válida.'),
-  categoryId: z.string().trim().min(1, 'Selecciona una categoría.'),
+  categoryId: z.string().min(1, 'Selecciona una categoría.'),
   amount: z.number().finite().positive('El monto debe ser mayor que cero.')
     .transform(value => Math.round(value * 100))
     .pipe(z.number().int().positive('El monto mínimo es 0.01.').max(Number.MAX_SAFE_INTEGER)),
 };
 const incomeSchema = z.object({ ...fields, type: z.enum(['extra', 'gift']), description: z.string().trim() });
 const expenseSchema = z.object({
-  ...fields, type: z.enum(['Fijo', 'Variable', 'Ocasional']), concept: z.string().trim(),
-  frequency: z.enum(['mensual', 'quincenal', 'semanal']).optional(),
-  paymentMethod: z.enum(['cash', 'credit']).default('cash'), debtId: z.string().optional(), recurringId: z.string().optional(),
+  ...fields, nature: z.enum(['Fijo', 'Variable', 'Ocasional']), concept: z.string().trim(),
+  paymentMethod: z.enum(['cash', 'credit']).default('cash'), debtId: z.string().optional(), recurringRuleId: z.string().optional(),
 });
 
 export async function saveIncome(input: Omit<Income, 'month'>, editing = false): Promise<void> {
   const value = incomeSchema.parse(input);
   const row: Income = { ...input, ...value, month: value.date.slice(0, 7) };
-  await db.transaction('rw', [...accountTables, db.settings], async () => {
+  await db.transaction('rw', [...accountTables, db.categories, db.recurrents, db.settings], async () => {
     const existing = editing ? await db.incomes.get(row.id) : undefined;
     if (editing && !existing) throw new Error('El ingreso ya no existe. Actualiza la lista.');
+    await requireCategory(row.categoryId, 'income', existing?.categoryId);
+    await requireRecurringProvenance(row.recurringRuleId, 'income', existing?.recurringRuleId);
     if (!editing) row.accountId = (await ensureCashAccount(row.date)).id;
     else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) await requireAccount(row.accountId, row.date);
@@ -39,7 +44,7 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false):
 }
 
 export async function removeIncome(id: string): Promise<void> {
-  await db.transaction('rw', [...accountTables, db.settings], async () => {
+  await db.transaction('rw', [...accountTables, db.categories, db.recurrents, db.settings], async () => {
     if ((await readFinancialPolicies()).preventNegativeAccountBalance) {
       const before = await readAccountSnapshot();
       requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: before.incomes.filter(i => i.id !== id) });
@@ -54,16 +59,18 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
     ...input, ...value, month: value.date.slice(0, 7),
     accountId: value.paymentMethod === 'credit' ? undefined : value.accountId,
     debtId: value.paymentMethod === 'credit' ? value.debtId : undefined,
-    frequency: value.type === 'Fijo' ? value.frequency || 'mensual' : undefined,
   };
+  // Do not persist obsolete or injected recurrence behavior on an actual expense.
+  delete (row as unknown as Record<string, unknown>).frequency;
+  delete (row as unknown as Record<string, unknown>).type;
+  delete (row as unknown as Record<string, unknown>).recurringId;
   // Read and write in one transaction so two windows cannot spend the same available funds.
-  await db.transaction('rw', [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts], async () => {
+  await db.transaction('rw', [...accountTables, db.categories, db.recurrents, db.settings, db.plans, db.goal_contributions, db.debts], async () => {
     const existing = await db.expenses.get(row.id);
-    if (row.recurringId) {
-      const duplicate = await db.expenses.filter(e => e.id !== row.id && e.recurringId === row.recurringId && e.date.slice(0, 7) === row.month).first();
-      if (duplicate) throw new Error('Esta suscripción ya tiene un pago registrado en ese mes.');
-    }
+    await requireRecurringProvenance(row.recurringRuleId, 'expense', editing ? existing?.recurringRuleId : undefined);
+    await legacyMonthlySubscriptionGuard(row, editing ? existing : undefined);
     if (editing && !existing) throw new Error('El gasto ya no existe. Actualiza la lista.');
+    await requireCategory(row.categoryId, 'expense', editing ? existing?.categoryId : undefined);
     const policies = await readFinancialPolicies();
     if (row.paymentMethod === 'credit') {
       const card = row.debtId ? await db.debts.get(row.debtId) : undefined;
@@ -89,7 +96,7 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
 }
 
 const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
-const outgoingTables = [...accountTables, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
+const outgoingTables = [...accountTables, db.categories, db.recurrents, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   centsSchema.parse(payment.amount);
   fields.date.parse(payment.date);

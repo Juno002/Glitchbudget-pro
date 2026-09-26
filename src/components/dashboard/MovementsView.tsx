@@ -6,7 +6,7 @@ import { db } from '@/lib/db';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useState, useMemo, useEffect } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { Expense, Income } from '@/lib/db';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,7 @@ type UnifiedItem = {
 };
 
 export default function MovementsView() {
+  const getCategoryInfo = useCategoryResolver();
   const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 
   const accountData = useLiveQuery(() => db.transaction('r', db.accounts, db.account_transfers, async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray() })));
@@ -69,7 +70,7 @@ export default function MovementsView() {
         amount: expenseForMonth(e, filterMonth),
         categoryId: e.categoryId,
         date: e.date,
-        isFixed: e.type === 'Fijo',
+        isFixed: e.nature === 'Fijo',
         raw: e,
       }));
 
@@ -98,7 +99,7 @@ export default function MovementsView() {
   const presentCategories = useMemo(() => {
     const ids = new Set(periodItems.map(i => i.categoryId));
     return Array.from(ids).map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
-  }, [periodItems]);
+  }, [periodItems, getCategoryInfo]);
 
   useEffect(() => {
     if (filterCategory !== 'all' && !presentCategories.some(c => c.id === filterCategory)) setFilterCategory('all');

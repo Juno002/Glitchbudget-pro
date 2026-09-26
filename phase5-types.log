@@ -1,0 +1,5 @@
+
+> glitchbudget-pro@0.1.0 typecheck
+> tsc --noEmit
+
+tests/finance.test.ts(141,45): error TS2339: Property 'nature' does not exist on type 'Income'.

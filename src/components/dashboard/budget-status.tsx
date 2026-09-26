@@ -3,12 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 
 export default function BudgetStatus() {
+  const getCategoryInfo = useCategoryResolver();
   const { getBudgetStatusDetails, currentMonth, loading } = useFinances();
 
   if (loading) {

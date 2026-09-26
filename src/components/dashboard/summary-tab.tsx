@@ -1,7 +1,7 @@
 'use client';
 
 import { useFinances } from "@/contexts/finance-context";
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -109,6 +109,7 @@ function Snapshot({
 
 
 const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, value: number }[], title: string, colors?: string[], delay?: number }) => {
+  const getCategoryInfo = useCategoryResolver();
     const [isClient, setIsClient] = useState(false);
     useEffect(() => { setIsClient(true) }, []);
 

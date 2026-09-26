@@ -5,7 +5,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFinances } from '@/contexts/finance-context';
-import { getCategoryInfo } from '@/lib/categories';
+import { useCategoryResolver } from '@/hooks/use-categories';
 import { formatCurrency } from '@/lib/utils';
 
 interface FlowNode {
@@ -277,6 +277,7 @@ function DesktopSankeyView({
 
 // ─── Main Component ─────────────────────────────────────────
 export default function MonthlyResultChart() {
+  const getCategoryInfo = useCategoryResolver();
   const {
     getTotals,
     getIncomesByCategory,
@@ -356,7 +357,7 @@ export default function MonthlyResultChart() {
     });
 
     return { sources, destinations: dests, links, totalIncome };
-  }, [getTotals, getIncomesByCategory, getExpensesByCategory, currentMonth]);
+  }, [getTotals, getIncomesByCategory, getExpensesByCategory, currentMonth, getCategoryInfo]);
 
   if (!isClient) return null;
 
