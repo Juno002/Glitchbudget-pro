@@ -12,7 +12,7 @@ La distribución es `out/`: HTML, JavaScript, CSS, fuentes e iconos. No necesita
 - `next.config.ts`: export estático, rutas con slash y sin patrones de imágenes remotas.
 - `scripts/generate-precache.mjs`: inventario de todos los archivos exportados, identificador por contenido, manifiesto dentro de out/. Incluye HTML de rutas y recursos de Next.
 - `public/sw.js`: instalación completa antes de reemplazar versión; sirve recursos conocidos desde caché. Rechaza métodos distintos de GET, otros orígenes y recursos desconocidos. No reenvía consultas ni datos de solicitudes. No borra IndexedDB.
-- CSP en layout de producción: recursos locales; sin objetos ni envío de formularios. Inline script/style siguen permitidos por el output de Next y estilos de la UI; no equivale a protección completa frente a XSS.
+- CSP en layout de producción: `connect-src 'none'`, recursos locales; sin objetos ni envío de formularios. Inline script/style siguen permitidos por el output de Next y estilos de la UI; no equivale a protección completa frente a XSS.
 - `scripts/check-local-only.mjs`, package.json y `tests/local-only.test.ts`: control AST de primitivas de red, rutas/API/server actions, URLs remotas y SDK conocidos. Se ejecuta en el `npm run check` de la CI existente. Distingue eventos fetch de invocaciones fetch; ambos casos tienen regresión.
 - README documenta distribución estática. Blueprint y mockup eliminan referencias activas a IA/fuentes externas. El roadmap y la evidencia histórica de Fase 0 se conservan intactos.
 
@@ -26,12 +26,12 @@ La protección de CI es preventiva, no un análisis completo de paquetes transit
 
 ## Verificación (26-09-2026)
 
-- `npm run check`: control local, tipos y lint correctos; **65 pruebas aprobadas, 0 fallidas**.
+- `npm run check`: control local, tipos y lint correctos; **67 pruebas aprobadas, 0 fallidas**.
 - Las pruebas incluyen migraciones Dexie v6/v7, round-trip JSON v4 con las 13 tablas, igualdad de saldos y rechazo atómico de respaldo inválido.
 - `npm run build`: correcto; todas las rutas son estáticas, sin API en el manifiesto de rutas.
-- 48 recursos del precache comprobados físicamente en out/; CSP presente en HTML exportado.
+- 44 recursos del precache comprobados físicamente en out/; CSP presente en HTML exportado.
 - Pruebas del worker sin función fetch disponible: rechaza origen externo, POST y recurso desconocido; resuelve navegación y JavaScript en caché sin reenviar parámetros.
-- Prueba manual en origen aislado 9012: cargar build, detener servidor, recargar, registrar ingreso ficticio de RD$ 1,000.00 y recargar. Cuentas e ingresos conservan RD$ 1,000.00. Abrir directamente /transactions/ sin servidor muestra el registro. Conexión al servidor confirmada como rechazada; servidor detenido y pestaña cerrada. [Evidencia](phase-1-offline.png).
+- Prueba manual del cierre inicial, anterior al endurecimiento final de CSP, en origen aislado 9012: cargar build, detener servidor, recargar, registrar ingreso ficticio de RD$ 1,000.00 y recargar. Cuentas e ingresos conservan RD$ 1,000.00. Abrir directamente /transactions/ sin servidor muestra el registro. Conexión al servidor confirmada como rechazada; servidor detenido y pestaña cerrada. [Evidencia](phase-1-offline.png).
 
 ## Datos y arquitectura
 
@@ -39,6 +39,14 @@ Dexie permanece en v8 y JSON en v4. No hay migración nueva ni cambios financier
 
 Para desplegar: publicar out/ completo y de forma atómica bajo HTTPS en la raíz del mismo origen; revalidar HTML, sw.js y precache-manifest.js. La nueva versión espera al cierre de las pestañas anteriores. Mantener el mismo origen conserva el acceso a IndexedDB; cambiar dominio/puerto exige exportar/importar. No se ejecutó despliegue ni prueba de actualización en un teléfono físico.
 
-La separación del dominio financiero sigue pendiente de Fase 2. La ruta heredada /diag/restore contiene un importador alternativo y merece revisión en la fase de respaldos; no se usó ni modificó aquí. No ampliar este cierre a una certificación general de seguridad o calidad comercial.
+La separación del dominio financiero sigue pendiente de Fase 2. La ruta heredada /diag/restore fue eliminada en el cierre corregido: no queda ese segundo importador destructivo en código ni en la exportación. No ampliar este cierre a una certificación general de seguridad o calidad comercial.
 
-Fase 1 completada. Detenerse para revisión antes de iniciar Fase 2.
+## Cierre corregido solicitado
+
+- Se conservaron y verificaron los dos cambios ya presentes al iniciar esta revisión: eliminación de src/app/diag/restore/page.tsx y connect-src 'none' en el layout.
+- Regresiones: ausencia del directorio del importador, CSP estricta y rechazo de políticas relajadas o duplicadas. Se prueba además que el verificador detecte la reintroducción de una ruta diagnóstica y HTML con política debilitada.
+- scripts/check-static-output.mjs se ejecuta al terminar cada build (incluida CI): exige connect-src exclusivamente 'none' en todos los HTML exportados, ausencia de out/diag y ausencia de /diag/ en el precache.
+- Check y build completos repetidos y aprobados. Backups y migraciones siguen cubiertos por la suite. Sin cambios de esquema ni datos.
+- La captura offline anterior se conserva como evidencia histórica; en esta corrección se verificaron automáticamente el worker y el output, sin repetir la prueba manual del navegador.
+
+Fase 1 cerrada con los ajustes aprobados. Fase 2 no iniciada; requiere autorización posterior.

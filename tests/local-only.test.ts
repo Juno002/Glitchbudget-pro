@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync, mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import vm from 'node:vm';
 // @ts-ignore Node tooling module intentionally uses JavaScript.
 import { auditSource, auditProject } from '../scripts/check-local-only.mjs';
@@ -33,4 +33,31 @@ test('production worker never forwards operations, queries or unknown requests t
   await request('https://local.test/transactions/', 'GET', 'navigate');
   await request('https://local.test/_next/app.js?x=123');
   assert.deepEqual(cached, ['/index.html', '/transactions/index.html', '/_next/app.js']);
+});
+
+// @ts-ignore Node tooling module intentionally uses JavaScript.
+import { checkConnectPolicy, checkStaticOutput } from '../scripts/check-static-output.mjs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+
+test('production policy prohibits connections and diagnostic importer stays removed', () => {
+  assert.equal(existsSync('src/app/diag/restore'), false);
+  const layout = readFileSync('src/app/layout.tsx', 'utf8');
+  const policy = layout.match(/httpEquiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
+  assert.ok(policy);
+  assert.equal(checkConnectPolicy(policy), true);
+  for (const weakened of ["default-src 'self'", "connect-src 'self'", "connect-src 'none' https://example.com", "connect-src *", "connect-src 'none'; connect-src 'self'"]) assert.equal(checkConnectPolicy(weakened), false);
+});
+
+test('export guard rejects restored diagnostic route and weakened HTML policy', () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'glitch-static-test-'));
+  try {
+    writeFileSync(path.join(root, 'index.html'), `<meta http-equiv="Content-Security-Policy" content="connect-src &#x27;none&#x27;"/>`);
+    writeFileSync(path.join(root, 'precache-manifest.js'), 'self.__PRECACHE = {urls: []}');
+    assert.deepEqual(checkStaticOutput(root), []);
+    mkdirSync(path.join(root, 'diag'));
+    assert.ok(checkStaticOutput(root).some((error: string) => error.includes('Diagnostic')));
+    writeFileSync(path.join(root, 'index.html'), `<meta http-equiv="Content-Security-Policy" content="connect-src 'self'"/>`);
+    assert.ok(checkStaticOutput(root).some((error: string) => error.includes('connect-src')));
+  } finally { rmSync(root, {recursive: true, force: true}); } // Only this newly created test directory.
 });
