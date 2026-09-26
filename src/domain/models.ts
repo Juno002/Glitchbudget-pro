@@ -7,6 +7,8 @@ export interface Settings {
   preventNegativeAccountBalance?: boolean;
   budgetOverspendingBehavior?: 'allow' | 'warn' | 'block';
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
+  /** Day 1..31 on which the financial month starts. Default: 1. */
+  periodStartDay?: number;
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
   expenseCategories?: string[];
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
