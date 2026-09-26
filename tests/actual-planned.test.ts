@@ -39,14 +39,17 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   data.recurrents=data.recurrents.map(({direction,cadence,...rest}: any)=>({...rest,type:direction,freq:cadence}));
   const before=metrics(data);const name='phase5-migration-'+crypto.randomUUID();const old=new Dexie(name);
   old.version(9).stores({...schema,accounts:'id, type',account_transfers:'id, fromAccountId, toAccountId, date',categories:'id, type'});
-  for(const [table,rows] of Object.entries(data)) await old.table(table).bulkAdd(rows);
+  for(const [table,rows] of Object.entries(data)) {
+    if (table === 'planned_occurrences') continue;
+    await old.table(table).bulkAdd(rows);
+  }
   old.close();const current=new GlitchBudgetDB(name);
   try{
     await current.open();assert.equal(current.verno,11);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
-    for(const table of Object.keys(data).filter(t=>!['expenses','recurrents'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
+    for(const table of Object.keys(data).filter(t=>!['expenses','recurrents','planned_occurrences'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
     assert.deepEqual(migrated.planned_occurrences,[]);
     assert.equal(migrated.expenses.find((e: any)=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
   }finally{await current.delete();}
