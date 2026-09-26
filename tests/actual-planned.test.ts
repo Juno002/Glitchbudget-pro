@@ -42,11 +42,12 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   for(const [table,rows] of Object.entries(data)) await old.table(table).bulkAdd(rows);
   old.close();const current=new GlitchBudgetDB(name);
   try{
-    await current.open();assert.equal(current.verno,10);const migrated=await snapshot(current);
+    await current.open();assert.equal(current.verno,11);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
     for(const table of Object.keys(data).filter(t=>!['expenses','recurrents'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
+    assert.deepEqual(migrated.planned_occurrences,[]);
     assert.equal(migrated.expenses.find((e: any)=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
   }finally{await current.delete();}
 });
@@ -110,9 +111,9 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
   assert.equal(metrics(await snapshot()).october.spending,0);
 });
 
-test('v6 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
+test('v7 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
   const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
-  assert.equal(dump.v,6);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
+  assert.equal(dump.v,7);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
   await importDataJSON(JSON.stringify(dump));assert.deepEqual(clean(await snapshot()),clean(before));
   for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(clean(await snapshot()),clean(before));}
 });
