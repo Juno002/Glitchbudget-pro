@@ -1,0 +1,2403 @@
+
+
+# GLITCHBUDGET PRO — ROADMAP 
+
+## Instrucción inicial para Codex:
+
+> **Do not implement this roadmap in one pass. Work strictly phase by phase. Before modifying a phase, inspect the current implementation and its tests. Preserve all existing user data through explicit Dexie migrations. Never reset the database as a migration strategy. Do not use the README as the functional specification. Do not introduce a backend, cloud synchronization, remote AI, analytics, advertising, remote financial APIs, or any mechanism that sends user financial data off-device. Prefer extending or migrating the working system over rewriting it. At the end of every phase, run all checks, verify backup compatibility and offline behavior, report architectural concerns, and STOP for review before beginning the next phase.**
+
+
+## Objetivo del producto
+
+GlitchBudget Pro es una aplicación financiera **personal, local-first y offline-capable**.
+
+La aplicación debe permitir administrar cuentas, movimientos, tarjetas, presupuestos, planificación, metas, inversiones y análisis **sin transmitir información financiera fuera del dispositivo**.
+
+No implementar:
+
+- cuentas de usuario de GlitchBudget;
+- backend de aplicación;
+- sincronización bancaria;
+- sincronización cloud;
+- IA remota;
+- telemetría financiera;
+- publicidad;
+- servicios de terceros que reciban movimientos, saldos, categorías, metas o inversiones;
+- cotizaciones o tipos de cambio obtenidos automáticamente desde Internet;
+- Web Push dependiente de servidor;
+- colaboración o cuentas compartidas.
+
+La PWA puede descargar/actualizar sus **archivos estáticos** desde su origen de distribución. Eso no autoriza a transmitir datos financieros.
+
+**El código actual de `main` es la fuente de verdad. El README está desactualizado y no debe utilizarse como especificación.**
+
+---
+
+# Arquitectura objetivo
+
+Antes de seguir añadiendo funciones, el código debe evolucionar hacia cuatro capas:
+
+```text
+UI
+ ↓
+Application services / commands
+ ↓
+Domain calculations / selectors
+ ↓
+Dexie / local persistence
+```
+
+Reglas:
+
+```text
+UI ≠ reglas financieras
+UI ≠ acceso directo a Dexie
+
+Dexie ≠ cálculos financieros
+
+Domain ≠ React
+Domain ≠ navegador
+Domain ≠ red
+```
+
+Los cálculos de saldo, presupuesto, deuda, cash flow, metas e inversiones deben poder probarse como funciones puras.
+
+No hacer un rewrite completo. Migrar gradualmente el código existente hacia esta estructura.
+
+---
+
+# Invariantes financieros
+
+Estas reglas deben quedar documentadas y probadas **antes de añadir nuevas funciones**.
+
+```text
+Ingreso
+→ aumenta una cuenta
+→ cuenta como ingreso
+
+Gasto con efectivo/banco
+→ reduce una cuenta
+→ cuenta como gasto
+
+Compra con tarjeta
+→ aumenta gasto
+→ aumenta pasivo
+→ NO reduce efectivo todavía
+
+Pago de tarjeta
+→ reduce una cuenta
+→ reduce pasivo
+→ NO vuelve a contar como gasto
+
+Transferencia
+→ reduce una cuenta
+→ aumenta otra
+→ NO cambia patrimonio
+→ NO es ingreso
+→ NO es gasto
+
+Presupuesto
+→ planificación
+→ NO mueve dinero
+
+Pago planificado
+→ planificación
+→ NO mueve dinero hasta confirmarse
+
+Meta
+→ seguimiento/reserva
+→ NO altera patrimonio por sí sola
+
+Inversión financiada desde una cuenta
+→ mueve patrimonio líquido a patrimonio invertido
+→ NO es gasto
+
+Rendimiento proyectado
+→ estimación
+→ NO se convierte automáticamente en patrimonio real
+```
+
+Además, todos los importes monetarios almacenados deben seguir usando **enteros en unidades mínimas** —centavos actualmente— y nunca `float` para dinero almacenado.
+
+---
+
+# FASE 0 — Congelar una línea base segura
+
+**No empezar ninguna feature nueva todavía.**
+
+1. Crear un tag/commit que represente el estado estable previo al roadmap.
+2. Ejecutar y dejar verdes:
+   - typecheck;
+   - lint;
+   - tests;
+   - build.
+3. Crear fixtures de bases antiguas para probar migraciones.
+4. Crear como mínimo un fixture compatible con el backup JSON v4 actual.
+5. Añadir pruebas de round-trip:
+
+```text
+export
+→ borrar DB de prueba
+→ import
+→ mismos datos
+→ mismos saldos derivados
+```
+
+6. Documentar explícitamente las invariantes anteriores.
+
+### Gate 0
+
+No pasar de fase hasta poder demostrar:
+
+```text
+npm run check ✅
+build ✅
+backup v4 → restore ✅
+balances before == balances after ✅
+```
+
+---
+
+# FASE 1 — Eliminar completamente IA y runtime remoto
+
+Actualmente siguen existiendo:
+
+```text
+src/app/api/ai-insight
+src/app/api/ai-insight-monthly
+src/app/api/ai-insight-transaction
+```
+
+y aún quedan estados como `insight` / `isFetchingInsight` en `TransactionModal.tsx`, aunque parte de la UI de IA esté desactivada.
+
+Eliminar todo.
+
+También eliminar:
+
+- variables de entorno asociadas;
+- llamadas;
+- código muerto;
+- prompts;
+- documentación;
+- dependencias que queden sin uso.
+
+### Convertir la aplicación en frontend estático
+
+Una vez eliminadas las rutas API:
+
+- estudiar `output: 'export'` de Next;
+- adaptar el sistema PWA/precache al output estático;
+- eliminar dependencia de un runtime Next de servidor;
+- sustituir App Hosting backend por simple distribución de archivos estáticos cuando corresponda.
+
+La aplicación instalada debe seguir funcionando sin conexión.
+
+### Auditoría de red
+
+Revisar todo el proyecto buscando:
+
+```text
+fetch
+XMLHttpRequest
+WebSocket
+EventSource
+sendBeacon
+remote URLs
+analytics
+SDKs externos
+```
+
+Eliminar usos innecesarios.
+
+Eliminar también los `remotePatterns` de imágenes externas de `next.config.ts` si realmente no se utilizan.
+
+Crear un check de CI que impida introducir accidentalmente endpoints/API/analytics en el futuro.
+
+### Gate 1
+
+Durante operaciones financieras normales:
+
+```text
+Create transaction
+Edit transaction
+Delete transaction
+Create account
+Transfer
+Create budget
+Create goal
+Backup
+Reports
+```
+
+no debe producirse ninguna transmisión de datos del usuario.
+
+---
+
+# FASE 2 — Crear el núcleo financiero canónico
+
+Esta es probablemente **la fase más importante de todo el roadmap**.
+
+Actualmente hay cálculos repartidos entre:
+
+```text
+finance-context.tsx
+finance-calculations.ts
+accounts.ts
+transaction-service.ts
+budget-rollover.ts
+varios componentes
+```
+
+Crear un dominio financiero central.
+
+Por ejemplo:
+
+```text
+src/domain/
+  money.ts
+  dates.ts
+  ledger.ts
+  accounts.ts
+  liabilities.ts
+  periods.ts
+  budgets.ts
+  goals.ts
+  recurrence.ts
+  investments.ts
+  reports.ts
+```
+
+No es obligatorio usar exactamente esos nombres, pero sí separar responsabilidades.
+
+## 2.1 Definir métricas distintas
+
+No utilizar palabras ambiguas como simplemente `balance`.
+
+Definir al menos:
+
+### Liquid position
+
+```text
+cash + bank accounts
+```
+
+### Net worth
+
+```text
+assets - liabilities
+```
+
+### Spending
+
+Compras/gastos realizados, incluyendo compras a crédito.
+
+### Cash flow
+
+```text
+cash income
+- cash expenses
+- debt payments
+```
+
+Las transferencias quedan fuera.
+
+### Available to plan
+
+Concepto de planificación:
+
+```text
+income/capacity
+- commitments
+- reserved budget
+- goal allocations
+```
+
+No confundirlo con saldo bancario.
+
+Esto evitará que Home, Reports y Accounts terminen mostrando números diferentes con el mismo nombre.
+
+---
+
+# FASE 3 — Corregir el ledger actual antes de ampliarlo
+
+## 3.1 Nuevos ingresos
+
+Actualmente `saveIncome()` asigna automáticamente una nueva entrada a Efectivo.
+
+Cambiar esto.
+
+Si el usuario selecciona:
+
+```text
+Qik
+APAP
+Efectivo
+```
+
+el ingreso debe afectar esa cuenta.
+
+Efectivo solo debe ser el default, no una obligación.
+
+## 3.2 Eliminaciones
+
+Actualmente la eliminación de ingresos pasa por el servicio financiero, pero `deleteExpense` puede borrar directamente desde `finance-context.tsx`.
+
+Toda modificación financiera debe pasar por comandos transaccionales comunes:
+
+```text
+create
+update
+delete
+```
+
+para que las mismas invariantes se cumplan siempre.
+
+## 3.3 Strict Mode
+
+Actualmente mezcla dos problemas:
+
+```text
+¿puedo dejar una cuenta negativa?
+```
+
+y:
+
+```text
+¿estoy superando lo que había planificado?
+```
+
+Separarlos.
+
+Por ejemplo:
+
+```text
+preventNegativeAccountBalance
+budgetOverspendingBehavior
+```
+
+El segundo podría ser:
+
+```text
+allow
+warn
+block
+```
+
+No utilizar una sola bandera para ambos conceptos.
+
+## 3.4 Integridad histórica
+
+Las entidades utilizadas por transacciones no deberían desaparecer destructivamente.
+
+Preferir:
+
+```text
+Account → archive
+Category → archive
+Credit card → close
+Investment → close
+Recurring rule → deactivate
+```
+
+en lugar de borrar referencias históricas.
+
+---
+
+# FASE 4 — Normalizar categorías antes de Rules/Reports/Templates
+
+Actualmente las categorías predeterminadas están en `categories.ts`, mientras la configuración mantiene arrays de strings y custom icons.
+
+Eso funcionó bien para empezar, pero se volverá frágil con:
+
+- renombrado;
+- categorías archivadas;
+- templates;
+- filtros;
+- reglas;
+- análisis históricos.
+
+Migrar a categorías con identidad estable:
+
+```ts
+Category {
+  id
+  name
+  type: income | expense | both
+  icon
+  archived
+}
+```
+
+Un rename cambia `name`, **no `id`**.
+
+Migrar todas las referencias actuales preservando los IDs existentes.
+
+Los defaults pueden seguir creándose automáticamente.
+
+### Gate 4
+
+Renombrar una categoría no debe modificar ni perder la categorización histórica.
+
+---
+
+# FASE 5 — Resolver definitivamente Actual vs Planned
+
+Actualmente hay una superposición importante.
+
+`Expense` puede ser `Fijo` y tener `frequency`, mientras existe además `Recurring`.
+
+Eso debe desaparecer antes de mejorar Planned Payments.
+
+Una transacción real representa **algo que ocurrió**.
+
+Nunca debe representar implícitamente:
+
+> “y repite este gasto todos los meses para siempre”.
+
+Por tanto:
+
+```text
+Expense
+= hecho real
+
+RecurringRule
+= intención futura
+```
+
+`Fijo / Variable / Ocasional` puede conservarse como **clasificación del gasto**, pero `frequency` no debe hacer aparecer gastos futuros dentro del ledger real.
+
+Eliminar gradualmente `expenseForMonth()` como mecanismo que replica gastos fijos hacia meses posteriores.
+
+---
+
+# FASE 6 — Construir un motor de períodos antes de Budgets 2.0
+
+Actualmente muchos sitios utilizan:
+
+```ts
+date.slice(0, 7)
+```
+
+y `month: YYYY-MM`.
+
+Eso funciona únicamente mientras todo significa “mes calendario”.
+
+Antes de permitir:
+
+```text
+Weekly
+Monthly
+Yearly
+One-Time
+Financial month starting on day 25
+```
+
+crear un motor común:
+
+```ts
+DateRange {
+  start
+  end
+}
+```
+
+con funciones como:
+
+```text
+periodContaining(date, settings)
+previousComparablePeriod(period)
+nextPeriod(period)
+contains(period, date)
+```
+
+Los reportes y presupuestos nuevos deben trabajar con rangos de fecha, no con substring de `YYYY-MM`.
+
+### Importante
+
+`Income.month` y `Expense.month` son derivables desde `date`.
+
+No tienen que eliminarse inmediatamente del DB si complicaría la migración, pero **deben dejar de ser fuente de verdad**.
+
+Lo mismo aplica a `Period` si deja de aportar información útil.
+
+### Gate 6
+
+Cambiar el inicio del período de:
+
+```text
+1
+```
+
+a:
+
+```text
+25
+```
+
+debe producir correctamente:
+
+```text
+25 agosto → 24 septiembre
+```
+
+en todos los cálculos que utilicen el nuevo motor.
+
+---
+
+# FASE 7 — Motor real de Planned Payments
+
+Reemplazar la actual lógica de “una suscripción ya registrada en este mes” por ocurrencias reales.
+
+Actualmente esa regla mensual también impediría manejar correctamente recurrencias semanales/quincenales.
+
+Modelo conceptual:
+
+```ts
+RecurringRule {
+  id
+  direction
+  title
+  amount
+  categoryId
+  defaultAccountId?
+  cadence
+  startDate
+  endDate?
+  active
+  ...
+}
+```
+
+y:
+
+```ts
+PlannedOccurrence {
+  id
+  ruleId
+  scheduledDate
+  status: pending | confirmed | skipped
+  transactionId?
+}
+```
+
+La combinación:
+
+```text
+ruleId + scheduledDate
+```
+
+debe ser única.
+
+Así:
+
+```text
+Netflix · Sep 28 · Pending
+```
+
+puede pasar a:
+
+```text
+Netflix · Sep 28 · Confirmed → Expense abc123
+```
+
+Confirmarlo dos veces debe ser imposible.
+
+### Weekly / Biweekly
+
+Debe basarse en intervalos reales desde la fecha de inicio, no:
+
+```text
+4.33 por mes
+```
+
+### Día 29–31
+
+Definir una sola política.
+
+Recomendación:
+
+> si el mes no contiene ese día, utilizar su último día válido.
+
+Documentarlo y probarlo.
+
+### Upcoming
+
+Generar localmente:
+
+```text
+Today
+Tomorrow
+Next 7 days
+Later
+```
+
+No necesita servidor.
+
+---
+
+# FASE 7.5 — UX Architecture & Design System
+
+Esta fase ocurre **después del motor de recurrencias/Planned Payments y antes de Quick Add 2.0**.
+
+El objetivo no es rediseñar visualmente toda la aplicación todavía. Es definir una arquitectura de interacción y un sistema visual estable para que las siguientes fases no creen pantallas incompatibles entre sí.
+
+No implementar features nuevas en esta fase salvo los cambios mínimos necesarios para establecer los patrones.
+
+---
+
+## 7.5.1 — Definir la arquitectura de información
+
+Mantener cuatro áreas principales:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+```
+
+No añadir nuevas pestañas principales para:
+
+```text
+Cuentas
+Tarjetas
+Metas
+Inversiones
+Suscripciones
+Ajustes
+```
+
+Esas funciones deben vivir dentro de las cuatro áreas principales o en navegación secundaria.
+
+### Responsabilidad de cada área
+
+**Resumen**
+
+Debe responder:
+
+```text
+¿Cuánto tengo?
+¿Cuánto debo?
+¿Cuánto puedo gastar?
+¿Qué viene próximamente?
+¿Qué requiere atención?
+```
+
+No debe convertirse en una colección de reportes.
+
+**Movimientos**
+
+Debe ser la fuente principal para consultar actividad financiera real:
+
+```text
+Ingresos
+Gastos
+Transferencias
+Pagos de deuda
+```
+
+y posteriormente:
+
+```text
+búsqueda
+filtros
+edición
+agrupación por fecha
+```
+
+**Plan**
+
+Contendrá:
+
+```text
+Presupuestos
+Metas
+Planificados
+```
+
+No mezclar movimientos realizados con planificación.
+
+**Reportes**
+
+Contendrá análisis histórico y comparaciones:
+
+```text
+Spending
+Cash flow
+Net worth
+Comparisons
+Trends
+```
+
+---
+
+# 7.5.2 — Unificar navegación móvil y escritorio
+
+Actualmente existen diferencias de nomenclatura como:
+
+```text
+Dashboard
+vs
+Resumen
+```
+
+Eliminar esas inconsistencias.
+
+Usar las mismas etiquetas conceptuales en todas las plataformas:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+```
+
+Los iconos pueden adaptarse, pero los nombres no deben cambiar según viewport.
+
+### Mobile
+
+Mantener Bottom Navigation.
+
+Máximo:
+
+```text
+4 destinos
+```
+
+No añadir un quinto destino únicamente porque aparezca una feature nueva.
+
+### Desktop
+
+Las mismas cuatro áreas pueden seguir como tabs o navegación equivalente.
+
+La navegación debe conservar el estado activo de forma predecible.
+
+---
+
+# 7.5.3 — Simplificar el Header
+
+El header actual acumula:
+
+```text
+logo
+nuevo movimiento
+selector de período
+este mes
+logros
+ajustes
+```
+
+En móvil resulta demasiado denso.
+
+Rediseñar responsabilidades.
+
+### Mobile
+
+El header debería priorizar aproximadamente:
+
+```text
+GlitchBudget
+Período/contexto si es relevante
+Ajustes
+```
+
+La acción **Nuevo movimiento** debe salir del header y convertirse en una acción principal persistente.
+
+Preferencia:
+
+```text
+Floating Action Button
+```
+
+o equivalente claramente accesible.
+
+### Desktop
+
+Puede existir una acción visible de Nuevo Movimiento sin saturar el header.
+
+---
+
+# 7.5.4 — Acción principal global: Nuevo Movimiento
+
+Crear un patrón único para iniciar:
+
+```text
+Gasto
+Ingreso
+Transferencia
+```
+
+Debe ser accesible desde cualquier sección principal.
+
+La UX no debe obligar al usuario a entrar primero en Movimientos.
+
+La acción debe abrir siempre el mismo compositor.
+
+---
+
+# 7.5.5 — Jerarquía definitiva de Resumen
+
+Resumen no debe intentar mostrar todo.
+
+Orden recomendado:
+
+```text
+1. Posición financiera
+2. Presupuesto disponible
+3. Próximos pagos
+4. Metas / inversiones relevantes
+5. Movimientos recientes
+```
+
+### Posición financiera
+
+Debe diferenciar visualmente:
+
+```text
+Disponible líquido
+Deuda
+Patrimonio neto
+```
+
+No presentar crédito disponible como dinero propio.
+
+### Budget
+
+Debe priorizar:
+
+```text
+Remaining
+```
+
+sobre gráficos decorativos.
+
+Ejemplo:
+
+```text
+Te quedan RD$ 18,400
+de RD$ 30,000 presupuestados
+```
+
+### Upcoming
+
+Mostrar únicamente eventos próximos relevantes.
+
+Ejemplo:
+
+```text
+Internet
+Mañana
+RD$ 1,500
+```
+
+### Goals / Investments
+
+Mostrar solo elementos que aporten información accionable.
+
+Ejemplo:
+
+```text
+Meta vehículo
+Necesitas RD$ 30,000 este mes
+```
+
+o:
+
+```text
+Certificado
+Vence en 74 días
+```
+
+### Recent activity
+
+Mostrar pocos movimientos recientes con acceso a “Ver todos”.
+
+---
+
+# 7.5.6 — Mover gráficos analíticos fuera de Home
+
+Los donuts actuales de:
+
+```text
+Gastos por categoría
+Ingresos por categoría
+```
+
+deben migrar progresivamente a Reportes.
+
+Home debe ser principalmente:
+
+```text
+status + action
+```
+
+Reportes debe ser:
+
+```text
+analysis + exploration
+```
+
+Evitar duplicar los mismos gráficos en ambas áreas.
+
+---
+
+# 7.5.7 — Patrón de Detail Screen
+
+Definir un patrón común antes de Accounts, Investments, Goals, etc.
+
+Una pantalla de detalle debe tener:
+
+```text
+Title
+Primary metric
+Secondary status
+Relevant actions
+History/detail
+```
+
+Ejemplo cuenta:
+
+```text
+Qik
+
+RD$ 24,350
++RD$ 2,100 this period
+
+[Transferir]
+[Conciliar]
+
+Movimientos recientes
+```
+
+Ejemplo inversión:
+
+```text
+Certificado APAP
+
+RD$ 50,000 principal
+RD$ 52,XXX estimated maturity
+
+[Registrar actualización]
+[Ver detalles]
+
+Vence en 74 días
+```
+
+No crear una UX completamente distinta para cada entidad.
+
+---
+
+# 7.5.8 — Separar View Mode de Management Mode
+
+No mezclar en la misma superficie principal:
+
+```text
+ver saldo
+editar saldo inicial
+crear cuenta
+conciliar
+eliminar
+transferir
+```
+
+Las acciones frecuentes deben estar visibles.
+
+Las acciones administrativas deben aparecer como:
+
+```text
+Manage
+Edit
+More
+Settings
+```
+
+Ejemplo:
+
+```text
+Cuenta
+ ├─ Ver saldo
+ ├─ Ver movimientos
+ ├─ Transferir
+ └─ Más
+     ├─ Conciliar
+     ├─ Editar nombre
+     ├─ Ajustar saldo inicial
+     └─ Archivar
+```
+
+---
+
+# 7.5.9 — Estructura de Plan
+
+Dentro de Plan usar exactamente tres conceptos:
+
+```text
+Presupuestos
+Metas
+Planificados
+```
+
+Eliminar “Suscripciones” como concepto principal de navegación una vez que Planned Payments sea más general.
+
+Una suscripción es solamente un tipo de planificación recurrente.
+
+---
+
+# 7.5.10 — Estados visuales para Planned Payments
+
+Definir componentes reutilizables para:
+
+```text
+Pending
+Confirmed
+Skipped
+Overdue
+```
+
+Cada estado debe tener:
+
+- texto;
+- icono o tratamiento visual;
+- no depender exclusivamente del color.
+
+Ejemplo:
+
+```text
+Netflix
+RD$ 450
+Sep 28
+
+Pending
+
+[Confirmar]
+[Omitir]
+```
+
+Después:
+
+```text
+Confirmed
+Sep 28
+→ Ver movimiento
+```
+
+---
+
+# 7.5.11 — Quick Add: Progressive Disclosure
+
+Definir el patrón antes de implementar Quick Add 2.0.
+
+Nivel principal:
+
+```text
+Monto
+
+Gasto | Ingreso | Transferencia
+
+Cuenta
+
+Categoría
+
+Guardar
+```
+
+Segundo nivel:
+
+```text
+Más detalles
+```
+
+puede contener:
+
+```text
+Fecha
+Nota
+Naturaleza
+Método de pago
+Tarjeta
+Recurrencia/template
+```
+
+No mostrar campos que no aplican.
+
+Ejemplo:
+
+```text
+Transferencia
+```
+
+no debe mostrar categoría de gasto.
+
+```text
+Compra con tarjeta
+```
+
+no debe pedir cuenta bancaria de origen.
+
+---
+
+# 7.5.12 — Sistema de métricas
+
+Crear componentes reutilizables para datos financieros.
+
+Por ejemplo:
+
+```text
+MetricCard
+MoneyValue
+DeltaValue
+ProgressMetric
+StatusBadge
+```
+
+Reglas:
+
+- números monetarios con cifras tabulares;
+- formato consistente de moneda;
+- signos `+` / `−` cuando representen variación;
+- no depender solo de verde/rojo;
+- etiquetas explícitas.
+
+Evitar que cada pantalla construya su propia tarjeta financiera.
+
+---
+
+# 7.5.13 — Vocabulario financiero consistente
+
+Crear un glosario UX.
+
+No utilizar dos palabras diferentes para el mismo concepto.
+
+Ejemplo recomendado:
+
+```text
+Saldo
+Disponible
+Gastado
+Restante
+Ingreso
+Gasto
+Transferencia
+Deuda
+Patrimonio neto
+Planificado
+Confirmado
+Meta
+Aporte
+Inversión
+```
+
+Evitar ambigüedades como usar:
+
+```text
+Balance
+Disponible
+Margen
+```
+
+indistintamente para métricas diferentes.
+
+El nombre mostrado debe corresponder exactamente con la definición del domain layer.
+
+---
+
+# 7.5.14 — Settings deja de ser Dropdown
+
+El engranaje debe abrir una pantalla/panel de Ajustes estructurado.
+
+Secciones:
+
+```text
+General
+Finanzas
+Categorías
+Privacidad y seguridad
+Datos y backups
+Apariencia
+Acerca de
+```
+
+### General
+
+```text
+Moneda base
+Período inicial
+Preferencias generales
+```
+
+### Finanzas
+
+```text
+Ingreso previsto
+Rollover
+Evitar saldo negativo
+Comportamiento al exceder presupuesto
+```
+
+### Privacidad y seguridad
+
+```text
+Ocultar importes
+Bloqueo de aplicación
+Auto-lock
+```
+
+### Datos y backups
+
+```text
+Exportar
+Importar
+Backups
+Borrar datos
+```
+
+No esconder acciones destructivas junto a preferencias cotidianas sin separación.
+
+---
+
+# 7.5.15 — Hide Balances global
+
+Añadir al sistema de diseño un estado:
+
+```text
+balancesHidden
+```
+
+Cuando esté activo:
+
+```text
+RD$ 24,350
+```
+
+se convierte en algo como:
+
+```text
+••••••
+```
+
+Debe aplicarse consistentemente a:
+
+```text
+Home
+Accounts
+Cards
+Goals
+Investments
+Reports
+```
+
+No ocultar necesariamente porcentajes si no revelan importe sensible, pero definir comportamiento consistente.
+
+Debe ser una acción rápida y reversible.
+
+---
+
+# 7.5.16 — Gamificación
+
+Mantenerla, pero como capa secundaria.
+
+Eliminar referencias antiguas como:
+
+```text
+Desbloqueo I.A.
+```
+
+Patrón recomendado:
+
+```text
+achievement unlocked
+→ toast discreto
+→ disponible después en Logros
+```
+
+No insertar banners persistentes que empujen hacia abajo la información financiera principal.
+
+Los logros no deben bloquear ni interrumpir una operación.
+
+---
+
+# 7.5.17 — Empty states
+
+Cada módulo debe tener un empty state útil.
+
+No solamente:
+
+```text
+No hay datos
+```
+
+Sino:
+
+```text
+Aún no tienes metas
+
+Crea una meta para calcular cuánto necesitas ahorrar cada mes.
+
+[Crear meta]
+```
+
+Lo mismo para:
+
+```text
+cuentas
+presupuestos
+planificados
+inversiones
+reportes sin datos
+```
+
+---
+
+# 7.5.18 — Loading y feedback
+
+Definir comportamientos comunes:
+
+### Loading
+
+Preferir skeleton cuando la estructura ya se conoce.
+
+### Save
+
+Evitar múltiples submits.
+
+Estados:
+
+```text
+Guardar
+Guardando…
+Guardado
+```
+
+### Success
+
+Usar toast o feedback inline breve.
+
+### Error
+
+Debe decir:
+
+```text
+qué ocurrió
+qué puede hacer el usuario
+```
+
+No mostrar errores técnicos de Dexie directamente.
+
+---
+
+# 7.5.19 — Acciones destructivas
+
+Confirmación obligatoria para:
+
+```text
+Eliminar movimiento
+Eliminar todos los datos
+Eliminar/archivar entidades con impacto histórico
+Restaurar backup que sobrescriba datos
+```
+
+No confirmar acciones reversibles o de bajo impacto innecesariamente.
+
+Siempre explicar el efecto.
+
+Ejemplo:
+
+```text
+Eliminar esta transferencia actualizará ambas cuentas.
+```
+
+---
+
+# 7.5.20 — Accesibilidad
+
+Mínimos obligatorios:
+
+- target táctil suficiente en móvil;
+- labels accesibles;
+- navegación con teclado en desktop;
+- focus visible;
+- `aria-label` cuando el icono no tenga texto;
+- contraste correcto;
+- no comunicar estados solamente mediante color;
+- respetar `prefers-reduced-motion`;
+- cantidades legibles con tamaños de fuente razonables;
+- dialogs con foco gestionado correctamente.
+
+---
+
+# 7.5.21 — Responsive rules
+
+Definir breakpoints y comportamiento explícito.
+
+### Mobile
+
+Priorizar una sola columna.
+
+Evitar tablas horizontales para información cotidiana.
+
+### Tablet/Desktop
+
+Permitir:
+
+```text
+summary cards side-by-side
+charts in grid
+master/detail where useful
+```
+
+No simplemente escalar componentes móviles.
+
+---
+
+# 7.5.22 — Motion
+
+Mantener el carácter visual de GlitchBudget, pero reducir animación funcionalmente innecesaria.
+
+Animaciones permitidas principalmente para:
+
+```text
+open/close
+state transition
+successful action
+achievement
+chart transition
+```
+
+Evitar animar continuamente métricas financieras o elementos decorativos.
+
+---
+
+# 7.5.23 — Temas
+
+Mantener:
+
+```text
+Neón Oscuro
+Claro
+Minimalista
+```
+
+pero todos deben utilizar exactamente la misma estructura UX.
+
+No permitir que un tema altere:
+
+```text
+jerarquía
+navegación
+orden de información
+funcionalidad
+```
+
+Solo presentación.
+
+---
+
+# 7.5.24 — Design tokens
+
+Centralizar:
+
+```text
+spacing
+radius
+surface hierarchy
+border strength
+typography scale
+money typography
+status semantics
+animation duration
+```
+
+Evitar nuevos valores arbitrarios por componente.
+
+Definir al menos niveles:
+
+```text
+page
+section
+card
+interactive surface
+modal
+```
+
+---
+
+# 7.5.25 — Componentes base a estabilizar
+
+Antes de las siguientes fases, disponer de patrones reutilizables equivalentes a:
+
+```text
+PageHeader
+SectionHeader
+MetricCard
+MoneyValue
+ProgressMetric
+StatusBadge
+EmptyState
+DetailHeader
+ActionMenu
+FilterChip
+TransactionRow
+PlannedPaymentRow
+```
+
+No es obligatorio que esos sean los nombres exactos.
+
+No construir un “design system” gigantesco; extraer únicamente elementos que realmente se repetirán.
+
+---
+
+# 7.5.26 — Prototipos estructurales antes de implementar
+
+Antes de Quick Add 2.0, crear wireframes simples o estructura JSX sin lógica nueva para:
+
+```text
+Resumen
+Quick Add
+Movimientos
+Plan
+Account Detail
+Settings
+```
+
+Evaluar:
+
+```text
+qué aparece primero
+qué es secundario
+qué está oculto
+cuántos taps requiere la acción principal
+```
+
+No invertir tiempo todavía en pixel-perfect.
+
+---
+
+# 7.5.27 — Métricas UX objetivo
+
+Usar estas como restricciones, no como analytics remota.
+
+### Registrar gasto cotidiano
+
+Objetivo:
+
+```text
+Open Quick Add
+→ amount
+→ account/category if necessary
+→ save
+```
+
+Sin navegar por múltiples páginas.
+
+### Consultar saldo de una cuenta
+
+```text
+Resumen
+→ account
+```
+
+máximo unas pocas interacciones.
+
+### Confirmar pago planificado
+
+```text
+Resumen/Plan
+→ Confirm
+```
+
+sin volver a introducir todos sus datos.
+
+### Ver por qué cambió el dinero
+
+```text
+Account Detail
+→ movement history
+```
+
+sin pasar por Reportes.
+
+---
+
+# 7.5.28 — Lo que NO se copiará de Wallet
+
+Documentar explícitamente para evitar scope creep:
+
+```text
+No giant configurable dashboard by default
+No bank sync UX
+No cloud account flows
+No Premium upsells
+No receipt system yet
+No warranty fields
+No loyalty cards
+No location metadata
+No investment market feeds
+No huge transaction metadata form
+```
+
+Ideas tomadas conceptualmente:
+
+```text
+amount-first entry
+progressive disclosure
+planned → confirmed
+remaining budget
+actionable goals
+useful period controls
+deep reports
+```
+
+No copiar su estructura visual.
+
+---
+
+# Gate 7.5
+
+No pasar a Quick Add 2.0 hasta que exista acuerdo sobre:
+
+```text
+Navigation map
+Home hierarchy
+Plan hierarchy
+Settings hierarchy
+Quick Add information hierarchy
+Detail-screen pattern
+Financial vocabulary
+Status vocabulary
+Responsive behavior
+Privacy visibility behavior
+```
+
+Y Codex debe entregar:
+
+```text
+1. Proposed navigation structure
+2. Components/patterns to reuse
+3. Existing components to keep
+4. Existing components to simplify
+5. Existing components to retire
+6. Mobile behavior
+7. Desktop behavior
+8. Accessibility considerations
+9. Screens affected by later phases
+10. Any UX decision that would constrain the domain model
+```
+
+**No comenzar Quick Add 2.0 hasta revisar este entregable.**
+
+---
+
+# FASE 8 — Quick Add 2.0
+
+No reconstruir `TransactionModal` desde cero.
+
+**Ya es bastante amount-first.**
+
+Mejorarlo sobre la arquitectura nueva.
+
+Flujo principal:
+
+```text
+Amount
+↓
+Expense / Income / Transfer
+↓
+Account
+↓
+Category
+↓
+Save
+```
+
+Agregar Transfer al mismo compositor.
+
+Valores comunes preseleccionados.
+
+Mover información secundaria a:
+
+```text
+More details
+```
+
+Mantener:
+
+- fecha;
+- concepto/nota;
+- naturaleza;
+- método de pago;
+- tarjeta cuando aplique.
+
+No meter veinte campos de Wallet.
+
+### Templates
+
+Después de que Quick Add esté estable:
+
+```text
+Save as template
+```
+
+Ejemplo:
+
+```text
+Bus
+DOP 35
+Expense
+Transportation
+Cash
+```
+
+Todo local.
+
+---
+
+# FASE 9 — Budgets 2.0
+
+Solo ahora ampliar el sistema de presupuestos.
+
+Debe mostrar siempre:
+
+```text
+Limit
+Spent
+Remaining
+Percentage
+Status
+```
+
+Ejemplo:
+
+```text
+DOP 5,000 limit
+DOP 1,200 spent
+DOP 3,800 remaining
+24%
+On track
+```
+
+Después implementar sobre el Period Engine:
+
+```text
+Weekly
+Monthly
+Yearly
+One-Time
+```
+
+No introducir cuatro implementaciones diferentes.
+
+El rollover también debe trabajar sobre el nuevo concepto de período.
+
+Las transferencias entre presupuestos **no son transferencias de dinero real**.
+
+---
+
+# FASE 10 — Goals 2.0
+
+Primero corregir el modelo.
+
+Actualmente existe:
+
+```text
+Goal.saved
+```
+
+y además:
+
+```text
+GoalContribution[]
+```
+
+Son dos fuentes potenciales del mismo dato.
+
+Elegir una sola fuente de verdad.
+
+Recomendación:
+
+```text
+saved = sum(contributions)
+```
+
+y no almacenarlo independientemente salvo que exista una razón de rendimiento muy clara.
+
+Mostrar:
+
+```text
+Target
+Saved
+Remaining
+Progress %
+Deadline
+Required monthly contribution
+```
+
+El aporte mensual requerido debe utilizar el Period Engine.
+
+### Importante
+
+Una aportación a una meta **no mueve automáticamente dinero de una cuenta**.
+
+Posteriormente puede permitirse:
+
+```text
+Goal linked to savings account
+```
+
+pero vincular no debe duplicar el saldo.
+
+---
+
+# FASE 11 — Currency foundation
+
+Antes de Investments, limpiar la infraestructura existente de currencies/FX.
+
+Actualmente existen campos de moneda y `FxRate`, pero los balances de cuenta trabajan fundamentalmente con montos directos.
+
+Definir:
+
+```text
+Account.currency
+Base currency
+```
+
+Migración actual:
+
+```text
+existing accounts → DOP
+```
+
+o a la moneda base configurada.
+
+Los movimientos de una cuenta normalmente utilizan su moneda.
+
+No obtener FX remotamente.
+
+Si posteriormente se soportan transferencias entre monedas:
+
+```text
+manual exchange rate
+```
+
+Hasta entonces se puede impedir una transferencia cross-currency que no tenga información suficiente.
+
+---
+
+# FASE 12 — Investments 1.0
+
+Ahora sí.
+
+Extender el concepto de cuenta con:
+
+```text
+investment
+```
+
+o una abstracción equivalente de activo no líquido.
+
+La ventaja es enorme:
+
+```text
+Banco → Certificado
+```
+
+puede ser una transferencia patrimonial:
+
+```text
+Bank -50,000
+Investment +50,000
+Net worth unchanged
+```
+
+en vez de fingir que invertir DOP 50,000 fue un gasto.
+
+Crear una entidad Investment asociada al activo.
+
+```ts
+Investment {
+  id
+  accountId
+  type
+  name
+  institution?
+  openedAt
+  maturityDate?
+  principal
+  annualRate?
+  compoundingMethod?
+  notes?
+  status
+}
+```
+
+## Investments 1.0 debe cubrir
+
+- certificado financiero;
+- depósito a plazo;
+- inversión con rendimiento conocido.
+
+Mostrar:
+
+```text
+Principal
+Rate
+Opening date
+Maturity
+Elapsed %
+Days remaining
+Estimated maturity value
+Estimated interest
+```
+
+Todo calculado localmente.
+
+### Existing vs New investment
+
+Debe existir diferencia entre:
+
+**Ya la tenía cuando empecé a usar GlitchBudget**
+
+```text
+Opening balance = current tracked value
+```
+
+y:
+
+**La acabo de abrir usando dinero de una cuenta registrada**
+
+```text
+Opening balance = 0
+Bank → Investment transfer
+```
+
+para evitar doble contabilización.
+
+### Proyecciones
+
+El rendimiento futuro es:
+
+```text
+ESTIMATED
+```
+
+No debe sumarse silenciosamente al patrimonio real.
+
+### Investments 1.1
+
+Más adelante:
+
+- valor introducido manualmente;
+- historial de valoraciones;
+- renovación;
+- vencimiento;
+- retiro;
+- interés realmente acreditado.
+
+Sin APIs de mercado.
+
+---
+
+# FASE 13 — Reports 2.0
+
+Ahora tenemos:
+
+- ledger confiable;
+- períodos confiables;
+- categorías estables;
+- liabilities;
+- planning;
+- investments.
+
+Solo entonces hacer Reports 2.0.
+
+Crear selectors comunes.
+
+## Spending
+
+```text
+Total spent
+Trend
+Categories
+Largest transactions
+Fixed / Variable / Occasional
+```
+
+Opcionalmente añadir una segunda dimensión:
+
+```text
+Must
+Need
+Want
+```
+
+pero separada de categoría.
+
+## Cash Flow
+
+```text
+Income
+Cash expenses
+Debt payments
+Net cash flow
+```
+
+## Net Worth
+
+```text
+Cash
+Banks
+Investments
+Credit-card liabilities
+Net worth
+```
+
+## Comparison
+
+```text
+Current period
+vs
+previous comparable period
+```
+
+## Ranges
+
+```text
+7D
+30D
+3M
+6M
+1Y
+Custom
+```
+
+**Home y Reports deben consumir exactamente los mismos selectors.**
+
+Nunca duplicar fórmulas entre componentes.
+
+---
+
+# FASE 14 — Home 2.0
+
+Después de Reports, no antes.
+
+Home debe ser un **read model**, no otro lugar con cálculos propios.
+
+Responder rápidamente:
+
+```text
+¿Cuánto tengo?
+¿Cuánto debo?
+¿Cuánto puedo gastar?
+¿Qué viene próximamente?
+¿Hay algo que requiera atención?
+```
+
+Máximo aproximado de módulos principales:
+
+```text
+Accounts / position
+Budget
+Upcoming
+Goals
+Investments
+```
+
+Puede permitirse personalización local:
+
+```text
+show/hide
+reorder
+default opening section
+```
+
+Pero evitar el Home interminable de Wallet.
+
+---
+
+# FASE 15 — Transaction Metadata + filtros
+
+Solo cuando categorías/reportes estén estabilizados.
+
+Añadir selectivamente:
+
+```text
+necessity: must | need | want
+labels
+```
+
+y filtros:
+
+```text
+account
+category
+date
+amount
+necessity
+label
+type
+```
+
+Permitir guardar filtros localmente.
+
+No añadir todavía:
+
+- ubicación;
+- garantías;
+- loyalty cards;
+- receipts;
+
+porque implican nuevas necesidades de almacenamiento y backup.
+
+Si algún día queremos receipts, primero debe existir una estrategia para archivos OPFS + export/import + cifrado.
+
+---
+
+# FASE 16 — Automatización local
+
+Orden:
+
+```text
+Templates
+↓
+Saved filters
+↓
+Rules
+```
+
+Rules deterministas.
+
+Ejemplo:
+
+```text
+Description contains "Spotify"
+→ Entertainment
+→ Want
+```
+
+Primera versión preferiblemente **sugiere** la clasificación.
+
+Después puede existir una opción explícita:
+
+```text
+Apply automatically
+```
+
+No utilizar IA.
+
+No transmitir descripciones.
+
+---
+
+# FASE 17 — Seguridad y privacidad local
+
+Separar correctamente dos problemas.
+
+## Privacy from servers
+
+Ya garantizada por arquitectura.
+
+## Privacy from someone using the device
+
+Añadir:
+
+```text
+Hide amounts
+App lock
+Auto-lock
+```
+
+Si se usa PIN/biometría, no afirmar que eso cifra Dexie si solo bloquea la UI.
+
+### Backup cifrado
+
+Añadir export opcional cifrado mediante Web Crypto y autenticación criptográfica.
+
+Formato versionado.
+
+```text
+GlitchBudget encrypted backup
+version
+KDF metadata
+salt
+nonce
+ciphertext
+```
+
+Contraseña nunca enviada ni almacenada remotamente.
+
+El backup JSON normal puede seguir disponible si el usuario lo solicita.
+
+---
+
+# FASE 18 — Backup 2.0 y migraciones permanentes
+
+Cada nueva tabla debe incluirse automáticamente en:
+
+```text
+export
+import
+restore
+validation
+migration tests
+```
+
+El backup debe llevar:
+
+```text
+schemaVersion
+appVersion
+exportedAt
+```
+
+Antes de importar:
+
+```text
+4 accounts
+423 transactions
+7 budgets
+3 goals
+2 cards
+1 investment
+```
+
+y solicitar confirmación.
+
+Hacer backup local automático antes de una importación destructiva cuando OPFS esté disponible.
+
+Nunca hacer una migración que resuelva incompatibilidades mediante:
+
+```text
+db.clear()
+```
+
+o recreando desde cero la DB del usuario.
+
+---
+
+# FASE 19 — Technical-debt closure
+
+No esperar al final para empezar a refactorizar, pero aquí se remata.
+
+Objetivos:
+
+### `finance-context.tsx`
+
+Actualmente ronda 34 KB y hace demasiadas cosas.
+
+Debe acabar principalmente como composición/fachada de hooks, no como motor financiero completo.
+
+### UI
+
+Eliminar accesos directos a:
+
+```ts
+db.*
+```
+
+desde componentes.
+
+Por ejemplo, `accounts-overview.tsx` actualmente consulta Dexie directamente. Migrarlo a queries/services.
+
+Añadir ESLint `no-restricted-imports` para evitar que nuevos componentes importen la DB directamente.
+
+### Componentes grandes
+
+Dividir por responsabilidad cuando sean tocados:
+
+```text
+TransactionModal
+GoalsManager
+ReportsTab
+AccountsOverview
+```
+
+No dividir solo para obtener archivos pequeños; dividir donde existan responsabilidades independientes.
+
+---
+
+# Definition of Done obligatoria para CADA fase
+
+Codex **no debe pasar automáticamente a la fase siguiente**.
+
+Cada fase termina únicamente cuando:
+
+```text
+npm run typecheck
+npm run lint
+npm test
+npm run build
+```
+
+están verdes.
+
+Además:
+
+```text
+existing backup import works
+export/import round-trip works
+existing financial totals remain valid
+new migrations have tests
+offline mode still works
+no financial network traffic introduced
+```
+
+Y Codex debe entregar antes de continuar:
+
+```text
+1. Files changed
+2. Schema changes
+3. Migration behavior
+4. Invariants affected
+5. Tests added
+6. Known limitations
+7. Any architectural concern discovered
+```
+
+Si encuentra que una fase posterior requiere cambiar una decisión estructural anterior, **debe detenerse y señalarlo antes de implementar**, no construir un workaround.
+
+---
+
+# Orden final
+
+```text
+0  Safety baseline + backup fixtures
+↓
+1  Remove AI + eliminate backend/runtime network
+↓
+2  Canonical financial domain + metric definitions
+↓
+3  Ledger correctness + strict-mode separation
+↓
+4  Stable category model
+↓
+5  Actual vs Planned separation
+↓
+6  Period engine
+↓
+7  Recurrence / Planned Payments engine
+↓
+8  Quick Add 2.0
+↓
+9  Budgets 2.0
+↓
+10 Goals 2.0
+↓
+11 Currency foundation
+↓
+12 Investments
+↓
+13 Reports 2.0
+↓
+14 Home 2.0
+↓
+15 Metadata + filters
+↓
+16 Templates / local rules
+↓
+17 Security/privacy UX
+↓
+18 Backup/migration polish
+↓
+19 Technical-debt closure
+```
+
+
