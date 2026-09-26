@@ -3,7 +3,8 @@ import { saveRecurringRule, removeRecurringRule } from '@/lib/recurring-rule-ser
 import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
 import { createCategory, resetCategories, requireCategory, savePlans } from '@/lib/category-service';
 
-import { selectMonthlyMetrics, recordedCategories, recordedExpenseForMonth as expenseForMonth, selectCategorySpending, selectBudgetRemaining } from '@/domain/metrics';
+import { selectPeriodMetrics, recordedCategoriesForPeriod, recordedExpenseForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
+import { periodContaining, periodForId, type PeriodRange } from '@/domain/periods';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
 import { readFinancialPolicies } from '@/lib/policy-settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
@@ -32,6 +33,7 @@ const DEFAULT_SETTINGS: Settings = {
   preventNegativeAccountBalance: true,
   budgetOverspendingBehavior: 'block',
   rolloverStrategy: 'reset',
+  periodStartDay: 1,
   baseIncome: { freq: 'mensual', amount: 0 },
   currency: "DOP",
   locale: "es-DO",
@@ -46,6 +48,8 @@ interface FinanceContextType {
   preventNegativeAccountBalance: boolean;
   budgetOverspendingBehavior: BudgetOverspendingBehavior;
   rolloverStrategy: RolloverStrategy;
+  periodStartDay: number;
+  currentPeriod: PeriodRange;
   incomes: Income[] | undefined;
   baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number };
   expenses: Expense[] | undefined;
@@ -64,6 +68,7 @@ interface FinanceContextType {
   setPreventNegativeAccountBalance: (value: boolean) => void;
   setBudgetOverspendingBehavior: (value: BudgetOverspendingBehavior) => void;
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
+  setPeriodStartDay: (day: number) => Promise<void>;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
   addIncomeItem: (income: Omit<Income, "id" | "month">) => Promise<boolean>;
   updateIncomeItem: (income: Income) => Promise<boolean>;
@@ -91,7 +96,7 @@ interface FinanceContextType {
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
-  getTotals: (month: string) => ReturnType<typeof selectMonthlyMetrics>;
+  getTotals: (periodId: string) => ReturnType<typeof selectPeriodMetrics>;
   getPosition: () => ReturnType<typeof selectPosition>;
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
@@ -176,6 +181,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [rawSettings]);
 
   const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories]);
+  const currentPeriod = useMemo(() => periodForId(currentMonth, activeSettings), [currentMonth, activeSettings.periodStartDay]);
+
+  useEffect(() => {
+    setCurrentMonthState(periodContaining(localDate(), activeSettings).id);
+  }, [activeSettings.periodStartDay]);
 
   useEffect(() => {
     async function initializeDB() {
@@ -213,21 +223,23 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [activeSettings.theme]);
 
 
-  const getSpentAmount = useCallback((categoryId: string, month: string): number =>
-    selectCategorySpending(expenses || [], categoryId, month), [expenses]);
+  const getSpentAmount = useCallback((categoryId: string, periodId: string): number =>
+    selectCategorySpendingForPeriod(expenses || [], categoryId, periodForId(periodId, activeSettings)), [expenses, activeSettings.periodStartDay]);
 
-  const getTotals = useCallback((month: string) => selectMonthlyMetrics({
+  const getTotals = useCallback((periodId: string) => selectPeriodMetrics({
     settings: activeSettings, incomes: incomes || [], expenses: expenses || [],
     budgets: budgets || [], goalContributions: goalContributions || [], debtPayments: debtPayments || [],
-  }, month), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
+  }, periodForId(periodId, activeSettings)), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
 
   const getMonthlyAverages = useCallback((numMonths = 3) => {
-    const months = Array.from(new Set([currentMonth, ...[...(incomes || []), ...(expenses || [])].map(t => t.date.slice(0, 7))]))
-      .filter(month => month <= currentMonth).sort().slice(-numMonths);
-    const totalIncome = months.reduce((sum, month) => sum + getTotals(month).recordedIncome, 0);
-    const totalExpenses = months.reduce((sum, month) => sum + getTotals(month).spending, 0);
-    return { incomeAvgMonthly: totalIncome / months.length, expenseAvgMonthly: totalExpenses / months.length };
-  }, [incomes, expenses, currentMonth, getTotals]);
+    const periodIds = Array.from(new Set([
+      currentMonth,
+      ...[...(incomes || []), ...(expenses || [])].map(t => periodContaining(t.date, activeSettings).id),
+    ])).filter(id => id <= currentMonth).sort().slice(-numMonths);
+    const totalIncome = periodIds.reduce((sum, id) => sum + getTotals(id).recordedIncome, 0);
+    const totalExpenses = periodIds.reduce((sum, id) => sum + getTotals(id).spending, 0);
+    return { incomeAvgMonthly: totalIncome / Math.max(1, periodIds.length), expenseAvgMonthly: totalExpenses / Math.max(1, periodIds.length) };
+  }, [incomes, expenses, currentMonth, getTotals, activeSettings.periodStartDay]);
 
   const getDisposable = useCallback((safetyPct = 0.05) => {
       const averages = getMonthlyAverages();
@@ -243,7 +255,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       toast({ title: 'Error al guardar configuración', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
-  }, [toast]);
+  }, [toast, activeSettings.periodStartDay]);
 
   const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
       try {
@@ -257,6 +269,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const setPreventNegativeAccountBalance = useCallback((value: boolean) => updateSetting('preventNegativeAccountBalance', value), [updateSetting]);
   const setBudgetOverspendingBehavior = useCallback((value: BudgetOverspendingBehavior) => updateSetting('budgetOverspendingBehavior', value), [updateSetting]);
   const setRolloverStrategy = useCallback((strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy), [updateSetting]);
+  const setPeriodStartDay = useCallback(async (day: number) => {
+    if (!Number.isInteger(day) || day < 1 || day > 31) {
+      toast({ title: 'Día inválido', description: 'El inicio del período debe estar entre 1 y 31.', variant: 'destructive' });
+      return;
+    }
+    if (await updateSetting('periodStartDay', day)) {
+      const nextId = periodContaining(localDate(), { periodStartDay: day }).id;
+      setCurrentMonthState(nextId);
+      try { await rollBudgetsIntoMonth(nextId); } catch {}
+      toast({ title: 'Inicio del período actualizado', description: day === 1 ? 'Se usarán meses calendario.' : `Cada período comenzará el día ${day}.` });
+    }
+  }, [updateSetting, toast]);
   const setBaseIncome = useCallback(async (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
     const cents = toCents(baseIncome.amount);
     if (!Number.isSafeInteger(cents) || cents < 0) {
@@ -423,7 +447,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
           await requireCategory(fromCategoryId, 'expense', fromBudget?.categoryId);
           await requireCategory(toCategoryId, 'expense', toBudget?.categoryId);
-          const spent = selectCategorySpending(await db.expenses.toArray(), fromCategoryId, month);
+          const spent = selectCategorySpendingForPeriod(await db.expenses.toArray(), fromCategoryId, periodForId(month, activeSettings));
           if (!fromBudget || fromBudget.limit - spent < amountInCents) {
               throw new Error("Fondos insuficientes en el presupuesto de origen.");
           }
@@ -451,14 +475,15 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const getBudgetStatusDetails = useCallback((month: string) => {
-    const monthBudgets = (budgets || []).filter(b => b.month === month);
-    const budgetedCategoryIds = new Set(monthBudgets.map(b => b.categoryId));
-    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => expenseForMonth(e, month) > 0).map(e => e.categoryId)]));
+  const getBudgetStatusDetails = useCallback((periodId: string) => {
+    const period = periodForId(periodId, activeSettings);
+    const periodBudgets = (budgets || []).filter(b => b.month === period.id);
+    const budgetedCategoryIds = new Set(periodBudgets.map(b => b.categoryId));
+    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => recordedExpenseForPeriod(e, period) > 0).map(e => e.categoryId)]));
 
     return allRelevantCategoryIds.map(catId => {
-      const budget = monthBudgets.find(b => b.categoryId === catId) || { month, categoryId: catId, limit: 0 };
-      const spent = getSpentAmount(budget.categoryId, month);
+      const budget = periodBudgets.find(b => b.categoryId === catId) || { month: period.id, categoryId: catId, limit: 0 };
+      const spent = getSpentAmount(budget.categoryId, period.id);
       const remaining = selectBudgetRemaining(budget.limit, spent).budgetRemaining;
       let status: 'ok' | 'alert' | 'over' | 'unbudgeted' = 'ok';
 
@@ -468,17 +493,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
       return { ...budget, spent, remaining, status };
     });
-  }, [budgets, expenses, getSpentAmount, expenseCategories]);
+  }, [budgets, expenses, getSpentAmount, expenseCategories, activeSettings.periodStartDay]);
 
-  const getExpensesByCategory = useCallback((month: string) => recordedCategories(expenses || [], month), [expenses]);
-  const getIncomesByCategory = useCallback((month: string) => recordedCategories(incomes || [], month), [incomes]);
+  const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings.periodStartDay]);
+  const getIncomesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(incomes || [], periodForId(periodId, activeSettings)), [incomes, activeSettings.periodStartDay]);
   const getPosition = useCallback(() => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()), [accounts, debts, incomes, expenses, debtPayments, transfers]);
 
-  const getExpensesByType = useCallback((month: string) => {
-      const exps = (expenses || []).filter(e => expenseForMonth(e, month) > 0);
+  const getExpensesByType = useCallback((periodId: string) => {
+      const period = periodForId(periodId, activeSettings);
+      const exps = (expenses || []).filter(e => recordedExpenseForPeriod(e, period) > 0);
       const groupT = exps.reduce((acc, e) => {
           const k = e.nature;
-          const val = expenseForMonth(e, month);
+          const val = recordedExpenseForPeriod(e, period);
           if (!acc[k]) acc[k] = { total: 0, count: 0 };
           acc[k].total += val;
           acc[k].count += 1;
@@ -488,7 +514,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       return Object.entries(groupT).map(([key, v]) => ({
           name: key, total: v.total, count: v.count, avg: v.total / Math.max(1, v.count),
       }));
-  }, [expenses]);
+  }, [expenses, activeSettings.periodStartDay]);
 
   const addIncomeCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'income',iconName); }, []);
   const addExpenseCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'expense',iconName); }, []);
@@ -706,6 +732,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
     budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
+    periodStartDay: activeSettings.periodStartDay ?? 1,
+    currentPeriod,
     baseIncome: activeSettings.baseIncome,
     expenseCategories: expenseCategories,
     incomeCategories: incomeCategories,
@@ -721,6 +749,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
+    setPeriodStartDay,
     setBaseIncome,
     addIncomeItem,
     updateIncomeItem,
@@ -769,8 +798,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules,
-    setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setBaseIncome, updateSettings,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules,
+    setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
