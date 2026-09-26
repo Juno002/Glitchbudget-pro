@@ -137,6 +137,15 @@ test('goal reserves with zero assets ignore both policies and keep atomic valida
  await assert.rejects(saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date}));assert.equal((await db.goals.get('goal'))?.saved,100_000);
  await assert.rejects(saveGoalContribution({id:'bad',goalId:'missing',amount:1,date}));
 });
+test('budget guard uses the containing custom financial period',async()=>{
+ await db.settings.update('general',{periodStartDay:25,budgetOverspendingBehavior:'block'});
+ await db.plans.add({month:'2026-09',categoryId:'food',limit:500_000});
+ await db.expenses.add({...old,id:'period-old',date:'2026-08-26',month:'2026-08',amount:450_000});
+ await assert.rejects(saveExpense({...expense,id:'period-new',date:'2026-09-24',amount:1000}),/presupuesto/);
+ assert.equal(await db.expenses.get('period-new'),undefined);
+ await saveExpense({...expense,id:'next-period',date:'2026-09-25',amount:1000});
+ assert.ok(await db.expenses.get('next-period'));
+});
 test('moving an expense to another month/category evaluates its destination budget',async()=>{
  await budget();await db.plans.add({month:'2026-10',categoryId:'other',limit:10_000});
  await assert.rejects(saveExpense({...expense,id:'old',categoryId:'other',date:'2026-10-01',amount:200},true),/presupuesto/);
