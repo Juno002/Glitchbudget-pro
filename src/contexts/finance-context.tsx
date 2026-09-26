@@ -181,11 +181,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [rawSettings]);
 
   const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories]);
-  const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings.periodStartDay]);
+  const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings]);
 
   useEffect(() => {
     setCurrentMonthState(periodContaining(localDate(), settings).id);
-  }, [settings.periodStartDay]);
+  }, [settings]);
 
   useEffect(() => {
     async function initializeDB() {
@@ -224,7 +224,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
 
   const getSpentAmount = useCallback((categoryId: string, periodId: string): number =>
-    selectCategorySpendingForPeriod(expenses || [], categoryId, periodForId(periodId, activeSettings)), [expenses, activeSettings.periodStartDay]);
+    selectCategorySpendingForPeriod(expenses || [], categoryId, periodForId(periodId, activeSettings)), [expenses, activeSettings]);
 
   const getTotals = useCallback((periodId: string) => selectPeriodMetrics({
     settings: activeSettings, incomes: incomes || [], expenses: expenses || [],
@@ -239,7 +239,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const totalIncome = periodIds.reduce((sum, id) => sum + getTotals(id).recordedIncome, 0);
     const totalExpenses = periodIds.reduce((sum, id) => sum + getTotals(id).spending, 0);
     return { incomeAvgMonthly: totalIncome / Math.max(1, periodIds.length), expenseAvgMonthly: totalExpenses / Math.max(1, periodIds.length) };
-  }, [incomes, expenses, currentMonth, getTotals, activeSettings.periodStartDay]);
+  }, [incomes, expenses, currentMonth, getTotals, activeSettings]);
 
   const getDisposable = useCallback((safetyPct = 0.05) => {
       const averages = getMonthlyAverages();
@@ -473,7 +473,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       });
       return false;
     }
-  }, [toast, activeSettings.periodStartDay]);
+  }, [toast, activeSettings]);
 
   const getBudgetStatusDetails = useCallback((periodId: string) => {
     const period = periodForId(periodId, activeSettings);
@@ -493,10 +493,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
       return { ...budget, spent, remaining, status };
     });
-  }, [budgets, expenses, getSpentAmount, expenseCategories, activeSettings.periodStartDay]);
+  }, [budgets, expenses, getSpentAmount, expenseCategories, activeSettings]);
 
-  const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings.periodStartDay]);
-  const getIncomesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(incomes || [], periodForId(periodId, activeSettings)), [incomes, activeSettings.periodStartDay]);
+  const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings]);
+  const getIncomesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(incomes || [], periodForId(periodId, activeSettings)), [incomes, activeSettings]);
   const getPosition = useCallback(() => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()), [accounts, debts, incomes, expenses, debtPayments, transfers]);
 
   const getExpensesByType = useCallback((periodId: string) => {
@@ -514,7 +514,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       return Object.entries(groupT).map(([key, v]) => ({
           name: key, total: v.total, count: v.count, avg: v.total / Math.max(1, v.count),
       }));
-  }, [expenses, activeSettings.periodStartDay]);
+  }, [expenses, activeSettings]);
 
   const addIncomeCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'income',iconName); }, []);
   const addExpenseCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'expense',iconName); }, []);
