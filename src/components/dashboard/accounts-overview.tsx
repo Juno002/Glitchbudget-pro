@@ -16,6 +16,7 @@ import { AccountSelect } from './account-select';
 import DebtsTab from './debts-tab';
 import { ActionMenu, DetailHeader } from '@/components/finance-ui';
 import { Pencil, Settings2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
@@ -43,7 +44,7 @@ export default function AccountsOverview() {
     try { await action(); toast({ title }); } catch (error) { toast({ title: 'No se guardó el cambio', description: friendlyError(error), variant: 'destructive' }); }
     finally { locked.current = false; setBusy(false); }
   };
-  if (!data) return null;
+  if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
   const cards = data.debts.filter(d => d.type === 'credit_card');
   const { cash, bank, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
