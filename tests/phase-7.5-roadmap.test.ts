@@ -59,7 +59,7 @@ test('global movement composer offers expense income and transfer in one surface
   assert.ok(modal.includes('Gasto'));
   assert.ok(modal.includes('Ingreso'));
   assert.ok(modal.includes('Transferencia'));
-  assert.match(modal, /txType !== 'transfer' && <ToolbarItem/);
+  assert.match(modal, /txType !== 'transfer' && \(/);
   assert.match(modal, /Cuenta de origen/);
   assert.match(modal, /Cuenta de destino/);
 });
