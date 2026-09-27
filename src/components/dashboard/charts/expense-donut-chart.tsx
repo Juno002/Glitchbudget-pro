@@ -1,7 +1,7 @@
 'use client';
 
 import { useFinances } from '@/contexts/finance-context';
-import { formatCurrency } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useState, useEffect } from 'react';
 
@@ -26,7 +26,7 @@ const CustomLegend = (props: any) => {
         payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span>{formatCurrency(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
+            <span>{money(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
           </li>
         ))
       }
@@ -35,6 +35,7 @@ const CustomLegend = (props: any) => {
 };
 
 export default function ExpenseDonutChart() {
+  const money = usePrivateCurrency();
     const { getExpensesByCategory, currentMonth, loading } = useFinances();
     const data = getExpensesByCategory(currentMonth);
     const [isClient, setIsClient] = useState(false);
@@ -55,7 +56,7 @@ export default function ExpenseDonutChart() {
       <ResponsiveContainer width="100%" height="100%">
           <PieChart>
               <Tooltip
-                  formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                  formatter={(value: number, name: string) => [money(value), name]}
               />
               <Legend content={<CustomLegend />} verticalAlign="bottom" />
               <Pie
