@@ -22,6 +22,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { playIncome } from '@/lib/sounds';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPeriodRange } from '@/lib/period-format';
+import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
@@ -318,9 +319,11 @@ export default function PlanningTab() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
-          <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
-          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
-          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Planificados</TabsTrigger>
+          {PLAN_SECTIONS.map(section => (
+            <TabsTrigger key={section.value} value={section.value} className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">
+              {section.label}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         {/* --- METAS TAB --- */}
