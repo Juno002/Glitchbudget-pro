@@ -41,6 +41,7 @@ test('Phase 8 templates are local presets and do not add a Dexie table', () => {
   assert.match(source, /Guarda estos valores para reutilizarlos/);
   assert.match(source, /loadQuickAddTemplates\(window\.localStorage\)/);
   assert.match(source, /upsertQuickAddTemplate\(window\.localStorage/);
+  assert.match(source, /Guardar como plantilla/);
 
   const templates = read('src/lib/quick-add-templates.ts');
   assert.match(templates, /glitchbudget_quick_add_templates_v1/);
@@ -48,4 +49,11 @@ test('Phase 8 templates are local presets and do not add a Dexie table', () => {
 
   const db = read('src/lib/db.ts');
   assert.doesNotMatch(db, /quick_add_templates|transaction_templates/);
+});
+
+
+test('full local-data reset also removes Phase 8 templates', () => {
+  const settings = read('src/components/layout/settings-dialog.tsx');
+  assert.match(settings, /QUICK_ADD_TEMPLATES_KEY/);
+  assert.match(settings, /localStorage\.removeItem\(QUICK_ADD_TEMPLATES_KEY\)/);
 });
