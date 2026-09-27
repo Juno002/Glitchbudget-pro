@@ -14,7 +14,7 @@ import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
-import { PageHeader, SectionHeader } from '@/components/finance-ui';
+import { PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const money = usePrivateCurrency();
@@ -154,11 +154,10 @@ const BudgetStatusReport = () => {
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
 
-    const statusColors = {
-        ok: 'bg-green-500',
-        alert: 'bg-yellow-500',
-        over: 'bg-red-500',
-    }
+    const statusFor = (status: 'ok' | 'alert' | 'over' | 'unbudgeted') => ({
+        kind: status === 'over' ? 'danger' : status === 'alert' ? 'warning' : status === 'ok' ? 'success' : 'neutral',
+        label: status === 'over' ? 'Excedido' : status === 'alert' ? 'Cerca del límite' : status === 'ok' ? 'En presupuesto' : 'Sin presupuesto',
+    } as const);
 
     return (
         <Card>
@@ -179,10 +178,7 @@ const BudgetStatusReport = () => {
                                         {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                                         {category?.name}
                                     </div>
-                                    <div className="flex items-center gap-1.5 text-xs font-medium">
-                                        <span className={cn("h-2 w-2 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                        <span className="capitalize">{{ ok: 'En orden', alert: 'Cerca del límite', over: 'Excedido', unbudgeted: 'Sin presupuesto' }[b.status]}</span>
-                                    </div>
+                                    <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
                                 </div>
                                 <div className="grid grid-cols-3 gap-2 text-sm mt-1">
                                     <div className="flex flex-col">
@@ -252,10 +248,7 @@ const BudgetStatusReport = () => {
                                             />
                                         </TableCell>
                                         <TableCell className="py-5">
-                                            <div className="flex items-center gap-2">
-                                                <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                                <span className="capitalize font-medium">{b.status}</span>
-                                            </div>
+                                            <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
                                         </TableCell>
                                     </TableRow>
                                 )
