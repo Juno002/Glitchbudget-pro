@@ -25,6 +25,8 @@ export function TransactionRow({
   onClick?: () => void;
   className?: string;
 }) {
+  const signedAmount = tone === 'negative' ? -Math.abs(amount) : tone === 'positive' ? Math.abs(amount) : amount;
+
   const body = (
     <>
       {icon ? <div className="shrink-0">{icon}</div> : null}
@@ -36,7 +38,7 @@ export function TransactionRow({
         </div>
       </div>
       <div className="shrink-0 text-right">
-        <MoneyValue amount={amount} tone={tone} showSign={tone === 'positive' || tone === 'negative'} className="text-sm font-semibold" />
+        <MoneyValue amount={signedAmount} tone={tone} showSign={tone === 'positive' || tone === 'negative'} className="text-sm font-semibold" />
         {dateLabel ? <div className="text-[10px] text-muted-foreground">{dateLabel}</div> : null}
       </div>
     </>
