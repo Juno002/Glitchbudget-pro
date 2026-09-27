@@ -14,7 +14,7 @@ import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
-import { PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
+import { EmptyState, PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const money = usePrivateCurrency();
@@ -24,28 +24,30 @@ const BreakdownTable = ({ title, data }: { title: string, data: { name: string, 
         <Card>
             <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Categoría</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead className="text-right">%</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.length > 0 ? data.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
-                                    <TableCell className="text-right">{money(item.value)}</TableCell>
-                                    <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Sin datos</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                {data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Categoría</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
+                                  <TableHead className="text-right">%</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {data.map(item => (
+                                  <TableRow key={item.name}>
+                                      <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
+                                      <TableCell className="text-right">{money(item.value)}</TableCell>
+                                      <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </div>
+                ) : (
+                  <EmptyState title="Sin datos para este período" description="Registra movimientos para ver este desglose." />
+                )}
             </CardContent>
         </Card>
     );
@@ -119,30 +121,32 @@ const ExpenseByTypeTable = () => {
         <Card>
             <CardHeader><CardTitle>📊 Resumen por tipo de gasto</CardTitle></CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Tipo de gasto</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead className="text-right">Promedio</TableHead>
-                                <TableHead className="text-right">#</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.length > 0 ? data.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell>{item.name}</TableCell>
-                                    <TableCell className="text-right">{money(item.total)}</TableCell>
-                                    <TableCell className="text-right">{money(item.avg)}</TableCell>
-                                    <TableCell className="text-right">{item.count}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Sin datos</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                {data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Tipo de gasto</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
+                                  <TableHead className="text-right">Promedio</TableHead>
+                                  <TableHead className="text-right">#</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {data.map(item => (
+                                  <TableRow key={item.name}>
+                                      <TableCell>{item.name}</TableCell>
+                                      <TableCell className="text-right">{money(item.total)}</TableCell>
+                                      <TableCell className="text-right">{money(item.avg)}</TableCell>
+                                      <TableCell className="text-right">{item.count}</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </div>
+                ) : (
+                  <EmptyState title="Sin gastos por clasificar" description="Cuando registres gastos, aquí aparecerá el resumen por naturaleza." />
+                )}
             </CardContent>
         </Card>
     );
