@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { EmptyState, ProgressMetric } from '@/components/finance-ui';
+import { EmptyState, MetricCard, MoneyValue, ProgressMetric } from '@/components/finance-ui';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Skeleton } from '../ui/skeleton';
@@ -33,6 +33,9 @@ export default function BudgetStatus() {
   }
 
   const trackedBudgets = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
+  const totalLimit = trackedBudgets.reduce((sum, budget) => sum + budget.limit, 0);
+  const totalSpent = trackedBudgets.reduce((sum, budget) => sum + budget.spent, 0);
+  const totalRemaining = totalLimit - totalSpent;
 
   return (
     <Card>
@@ -43,6 +46,12 @@ export default function BudgetStatus() {
       <CardContent>
         {trackedBudgets.length > 0 ? (
           <div className="space-y-6">
+            <MetricCard
+              label="Restante total"
+              amount={totalRemaining}
+              tone={totalRemaining < 0 ? 'negative' : 'neutral'}
+              supporting={<>de <MoneyValue amount={totalLimit} className="text-xs" /> presupuestados · gastado <MoneyValue amount={totalSpent} className="text-xs" /></>}
+            />
             {trackedBudgets.map((budget) => {
               const category = getCategoryInfo(budget.categoryId);
               if (!category) return null;
