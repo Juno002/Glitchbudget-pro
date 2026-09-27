@@ -53,7 +53,7 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false, 
 async function requireNotConfirmedOccurrenceTransaction(id: string): Promise<void> {
   const linked = await db.planned_occurrences.where('transactionId').equals(id).first();
   if (linked?.status === 'confirmed') {
-    throw new Error('Este movimiento confirma una ocurrencia planificada. Deshaz la confirmación desde el pago planificado antes de eliminarlo.');
+    throw new Error('Este movimiento confirma una ocurrencia planificada y no puede eliminarse directamente.');
   }
 }
 
