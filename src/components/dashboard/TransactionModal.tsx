@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2, CreditCard, Banknote } from 'lucide-react';
+import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2, CreditCard, Banknote, ArrowRightLeft } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,7 +23,7 @@ interface TransactionModalProps {
   editingIncome?: Income;
 }
 
-type TransactionType = 'income' | 'expense';
+type TransactionType = 'income' | 'expense' | 'transfer';
 
   // --- Toolbar item component ---
 const ToolbarItem = ({ icon, label, active, children, popoverOpen, setPopoverOpen }: {
@@ -58,6 +58,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     addIncomeItem, updateIncomeItem, deleteIncomeItem,
     expenseCategories, incomeCategories,
     debts: allDebts,
+    addAccountTransfer,
   } = useFinances();
 
   const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card');
@@ -75,6 +76,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit'>('cash');
   const [debtId, setDebtId] = useState('');
   const [accountId, setAccountId] = useState('');
+  const [toAccountId, setToAccountId] = useState('');
+  const [transferNote, setTransferNote] = useState('');
 
   // Local validation and persistence errors
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -127,18 +130,24 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setIncomeSubtype('extra');
       setPaymentMethod('cash');
       setDebtId('');
+      setToAccountId('');
+      setTransferNote('');
     }
     setSaved(false);
     setSubmitError(null);
   }, [open, mode, editingExpense, editingIncome]);
 
   const categories = useMemo(() => {
+    if (txType === 'transfer') return [];
     const ids = txType === 'income' ? incomeCategories : expenseCategories;
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
   }, [txType, incomeCategories, expenseCategories, getCategoryInfo]);
 
   const selectedCat = categoryId ? getCategoryInfo(categoryId) : undefined;
-  const canSave = Number.isFinite(Number(amount)) && Number(amount) >= 0.01 && categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
+  const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
+  const canSave = txType === 'transfer'
+    ? validAmount && isValidDate(date) && !!accountId && !!toAccountId && accountId !== toAccountId && !saved && !isSaving
+    : validAmount && !!categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
 
   const handleSave = async () => {
     if (!canSave || savingRef.current) return;
@@ -148,7 +157,15 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     try {
       const numAmount = Number(amount);
       let success: boolean;
-      if (txType === 'expense') {
+      if (txType === 'transfer') {
+        success = await addAccountTransfer({
+          fromAccountId: accountId,
+          toAccountId,
+          amount: Math.round(numAmount * 100),
+          date,
+          note: transferNote,
+        });
+      } else if (txType === 'expense') {
         const fields = {
           accountId: accountId || undefined, concept, amount: numAmount, categoryId, date, nature: expenseSubtype,
           paymentMethod, debtId: paymentMethod === 'credit' ? debtId : undefined,
@@ -213,12 +230,14 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           )}
         >
           <label className="text-xs text-muted-foreground">
-            {saved ? (txType === 'expense' ? 'Gasto registrado' : 'Ingreso registrado') : (isEditing ? 'Editando' : 'Nuevo movimiento')}
+            {saved
+              ? (txType === 'expense' ? 'Gasto registrado' : txType === 'income' ? 'Ingreso registrado' : 'Transferencia registrada')
+              : (isEditing ? 'Editando' : 'Nuevo movimiento')}
           </label>
           <div className="flex items-baseline gap-1">
             <span className={cn(
               "text-lg font-medium",
-              txType === 'expense' ? "text-rose-400" : "text-emerald-400"
+              txType === 'expense' ? "text-rose-400" : txType === 'income' ? "text-emerald-400" : "text-primary"
             )}>RD$</span>
             <input
               type="number"
@@ -233,7 +252,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               className={cn(
                 "bg-transparent border-none outline-none text-center font-bold tabular-nums w-[180px]",
                 "text-4xl",
-                txType === 'expense' ? "text-rose-400 placeholder:text-rose-400/30" : "text-emerald-400 placeholder:text-emerald-400/30"
+                txType === 'expense' ? "text-rose-400 placeholder:text-rose-400/30" : txType === 'income' ? "text-emerald-400 placeholder:text-emerald-400/30" : "text-primary placeholder:text-primary/30"
               )}
             />
           </div>
@@ -245,9 +264,11 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           <ToolbarItem
             icon={txType === 'expense'
               ? <TrendingDown className="h-5 w-5 text-rose-500" />
-              : <TrendingUp className="h-5 w-5 text-emerald-500" />
+              : txType === 'income'
+                ? <TrendingUp className="h-5 w-5 text-emerald-500" />
+                : <ArrowRightLeft className="h-5 w-5 text-primary" />
             }
-            label={txType === 'expense' ? 'Gasto' : 'Ingreso'}
+            label={txType === 'expense' ? 'Gasto' : txType === 'income' ? 'Ingreso' : 'Transferencia'}
             active
             popoverOpen={typeOpen}
             setPopoverOpen={setTypeOpen}
@@ -271,11 +292,26 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               >
                 <TrendingUp className="h-4 w-4" /> Ingreso
               </button>
+              <button
+                disabled={isEditing}
+                onClick={() => {
+                  setTxType('transfer');
+                  setCategoryId('');
+                  setPaymentMethod('cash');
+                  setDebtId('');
+                  setTypeOpen(false);
+                }}
+                className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+                  txType === 'transfer' ? "bg-primary/10 text-primary" : "hover:bg-black/10 dark:hover:bg-white/10"
+                )}
+              >
+                <ArrowRightLeft className="h-4 w-4" /> Transferencia
+              </button>
             </div>
           </ToolbarItem>
 
           {/* Category selector */}
-          <ToolbarItem
+          {txType !== 'transfer' && <ToolbarItem
             icon={selectedCat ? <selectedCat.icon className="h-5 w-5" /> : <Grid3X3 className="h-5 w-5" />}
             label={selectedCat?.name || 'Categoría'}
             active={!!categoryId}
@@ -302,7 +338,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 );
               })}
             </div>
-          </ToolbarItem>
+          </ToolbarItem>}
 
           {/* Date — uses ref to trigger native picker */}
           <button
@@ -329,7 +365,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           </button>
 
           {/* Subtype selector */}
-          <ToolbarItem
+          {txType !== 'transfer' && <ToolbarItem
             icon={<SlidersHorizontal className="h-5 w-5" />}
             label={txType === 'expense' ? expenseSubtype : (incomeSubtype === 'extra' ? 'Extra' : 'Regalo')}
             popoverOpen={subtypeOpen}
@@ -373,12 +409,27 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 </>
               )}
             </div>
-          </ToolbarItem>
+          </ToolbarItem>}
         </div>
 
         {/* Body */}
         <div className="px-6 py-4 space-y-3">
           
+          {txType === 'transfer' && !saved && (
+            <div className="space-y-3">
+              <AccountSelect cashDefault value={accountId} onChange={setAccountId} label="Cuenta de origen" disabled={isSaving} />
+              <AccountSelect value={toAccountId} onChange={setToAccountId} label="Cuenta de destino" disabled={isSaving} />
+              <Input
+                aria-label="Nota de la transferencia"
+                placeholder="Nota (opcional)"
+                value={transferNote}
+                onChange={event => setTransferNote(event.target.value)}
+                maxLength={250}
+              />
+              <p className="text-xs text-muted-foreground">Una transferencia mueve dinero entre tus cuentas. No cuenta como ingreso ni gasto.</p>
+            </div>
+          )}
+
           {/* Payment Method Selector (Only when there are debts and it's an expense) */}
           {!saved && txType === 'expense' && debts && debts.length > 0 && (
             <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-lg p-1">
@@ -429,9 +480,9 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           )}
 
-          {!saved && (txType === 'income' || paymentMethod !== 'credit') && <AccountSelect cashDefault={!isEditing} value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
+          {!saved && txType !== 'transfer' && (txType === 'income' || paymentMethod !== 'credit') && <AccountSelect cashDefault={!isEditing} value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
           {/* Concept input */}
-          {!saved && (
+          {!saved && txType !== 'transfer' && (
             <Input
               aria-label={txType === 'expense' ? 'Concepto' : 'Descripción'}
               placeholder={txType === 'expense' ? 'Concepto (opcional)' : 'Descripción (opcional)'}
