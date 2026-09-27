@@ -1,5 +1,4 @@
 import { requireRecurringProvenance } from './recurring-rule-service';
-import { legacyMonthlySubscriptionGuard } from './legacy-monthly-subscription-guard';
 import { requireCategory } from './category-service';
 import { readFinancialPolicies } from './policy-settings';
 import { evaluateBudgetOverspending, BudgetWarning } from '../policies/budget-overspending';
@@ -83,7 +82,6 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
   await db.transaction('rw', [...accountTables, db.categories, db.recurrents, db.settings, db.plans, db.goal_contributions, db.debts], async () => {
     const existing = await db.expenses.get(row.id);
     await requireRecurringProvenance(row.recurringRuleId, 'expense', editing ? existing?.recurringRuleId : undefined, { allowInactive: options.allowInactiveRecurringRule });
-    await legacyMonthlySubscriptionGuard(row, editing ? existing : undefined);
     if (editing && !existing) throw new Error('El gasto ya no existe. Actualiza la lista.');
     await requireCategory(row.categoryId, 'expense', editing ? existing?.categoryId : undefined);
     const policies = await readFinancialPolicies();
