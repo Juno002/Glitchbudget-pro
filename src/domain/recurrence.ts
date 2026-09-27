@@ -28,7 +28,7 @@ function formatDate({ year, month, day }: CalendarDate): string {
   return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
-function addDays(value: string, delta: number): string {
+export function shiftDate(value: string, delta: number): string {
   let { year, month, day } = parseDate(value);
   let remaining = Math.trunc(delta);
   while (remaining > 0) {
@@ -91,11 +91,11 @@ export function scheduledDatesForRule(rule: RecurringRule, range: DateRange): st
   if (rule.cadence === 'weekly' || rule.cadence === 'biweekly') {
     const step = rule.cadence === 'weekly' ? 7 : 14;
     let cursor = rule.startDate;
-    while (cursor < lower) cursor = addDays(cursor, step);
+    while (cursor < lower) cursor = shiftDate(cursor, step);
     const result: string[] = [];
     while (cursor <= upper) {
       result.push(cursor);
-      cursor = addDays(cursor, step);
+      cursor = shiftDate(cursor, step);
     }
     return result;
   }
