@@ -23,6 +23,7 @@ import { playIncome } from '@/lib/sounds';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPeriodRange } from '@/lib/period-format';
 import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
+import { PageHeader } from '@/components/finance-ui';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
@@ -310,12 +311,10 @@ export default function PlanningTab() {
 
   return (
     <div className="space-y-6 pb-24 md:pb-8">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">Plan</h2>
-          <p className="text-sm text-muted-foreground">{formatPeriodRange(currentPeriod)}</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Plan"
+        description={<>Presupuestos, metas y movimientos planificados · {formatPeriodRange(currentPeriod)}</>}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
