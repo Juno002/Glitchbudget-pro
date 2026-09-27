@@ -219,7 +219,7 @@ export function SettingsDialog() {
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>¿Borrar todos los datos?</AlertDialogTitle>
-                    <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+                    <AlertDialogDescription>Borrar todos los datos eliminará movimientos, planes, cuentas, metas y copias locales del sitio. Esta acción no se puede deshacer.</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>

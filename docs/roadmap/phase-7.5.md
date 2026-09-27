@@ -418,6 +418,29 @@ Los checks automáticos no sustituyen:
 
 La revisión humana del Gate fue completada y aprobada por el usuario el 2026-09-27. Las comprobaciones físicas de QA anteriores siguen siendo tareas de release; no bloquean el cierre arquitectónico ni el inicio de Fase 8.
 
+## Cierre final contra el roadmap · 2026-09-27
+
+Revisión final realizada directamente contra `Roadmap septiembre 2026.txt` antes de iniciar Fase 8.
+
+Se cerraron los dos últimos desvíos detectados:
+
+- **7.5.17 — Empty states:** el estado vacío de presupuestos dentro de Reportes ahora explica el siguiente paso y ofrece acceso a Plan → Presupuestos, tanto en móvil como en escritorio.
+- **7.5.19 — Acciones destructivas:** la confirmación de “Borrar todos los datos” explica dentro del propio diálogo que elimina movimientos, planes, cuentas, metas y copias locales del sitio.
+
+Gate técnico final de la rama de cierre: GitHub Actions `Quality checks` run **299** completó correctamente `npm run check` y `npm run build`.
+
+### Definition of Done de la fase
+
+1. **Files changed:** `src/components/dashboard/reports-tab.tsx`, `src/components/layout/settings-dialog.tsx`, `tests/phase-7.5-roadmap.test.ts` y esta documentación de cierre.
+2. **Schema changes:** ninguno.
+3. **Migration behavior:** sin migraciones; Dexie y backup conservan sus versiones existentes.
+4. **Invariants affected:** ninguna invariante financiera; solo presentación, navegación contextual y texto de confirmación.
+5. **Tests added:** regresión de 7.5.17 y 7.5.19 para impedir volver a empty states no accionables o confirmaciones destructivas sin alcance explícito.
+6. **Known limitations:** QA física con lector de pantalla/teléfono sigue perteneciendo a release QA; no altera el cierre arquitectónico.
+7. **Architectural concern discovered:** `SettingsDialog` aún accede directamente a Dexie para el borrado total. No se amplió ese patrón; su eliminación forma parte de la deuda técnica prevista por el roadmap para Fase 19.
+
+**Resultado:** Fase 7.5 cerrada conforme a la única fuente de verdad, `Roadmap septiembre 2026.txt`. No se implementó Fase 8 durante este cierre.
+
 ## Siguiente fase
 
 ```text

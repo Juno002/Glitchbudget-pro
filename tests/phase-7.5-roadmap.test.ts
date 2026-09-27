@@ -113,3 +113,17 @@ test('roadmap gate contains the exact ten requested deliverable sections', () =>
   }
   assert.match(gate, /No pasar a Fase 8 antes de revisar este gate/);
 });
+
+
+test('roadmap 7.5 empty states and destructive confirmations explain the next consequence', () => {
+  const reports = read('src/components/dashboard/reports-tab.tsx');
+  assert.match(reports, /Aún no tienes presupuestos/);
+  assert.match(reports, /Crea un presupuesto en Plan → Presupuestos/);
+  assert.match(reports, /Crear presupuesto/);
+  assert.match(reports, /setPlanningTab\('budgets'\)/);
+  assert.doesNotMatch(reports, /No hay presupuestos configurados para este período/);
+
+  const settings = read('src/components/layout/settings-dialog.tsx');
+  assert.match(settings, /Borrar todos los datos eliminará movimientos, planes, cuentas, metas y copias locales del sitio/);
+  assert.match(settings, /Esta acción no se puede deshacer/);
+});

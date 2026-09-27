@@ -15,6 +15,8 @@ import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
 import { EmptyState, PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
+import { Button } from '../ui/button';
+import { useTabs } from '@/contexts/tabs-context';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const money = usePrivateCurrency();
@@ -155,6 +157,7 @@ const ExpenseByTypeTable = () => {
 const BudgetStatusReport = () => {
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
+  const { setActiveTab, setPlanningTab } = useTabs();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
 
@@ -162,6 +165,21 @@ const BudgetStatusReport = () => {
         kind: status === 'over' ? 'danger' : status === 'alert' ? 'warning' : status === 'ok' ? 'success' : 'neutral',
         label: status === 'over' ? 'Excedido' : status === 'alert' ? 'Cerca del límite' : status === 'ok' ? 'En presupuesto' : 'Sin presupuesto',
     } as const);
+
+    const renderBudgetEmptyState = () => (
+      <EmptyState
+        title="Aún no tienes presupuestos"
+        description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
+        action={(
+          <Button type="button" variant="outline" onClick={() => {
+            setPlanningTab('budgets');
+            setActiveTab('planning');
+          }}>
+            Crear presupuesto
+          </Button>
+        )}
+      />
+    );
 
     return (
         <Card>
@@ -207,11 +225,7 @@ const BudgetStatusReport = () => {
                                 />
                             </div>
                         )
-                    }) : (
-                        <div className="text-center text-muted-foreground p-6 bg-black/5 dark:bg-white/5 rounded-xl border border-dashed border-border/50">
-                            No hay presupuestos configurados para este período.
-                        </div>
-                    )}
+                    }) : renderBudgetEmptyState()}
                 </div>
 
                 {/* DESKTOP VIEW: Pro Table */}
@@ -258,7 +272,7 @@ const BudgetStatusReport = () => {
                                 )
                             }) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 text-lg">No hay presupuestos configurados para este período.</TableCell>
+                                    <TableCell colSpan={6} className="p-0">{renderBudgetEmptyState()}</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
