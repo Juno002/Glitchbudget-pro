@@ -85,7 +85,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" className="h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
+                <Button variant="ghost" className="min-h-11 sm:min-h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden gap-0">
                 <DialogHeader className="p-6 pb-2">
@@ -264,7 +264,7 @@ export default function GoalsManager() {
                                     )}
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-9 w-9">
+                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-11 w-11 sm:h-9 sm:w-9">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </AlertDialogTrigger>
@@ -332,7 +332,7 @@ export default function GoalsManager() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                      <FormField
                                         control={form.control}
                                         name="name"
