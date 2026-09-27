@@ -11,10 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreditCard, Plus, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
-import { formatCurrency, toCents, cn } from '@/lib/utils';
+import { toCents, cn } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DebtsTab() {
+  const money = usePrivateCurrency();
   const { debts, expenses, debtPayments, addDebt, deleteDebt, addDebtPayment } = useFinances();
   const savingRef = useRef(false);
   const [saving, setSaving] = useState(false);
@@ -161,13 +163,13 @@ export default function DebtsTab() {
                   <div className="bg-black/5 dark:bg-white/5 border border-[rgba(255,255,255,0.04)] rounded-xl p-3">
                     <p className="text-xs text-muted-foreground mb-1">Disponible para Uso</p>
                     <p className="text-xl font-bold font-mono tracking-tight text-primary">
-                      {formatCurrency(availableLimit)}
+                      {money(availableLimit)}
                     </p>
                   </div>
                   <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-good/5 border-good/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
                     <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Saldo pendiente'}</p>
                     <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-good" : (currentDebt === 0 ? "text-muted-foreground" : "text-bad"))}>
-                      {formatCurrency(absoluteDebt)}
+                      {money(absoluteDebt)}
                     </p>
                   </div>
                 </div>
@@ -203,11 +205,11 @@ export default function DebtsTab() {
                     {isSurplus ? (
                        <div className="bg-primary/10 p-3 rounded-md mb-2 flex items-start gap-2">
                           <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          <p className="text-xs text-primary dark:text-primary/80">Tienes saldo a favor de {formatCurrency(absoluteDebt)}. Cualquier pago adicional aumentará este colchón temporal en la tarjeta.</p>
+                          <p className="text-xs text-primary dark:text-primary/80">Tienes saldo a favor de {money(absoluteDebt)}. Cualquier pago adicional aumentará este colchón temporal en la tarjeta.</p>
                        </div>
                     ) : (
                        <div className="bg-black/5 dark:bg-[rgba(255,255,255,0.05)] p-3 rounded-md mb-2">
-                          <p className="text-xs text-muted-foreground">Tu deuda actual con esta tarjeta es de <span className="text-rose-500 dark:text-rose-400 font-bold">{formatCurrency(currentDebt)}</span>.</p>
+                          <p className="text-xs text-muted-foreground">Tu deuda actual con esta tarjeta es de <span className="text-rose-500 dark:text-rose-400 font-bold">{money(currentDebt)}</span>.</p>
                        </div>
                     )}
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
