@@ -1,3 +1,7 @@
+export { ActionMenu, type ActionMenuItem } from './action-menu';
+export { FilterChip } from './filter-chip';
+export { PlannedPaymentRow } from './planned-payment-row';
+export { TransactionRow } from './transaction-row';
 export { DetailHeader } from './detail-header';
 export { DeltaValue } from './delta-value';
 export { EmptyState } from './empty-state';
