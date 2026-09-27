@@ -162,7 +162,7 @@ export default function SubscriptionsManager() {
 
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
+            <Button size="sm" variant="outline" className="min-h-11 sm:min-h-9 border-primary/30 text-primary hover:bg-primary/10">
               <Plus className="mr-2 h-4 w-4" /> Añadir regla
             </Button>
           </DialogTrigger>
@@ -292,7 +292,7 @@ export default function SubscriptionsManager() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h4 id="upcoming-title" className="font-semibold">Próximos movimientos</h4>
-            <p className="text-xs text-muted-foreground">{unresolvedCount} pendientes dentro de la planificación materializada.</p>
+            <p aria-live="polite" className="text-xs text-muted-foreground">{unresolvedCount} pendientes dentro de la planificación materializada.</p>
           </div>
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
