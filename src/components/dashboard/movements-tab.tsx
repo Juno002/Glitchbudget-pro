@@ -20,7 +20,7 @@ export default function MovementsTab() {
         <MovementsView />
       </section>
 
-      <section className="space-y-3 border-t pt-6" aria-labelledby="accounts-title">
+      <section id="accounts-section" className="scroll-mt-24 space-y-3 border-t pt-6" aria-labelledby="accounts-title">
         <SectionHeader
           title={<span id="accounts-title">Cuentas y tarjetas</span>}
           description="Acceso secundario para consultar saldos, transferir, conciliar o administrar cuentas."
