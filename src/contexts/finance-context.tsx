@@ -48,6 +48,7 @@ export type BackupFile = { name: string; lastModified: number };
 
 interface FinanceContextType {
   theme: 'light' | 'dark' | 'serious';
+  currency: string;
   preventNegativeAccountBalance: boolean;
   budgetOverspendingBehavior: BudgetOverspendingBehavior;
   rolloverStrategy: RolloverStrategy;
@@ -792,6 +793,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
+    currency: activeSettings.currency,
     preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
     budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
