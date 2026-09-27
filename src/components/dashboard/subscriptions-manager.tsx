@@ -144,9 +144,9 @@ export default function SubscriptionsManager() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="text-lg font-bold">Pagos planificados</h3>
+          <h3 className="text-lg font-bold">Movimientos planificados</h3>
           <p className="text-sm text-muted-foreground">
-            Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un movimiento real.
+            Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un ingreso o gasto real.
           </p>
         </div>
 
