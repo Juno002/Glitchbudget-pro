@@ -1,12 +1,12 @@
 # Fase 7.5 — UX Architecture & Design System
 
-Fecha de cierre: 2026-09-27. Rama: `phase-7.5-ux-architecture`. Base: Fases 6–7 integradas en `main`.
+Fecha: 2026-09-27. Rama: `phase-7.5-ux-architecture`. Fuente de verdad: `Roadmap septiembre 2026.txt`.
 
-Fase 7.5 se dividió deliberadamente en cuatro gates para evitar una reescritura visual masiva y proteger el dominio financiero.
+Este documento registra el cumplimiento de **Fase 7.5 completa según el roadmap**, no una reescritura pixel-perfect de toda la aplicación. El objetivo fue fijar y aplicar la arquitectura de interacción, los patrones reutilizables y las restricciones UX antes de Quick Add 2.0.
 
-## 7.5A — Arquitectura de información
+## Navegación principal
 
-Contrato principal:
+La aplicación mantiene exactamente cuatro áreas:
 
 ```text
 Resumen
@@ -15,9 +15,110 @@ Plan
 Reportes
 ```
 
-Mismos nombres en móvil y escritorio.
+Las etiquetas son iguales en móvil y escritorio.
 
-Plan queda en:
+No se añadieron tabs primarios para Cuentas, Tarjetas, Metas, Inversiones, Planificados, Ajustes o Logros.
+
+## Header y acción global
+
+### Mobile
+
+El header prioriza:
+
+```text
+GlitchBudget
+Ocultar/mostrar importes
+Ajustes
+Período/contexto
+```
+
+Logros permanece como capa secundaria y su acceso explícito se oculta del header móvil para reducir densidad.
+
+### Desktop
+
+Conserva el mismo contexto y las mismas cuatro áreas.
+
+### Nuevo movimiento
+
+El FAB es accesible desde cualquier área primaria y abre siempre `TransactionModal`.
+
+El compositor global puede iniciar:
+
+```text
+Gasto
+Ingreso
+Transferencia
+```
+
+Transferencia solicita origen/destino y no muestra categoría. Reutiliza `saveTransfer`, por lo que sigue siendo movimiento de activos y no ingreso/gasto.
+
+TransactionModal continúa siendo la base a mejorar en Fase 8; no se reconstruyó desde cero.
+
+## Resumen
+
+Se aplicó la jerarquía del roadmap:
+
+```text
+1. Posición financiera
+2. Presupuesto disponible
+3. Próximos pagos
+4. Metas relevantes
+5. Movimientos recientes
+```
+
+### Posición financiera
+
+Diferencia:
+
+- Disponible líquido;
+- Deuda de tarjetas;
+- Patrimonio neto.
+
+El crédito disponible no se presenta como efectivo.
+
+### Presupuesto disponible
+
+`BudgetStatus` prioriza `Restante total` antes del detalle por categoría.
+
+### Próximos pagos
+
+Muestra hasta tres ocurrencias que requieren atención y permite Confirmar/Omitir sin reintroducir sus datos.
+
+### Metas
+
+Muestra highlights activos con progreso. Inversiones no se inventan antes de Fase 12.
+
+### Actividad reciente
+
+Incluye actividad registrada reciente:
+
+- ingresos;
+- gastos;
+- transferencias;
+- pagos de tarjeta;
+- aportes a metas.
+
+El análisis profundo por categoría vive en Reportes.
+
+## Movimientos
+
+El orden visible es ahora:
+
+```text
+Movimientos
+→ búsqueda
+→ filtros
+→ historial real
+→ cuentas/tarjetas como acceso secundario
+```
+
+`AccountsOverview` ya no ocupa la parte superior antes del historial.
+
+La administración de cuentas/tarjetas se agrupa detrás de acciones secundarias y `ActionMenu`.
+
+## Plan
+
+Contiene exactamente:
 
 ```text
 Presupuestos
@@ -25,186 +126,298 @@ Metas
 Planificados
 ```
 
-Tarjetas, cuentas, settings, logros e inversiones no son navegación primaria.
+La subsección activa se conserva en el contexto de navegación, permitiendo que Resumen lleve directamente a Metas o Planificados.
 
-Se centralizaron definiciones de navegación y se retiró la nomenclatura inconsistente Dashboard/Resumen y Planificación/Plan.
+“Suscripciones” ya no es concepto de navegación principal.
 
-Documento:
+## Planned Payments
 
-```text
-docs/ux/architecture.md
-```
-
-## 7.5B — Design System mínimo
-
-Primitives financieros compartidos:
+Patrón estable:
 
 ```text
-PageHeader
-SectionHeader
-DetailHeader
-MoneyValue
-DeltaValue
-MetricCard
-StatusBadge
-ProgressMetric
-EmptyState
-```
-
-Tokens estructurales centralizados:
-
-- spacing;
-- radius;
-- typography;
-- motion;
-- surface hierarchy.
-
-Documento:
-
-```text
-docs/ux/design-system.md
-```
-
-## 7.5C — Patrones estructurales
-
-Resumen pasa a status-first:
-
-```text
-Posición financiera
-Presupuesto restante
-Actividad registrada
-Ahorro sugerido
-```
-
-Los donuts salen de Home y el análisis queda en Reportes.
-
-Movimientos se estructura como:
-
-```text
-Mi dinero hoy
-Historial
-```
-
-Settings deja de ser un dropdown monolítico y pasa a:
-
-```text
-General
-Finanzas
-Categorías
-Privacidad
-Datos
-Apariencia
-Acerca de
-```
-
-Se establece `DetailHeader` y cuentas se convierte en la primera adopción del patrón común de detalle.
-
-Reportes se agrupa por propósito analítico.
-
-## 7.5D — Estados, privacidad y accesibilidad
-
-Hide Balances global:
-
-- preferencia visual local;
-- quick toggle en Header;
-- Ajustes → Privacidad;
-- sin Dexie ni backup;
-- superficies financieras principales privacy-aware;
-- sin flash inicial de importes cuando ya estaba activado.
-
-Estados Planned Payments:
-
-```text
+PlannedPaymentRow
 Pendiente
 Vencido
 Confirmado
 Omitido
 ```
 
-con texto + color y actividad reciente.
+Los estados siempre tienen texto y tratamiento visual.
 
-Accesibilidad/responsive:
+Las ocurrencias pendientes/vencidas permiten Confirmar/Omitir.
 
-- skip link;
-- main focus target;
-- focus rings;
-- touch targets móviles;
-- live regions;
-- autosave anunciado;
-- formularios apilados en móvil;
-- reduced-motion preservado.
+Las confirmadas recientes ofrecen:
 
-## Frontera respetada
+```text
+Ver movimiento
+```
 
-Durante toda 7.5 no se modificó:
+y abren el movimiento real vinculado dentro de Movimientos.
 
-- ledger;
+## Detail Screen / View vs Management
+
+Se estabilizó `DetailHeader`:
+
+```text
+Título
+Tipo/estado
+Métrica primaria
+Supporting information
+Acciones
+Historial/detalle
+```
+
+Cuentas es la primera adopción.
+
+La vista cotidiana muestra estado primero; editar, ajustar saldos o abrir administración se mueve a `ActionMenu`/dialogs secundarios.
+
+## Settings
+
+El engranaje abre un panel estructurado:
+
+```text
+General
+Finanzas
+Categorías
+Privacidad y seguridad
+Datos y backups
+Apariencia
+Acerca de
+```
+
+### General
+- moneda base actual;
+- inicio del período.
+
+La edición/multicurrency se reserva para Fase 11.
+
+### Finanzas
+- ingreso previsto;
+- rollover;
+- protección de saldo;
+- comportamiento al exceder presupuesto.
+
+### Privacidad y seguridad
+- Ocultar importes;
+- bloqueo de aplicación: reservado para Fase 17;
+- auto-lock: reservado para Fase 17.
+
+No se presentan controles falsos para features futuras.
+
+### Datos y backups
+- respaldos/export/import;
+- zona destructiva separada.
+
+## Hide Balances
+
+`balancesHidden` es una preferencia de presentación local:
+
+- quick toggle;
+- Ajustes → Privacidad;
+- persistencia en `localStorage`;
+- sincronización entre tabs;
+- sin Dexie;
+- sin backup;
+- sin modificar cálculos.
+
+Las superficies financieras principales usan `MoneyValue` o `usePrivateCurrency`.
+
+## Sistema de métricas y patrones base
+
+Estabilizados:
+
+```text
+PageHeader
+SectionHeader
+MetricCard
+MoneyValue
+DeltaValue
+ProgressMetric
+StatusBadge
+EmptyState
+DetailHeader
+ActionMenu
+FilterChip
+TransactionRow
+PlannedPaymentRow
+```
+
+El sistema visual no calcula dinero ni accede al ledger.
+
+## Design tokens
+
+Centralizados:
+
+- spacing;
+- radius;
+- surface hierarchy;
+- border strength;
+- typography scale;
+- money typography;
+- status semantics;
+- animation duration.
+
+Niveles estructurales:
+
+```text
+page
+section
+card
+interactive surface
+modal
+```
+
+Neón Oscuro, Claro y Minimalista comparten exactamente la misma arquitectura UX.
+
+## Empty / loading / feedback
+
+Aplicado/definido:
+
+- `EmptyState` contextual;
+- skeleton cuando la estructura se conoce;
+- bloqueo de submits repetidos;
+- Guardando/Guardado;
+- toasts/feedback inline;
+- errores de aplicación mediante mensajes útiles en vez de exponer Dexie directamente.
+
+## Destructivos
+
+Se exige confirmación en superficies con impacto histórico, incluyendo:
+
+- eliminar movimientos;
+- eliminar tarjetas;
+- borrar datos;
+- restaurar un backup que sobrescribe datos;
+- resets de categorías.
+
+La confirmación explica el efecto cuando corresponde.
+
+## Accesibilidad
+
+Incluye:
+
+- skip link a contenido;
+- focus visible;
+- navegación por teclado;
+- icon buttons etiquetados;
+- estados no basados solo en color;
+- live regions para estados dinámicos;
+- touch targets reforzados;
+- `prefers-reduced-motion`;
+- dialogs con primitives Radix.
+
+## Responsive
+
+### Mobile
+- una columna;
+- Bottom Navigation de cuatro destinos;
+- FAB sobre safe-area;
+- filtros/inputs apilables;
+- historial cotidiano sin tablas horizontales;
+- administración secundaria debajo del contenido principal.
+
+### Desktop
+- mismos nombres/orden;
+- grids para métricas;
+- tablas/grids en análisis;
+- master/detail solo donde aporte claridad.
+
+## Prototipos estructurales
+
+Antes de Fase 8 se documentaron wireframes para:
+
+```text
+Resumen
+Quick Add
+Movimientos
+Plan
+Account Detail
+Settings
+```
+
+Documento:
+
+```text
+docs/ux/wireframes-phase-7.5.md
+```
+
+Incluye evaluación de orden, información secundaria, progressive disclosure y objetivos de interacción.
+
+## Gate exacto del roadmap
+
+El entregable de 10 puntos solicitado por el roadmap está en:
+
+```text
+docs/roadmap/phase-7.5-gate.md
+```
+
+Contiene:
+
+1. Proposed navigation structure
+2. Components/patterns to reuse
+3. Existing components to keep
+4. Existing components to simplify
+5. Existing components to retire
+6. Mobile behavior
+7. Desktop behavior
+8. Accessibility considerations
+9. Screens affected by later phases
+10. UX decisions that constrain the domain model
+
+## Frontera financiera respetada
+
+Fase 7.5 no modificó:
+
 - fórmulas financieras;
 - canonical metrics;
 - Period Engine;
 - Recurrence Engine;
-- lifecycle de PlannedOccurrence;
+- estados de PlannedOccurrence;
 - categorías persistidas;
-- Dexie schema;
-- backup format.
+- schema Dexie;
+- formato del backup.
 
-Persistencia final:
+Persistencia:
 
 ```text
 Dexie v11
 Backup JSON v7
 ```
 
-## Resultado arquitectónico
+El único adaptador funcional nuevo del compositor global reutiliza el servicio de transferencia existente; no redefine su semántica.
 
-La aplicación tiene ahora una jerarquía UX estable sobre la cual pueden construirse fases posteriores sin volver a decidir navegación y vocabulario en cada feature.
+## Gate técnico
 
-```text
-UI primitives
-      ↓
-4 áreas primarias
-      ↓
-dominio financiero existente
-```
-
-El Design System no calcula dinero y la UI no redefine reglas financieras.
-
-## Gates
-
-- 7.5A: 194 tests.
-- 7.5B: 196 tests.
-- 7.5C: 200 tests.
-- 7.5D: 205 tests.
-
-Gate final:
+Gate de código previo a esta documentación:
 
 ```text
-205 tests
-205 pass
+214 tests
+214 pass
 0 fail
 typecheck ✓
-lint ✓
+ESLint 0 warnings ✓
 local-only ✓
 static build ✓
-offline manifest ✓
+offline manifest: 43 resources
 ```
 
-## Siguiente fase del roadmap
+Los avisos Node/Actions del runner son deprecaciones externas.
+
+## QA manual
+
+Los checks automáticos no sustituyen:
+
+- revisión visual en teléfono físico;
+- lector de pantalla real;
+- contraste manual de combinaciones extremas;
+- revisión humana del entregable UX.
+
+El roadmap exige revisar el gate antes de Fase 8.
+
+## Siguiente fase
 
 ```text
 Fase 8 — Quick Add 2.0
 ```
 
-Quick Add deberá respetar el contrato ya definido:
-
-```text
-Monto
-Gasto | Ingreso | Transferencia
-Cuenta
-Categoría cuando aplica
-Guardar
-↓
-Más detalles
-```
-
-No iniciar Fase 8 sin un gate explícito.
+**No iniciar Fase 8 hasta revisar `docs/roadmap/phase-7.5-gate.md`.**
