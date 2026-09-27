@@ -11,7 +11,7 @@ import { friendlyError } from '@/lib/errors';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AccountSelect } from './account-select';
 import DebtsTab from './debts-tab';
 import { ActionMenu, DetailHeader } from '@/components/finance-ui';
@@ -29,6 +29,7 @@ export default function AccountsOverview() {
   const [editingTransfer, setEditingTransfer] = useState('');
   const [name, setName] = useState('');
   const [cashOpen, setCashOpen] = useState(false);
+  const [cardsOpen, setCardsOpen] = useState(false);
   const [opening, setOpening] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -51,8 +52,31 @@ export default function AccountsOverview() {
   const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
   const account = data.accounts.find(a => a.id === selected);
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h3 className="font-semibold">Cuentas y tarjetas</h3><div className="flex flex-wrap gap-x-4 gap-y-1 text-sm"><p className="whitespace-nowrap"><span className="text-muted-foreground">Efectivo</span> {money(cash)}</p><p className="whitespace-nowrap"><span className="text-muted-foreground">Bancos</span> {money(bank)}</p></div></div>
-      <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}><DialogTrigger asChild><Button variant="outline" onClick={() => {setEditingAccount('');setName('');setOpening('');}}>Gestionar bancos</Button></DialogTrigger>
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h3 className="font-semibold">Cuentas y tarjetas</h3>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Efectivo</span> {money(cash)}</p>
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Bancos</span> {money(bank)}</p>
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Deuda</span> {money(owed)}</p>
+        </div>
+      </div>
+      <ActionMenu
+        label="Gestionar cuentas y tarjetas"
+        items={[
+          {
+            label: 'Bancos y transferencias',
+            icon: <Settings2 className="h-4 w-4" />,
+            onSelect: () => { setEditingAccount(''); setName(''); setOpening(''); setOpen(true); },
+          },
+          {
+            label: 'Tarjetas y pagos',
+            icon: <Settings2 className="h-4 w-4" />,
+            onSelect: () => setCardsOpen(true),
+          },
+        ]}
+      />
+      <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}>
         <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Bancos y transferencias</DialogTitle><DialogDescription>Registra tus bancos con su saldo actual. Efectivo se administra automáticamente con tus ingresos y gastos.</DialogDescription></DialogHeader>
           <fieldset disabled={busy} className="space-y-6 min-w-0">
             <form className="space-y-3" onSubmit={e => { e.preventDefault(); void run(async () => { await addAccount({ id: editingAccount || crypto.randomUUID(), name, type: 'bank', openingBalance: toCents(opening), startDate: data.accounts.find(a => a.id === editingAccount)?.startDate || localDate() }, !!editingAccount); setName(''); setOpening(''); setEditingAccount(''); }, editingAccount ? 'Cuenta actualizada' : 'Cuenta creada'); }}>
@@ -81,12 +105,11 @@ export default function AccountsOverview() {
           </fieldset>{busy && <p role="status" className="text-sm">Guardando…</p>}
         </DialogContent>
       </Dialog>
-      <Dialog>
-        <DialogTrigger asChild><Button variant="outline">Gestionar tarjetas</Button></DialogTrigger>
+      <Dialog open={cardsOpen} onOpenChange={setCardsOpen}>
         <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Tarjetas y pagos</DialogTitle>
-            <DialogDescription>Consulta y administra tus tarjetas sin convertirlas en una sección principal de Plan.</DialogDescription>
+            <DialogDescription>Consulta y administra tus tarjetas sin convertirlas en una sección principal.</DialogDescription>
           </DialogHeader>
           <DebtsTab />
         </DialogContent>
