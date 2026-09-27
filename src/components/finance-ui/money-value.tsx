@@ -1,4 +1,7 @@
+'use client';
+
 import { cn, formatCurrency } from '@/lib/utils';
+import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 
 export type MoneyTone = 'neutral' | 'positive' | 'negative' | 'warning' | 'muted';
 
@@ -23,6 +26,8 @@ export function MoneyValue({
   concealed?: boolean;
   className?: string;
 }) {
+  const { balancesHidden } = useBalanceVisibility();
+  const hidden = concealed || balancesHidden;
   const sign = showSign && amount !== 0 ? (amount > 0 ? '+' : '−') : '';
   const absolute = showSign ? Math.abs(amount) : amount;
 
@@ -33,9 +38,10 @@ export function MoneyValue({
         toneClass[tone],
         className,
       )}
-      aria-label={concealed ? 'Importe oculto' : undefined}
+      data-money-value="true"
+      aria-label={hidden ? 'Importe oculto' : undefined}
     >
-      {concealed ? '••••••' : `${sign}${formatCurrency(absolute)}`}
+      {hidden ? '••••••' : `${sign}${formatCurrency(absolute)}`}
     </span>
   );
 }
