@@ -8,6 +8,7 @@ export const recurringRuleSchema = z.object({
   id: z.string().min(1), direction: z.enum(['income', 'expense']),
   title: z.string().min(1), categoryId: z.string().min(1),
   amount: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  defaultAccountId: z.string().min(1).optional(),
   cadence: z.enum(['weekly', 'biweekly', 'monthly']),
   day: z.number().int().min(0).max(31).optional(),
   startDate: z.string().refine(isValidDate), endDate: z.string().refine(isValidDate).optional(),
@@ -18,7 +19,7 @@ export const recurringRuleSchema = z.object({
 export async function saveRecurringRule(input: RecurringRule, editing = false) {
   const row = recurringRuleSchema.parse(input);
   if (row.endDate && row.endDate < row.startDate) throw new Error('La fecha final precede al inicio de la regla.');
-  return db.transaction('rw', db.categories, db.recurrents, db.planned_occurrences, async () => {
+  return db.transaction('rw', db.categories, db.accounts, db.recurrents, db.planned_occurrences, async () => {
     const old = editing ? await db.recurrents.get(row.id) : undefined;
     if (editing && !old) throw new Error('La regla ya no existe.');
     if (old && old.direction !== row.direction) {
@@ -26,6 +27,9 @@ export async function saveRecurringRule(input: RecurringRule, editing = false) {
       if (occurrences) throw new Error('No se puede cambiar el tipo de una regla que ya tiene ocurrencias materializadas.');
     }
     await requireCategory(row.categoryId, row.direction, old?.direction === row.direction ? old.categoryId : undefined);
+    if (row.defaultAccountId && !await db.accounts.get(row.defaultAccountId)) {
+      throw new Error('La cuenta predeterminada de la regla no existe.');
+    }
     if (editing) await db.recurrents.put(row); else await db.recurrents.add(row);
   });
 }
