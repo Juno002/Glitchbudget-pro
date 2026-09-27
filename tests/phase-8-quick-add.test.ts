@@ -38,7 +38,7 @@ test('Phase 8 preselects the real default cash account instead of a visual-only 
 
 test('Phase 8 templates are local presets and do not add a Dexie table', () => {
   const source = read('src/components/dashboard/TransactionModal.tsx');
-  assert.match(source, /Guardar estos valores para reutilizarlos/);
+  assert.match(source, /Guarda estos valores para reutilizarlos/);
   assert.match(source, /loadQuickAddTemplates\(window\.localStorage\)/);
   assert.match(source, /upsertQuickAddTemplate\(window\.localStorage/);
 
