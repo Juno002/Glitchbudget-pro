@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { EmptyState, FilterChip, TransactionRow } from '@/components/finance-ui';
 import { TrendingUp, TrendingDown, Pin } from 'lucide-react';
 import TransactionModal from './TransactionModal';
-import { useTabs } from '@/contexts/tabs-context';
+import { useOptionalTabs } from '@/contexts/tabs-context';
 
 type UnifiedItem = {
   id: string;
@@ -32,7 +32,9 @@ type UnifiedItem = {
 export default function MovementsView() {
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
-  const { movementFocusId, clearMovementFocus } = useTabs();
+  const tabs = useOptionalTabs();
+  const movementFocusId = tabs?.movementFocusId ?? null;
+  const clearMovementFocus = tabs?.clearMovementFocus;
   const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 
   const accountData = useLiveQuery(() => db.transaction('r', db.accounts, db.account_transfers, async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray() })));
@@ -123,7 +125,7 @@ export default function MovementsView() {
     } else {
       setDetailItem(item);
     }
-    clearMovementFocus();
+    clearMovementFocus?.();
   }, [movementFocusId, periodItems, clearMovementFocus]);
 
   const handleItemClick = (item: UnifiedItem) => {
