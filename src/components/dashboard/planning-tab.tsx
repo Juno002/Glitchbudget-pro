@@ -7,7 +7,8 @@ import { useFinances } from '@/contexts/finance-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft, Plus } from 'lucide-react';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Skeleton } from '../ui/skeleton';
@@ -32,6 +33,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   spent: number;
   onSave: (val: number) => Promise<boolean>;
 }) {
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const category = getCategoryInfo(categoryId);
   const [inputValue, setInputValue] = useState(String(currentPlan / 100));
@@ -109,9 +111,9 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
              {over && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Excedido</span>}
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-            <span>Gastado: {formatCurrency(spent)}</span>
+            <span>Gastado: {money(spent)}</span>
             <span>•</span>
-            <span className={cn(left === 0 && plan > 0 && "text-amber-500")}>Resta: {formatCurrency(left)}</span>
+            <span className={cn(left === 0 && plan > 0 && "text-amber-500")}>Resta: {money(left)}</span>
           </div>
         </div>
       </div>
@@ -281,6 +283,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
 }
 
 export default function PlanningTab() {
+  const money = usePrivateCurrency();
   const { currentMonth, currentPeriod, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState('budgets');
@@ -332,7 +335,7 @@ export default function PlanningTab() {
 
         {/* --- PRESUPUESTOS TAB --- */}
         <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{formatCurrency(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{formatCurrency(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del período tras reservas: <strong>{formatCurrency(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
+            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{money(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{money(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del período tras reservas: <strong>{money(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
             <Card>
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                     <div className="space-y-1">
