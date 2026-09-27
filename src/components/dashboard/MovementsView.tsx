@@ -12,8 +12,7 @@ import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import type { Expense, Income } from '@/lib/db';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EmptyState } from '@/components/finance-ui';
+import { EmptyState, FilterChip, TransactionRow } from '@/components/finance-ui';
 import { TrendingUp, TrendingDown, Pin } from 'lucide-react';
 import TransactionModal from './TransactionModal';
 
@@ -129,35 +128,45 @@ export default function MovementsView() {
     <div className="space-y-4">
       <Input aria-label="Buscar movimientos" placeholder="Buscar movimientos…" value={search} onChange={e => setSearch(e.target.value)} />
       {/* Filter bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
-        <Tabs value={filterType} onValueChange={(v) => setFilterType(v as any)} className="w-full sm:flex-1">
-          <TabsList className="flex w-full overflow-x-auto gap-1 no-scrollbar justify-start border bg-black/5 dark:bg-white/5 p-1 rounded-xl">
-            <TabsTrigger className="flex-1 whitespace-nowrap" value="all">Todos</TabsTrigger>
-            <TabsTrigger className="flex-1 whitespace-nowrap" value="income">Ingresos</TabsTrigger>
-            <TabsTrigger className="flex-1 whitespace-nowrap" value="expense">Gastos</TabsTrigger>
-            <TabsTrigger className="flex-1 whitespace-nowrap" value="other">Otros</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2" aria-label="Tipo de movimiento">
+          {([
+            ['all', 'Todos'],
+            ['income', 'Ingresos'],
+            ['expense', 'Gastos'],
+            ['other', 'Otros'],
+          ] as const).map(([value, label]) => (
+            <FilterChip
+              key={value}
+              active={filterType === value}
+              onClick={() => setFilterType(value)}
+            >
+              {label}
+            </FilterChip>
+          ))}
+        </div>
 
-        <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Categoría" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todas</SelectItem>
-            {presentCategories.map(cat => (
-              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {presentCategories.map(cat => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <Input
-          type="month"
-          aria-label="Mes del historial"
-          value={filterMonth}
-          onChange={(e) => setFilterMonth(e.target.value)}
-          className="w-auto"
-        />
+          <Input
+            type="month"
+            aria-label="Mes del historial"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            className="w-full sm:w-auto"
+          />
+        </div>
       </div>
 
       {/* Items list */}
@@ -172,48 +181,28 @@ export default function MovementsView() {
             const cat = getCategoryInfo(item.categoryId);
             const Icon = cat?.icon;
             const isIncome = item.kind === 'income';
-            const neutral = item.kind !== 'income' && item.kind !== 'expense';
+            const isExpense = item.kind === 'expense';
+            const tone = isIncome ? 'positive' : isExpense ? 'negative' : 'neutral';
 
             return (
-              <button
+              <TransactionRow
                 key={`${item.kind}-${item.id}`}
                 onClick={() => handleItemClick(item)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl border hover:bg-black/5 dark:hover:bg-white/5 transition-colors text-left"
-              >
-                {/* Icon */}
-                <div className={cn(
-                  "shrink-0 flex items-center justify-center w-10 h-10 rounded-lg",
-                  isIncome ? "bg-good/10" : "bg-bad/10"
-                )}>
-                  {Icon && <Icon strokeWidth={1.75} className={cn("h-4 w-4", isIncome ? "text-good" : "text-bad")} />}
-                </div>
-
-                {/* Label + Category */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{item.label}</div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <span className="truncate">{item.detail || cat?.name}{item.kind === 'expense' && (item.raw as Expense)?.paymentMethod === 'credit' ? ' · Tarjeta' : ''}</span>
-                    {item.isFixed && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 text-[10px] font-medium">
-                        <Pin className="h-2.5 w-2.5" /> Fijo
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Amount + Date */}
-                <div className="shrink-0 text-right">
+                icon={
                   <div className={cn(
-                    "text-sm font-semibold tabular-nums",
-                    neutral ? 'text-foreground' : isIncome ? "text-emerald-500" : "text-rose-500"
+                    "flex h-10 w-10 items-center justify-center rounded-lg",
+                    isIncome ? "bg-good/10" : isExpense ? "bg-bad/10" : "bg-muted/20"
                   )}>
-                    {neutral ? '' : isIncome ? '+' : '-'}{money(item.amount)}
+                    {Icon ? <Icon strokeWidth={1.75} className={cn("h-4 w-4", isIncome ? "text-good" : isExpense ? "text-bad" : "text-muted-foreground")} /> : null}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {new Date(item.date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
-                  </div>
-                </div>
-              </button>
+                }
+                title={item.label}
+                meta={<span className="truncate">{item.detail || cat?.name}{isExpense && (item.raw as Expense)?.paymentMethod === 'credit' ? ' · Tarjeta' : ''}</span>}
+                badge={item.isFixed ? <span className="inline-flex items-center gap-0.5 rounded bg-muted/20 px-1.5 py-0.5 text-[10px] font-medium"><Pin className="h-2.5 w-2.5" /> Fijo</span> : undefined}
+                amount={item.amount}
+                tone={tone}
+                dateLabel={new Date(item.date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
+              />
             );
           })}
         </div>
