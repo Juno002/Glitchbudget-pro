@@ -152,6 +152,9 @@ export function validateOccurrenceLedgerLinks(
   const ruleMap = new Map(rules.map(row => [row.id, row]));
 
   for (const occurrence of occurrences) {
+    if (occurrence.status === 'pending' && !ruleMap.has(occurrence.ruleId)) {
+      throw new Error('El respaldo contiene una ocurrencia pendiente sin su regla de origen.');
+    }
     if (occurrence.status !== 'confirmed') continue;
     const id = occurrence.transactionId!;
     const income = incomeMap.get(id);
