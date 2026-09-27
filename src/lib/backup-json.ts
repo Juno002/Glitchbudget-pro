@@ -80,6 +80,18 @@ export const PlanV3 = z.object({
   limit: z.number().int().nonnegative()
 });
 
+export const PlanV7 = z.object({
+  month: z.string().min(1),
+  categoryId: Id,
+  limit: z.number().int().nonnegative(),
+  periodType: z.enum(['weekly','monthly','yearly','one_time']).optional(),
+  periodStart: ISODate.optional(),
+  periodEnd: ISODate.optional(),
+}).refine(plan => {
+  const metadata = [plan.periodType, plan.periodStart, plan.periodEnd];
+  return metadata.every(value => value === undefined) || metadata.every(value => value !== undefined);
+}, 'El período del presupuesto está incompleto.');
+
 export const GoalV3 = z.object({
   quota: MoneyCents.default(0),
   id: Id, name: z.string(),
@@ -136,7 +148,7 @@ const DumpV3 = z.object({
   fxRates: z.array(FxRateV3).optional(),
 });
 const DumpV6 = DumpV3.extend({ v:z.literal(6), incomes:z.array(IncomeV6), expenses:z.array(ExpenseV6), recurrents:z.array(recurringRuleSchema) });
-const DumpV7 = DumpV6.extend({ v:z.literal(7), plannedOccurrences:z.array(plannedOccurrenceSchema) });
+const DumpV7 = DumpV6.extend({ v:z.literal(7), plans:z.array(PlanV7), plannedOccurrences:z.array(plannedOccurrenceSchema) });
 type DumpV7T = z.infer<typeof DumpV7>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
@@ -212,7 +224,10 @@ export async function exportDataJSON(): Promise<string> {
     })),
     plans: plans.map(p => ({
       month: p.month, categoryId: p.categoryId,
-      limit: toCents(p.limit)
+      limit: toCents(p.limit),
+      periodType: p.periodType,
+      periodStart: p.periodStart,
+      periodEnd: p.periodEnd,
     })),
     goals: goals.map(g => ({
       quota: g.quota ?? 0,
@@ -290,7 +305,7 @@ export async function importDataJSON(text: string): Promise<{
     ...d.periods.map(p => p.id),
     ...d.incomes.map(i => i.date.slice(0, 7)),
     ...d.expenses.map(e => e.date.slice(0, 7)),
-    ...d.plans.map(p => p.month)
+    ...d.plans.map(p => p.month).filter(id => /^\d{4}-\d{2}$/.test(id))
   ]);
   const periodsEnsured = periodIds.map(id => {
     const found = d.periods.find(p => p.id === id);
@@ -331,8 +346,12 @@ export async function importDataJSON(text: string): Promise<{
   }));
 
   const plans = d.plans.map(p => ({
-    month: p.month, categoryId: p.categoryId,
-    limit: p.limit
+    month: p.month,
+    categoryId: p.categoryId,
+    limit: p.limit,
+    periodType: 'periodType' in p ? p.periodType : undefined,
+    periodStart: 'periodStart' in p ? p.periodStart : undefined,
+    periodEnd: 'periodEnd' in p ? p.periodEnd : undefined,
   }));
 
   const goals = d.goals.map(g => ({
