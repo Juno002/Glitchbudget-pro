@@ -19,7 +19,7 @@ import { db, type Settings, type Income, type Expense, type Plan, type Debt, typ
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
-import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome } from '@/lib/transaction-service';
+import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
 import { ensureCashAccount } from '@/lib/accounts';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
@@ -352,7 +352,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteExpense = useCallback(async (id: string) => {
     try {
-      await db.expenses.delete(id);
+      await removeExpense(id);
       toast({ title: 'Gasto eliminado' });
       return true;
     } catch (error) {
