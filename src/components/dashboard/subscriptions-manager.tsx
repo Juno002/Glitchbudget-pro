@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, CheckCircle2, CirclePause, CirclePlay, Clock3, Plus, SkipForward } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { EmptyState, StatusBadge } from '@/components/finance-ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { groupUpcomingOccurrences, type UpcomingBucket } from '@/domain/upcoming';
@@ -34,6 +36,7 @@ function dateLabel(value: string) {
 }
 
 export default function SubscriptionsManager() {
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const {
     recurringRules,
@@ -76,6 +79,13 @@ export default function SubscriptionsManager() {
     [recurringRules],
   );
   const unresolvedCount = Object.values(grouped).reduce((sum, rows) => sum + rows.length, 0);
+  const recentResolved = useMemo(
+    () => [...(plannedOccurrences || [])]
+      .filter(row => row.status === 'confirmed' || row.status === 'skipped')
+      .sort((a, b) => b.scheduledDate.localeCompare(a.scheduledDate) || b.id.localeCompare(a.id))
+      .slice(0, 5),
+    [plannedOccurrences],
+  );
 
   const handleAddSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -171,7 +181,7 @@ export default function SubscriptionsManager() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Tipo</Label>
                   <Select
@@ -201,7 +211,7 @@ export default function SubscriptionsManager() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Frecuencia</Label>
                   <Select
@@ -288,9 +298,10 @@ export default function SubscriptionsManager() {
         </div>
 
         {unresolvedCount === 0 ? (
-          <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No hay ocurrencias pendientes en la ventana actual.
-          </div>
+          <EmptyState
+            title="Nada pendiente"
+            description="No hay movimientos planificados pendientes en la ventana actual."
+          />
         ) : (
           GROUPS.map(group => {
             const rows = grouped[group.key];
@@ -312,17 +323,18 @@ export default function SubscriptionsManager() {
                           <Clock3 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
                           <span className="truncate font-medium">{rule.title}</span>
                           <span className="text-xs text-muted-foreground">{rule.direction === 'expense' ? 'Gasto' : 'Ingreso'}</span>
+                          <StatusBadge status={group.key === 'overdue' ? 'overdue' : 'pending'} />
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          {dateLabel(occurrence.scheduledDate)} · {formatCurrency(rule.amount)}
+                          {dateLabel(occurrence.scheduledDate)} · {money(rule.amount)}
                           {category ? ` · ${category.name}` : ''}
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" disabled={!!workingId} onClick={() => skip(occurrence)}>
+                        <Button size="sm" variant="outline" className="min-h-11 sm:min-h-9" disabled={!!workingId} onClick={() => skip(occurrence)}>
                           <SkipForward className="mr-1 h-3.5 w-3.5" /> Omitir
                         </Button>
-                        <Button size="sm" disabled={!!workingId} onClick={() => confirm(occurrence)}>
+                        <Button size="sm" className="min-h-11 sm:min-h-9" disabled={!!workingId} onClick={() => confirm(occurrence)}>
                           <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> {busy ? 'Guardando…' : 'Confirmar'}
                         </Button>
                       </div>
@@ -335,6 +347,32 @@ export default function SubscriptionsManager() {
         )}
       </section>
 
+      {recentResolved.length > 0 && (
+        <section className="space-y-3" aria-labelledby="recent-planned-title">
+          <div>
+            <h4 id="recent-planned-title" className="font-semibold">Actividad planificada reciente</h4>
+            <p className="text-xs text-muted-foreground">Últimas ocurrencias confirmadas u omitidas.</p>
+          </div>
+          <div className="grid gap-2">
+            {recentResolved.map(occurrence => {
+              const rule = rulesById.get(occurrence.ruleId);
+              return (
+                <div key={occurrence.id} className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{rule?.title || 'Regla eliminada'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {dateLabel(occurrence.scheduledDate)}
+                      {rule ? ` · ${money(rule.amount)}` : ''}
+                    </p>
+                  </div>
+                  <StatusBadge status={occurrence.status} />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <section className="space-y-3" aria-labelledby="rules-title">
         <div>
           <h4 id="rules-title" className="font-semibold">Reglas recurrentes</h4>
@@ -342,7 +380,7 @@ export default function SubscriptionsManager() {
         </div>
 
         {sortedRules.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">Aún no hay reglas recurrentes.</div>
+          <EmptyState title="Aún no hay reglas recurrentes" description="Añade una regla para generar movimientos planificados localmente." />
         ) : (
           <div className="grid gap-2">
             {sortedRules.map(rule => {
@@ -352,10 +390,10 @@ export default function SubscriptionsManager() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{rule.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {cadenceLabel(rule.cadence)} · {formatCurrency(rule.amount)}
+                      {cadenceLabel(rule.cadence)} · {money(rule.amount)}
                       {category ? ` · ${category.name}` : ''}
-                      {!rule.active ? ' · Pausada' : ''}
                     </p>
+                    <div className="mt-1"><StatusBadge status={rule.active ? 'success' : 'neutral'} label={rule.active ? 'Activa' : 'Pausada'} /></div>
                   </div>
                   <Button
                     size="sm"
