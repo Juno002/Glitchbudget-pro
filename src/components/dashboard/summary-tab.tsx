@@ -1,270 +1,146 @@
 'use client';
 
-import { useFinances } from "@/contexts/finance-context";
-import { useCategoryResolver } from '@/hooks/use-categories';
-import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useFinances } from '@/contexts/finance-context';
 import { formatPeriodRange } from '@/lib/period-format';
-import { useEffect, useState } from "react";
-import { motion } from 'framer-motion';
-import BudgetStatus from "./budget-status";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip as RechartsTooltip } from 'recharts';
+import { PageHeader, SectionHeader, MetricCard } from '@/components/finance-ui';
+import { Skeleton } from '@/components/ui/skeleton';
+import BudgetStatus from './budget-status';
+import { cn } from '@/lib/utils';
 
-function formatMonth(date: string) {
-  const d = new Date(`${date}-02`); // Use day 2 to avoid timezone issues
-  return format(d, 'MMMM', { locale: es });
+function formatMonth(value: string) {
+  return format(new Date(`${value}-02`), 'MMMM', { locale:es });
 }
 
-const Ring = ({ pct, ok = true }: { pct: number, ok?: boolean }) => (
-  <div className="relative h-9 w-9">
-    <svg viewBox="0 0 36 36" className="h-9 w-9">
-      <path
-        d="M18 2 a16 16 0 1 1 0 32 a16 16 0 1 1 0-32"
-        fill="none"
-        stroke="currentColor"
-        className="text-slate-200 dark:text-slate-700"
-        strokeWidth="4"
-      />
-      <path
-        d="M18 2 a16 16 0 1 1 0 32 a16 16 0 1 1 0-32"
-        fill="none"
-        stroke="currentColor"
-        className={ok ? "text-emerald-500" : "text-rose-500"}
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeDasharray={`${pct} ${100 - pct}`}
-        transform="rotate(-90 18 18)"
-      />
-    </svg>
-  </div>
-);
-
-
-function Snapshot({
-  totalIncome, totalExpenses, liquidAssets, suggestedSave, savePct, loading
-}: {
-  totalIncome: number; totalExpenses: number; liquidAssets: number; suggestedSave: number; savePct: number; loading: boolean
-}) {
-  const position = useFinances().getPosition();
-  const spendingPct = Math.min(100, Math.round((totalExpenses / Math.max(1, totalIncome)) * 100));
-  const currentSavePct = Math.min(100, Math.round((suggestedSave / Math.max(1, totalIncome)) * 100));
-
-  if (loading) {
-      return (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
-          </div>
-      )
-  }
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: (i: number) => ({
-      opacity: 1, y: 0, scale: 1,
-      transition: { delay: i * 0.08, type: 'spring' as const, stiffness: 260, damping: 20 }
-    }),
-  };
-
-  const cards = [
-    { label: 'Dinero en cuentas hoy', value: liquidAssets, color: 'text-emerald-600 dark:text-emerald-500', ring: <Ring pct={liquidAssets > 0 ? 100 : 0} ok={liquidAssets >= 0} />, info: `Efectivo: ${formatCurrency(position.cash)}. Bancos: ${formatCurrency(position.bank)}. Total real de hoy, igual que en Movimientos. No incluye crédito disponible ni descuenta deudas o reservas del presupuesto.` },
-    { label: 'Ahorro sugerido', value: suggestedSave, color: 'text-amber-600 dark:text-amber-500', ring: <Ring pct={currentSavePct} ok />, info: `${Math.round(savePct * 100)}% de los ingresos registrados del mes. Es una propuesta; no mueve dinero entre cuentas.` },
-    { label: 'Ingresos', value: totalIncome, color: 'text-emerald-700 dark:text-emerald-600', ring: <Ring pct={totalIncome > 0 ? 100 - spendingPct : 0} ok /> },
-    { label: 'Gastos', value: totalExpenses, color: 'text-rose-600 dark:text-rose-500', ring: <Ring pct={spendingPct} ok={spendingPct <= 70} /> },
+function SaveStrategy() {
+  const { savePct, updateSettings } = useFinances();
+  const options = [
+    { label:'Ninguno 0%', value:0 },
+    { label:'Conservador 5%', value:0.05 },
+    { label:'Estándar 10%', value:0.10 },
+    { label:'Agresivo 20%', value:0.20 },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {cards.map((card, i) => (
-        <motion.div
-          key={card.label}
-          custom={i}
-          initial="hidden"
-          animate="visible"
-          variants={cardVariants}
-        >
-          <Card className="p-3 hover:shadow-lg hover:shadow-[hsl(var(--primary)_/_0.04)] transition-shadow duration-300">
-            <CardContent className="p-0 flex items-center gap-3 min-w-0">
-              <div className="shrink-0">{card.ring}</div>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">{card.label}</div>
-                <div className={`text-2xl font-semibold tabular-nums break-words leading-tight ${card.color}`}>{formatCurrency(card.value)}</div>
-              </div>
-              {card.info && (
-                <Popover>
-                  <PopoverTrigger className="shrink-0 text-slate-400 text-sm focus:outline-none">ℹ️</PopoverTrigger>
-                  <PopoverContent>{card.info}</PopoverContent>
-                </Popover>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      ))}
+    <div className="flex flex-wrap gap-2">
+      {options.map(option => {
+        const active = Math.abs(savePct - option.value) < 0.001;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => updateSettings({ savePct:option.value })}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-xs transition-colors',
+              active
+                ? 'border-primary/30 bg-primary/10 text-primary'
+                : 'border-border text-muted-foreground hover:bg-muted/30 hover:text-foreground',
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-
-
-const DonutChart = ({ data, title, colors, delay = 0 }: { data: { name: string, value: number }[], title: string, colors?: string[], delay?: number }) => {
-  const getCategoryInfo = useCategoryResolver();
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => { setIsClient(true) }, []);
-
-    // Default palette if none provided
-    const COLORS = colors || [
-        'hsl(var(--chart-1))',
-        'hsl(var(--chart-2))',
-        'hsl(var(--chart-3))',
-        'hsl(var(--chart-4))',
-        'hsl(var(--chart-5))',
-    ];
-
-    if(!isClient) return <Skeleton className="h-64 w-full" />;
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay, type: 'spring', stiffness: 200, damping: 20 }}
-        >
-        <Card className="hover:shadow-lg hover:shadow-[hsl(var(--primary)_/_0.04)] transition-shadow duration-300">
-            <CardContent className="pt-6">
-                <h3 className="text-base font-semibold mb-3">{title} por categoría</h3>
-                <div className="h-64 w-full">
-                    {data.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <RechartsTooltip
-                                    formatter={(value: number) => [formatCurrency(value), title]}
-                                    contentStyle={{
-                                        backgroundColor: 'hsl(var(--popover))',
-                                        border: '1px solid hsl(var(--border))',
-                                        borderRadius: '12px',
-                                        backdropFilter: 'blur(12px)',
-                                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                                    }}
-                                    itemStyle={{ color: 'hsl(var(--foreground))' }}
-                                />
-                                <Legend formatter={(value) => getCategoryInfo(String(value))?.name || String(value)} />
-                                <Pie
-                                    data={data}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={80}
-                                    innerRadius={50}
-                                    labelLine={false}
-                                    animationBegin={delay * 1000}
-                                    animationDuration={800}
-                                    animationEasing="ease-out"
-                                    paddingAngle={3}
-                                    stroke="hsl(var(--background))"
-                                    strokeWidth={2}
-                                >
-                                    {data.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className="flex items-center justify-center h-full text-muted-foreground">Sin datos para mostrar.</div>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-        </motion.div>
-    );
-}
-
-const chipClass = (isActive: boolean) =>
-  `px-3 py-1.5 text-xs rounded-full border transition-all duration-300 ${
-    isActive
-      ? 'bg-primary/10 border-primary/30 text-primary shadow-[0_0_12px_hsl(var(--primary)_/_0.1)]'
-      : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-muted-foreground hover:bg-black/10 dark:bg-white/10 hover:text-foreground'
-  }`;
-
-const SaveStrategyChips = () => {
-    const { savePct, updateSettings } = useFinances();
-    return (
-        <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">💰 Ahorro sugerido <span className="text-[10px] opacity-60">(no mueve dinero)</span></p>
-            <div className="flex flex-wrap gap-2">
-                {[
-                    {label:'Ninguno 0%',      val:0.00},
-                    {label:'Conservador 5%',   val:0.05},
-                    {label:'Estándar 10%',     val:0.10},
-                    {label:'Agresivo 20%',     val:0.20},
-                ].map(opt => {
-                    const isActive = Math.abs(savePct - opt.val) < 0.01;
-                    return (
-                      <button key={opt.val}
-                      onClick={() => updateSettings({ savePct: opt.val })}
-                      className={chipClass(isActive)}>
-                      {opt.label}
-                      </button>
-                    )
-                })}
-            </div>
-        </div>
-    )
-}
-
-
 export default function SummaryTab() {
-  const { getTotals, getPosition, getExpensesByCategory, getIncomesByCategory, getBudgetStatusDetails, loading, currentMonth, currentPeriod, periodStartDay, savePct } = useFinances();
-  const [monthName, setMonthName] = useState('');
+  const {
+    getTotals,
+    getPosition,
+    loading,
+    currentMonth,
+    currentPeriod,
+    periodStartDay,
+  } = useFinances();
+  const [periodLabel, setPeriodLabel] = useState('');
 
   useEffect(() => {
-    setMonthName(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
+    setPeriodLabel(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
   }, [currentMonth, currentPeriod, periodStartDay]);
 
   const totals = getTotals(currentMonth);
-  const expenseData = getExpensesByCategory(currentMonth);
-  const incomeData = getIncomesByCategory(currentMonth);
-  const budgetStatus = getBudgetStatusDetails(currentMonth);
-
+  const position = getPosition();
 
   return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">{periodStartDay === 1 ? `Resumen de ${monthName}` : `Resumen · ${monthName}`}</h2>
-        </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Resumen"
+        description={periodStartDay === 1 ? `Situación actual y actividad de ${periodLabel}.` : `Situación actual · ${periodLabel}.`}
+      />
 
-        <Snapshot
-            totalIncome={totals.recordedIncome}
-            totalExpenses={totals.spending}
-            liquidAssets={getPosition().liquidAssets}
-            suggestedSave={totals.suggestedSave}
-            savePct={savePct}
-            loading={loading}
+      <section className="space-y-3" aria-labelledby="position-title">
+        <SectionHeader
+          title={<span id="position-title">Posición financiera</span>}
+          description="Lo que tienes disponible, lo que debes y tu patrimonio registrado."
         />
-
-
-        <div className="pt-2">
-            <SaveStrategyChips />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
-            <DonutChart
-                data={expenseData}
-                title="Gastos"
-                colors={['#f43f5e', '#fb923c', '#fbbf24', '#a78bfa', '#f472b6']}
+        {loading ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[0,1,2].map(index => <Skeleton key={index} className="h-24 w-full" />)}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <MetricCard
+              label="Disponible líquido"
+              amount={position.liquidAssets}
+              tone={position.liquidAssets < 0 ? 'negative' : 'positive'}
+              supporting="Efectivo + bancos registrados. No incluye crédito disponible."
             />
-            <DonutChart
-                data={incomeData}
-                title="Ingresos"
-                colors={['#10b981', '#3b82f6', '#06b6d4', '#8b5cf6', '#14b8a6']}
+            <MetricCard
+              label="Deuda"
+              amount={position.liabilities}
+              tone={position.liabilities > 0 ? 'negative' : 'neutral'}
+              supporting="Saldo adeudado en tarjetas registradas."
             />
-        </div>
+            <MetricCard
+              label="Patrimonio neto"
+              amount={position.netWorth}
+              tone={position.netWorth < 0 ? 'negative' : 'neutral'}
+              supporting="Disponible líquido + saldo a favor en tarjetas − deuda."
+            />
+          </div>
+        )}
+      </section>
 
+      <section className="space-y-3" aria-labelledby="activity-title">
+        <SectionHeader
+          title={<span id="activity-title">Actividad registrada</span>}
+          description="Ingresos y gastos reales del período seleccionado."
+        />
+        <div className="grid gap-3 sm:grid-cols-3">
+          <MetricCard label="Ingresos" amount={totals.recordedIncome} tone="positive" />
+          <MetricCard label="Gastos" amount={totals.spending} tone="negative" />
+          <MetricCard
+            label="Resultado"
+            amount={totals.monthlyResult}
+            tone={totals.monthlyResult < 0 ? 'negative' : 'neutral'}
+            supporting="Ingresos − gastos. No es el saldo de tus cuentas."
+          />
+        </div>
+      </section>
+
+      <section className="space-y-3" aria-labelledby="budget-title">
+        <SectionHeader
+          title={<span id="budget-title">Presupuesto restante</span>}
+          description="Qué tan cerca estás de los límites que definiste en Plan."
+        />
         <BudgetStatus />
+      </section>
 
-      </div>
+      <section className="space-y-3" aria-labelledby="saving-title">
+        <SectionHeader
+          title={<span id="saving-title">Ahorro sugerido</span>}
+          description="Una referencia de planificación; cambiarla no mueve dinero."
+        />
+        <SaveStrategy />
+      </section>
+
+      <p className="text-xs text-muted-foreground">
+        El análisis por categoría y las comparaciones históricas viven en Reportes.
+      </p>
+    </div>
   );
 }
