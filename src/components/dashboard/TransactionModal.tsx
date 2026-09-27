@@ -4,16 +4,23 @@ import { AccountSelect } from './account-select';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Expense, Income } from '@/lib/db';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TrendingUp, TrendingDown, Grid3X3, CalendarDays, SlidersHorizontal, Trash2, CreditCard, Banknote, ArrowRightLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, BookmarkPlus, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
+import { defaultCashAccount } from '@/lib/accounts';
+import {
+  loadQuickAddTemplates,
+  removeQuickAddTemplate,
+  upsertQuickAddTemplate,
+  type QuickAddTemplate,
+  type QuickAddTransactionType,
+} from '@/lib/quick-add-templates';
 
 interface TransactionModalProps {
   open: boolean;
@@ -23,33 +30,7 @@ interface TransactionModalProps {
   editingIncome?: Income;
 }
 
-type TransactionType = 'income' | 'expense' | 'transfer';
-
-  // --- Toolbar item component ---
-const ToolbarItem = ({ icon, label, active, children, popoverOpen, setPopoverOpen }: {
-    icon: React.ReactNode;
-    label: string;
-    active?: boolean;
-    children: React.ReactNode;
-    popoverOpen: boolean;
-    setPopoverOpen: (open: boolean) => void;
-  }) => (
-    <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <button className={cn(
-          "flex flex-col items-center gap-1 flex-1 py-2 rounded-lg transition-colors text-xs",
-          active ? "text-primary" : "text-muted-foreground hover:text-foreground"
-        )}>
-          {icon}
-          <span className="truncate max-w-[70px]">{label}</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-2" align="center">
-        {children}
-      </PopoverContent>
-    </Popover>
-  );
-
+type TransactionType = QuickAddTransactionType;
 
 export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome }: TransactionModalProps) {
   const getCategoryInfo = useCategoryResolver();
@@ -58,14 +39,15 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     addIncomeItem, updateIncomeItem, deleteIncomeItem,
     expenseCategories, incomeCategories,
     debts: allDebts,
+    accounts,
     addAccountTransfer,
   } = useFinances();
 
-  const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card');
+  const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card') || [];
+  const defaultCashId = useMemo(() => defaultCashAccount(accounts || [])?.id || '', [accounts]);
   const [isSaving, setIsSaving] = useState(false);
   const savingRef = useRef(false);
 
-  // --- State ---
   const [txType, setTxType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -79,31 +61,26 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [toAccountId, setToAccountId] = useState('');
   const [transferNote, setTransferNote] = useState('');
 
-  // Local validation and persistence errors
+  const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [templateName, setTemplateName] = useState('');
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Popover toggles
-  const [typeOpen, setTypeOpen] = useState(false);
-  const [catOpen, setCatOpen] = useState(false);
-  const [subtypeOpen, setSubtypeOpen] = useState(false);
-
-  const dateInputRef = useRef<HTMLInputElement>(null);
-
   const isEditing = mode === 'edit';
 
-  // Reset state on open
   useEffect(() => {
     if (!open) {
-      // Cleanup on close
       if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
       setSaved(false);
       setSubmitError(null);
       return;
     }
 
-    setAccountId(editingExpense?.accountId || editingIncome?.accountId || '');
+    setSelectedTemplateId('');
+    setTemplateName('');
+
     if (mode === 'edit' && editingExpense) {
       setTxType('expense');
       setAmount(String(editingExpense.amount / 100));
@@ -113,6 +90,9 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setExpenseSubtype(editingExpense.nature);
       setPaymentMethod(editingExpense.paymentMethod || 'cash');
       setDebtId(editingExpense.debtId || '');
+      setAccountId(editingExpense.accountId || '');
+      setToAccountId('');
+      setTransferNote('');
     } else if (mode === 'edit' && editingIncome) {
       setTxType('income');
       setAmount(String(editingIncome.amount / 100));
@@ -120,6 +100,11 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setConcept(editingIncome.description);
       setDate(editingIncome.date);
       setIncomeSubtype(editingIncome.type);
+      setPaymentMethod('cash');
+      setDebtId('');
+      setAccountId(editingIncome.accountId || '');
+      setToAccountId('');
+      setTransferNote('');
     } else {
       setTxType('expense');
       setAmount('');
@@ -130,12 +115,18 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setIncomeSubtype('extra');
       setPaymentMethod('cash');
       setDebtId('');
+      setAccountId('');
       setToAccountId('');
       setTransferNote('');
+      if (typeof window !== 'undefined') setTemplates(loadQuickAddTemplates(window.localStorage));
     }
     setSaved(false);
     setSubmitError(null);
   }, [open, mode, editingExpense, editingIncome]);
+
+  useEffect(() => {
+    if (open && !isEditing && !accountId && defaultCashId) setAccountId(defaultCashId);
+  }, [open, isEditing, accountId, defaultCashId]);
 
   const categories = useMemo(() => {
     if (txType === 'transfer') return [];
@@ -143,11 +134,91 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
   }, [txType, incomeCategories, expenseCategories, getCategoryInfo]);
 
-  const selectedCat = categoryId ? getCategoryInfo(categoryId) : undefined;
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
+  const hasAccountForActual = !!accountId || isEditing;
   const canSave = txType === 'transfer'
     ? validAmount && isValidDate(date) && !!accountId && !!toAccountId && accountId !== toAccountId && !saved && !isSaving
-    : validAmount && !!categoryId && isValidDate(date) && !saved && !isSaving && (txType !== 'expense' || paymentMethod !== 'credit' || !!debtId);
+    : validAmount && !!categoryId && isValidDate(date) && !saved && !isSaving
+      && (txType === 'expense' && paymentMethod === 'credit' ? !!debtId : hasAccountForActual);
+
+  const templateReady = !isEditing && validAmount && (
+    txType === 'transfer'
+      ? !!accountId && !!toAccountId && accountId !== toAccountId
+      : !!categoryId && (txType === 'expense' && paymentMethod === 'credit' ? !!debtId : !!accountId)
+  );
+
+  const setMovementType = (type: TransactionType) => {
+    if (isEditing) return;
+    setTxType(type);
+    setCategoryId('');
+    setSubmitError(null);
+    if (type === 'transfer') {
+      setPaymentMethod('cash');
+      setDebtId('');
+    }
+  };
+
+  const applyTemplate = (template: QuickAddTemplate) => {
+    const templateAccount = template.accountId && accounts?.some(account => account.id === template.accountId)
+      ? template.accountId : defaultCashId;
+    const templateDestination = template.toAccountId && accounts?.some(account => account.id === template.toAccountId)
+      ? template.toAccountId : '';
+    const allowedCategories = template.type === 'income' ? incomeCategories : expenseCategories;
+    const templateCategory = template.categoryId && allowedCategories.includes(template.categoryId) ? template.categoryId : '';
+    const activeDebt = template.debtId && debts.some(debt => debt.id === template.debtId) ? template.debtId : '';
+    const method = template.type === 'expense' && template.paymentMethod === 'credit' && activeDebt ? 'credit' : 'cash';
+
+    setTxType(template.type);
+    setAmount(template.amount);
+    setAccountId(method === 'credit' ? '' : (templateAccount || ''));
+    setToAccountId(template.type === 'transfer' && templateDestination !== templateAccount ? templateDestination : '');
+    setCategoryId(template.type === 'transfer' ? '' : templateCategory);
+    setConcept(template.concept || '');
+    setExpenseSubtype(template.expenseSubtype || 'Variable');
+    setIncomeSubtype(template.incomeSubtype || 'extra');
+    setPaymentMethod(method);
+    setDebtId(method === 'credit' ? activeDebt : '');
+    setTransferNote(template.transferNote || '');
+    setDate(localDate());
+    setSelectedTemplateId(template.id);
+    setSubmitError(null);
+  };
+
+  const handleTemplateSelection = (id: string) => {
+    setSelectedTemplateId(id);
+    const template = templates.find(item => item.id === id);
+    if (template) applyTemplate(template);
+  };
+
+  const handleSaveTemplate = () => {
+    const name = templateName.trim();
+    if (!templateReady || !name || typeof window === 'undefined') return;
+    const existing = templates.find(item => item.name.toLocaleLowerCase('es') === name.toLocaleLowerCase('es'));
+    const next = upsertQuickAddTemplate(window.localStorage, {
+      id: existing?.id || crypto.randomUUID(),
+      name,
+      type: txType,
+      amount,
+      accountId: paymentMethod === 'credit' ? undefined : accountId || undefined,
+      toAccountId: txType === 'transfer' ? toAccountId || undefined : undefined,
+      categoryId: txType === 'transfer' ? undefined : categoryId || undefined,
+      concept: txType === 'transfer' ? undefined : concept || undefined,
+      expenseSubtype: txType === 'expense' ? expenseSubtype : undefined,
+      incomeSubtype: txType === 'income' ? incomeSubtype : undefined,
+      paymentMethod: txType === 'expense' ? paymentMethod : undefined,
+      debtId: txType === 'expense' && paymentMethod === 'credit' ? debtId || undefined : undefined,
+      transferNote: txType === 'transfer' ? transferNote || undefined : undefined,
+    });
+    setTemplates(next);
+    setSelectedTemplateId(existing?.id || next[0]?.id || '');
+    setTemplateName('');
+  };
+
+  const handleDeleteTemplate = () => {
+    if (!selectedTemplateId || typeof window === 'undefined') return;
+    setTemplates(removeQuickAddTemplate(window.localStorage, selectedTemplateId));
+    setSelectedTemplateId('');
+  };
 
   const handleSave = async () => {
     if (!canSave || savingRef.current) return;
@@ -167,14 +238,27 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         });
       } else if (txType === 'expense') {
         const fields = {
-          accountId: accountId || undefined, concept, amount: numAmount, categoryId, date, nature: expenseSubtype,
-          paymentMethod, debtId: paymentMethod === 'credit' ? debtId : undefined,
+          accountId: paymentMethod === 'credit' ? undefined : accountId || undefined,
+          concept,
+          amount: numAmount,
+          categoryId,
+          date,
+          nature: expenseSubtype,
+          paymentMethod,
+          debtId: paymentMethod === 'credit' ? debtId : undefined,
         };
         success = editingExpense
           ? await updateExpense({ ...editingExpense, ...fields })
           : await addExpense(fields);
       } else {
-        const fields = { accountId: accountId || undefined, description: concept, amount: numAmount, categoryId, date, type: incomeSubtype };
+        const fields = {
+          accountId: accountId || undefined,
+          description: concept,
+          amount: numAmount,
+          categoryId,
+          date,
+          type: incomeSubtype,
+        };
         success = editingIncome
           ? await updateIncomeItem({ ...editingIncome, ...fields })
           : await addIncomeItem(fields);
@@ -206,355 +290,316 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     }
   };
 
-  const formattedDate = new Date(date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' });
-
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
-      <DialogContent className="sm:max-w-[420px] p-0 gap-0 overflow-x-hidden overflow-y-auto">
+      <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto overflow-x-hidden p-0 sm:max-w-[440px]">
         <DialogHeader className="sr-only">
-          <DialogDescription>Completa el monto y los datos que correspondan al tipo de movimiento.</DialogDescription>
+          <DialogDescription>Registra un movimiento con el flujo rápido. Los campos secundarios están en Más detalles.</DialogDescription>
           <DialogTitle>{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
         </DialogHeader>
 
         <fieldset disabled={isSaving || saved} className="contents">
-        {/* Hero Amount Card */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
-          className={cn(
-            "px-6 py-8 flex flex-col items-center gap-2 transition-colors",
-            txType === 'expense'
-              ? "bg-[hsl(var(--bad)_/_0.08)]"
-              : "bg-[hsl(var(--primary)_/_0.08)]"
-          )}
-        >
-          <label className="text-xs text-muted-foreground">
-            {saved
-              ? (txType === 'expense' ? 'Gasto registrado' : txType === 'income' ? 'Ingreso registrado' : 'Transferencia registrada')
-              : (isEditing ? 'Editando' : 'Nuevo movimiento')}
-          </label>
-          <div className="flex items-baseline gap-1">
-            <span className={cn(
-              "text-lg font-medium",
-              txType === 'expense' ? "text-rose-400" : txType === 'income' ? "text-emerald-400" : "text-primary"
-            )}>RD$</span>
-            <input
-              type="number"
-              aria-label="Monto"
-              min="0.01"
-              step="0.01"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              disabled={saved}
-              placeholder="0.00"
-              className={cn(
-                "bg-transparent border-none outline-none text-center font-bold tabular-nums w-[180px]",
-                "text-4xl",
-                txType === 'expense' ? "text-rose-400 placeholder:text-rose-400/30" : txType === 'income' ? "text-emerald-400 placeholder:text-emerald-400/30" : "text-primary placeholder:text-primary/30"
-              )}
-            />
-          </div>
-        </motion.div>
-
-        {/* Toolbar */}
-        <div className="flex border-b border-black/10 dark:border-white/10 px-2">
-          {/* Type selector */}
-          <ToolbarItem
-            icon={txType === 'expense'
-              ? <TrendingDown className="h-5 w-5 text-rose-500" />
-              : txType === 'income'
-                ? <TrendingUp className="h-5 w-5 text-emerald-500" />
-                : <ArrowRightLeft className="h-5 w-5 text-primary" />
-            }
-            label={txType === 'expense' ? 'Gasto' : txType === 'income' ? 'Ingreso' : 'Transferencia'}
-            active
-            popoverOpen={typeOpen}
-            setPopoverOpen={setTypeOpen}
+          <motion.div
+            data-quick-add-step="amount"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.18 }}
+            className={cn(
+              'flex flex-col items-center gap-2 px-6 py-7 transition-colors',
+              txType === 'expense' ? 'bg-[hsl(var(--bad)_/_0.08)]' : 'bg-[hsl(var(--primary)_/_0.08)]',
+            )}
           >
-            <div className="flex flex-col gap-1 min-w-[120px]">
-              <button
-                disabled={isEditing}
-                onClick={() => { setTxType('expense'); setCategoryId(''); setTypeOpen(false); }}
-                className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'expense' ? "bg-[hsl(var(--bad)_/_0.1)] text-rose-400" : "hover:bg-black/10 dark:hover:bg-white/10"
-                )}
-              >
-                <TrendingDown className="h-4 w-4" /> Gasto
-              </button>
-              <button
-                disabled={isEditing}
-                onClick={() => { setTxType('income'); setCategoryId(''); setTypeOpen(false); }}
-                className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'income' ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:hover:bg-white/10"
-                )}
-              >
-                <TrendingUp className="h-4 w-4" /> Ingreso
-              </button>
-              <button
-                disabled={isEditing}
-                onClick={() => {
-                  setTxType('transfer');
-                  setCategoryId('');
-                  setPaymentMethod('cash');
-                  setDebtId('');
-                  setTypeOpen(false);
-                }}
-                className={cn("flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
-                  txType === 'transfer' ? "bg-primary/10 text-primary" : "hover:bg-black/10 dark:hover:bg-white/10"
-                )}
-              >
-                <ArrowRightLeft className="h-4 w-4" /> Transferencia
-              </button>
-            </div>
-          </ToolbarItem>
-
-          {/* Category selector */}
-          {txType !== 'transfer' && <ToolbarItem
-            icon={selectedCat ? <selectedCat.icon className="h-5 w-5" /> : <Grid3X3 className="h-5 w-5" />}
-            label={selectedCat?.name || 'Categoría'}
-            active={!!categoryId}
-            popoverOpen={catOpen}
-            setPopoverOpen={setCatOpen}
-          >
-            <div className="grid grid-cols-3 gap-1.5 max-h-[240px] overflow-y-auto min-w-[220px]">
-              {categories.map(cat => {
-                const Icon = cat.icon;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => { setCategoryId(cat.id); setCatOpen(false); }}
-                    className={cn(
-                      "flex flex-col items-center gap-1 p-2 rounded-lg text-[10px] transition-colors",
-                      categoryId === cat.id
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-black/10 dark:bg-white/10"
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span className="truncate w-full text-center">{cat.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </ToolbarItem>}
-
-          {/* Date — uses ref to trigger native picker */}
-          <button
-            type="button"
-            onClick={() => {
-              const el = dateInputRef.current;
-              if (el) {
-                try { el.showPicker(); } catch { el.focus(); }
-              }
-            }}
-            className="flex flex-col items-center gap-1 flex-1 py-2 rounded-lg transition-colors text-xs text-muted-foreground hover:text-foreground relative"
-          >
-            <CalendarDays className="h-5 w-5" />
-            <span className="truncate max-w-[70px]">{formattedDate}</span>
-            <input
-              ref={dateInputRef}
-              type="date"
-              aria-label="Fecha del movimiento"
-              value={date}
-              onChange={(e) => { if (e.target.value) setDate(e.target.value); }}
-              className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0 opacity-0 pointer-events-none"
-              tabIndex={-1}
-            />
-          </button>
-
-          {/* Subtype selector */}
-          {txType !== 'transfer' && <ToolbarItem
-            icon={<SlidersHorizontal className="h-5 w-5" />}
-            label={txType === 'expense' ? expenseSubtype : (incomeSubtype === 'extra' ? 'Extra' : 'Regalo')}
-            popoverOpen={subtypeOpen}
-            setPopoverOpen={setSubtypeOpen}
-          >
-            <div className="flex flex-col gap-1 min-w-[130px]">
-              {txType === 'expense' ? (
-                <>
-                  <span className="px-3 text-xs text-muted-foreground">Naturaleza</span>
-                  {(['Variable', 'Ocasional', 'Fijo'] as const).map(t => (
-                    <button
-                      key={t}
-                      onClick={() => { setExpenseSubtype(t); setSubtypeOpen(false); }}
-                      className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                        expenseSubtype === t ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
-                      )}
-                    >
-                      {t}
-                    </button>
-                  ))}
-
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => { setIncomeSubtype('extra'); setSubtypeOpen(false); }}
-                    className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                      incomeSubtype === 'extra' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
-                    )}
-                  >
-                    Adicional
-                  </button>
-                  <button
-                    onClick={() => { setIncomeSubtype('gift'); setSubtypeOpen(false); }}
-                    className={cn("px-3 py-2 rounded-lg text-sm text-left transition-colors",
-                      incomeSubtype === 'gift' ? "bg-[rgba(255,255,255,0.08)]" : "hover:bg-black/10 dark:hover:bg-white/10"
-                    )}
-                  >
-                    Regalo / Otro
-                  </button>
-                </>
-              )}
-            </div>
-          </ToolbarItem>}
-        </div>
-
-        {/* Body */}
-        <div className="px-6 py-4 space-y-3">
-          
-          {txType === 'transfer' && !saved && (
-            <div className="space-y-3">
-              <AccountSelect cashDefault value={accountId} onChange={setAccountId} label="Cuenta de origen" disabled={isSaving} />
-              <AccountSelect value={toAccountId} onChange={setToAccountId} label="Cuenta de destino" disabled={isSaving} />
-              <Input
-                aria-label="Nota de la transferencia"
-                placeholder="Nota (opcional)"
-                value={transferNote}
-                onChange={event => setTransferNote(event.target.value)}
-                maxLength={250}
+            <label htmlFor="quick-add-amount" className="text-xs text-muted-foreground">
+              {saved
+                ? (txType === 'expense' ? 'Gasto registrado' : txType === 'income' ? 'Ingreso registrado' : 'Transferencia registrada')
+                : (isEditing ? 'Editando movimiento' : 'Monto')}
+            </label>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-medium">RD$</span>
+              <input
+                id="quick-add-amount"
+                type="number"
+                aria-label="Monto"
+                min="0.01"
+                step="0.01"
+                inputMode="decimal"
+                autoFocus={!isEditing}
+                value={amount}
+                onChange={event => setAmount(event.target.value)}
+                disabled={saved}
+                placeholder="0.00"
+                className="w-[190px] border-none bg-transparent text-center text-4xl font-bold tabular-nums outline-none placeholder:text-muted-foreground/30"
               />
-              <p className="text-xs text-muted-foreground">Una transferencia mueve dinero entre tus cuentas. No cuenta como ingreso ni gasto.</p>
+            </div>
+          </motion.div>
+
+          {!isEditing && templates.length > 0 && (
+            <div className="border-b px-6 py-3">
+              <div className="flex items-center gap-2">
+                <label htmlFor="quick-add-template" className="sr-only">Usar plantilla</label>
+                <select
+                  id="quick-add-template"
+                  value={selectedTemplateId}
+                  onChange={event => handleTemplateSelection(event.target.value)}
+                  className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">Usar plantilla…</option>
+                  {templates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
+                </select>
+                <Button type="button" variant="ghost" size="sm" disabled={!selectedTemplateId} onClick={handleDeleteTemplate}>
+                  Eliminar
+                </Button>
+              </div>
             </div>
           )}
 
-          {/* Payment Method Selector (Only when there are debts and it's an expense) */}
-          {!saved && txType === 'expense' && debts && debts.length > 0 && (
-            <div className="flex items-center gap-1 bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-lg p-1">
-               <button
-                 type="button"
-                 className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'cash' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
-                 onClick={() => { setPaymentMethod('cash'); setDebtId(''); }}
-               >
-                 <Banknote className="h-4 w-4" /> Efectivo / banco
-               </button>
-               
-               {/* Dropdown for credit cards if more than 1, otherwise just a button */}
-               {debts.length === 1 ? (
-                 <button
-                   type="button"
-                   className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
-                   onClick={() => { setPaymentMethod('credit'); setDebtId(debts[0].id); }}
-                 >
-                   <CreditCard className="h-4 w-4" /> Tarjeta
-                 </button>
-               ) : (
-                 <Popover>
-                   <PopoverTrigger asChild>
-                     <button
-                       type="button"
-                       className={cn("flex-1 flex gap-2 items-center justify-center text-xs py-2 rounded-md transition-colors", paymentMethod === 'credit' ? "bg-black/10 dark:bg-white/10 text-foreground shadow-sm" : "hover:bg-black/10 dark:hover:bg-white/10 text-muted-foreground")}
-                     >
-                       <CreditCard className="h-4 w-4" /> {paymentMethod === 'credit' && debtId ? debts.find(d => d.id === debtId)?.name || 'Tarjeta' : 'Pagar con Tarjeta'}
-                     </button>
-                   </PopoverTrigger>
-                   <PopoverContent className="w-56 p-1" align="end">
-                     <div className="text-xs font-medium text-muted-foreground px-2 py-1.5 border-b border-black/10 dark:border-white/10 mb-1">Elige una tarjeta</div>
-                     <div className="flex flex-col gap-1 max-h-[150px] overflow-y-auto">
-                       {debts.map(d => (
-                         <button
-                           key={d.id}
-                           type="button"
-                           className={cn("text-left px-2 py-2 text-sm rounded-md transition-colors flex items-center gap-2", paymentMethod === 'credit' && debtId === d.id ? "bg-primary/10 text-emerald-400" : "hover:bg-black/10 dark:bg-white/10 text-foreground")}
-                           onClick={() => { setPaymentMethod('credit'); setDebtId(d.id); }}
-                         >
-                           <CreditCard className="h-4 w-4" /> {d.name}
-                         </button>
-                       ))}
-                     </div>
-                   </PopoverContent>
-                 </Popover>
-               )}
+          <div className="space-y-4 px-6 py-5">
+            <div data-quick-add-step="type" className="space-y-2">
+              <span className="text-sm font-medium">Tipo de movimiento</span>
+              <div className="grid grid-cols-3 gap-2" aria-label="Tipo de movimiento">
+                {([
+                  ['expense', 'Gasto', TrendingDown],
+                  ['income', 'Ingreso', TrendingUp],
+                  ['transfer', 'Transferencia', ArrowRightLeft],
+                ] as const).map(([type, label, Icon]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    disabled={isEditing}
+                    aria-pressed={txType === type}
+                    onClick={() => setMovementType(type)}
+                    className={cn(
+                      'flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                      txType === type ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/30',
+                    )}
+                  >
+                    <Icon className="h-4 w-4" aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
 
-          {!saved && txType !== 'transfer' && (txType === 'income' || paymentMethod !== 'credit') && <AccountSelect cashDefault={!isEditing} value={accountId} onChange={setAccountId} label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'} disabled={isSaving} />}
-          {/* Concept input */}
-          {!saved && txType !== 'transfer' && (
-            <Input
-              aria-label={txType === 'expense' ? 'Concepto' : 'Descripción'}
-              placeholder={txType === 'expense' ? 'Concepto (opcional)' : 'Descripción (opcional)'}
-              value={concept}
-              onChange={(e) => setConcept(e.target.value)}
-              className="h-11"
-            />
-          )}
-
-          {/* Action buttons */}
-          {!saved && txType !== 'transfer' && Number(amount) > 0 && !categoryId && <p className="text-xs text-muted-foreground" role="status">Selecciona una categoría para continuar.</p>}
-          {!saved && txType === 'transfer' && Number(amount) > 0 && (!accountId || !toAccountId || accountId === toAccountId) && <p className="text-xs text-muted-foreground" role="status">Selecciona dos cuentas diferentes para continuar.</p>}
-          {!saved && (
-            <div className="flex gap-2">
-              {isEditing && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button aria-label="Eliminar movimiento" variant="outline" size="sm" className="text-rose-500 border-rose-500/30 hover:bg-rose-500/10">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertTitle>¿Eliminar este registro?</AlertTitle>
-                      <AlertDialogDescription>
-                        {editingExpense
-                          ? 'Eliminar este gasto actualizará tus totales, el presupuesto de su categoría y la cuenta o tarjeta vinculada. Esta acción no se puede deshacer.'
-                          : 'Eliminar este ingreso actualizará tus totales y el saldo de la cuenta vinculada. Esta acción no se puede deshacer.'}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-                        Eliminar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+            <div data-quick-add-step="account" className="space-y-3">
+              {txType === 'transfer' ? (
+                <>
+                  <AccountSelect cashDefault value={accountId} onChange={setAccountId} label="Cuenta de origen" disabled={isSaving} />
+                  <AccountSelect value={toAccountId} onChange={setToAccountId} label="Cuenta de destino" disabled={isSaving} />
+                  <p className="text-xs text-muted-foreground">La transferencia mueve dinero entre tus cuentas y no crea ingreso ni gasto.</p>
+                </>
+              ) : txType === 'expense' && paymentMethod === 'credit' ? (
+                <div className="rounded-lg border bg-muted/20 p-3 text-sm">
+                  <span className="text-muted-foreground">Medio</span>
+                  <strong className="ml-2">{debts.find(debt => debt.id === debtId)?.name || 'Selecciona una tarjeta en Más detalles'}</strong>
+                </div>
+              ) : (
+                <AccountSelect
+                  cashDefault={!isEditing}
+                  value={accountId}
+                  onChange={setAccountId}
+                  label={txType === 'income' ? 'Cuenta de destino' : 'Cuenta de origen'}
+                  disabled={isSaving}
+                />
               )}
-              <motion.div className="flex-1" whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}>
-              <Button
-                className={cn(
-                  "flex-1 h-12 text-base font-semibold transition-all w-full",
-                  txType === 'expense'
-                    ? "bg-[hsl(var(--bad)_/_0.12)] border border-[hsl(var(--bad)_/_0.3)] text-[hsl(var(--bad)_/_0.9)] hover:bg-[hsl(var(--bad)_/_0.2)]"
-                    : "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
-                )}
-                disabled={!canSave}
-                onClick={handleSave}
-              >
-                {isSaving ? 'Guardando…' : isEditing ? 'Guardar Cambios' : txType === 'expense' ? 'Crear gasto' : txType === 'income' ? 'Crear ingreso' : 'Registrar transferencia'}
-              </Button>
-              </motion.div>
             </div>
-          )}
 
-          {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
+            {txType !== 'transfer' && (
+              <label data-quick-add-step="category" className="block space-y-1 text-sm">
+                <span className="font-medium">Categoría</span>
+                <select
+                  aria-label="Categoría"
+                  value={categoryId}
+                  onChange={event => setCategoryId(event.target.value)}
+                  className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">Selecciona una categoría</option>
+                  {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </select>
+              </label>
+            )}
 
-          {/* Post-save confirmation */}
-          {saved && !submitError && (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
-              className="flex items-center justify-center py-4"
-            >
-              <p className="text-sm text-muted-foreground">
-                {txType === 'expense' ? '✅ Gasto registrado' : txType === 'income' ? '✅ Ingreso registrado' : '✅ Transferencia registrada'}
-              </p>
-            </motion.div>
-          )}
-        </div>
+            <details open={isEditing} className="group rounded-lg border">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 py-2 text-sm font-medium">
+                Más detalles
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
+              </summary>
+              <div className="space-y-4 border-t p-3">
+                <label className="block space-y-1 text-sm">
+                  <span className="text-muted-foreground">Fecha</span>
+                  <Input type="date" aria-label="Fecha del movimiento" value={date} onChange={event => { if (event.target.value) setDate(event.target.value); }} />
+                </label>
+
+                {txType === 'transfer' ? (
+                  <label className="block space-y-1 text-sm">
+                    <span className="text-muted-foreground">Nota</span>
+                    <Input
+                      aria-label="Nota de la transferencia"
+                      placeholder="Opcional"
+                      value={transferNote}
+                      onChange={event => setTransferNote(event.target.value)}
+                      maxLength={250}
+                    />
+                  </label>
+                ) : (
+                  <>
+                    <label className="block space-y-1 text-sm">
+                      <span className="text-muted-foreground">{txType === 'expense' ? 'Concepto' : 'Descripción'}</span>
+                      <Input
+                        aria-label={txType === 'expense' ? 'Concepto' : 'Descripción'}
+                        placeholder="Opcional"
+                        value={concept}
+                        onChange={event => setConcept(event.target.value)}
+                        maxLength={250}
+                      />
+                    </label>
+
+                    {txType === 'expense' ? (
+                      <>
+                        <label className="block space-y-1 text-sm">
+                          <span className="text-muted-foreground">Naturaleza</span>
+                          <select
+                            aria-label="Naturaleza"
+                            value={expenseSubtype}
+                            onChange={event => setExpenseSubtype(event.target.value as typeof expenseSubtype)}
+                            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                          >
+                            <option value="Variable">Variable</option>
+                            <option value="Ocasional">Ocasional</option>
+                            <option value="Fijo">Fijo</option>
+                          </select>
+                        </label>
+
+                        <div className="space-y-2">
+                          <span className="text-sm text-muted-foreground">Método de pago</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              aria-pressed={paymentMethod === 'cash'}
+                              onClick={() => { setPaymentMethod('cash'); setDebtId(''); if (!accountId) setAccountId(defaultCashId); }}
+                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm', paymentMethod === 'cash' && 'border-primary/40 bg-primary/10 text-primary')}
+                            >
+                              <Banknote className="h-4 w-4" /> Efectivo / banco
+                            </button>
+                            <button
+                              type="button"
+                              disabled={debts.length === 0}
+                              aria-pressed={paymentMethod === 'credit'}
+                              onClick={() => { setPaymentMethod('credit'); setDebtId(debtId || debts[0]?.id || ''); }}
+                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm disabled:opacity-50', paymentMethod === 'credit' && 'border-primary/40 bg-primary/10 text-primary')}
+                            >
+                              <CreditCard className="h-4 w-4" /> Tarjeta
+                            </button>
+                          </div>
+                        </div>
+
+                        {paymentMethod === 'credit' && (
+                          <label className="block space-y-1 text-sm">
+                            <span className="text-muted-foreground">Tarjeta</span>
+                            <select
+                              aria-label="Tarjeta"
+                              value={debtId}
+                              onChange={event => setDebtId(event.target.value)}
+                              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            >
+                              <option value="">Selecciona una tarjeta</option>
+                              {debts.map(debt => <option key={debt.id} value={debt.id}>{debt.name}</option>)}
+                            </select>
+                          </label>
+                        )}
+                      </>
+                    ) : (
+                      <label className="block space-y-1 text-sm">
+                        <span className="text-muted-foreground">Tipo de ingreso</span>
+                        <select
+                          aria-label="Tipo de ingreso"
+                          value={incomeSubtype}
+                          onChange={event => setIncomeSubtype(event.target.value as typeof incomeSubtype)}
+                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="extra">Adicional</option>
+                          <option value="gift">Regalo / otro</option>
+                        </select>
+                      </label>
+                    )}
+                  </>
+                )}
+
+                {!isEditing && (
+                  <div className="space-y-2 border-t pt-4">
+                    <span className="text-sm font-medium">Plantilla</span>
+                    <p className="text-xs text-muted-foreground">Guarda estos valores para reutilizarlos. La fecha siempre se restablece al día en que uses la plantilla.</p>
+                    <div className="flex gap-2">
+                      <Input
+                        aria-label="Nombre de plantilla"
+                        placeholder="Ej. Bus"
+                        value={templateName}
+                        onChange={event => setTemplateName(event.target.value)}
+                        maxLength={80}
+                      />
+                      <Button type="button" variant="outline" disabled={!templateReady || !templateName.trim()} onClick={handleSaveTemplate}>
+                        <BookmarkPlus className="mr-2 h-4 w-4" />
+                        Guardar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </details>
+
+            {!saved && txType !== 'transfer' && validAmount && !categoryId && <p className="text-xs text-muted-foreground" role="status">Selecciona una categoría para continuar.</p>}
+            {!saved && txType === 'transfer' && validAmount && (!accountId || !toAccountId || accountId === toAccountId) && <p className="text-xs text-muted-foreground" role="status">Selecciona dos cuentas diferentes para continuar.</p>}
+            {!saved && txType === 'expense' && paymentMethod === 'credit' && validAmount && !debtId && <p className="text-xs text-muted-foreground" role="status">Selecciona una tarjeta en Más detalles para continuar.</p>}
+
+            {!saved && (
+              <div data-quick-add-step="save" className="flex gap-2">
+                {isEditing && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button aria-label="Eliminar movimiento" variant="outline" size="sm" className="h-12 text-rose-500">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertTitle>¿Eliminar este registro?</AlertTitle>
+                        <AlertDialogDescription>
+                          {editingExpense
+                            ? 'Eliminar este gasto actualizará tus totales, el presupuesto de su categoría y la cuenta o tarjeta vinculada. Esta acción no se puede deshacer.'
+                            : 'Eliminar este ingreso actualizará tus totales y el saldo de la cuenta vinculada. Esta acción no se puede deshacer.'}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                <Button
+                  className="h-12 flex-1 text-base font-semibold"
+                  disabled={!canSave}
+                  onClick={handleSave}
+                >
+                  {isSaving ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Guardar'}
+                </Button>
+              </div>
+            )}
+
+            {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
+
+            {saved && !submitError && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.18 }}
+                className="flex items-center justify-center py-4"
+              >
+                <p className="text-sm text-muted-foreground">
+                  {txType === 'expense' ? 'Gasto registrado' : txType === 'income' ? 'Ingreso registrado' : 'Transferencia registrada'}
+                </p>
+              </motion.div>
+            )}
+          </div>
         </fieldset>
       </DialogContent>
     </Dialog>
