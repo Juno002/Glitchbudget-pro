@@ -71,7 +71,7 @@ No contiene Tarjetas como cuarto subtab.
 
 **Tarjetas**
 - son pasivos/medios de pago, no planificación;
-- administración accesible como navegación secundaria dentro de “Mi dinero hoy”;
+- administración accesible como navegación secundaria dentro de Movimientos, después del historial principal;
 - Reportes puede mostrar análisis, no administración.
 
 **Metas**
@@ -309,7 +309,7 @@ Cada estado debe tener texto y posteriormente icono/tratamiento visual; nunca de
 
 ## 13. Privacidad de importes
 
-El sistema de diseño debe soportar un estado global futuro:
+El sistema de diseño soporta un estado global:
 
 ```text
 balancesHidden
@@ -329,7 +329,7 @@ Reportes
 
 Los porcentajes pueden seguir visibles cuando no revelen por sí mismos una cantidad sensible.
 
-No se implementa persistencia ni comportamiento de Hide Balances en 7.5A.
+En 7.5D se implementa como preferencia visual local del navegador. No entra en Dexie ni en backups.
 
 ## 14. Responsive
 
@@ -351,7 +351,7 @@ Viewport no cambia significado, funcionalidad ni orden conceptual.
 ## 15. Componentes actuales
 
 ### Mantener
-- TransactionModal como compositor transitorio hasta Fase 8;
+- TransactionModal como compositor transitorio hasta Fase 8; en 7.5 ya inicia Gasto/Ingreso/Transferencia desde el mismo FAB;
 - BottomNav;
 - Tabs principales;
 - MovementsView;
@@ -360,7 +360,7 @@ Viewport no cambia significado, funcionalidad ni orden conceptual.
 - diálogos de backup;
 - dialogs y primitives UI existentes.
 
-### Simplificar en 7.5C
+### Simplificados durante 7.5
 - Header;
 - SummaryTab;
 - AccountsOverview;
@@ -376,9 +376,8 @@ Viewport no cambia significado, funcionalidad ni orden conceptual.
 - duplicación de definiciones de navegación entre móvil/escritorio.
 
 ### Retirar más adelante
-- donuts de categoría en Resumen, una vez representados correctamente en Reportes;
-- dropdown monolítico de Ajustes;
-- ruta /transactions duplicada cuando exista una estrategia de compatibilidad segura.
+- componentes analíticos legacy sin consumidores, una vez verificado su reemplazo;
+- ruta /transactions duplicada cuando exista una estrategia de compatibilidad segura;
 
 ## 16. Restricciones para el dominio
 
@@ -401,5 +400,5 @@ Si una decisión UX requiere alterar esas reglas, se detiene y se trata como cam
 - Fase 10 Goals 2.0 vive dentro de Plan → Metas.
 - Fase 12 Investments no crea pestaña primaria.
 - Fase 13 Reports 2.0 recibe análisis retirado de Resumen.
-- Fase 14 Home 2.0 implementa la jerarquía definida aquí.
-- Fase 17 implementa balancesHidden y seguridad sin alterar navegación primaria.
+- Fase 14 Home 2.0 refina la jerarquía definida aquí sin volver a decidirla.
+- Fase 17 añade app lock/auto-lock y seguridad adicional; balancesHidden ya existe como preferencia visual local.
