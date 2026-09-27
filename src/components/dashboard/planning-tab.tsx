@@ -139,9 +139,10 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
             />
         </div>
 
-        <div className="w-5 flex justify-center">
-            {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
-            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary animate-in zoom-in" />}
+        <div className="w-5 flex justify-center" aria-live="polite">
+            {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
+            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary animate-in zoom-in" aria-hidden="true" />}
+            <span className="sr-only">{status === 'saving' ? 'Guardando presupuesto' : status === 'saved' ? 'Presupuesto guardado' : ''}</span>
         </div>
       </div>
 
