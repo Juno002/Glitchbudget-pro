@@ -26,6 +26,17 @@ export async function saveRecurringRule(input: RecurringRule, editing = false) {
       const occurrences = await db.planned_occurrences.where('ruleId').equals(row.id).count();
       if (occurrences) throw new Error('No se puede cambiar el tipo de una regla que ya tiene ocurrencias materializadas.');
     }
+    if (old) {
+      const scheduleChanged =
+        old.cadence !== row.cadence ||
+        old.day !== row.day ||
+        old.startDate !== row.startDate ||
+        old.endDate !== row.endDate;
+      if (scheduleChanged) {
+        const pending = await db.planned_occurrences.where('ruleId').equals(row.id).filter(o => o.status === 'pending').count();
+        if (pending) throw new Error('Confirma u omite las ocurrencias pendientes antes de cambiar el calendario de la regla.');
+      }
+    }
     await requireCategory(row.categoryId, row.direction, old?.direction === row.direction ? old.categoryId : undefined);
     if (row.defaultAccountId && !await db.accounts.get(row.defaultAccountId)) {
       throw new Error('La cuenta predeterminada de la regla no existe.');
