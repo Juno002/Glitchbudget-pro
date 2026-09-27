@@ -10,6 +10,7 @@ import { materializePendingOccurrences, plannedOccurrenceSchema } from '../src/l
 import { readAccountSnapshot } from '../src/lib/accounts';
 import { selectPosition } from '../src/domain/ledger';
 import { selectMonthlyMetrics } from '../src/domain/metrics';
+import { periodForId } from '../src/domain/periods';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'));
 const rule = (patch: Partial<RecurringRule> = {}): RecurringRule => ({
@@ -44,6 +45,15 @@ test('biweekly cadence uses exact fourteen-day intervals across month boundaries
     { start:'2026-08-25', end:'2026-10-10' },
   );
   assert.deepEqual(dates, ['2026-08-28','2026-09-11','2026-09-25','2026-10-09']);
+});
+
+test('scheduler consumes the Phase 6 financial DateRange without assuming calendar months', () => {
+  const financialPeriod = periodForId('2026-09', { periodStartDay:25 });
+  assert.deepEqual(financialPeriod, { id:'2026-09', start:'2026-08-25', end:'2026-09-24' });
+  assert.deepEqual(
+    scheduledDatesForRule(rule({ cadence:'weekly', startDate:'2026-08-25' }), financialPeriod),
+    ['2026-08-25','2026-09-01','2026-09-08','2026-09-15','2026-09-22'],
+  );
 });
 
 test('monthly day 31 clamps to each month final valid day including leap years', () => {
