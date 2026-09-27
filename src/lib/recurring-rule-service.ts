@@ -22,8 +22,8 @@ export async function saveRecurringRule(input: RecurringRule, editing = false) {
     const old = editing ? await db.recurrents.get(row.id) : undefined;
     if (editing && !old) throw new Error('La regla ya no existe.');
     if (old && old.direction !== row.direction) {
-      const pending = await db.planned_occurrences.where('ruleId').equals(row.id).filter(o => o.status === 'pending').count();
-      if (pending) throw new Error('No se puede cambiar el tipo de una regla con ocurrencias pendientes.');
+      const occurrences = await db.planned_occurrences.where('ruleId').equals(row.id).count();
+      if (occurrences) throw new Error('No se puede cambiar el tipo de una regla que ya tiene ocurrencias materializadas.');
     }
     await requireCategory(row.categoryId, row.direction, old?.direction === row.direction ? old.categoryId : undefined);
     if (editing) await db.recurrents.put(row); else await db.recurrents.add(row);
