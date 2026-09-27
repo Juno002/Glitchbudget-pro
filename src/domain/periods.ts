@@ -139,3 +139,78 @@ export function previousComparablePeriod(period: PeriodRange, settings: PeriodSe
 export function nextPeriod(period: PeriodRange, settings: PeriodSettings = {}): PeriodRange {
   return periodForId(shiftPeriodId(period.id, 1), settings);
 }
+
+
+export type BudgetPeriodKind = 'weekly' | 'monthly' | 'yearly' | 'one_time';
+
+export interface BudgetPeriodRange extends PeriodRange {
+  kind: BudgetPeriodKind;
+}
+
+function weekdayMondayZero(value: string): number {
+  const { year, month, day } = parseDate(value);
+  const jsDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  return (jsDay + 6) % 7;
+}
+
+export function budgetPeriodContaining(
+  value: string,
+  kind: BudgetPeriodKind,
+  settings: PeriodSettings = {},
+  oneTime?: DateRange,
+): BudgetPeriodRange {
+  const date = value.slice(0, 10);
+  parseDate(date);
+
+  if (kind === 'monthly') {
+    return { ...periodContaining(date, settings), kind };
+  }
+
+  if (kind === 'weekly') {
+    const start = addDays(date, -weekdayMondayZero(date));
+    const end = addDays(start, 6);
+    return { id: `weekly:${start}`, start, end, kind };
+  }
+
+  if (kind === 'yearly') {
+    const { year } = parseDate(date);
+    const start = formatDate(year, 1, 1);
+    const end = formatDate(year, 12, 31);
+    return { id: `yearly:${year}`, start, end, kind };
+  }
+
+  if (!oneTime) throw new Error('El presupuesto único necesita una fecha inicial y final.');
+  parseDate(oneTime.start);
+  parseDate(oneTime.end);
+  if (oneTime.start > oneTime.end) throw new Error('El rango del presupuesto único es inválido.');
+  if (!contains(oneTime, date)) throw new Error('La fecha de referencia debe estar dentro del presupuesto único.');
+  return { id: `one-time:${oneTime.start}:${oneTime.end}`, start: oneTime.start, end: oneTime.end, kind };
+}
+
+export function previousBudgetPeriod(
+  period: BudgetPeriodRange,
+  settings: PeriodSettings = {},
+): BudgetPeriodRange | undefined {
+  if (period.kind === 'one_time') return undefined;
+  if (period.kind === 'monthly') return { ...previousComparablePeriod(period, settings), kind: 'monthly' };
+  if (period.kind === 'weekly') {
+    const start = addDays(period.start, -7);
+    return { id: `weekly:${start}`, start, end: addDays(start, 6), kind: 'weekly' };
+  }
+  const year = Number(period.start.slice(0, 4)) - 1;
+  return { id: `yearly:${year}`, start: formatDate(year, 1, 1), end: formatDate(year, 12, 31), kind: 'yearly' };
+}
+
+export function nextBudgetPeriod(
+  period: BudgetPeriodRange,
+  settings: PeriodSettings = {},
+): BudgetPeriodRange | undefined {
+  if (period.kind === 'one_time') return undefined;
+  if (period.kind === 'monthly') return { ...nextPeriod(period, settings), kind: 'monthly' };
+  if (period.kind === 'weekly') {
+    const start = addDays(period.start, 7);
+    return { id: `weekly:${start}`, start, end: addDays(start, 6), kind: 'weekly' };
+  }
+  const year = Number(period.start.slice(0, 4)) + 1;
+  return { id: `yearly:${year}`, start: formatDate(year, 1, 1), end: formatDate(year, 12, 31), kind: 'yearly' };
+}
