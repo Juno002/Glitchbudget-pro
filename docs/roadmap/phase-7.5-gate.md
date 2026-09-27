@@ -159,6 +159,7 @@ Decisiones que el dominio debe seguir respetando:
 - Hide Balances es presentación, no mutación/cifrado de datos.
 - moneda base futura no debe reinterpretar centavos actuales sin migración explícita.
 - entidades futuras deben encajar en patrón de detalle sin crear tabs primarios.
+- confirmar un planificado sin reintroducir datos requiere que la regla contenga suficientes defaults de ejecución. El dominio actual conserva `defaultAccountId`, pero no modela todavía tarjeta/método de pago recurrente; si se necesita ese caso, debe abrirse como cambio explícito de dominio y no resolverse desde 7.5 con datos implícitos.
 
 Si una UX futura exige cambiar cualquiera de estas invariantes, se abre como cambio de dominio separado.
 
