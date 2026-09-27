@@ -132,13 +132,13 @@ test('credit spending requires an active card and does not spend cash', async ()
 test('editing a deleted movement does not recreate it', async () => {
   await assert.rejects(saveExpense({ ...expense, amount: 1 }, true), /ya no existe/);
 });
-test('legacy monthly subscription guard prevents repeated UI payments', async () => {
+test('legacy month-wide recurrence duplicate guard is retired', async () => {
   await db.recurrents.add({id:'subscription',direction:'expense',title:'Plan',categoryId:'food',amount:1000,cadence:'monthly',startDate:'2026-09-01',active:true});
   await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
   await saveExpense({ ...expense, recurringRuleId: 'subscription', amount: 10 });
-  await assert.rejects(saveExpense({ ...expense, id: 'second', recurringRuleId: 'subscription', amount: 10 }), /ya tiene un pago/);
+  await saveExpense({ ...expense, id: 'second', recurringRuleId: 'subscription', amount: 10 });
   await saveExpense({ ...expense, id: 'next-month', date: '2026-10-01', recurringRuleId: 'subscription', amount: 10 });
-  assert.equal(await db.expenses.count(), 2);
+  assert.equal(await db.expenses.count(), 3);
 });
 test('JSON round trip preserves expense nature, goal quotas and settings', async () => {
   await db.expenses.add({ ...expense, nature: 'Fijo' });
