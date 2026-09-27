@@ -272,7 +272,7 @@ const BudgetStatusReport = () => {
                                 )
                             }) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 text-lg">No hay presupuestos configurados para este período.</TableCell>
+                                    <TableCell colSpan={6} className="p-0">{renderBudgetEmptyState()}</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
