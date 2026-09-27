@@ -46,6 +46,31 @@ body {
     --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
     --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
     --backdrop: rgba(8,8,8,0.85);
+
+    /* 7.5 Design System: structural tokens shared by every theme. */
+    --space-page: 2rem;
+    --space-section: 1.5rem;
+    --space-card: 1rem;
+    --space-control: 0.75rem;
+
+    --radius-card: 1.25rem;
+    --radius-interactive: 0.75rem;
+    --radius-modal: 1.25rem;
+
+    --text-page-title: 1.5rem;
+    --text-section-title: 1.125rem;
+    --text-metric: 1.5rem;
+    --text-supporting: 0.875rem;
+
+    --motion-fast: 120ms;
+    --motion-standard: 180ms;
+    --motion-slow: 280ms;
+
+    --surface-page: var(--background);
+    --surface-section: var(--card);
+    --surface-card: var(--card);
+    --surface-interactive: var(--background);
+    --surface-modal: var(--popover);
   }
   .dark {
     --background: 0 0% 3%; /* #080808 */
