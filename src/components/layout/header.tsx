@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useFinances } from '@/contexts/finance-context';
 import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadge } from '@/components/dashboard/achievements-panel';
 import { SettingsDialog } from './settings-dialog';
+import { BalanceVisibilityToggle } from './balance-visibility-toggle';
 
 export default function Header() {
   const {
@@ -56,6 +57,8 @@ export default function Header() {
                 Período actual
               </Button>
             </div>
+
+            <BalanceVisibilityToggle />
 
             <Dialog>
               <DialogTrigger asChild>
