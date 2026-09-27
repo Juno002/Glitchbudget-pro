@@ -68,6 +68,7 @@ interface FinanceContextType {
   debtPayments: DebtPayment[] | undefined;
   recurringRules: RecurringRule[] | undefined;
   plannedOccurrences: PlannedOccurrence[] | undefined;
+  accountTransfers: AccountTransfer[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setPreventNegativeAccountBalance: (value: boolean) => void;
@@ -812,6 +813,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debtPayments,
     recurringRules,
     plannedOccurrences,
+    accountTransfers: transfers,
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
