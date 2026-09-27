@@ -72,7 +72,7 @@ export default function SummaryTab() {
     incomes,
     expenses,
   } = useFinances();
-  const { setActiveTab } = useTabs();
+  const { setActiveTab, setPlanningTab } = useTabs();
   const getCategoryInfo = useCategoryResolver();
   const [periodLabel, setPeriodLabel] = useState('');
   const today = localDate();
@@ -115,6 +115,10 @@ export default function SummaryTab() {
         <SectionHeader
           title={<span id="position-title">Posición financiera</span>}
           description="Lo que tienes disponible, lo que debes y tu patrimonio registrado."
+          actions={<Button type="button" variant="outline" size="sm" onClick={() => {
+            setActiveTab('movements');
+            setTimeout(() => document.getElementById('accounts-section')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0);
+          }}>Ver cuentas</Button>}
         />
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-3">
@@ -156,7 +160,7 @@ export default function SummaryTab() {
         <SectionHeader
           title={<span id="upcoming-title">Próximos pagos</span>}
           description="Solo lo que viene pronto o ya requiere atención."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => setActiveTab('planning')}>Ver Plan</Button>}
+          actions={<Button type="button" variant="outline" size="sm" onClick={() => { setPlanningTab('subscriptions'); setActiveTab('planning'); }}>Ver Plan</Button>}
         />
         {upcoming.length ? (
           <div className="grid gap-2">
@@ -189,7 +193,7 @@ export default function SummaryTab() {
         <SectionHeader
           title={<span id="goals-title">Metas relevantes</span>}
           description="Solo objetivos activos que pueden requerir una acción."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => setActiveTab('planning')}>Ver metas</Button>}
+          actions={<Button type="button" variant="outline" size="sm" onClick={() => { setPlanningTab('goals'); setActiveTab('planning'); }}>Ver metas</Button>}
         />
         {goalHighlights.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
