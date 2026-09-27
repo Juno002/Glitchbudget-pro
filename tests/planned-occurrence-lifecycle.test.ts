@@ -8,6 +8,7 @@ import {
   addPendingOccurrence,
   actualTransactionIdForOccurrence,
   confirmPlannedOccurrence,
+  materializePendingOccurrences,
   skipPlannedOccurrence,
 } from '../src/lib/planned-occurrence-service';
 import { occurrenceDisplayStatus } from '../src/domain/occurrence-status';
@@ -92,6 +93,32 @@ test('concurrent confirmations still create exactly one actual movement', async 
   assert.equal(results.filter(result => result.alreadyConfirmed).length, 1);
   assert.equal(await db.expenses.get('actual:occ-concurrent').then(Boolean), true);
   assert.equal(await db.expenses.where('id').equals('actual:occ-concurrent').count(), 1);
+});
+
+test('weekly and biweekly rules can confirm multiple occurrences in the same calendar month', async () => {
+  for (const cadence of ['weekly','biweekly'] as const) {
+    const ruleId = `multi-${cadence}`;
+    await saveRecurringRule({
+      id:ruleId,
+      direction:'expense',
+      title:cadence,
+      categoryId:'food',
+      amount:500,
+      defaultAccountId:'bank',
+      cadence,
+      startDate:'2026-09-03',
+      active:true,
+    });
+  }
+  await materializePendingOccurrences({ start:'2026-09-01', end:'2026-09-30' });
+
+  for (const ruleId of ['multi-weekly','multi-biweekly']) {
+    const rows = await db.planned_occurrences.where('ruleId').equals(ruleId).sortBy('scheduledDate');
+    assert.ok(rows.length >= 2);
+    await confirmPlannedOccurrence(rows[0].id);
+    await confirmPlannedOccurrence(rows[1].id);
+    assert.equal((await db.expenses.toArray()).filter(row => row.recurringRuleId === ruleId).length, 2);
+  }
 });
 
 test('budget warning aborts both the actual movement and occurrence state until retried', async () => {
