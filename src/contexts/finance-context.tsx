@@ -7,13 +7,14 @@ import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
 import { createCategory, resetCategories, requireCategory, savePlans } from '@/lib/category-service';
 
 import { selectPeriodMetrics, recordedCategoriesForPeriod, recordedExpenseForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
-import { periodContaining, periodForId, type PeriodRange } from '@/domain/periods';
+import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
 import { readFinancialPolicies } from '@/lib/policy-settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
-import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
+import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod } from '@/lib/budget-rollover';
+import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '@/domain/budgets';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
@@ -88,8 +89,9 @@ interface FinanceContextType {
   updateGoal: (goal: Goal) => Promise<boolean>;
   deleteGoal: (id: string) => void;
   contributeToGoal: (id: string, amount: number) => Promise<boolean>;
-  updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[]) => Promise<boolean>;
-  transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => Promise<boolean>;
+  updateAllBudgets: (month: string, allBudgets: Omit<Budget, 'month'>[], budgetPeriod?: BudgetPeriodRange) => Promise<boolean>;
+  transferBetweenBudgets: (month: string, fromCategoryId: string, toCategoryId: string, amount: number, budgetPeriod?: BudgetPeriodRange) => Promise<boolean>;
+  prepareBudgetPeriod: (budgetPeriod: BudgetPeriodRange) => Promise<void>;
   resetSettings: () => Promise<void>;
   updateSettings: (newSettings: Partial<Settings>) => void;
 
@@ -111,7 +113,7 @@ interface FinanceContextType {
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
-  getBudgetStatusDetails: (month: string) => Array<Budget & { spent: number; remaining: number; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
+  getBudgetStatusDetails: (month: string, budgetPeriod?: BudgetPeriodRange) => Array<Budget & { range: BudgetPeriodRange; spent: number; remaining: number; percentage: number; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
 
   addIncomeCategory: (category: string, iconName?: string) => Promise<void>;
   resetIncomeCategories: () => Promise<void>;
@@ -453,51 +455,53 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const updateAllBudgets = useCallback(async (month: string, allBudgets: Omit<Budget, 'month'>[]) => {
+  const updateAllBudgets = useCallback(async (month: string, allBudgets: Omit<Budget, 'month'>[], budgetPeriod?: BudgetPeriodRange) => {
     try {
-      const budgetsToPut: Plan[] = allBudgets.map(b => ({ ...b, month, limit: toCents(b.limit) }));
+      const range = budgetPeriod ?? { ...periodForId(month, activeSettings), kind: 'monthly' as const };
+      const budgetsToPut: Plan[] = allBudgets.map(b => budgetPlanForRange(range, b.categoryId, toCents(b.limit)));
       if (budgetsToPut.some(b => !Number.isSafeInteger(b.limit) || b.limit < 0)) throw new Error('Los presupuestos deben ser montos positivos o cero.');
       await savePlans(budgetsToPut);
-       toast({ title: '¡Presupuestos guardados!'});
+      toast({ title: '¡Presupuestos guardados!'});
       return true;
     } catch (error) {
       toast({ title: 'Error al guardar presupuestos', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
-  }, [toast]);
+  }, [toast, activeSettings]);
 
-  const transferBetweenBudgets = useCallback(async (month: string, fromCategoryId: string, toCategoryId: string, amount: number) => {
+  const transferBetweenBudgets = useCallback(async (month: string, fromCategoryId: string, toCategoryId: string, amount: number, budgetPeriod?: BudgetPeriodRange) => {
     const amountInCents = toCents(amount);
     try {
       if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error("El monto de la transferencia debe ser positivo.");
       if (fromCategoryId === toCategoryId) throw new Error('Selecciona dos categorías diferentes.');
+      const range = budgetPeriod ?? { ...periodForId(month, activeSettings), kind: 'monthly' as const };
       await db.transaction('rw', db.plans, db.expenses, db.categories, async () => {
-          const fromBudget = await db.plans.get([month, fromCategoryId]);
-          const toBudget = await db.plans.get([month, toCategoryId]);
+          const fromBudget = await db.plans.get([range.id, fromCategoryId]);
+          const toBudget = await db.plans.get([range.id, toCategoryId]);
 
           await requireCategory(fromCategoryId, 'expense', fromBudget?.categoryId);
           await requireCategory(toCategoryId, 'expense', toBudget?.categoryId);
-          const spent = selectCategorySpendingForPeriod(await db.expenses.toArray(), fromCategoryId, periodForId(month, activeSettings));
+          const spent = selectCategorySpendingForPeriod(await db.expenses.toArray(), fromCategoryId, range);
           if (!fromBudget || fromBudget.limit - spent < amountInCents) {
               throw new Error("Fondos insuficientes en el presupuesto de origen.");
           }
 
-          await db.plans.update([month, fromCategoryId], { limit: fromBudget.limit - amountInCents });
+          await db.plans.update([range.id, fromCategoryId], { limit: fromBudget.limit - amountInCents });
 
           if (toBudget) {
-              await db.plans.update([month, toCategoryId], { limit: toBudget.limit + amountInCents });
+              await db.plans.update([range.id, toCategoryId], { limit: toBudget.limit + amountInCents });
           } else {
-              await db.plans.add({ month, categoryId: toCategoryId, limit: amountInCents });
+              await db.plans.add(budgetPlanForRange(range, toCategoryId, amountInCents));
           }
       });
       toast({
-            title: 'Transferencia exitosa',
-            description: 'El monto ha sido transferido entre los presupuestos.',
+            title: 'Transferencia de presupuesto completada',
+            description: 'Solo cambió la asignación planificada entre categorías; no se movió dinero real.',
       });
       return true;
     } catch(error: any) {
       toast({
-            title: 'Error en la transferencia',
+            title: 'Error en la transferencia de presupuesto',
             description: friendlyError(error),
             variant: 'destructive',
       });
@@ -505,25 +509,25 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast, activeSettings]);
 
-  const getBudgetStatusDetails = useCallback((periodId: string) => {
-    const period = periodForId(periodId, activeSettings);
-    const periodBudgets = (budgets || []).filter(b => b.month === period.id);
+  const prepareBudgetPeriod = useCallback(async (budgetPeriod: BudgetPeriodRange) => {
+    try {
+      if (await rollBudgetsIntoPeriod(budgetPeriod)) setDataVersion(version => version + 1);
+    } catch (error) {
+      toast({ title: 'No se pudo aplicar el rollover', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const getBudgetStatusDetails = useCallback((periodId: string, budgetPeriod?: BudgetPeriodRange) => {
+    const range = budgetPeriod ?? { ...periodForId(periodId, activeSettings), kind: 'monthly' as const };
+    const periodBudgets = budgetPlansForRange(budgets || [], range);
     const budgetedCategoryIds = new Set(periodBudgets.map(b => b.categoryId));
-    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => recordedExpenseForPeriod(e, period) > 0).map(e => e.categoryId)]));
+    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => recordedExpenseForPeriod(e, range) > 0).map(e => e.categoryId)]));
 
     return allRelevantCategoryIds.map(catId => {
-      const budget = periodBudgets.find(b => b.categoryId === catId) || { month: period.id, categoryId: catId, limit: 0 };
-      const spent = getSpentAmount(budget.categoryId, period.id);
-      const remaining = selectBudgetRemaining(budget.limit, spent).budgetRemaining;
-      let status: 'ok' | 'alert' | 'over' | 'unbudgeted' = 'ok';
-
-      if (budget.limit === 0) status = 'unbudgeted';
-      else if (remaining < 0) status = 'over';
-      else if (remaining < budget.limit * 0.25) status = 'alert';
-
-      return { ...budget, spent, remaining, status };
+      const budget = periodBudgets.find(b => b.categoryId === catId) || budgetPlanForRange(range, catId, 0);
+      return budgetStatusForRange(budget, expenses || [], range);
     });
-  }, [budgets, expenses, getSpentAmount, expenseCategories, activeSettings]);
+  }, [budgets, expenses, expenseCategories, activeSettings]);
 
   const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings]);
   const getIncomesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(incomes || [], periodForId(periodId, activeSettings)), [incomes, activeSettings]);
@@ -834,6 +838,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     contributeToGoal,
     updateAllBudgets,
     transferBetweenBudgets,
+    prepareBudgetPeriod,
     resetSettings,
     updateSettings,
     addDebt,
@@ -875,7 +880,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
-    updateAllBudgets, transferBetweenBudgets, resetSettings,
+    updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,
     addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
     getMonthlyAverages, getDisposable, getTotals, getPosition, getSpentAmount,
