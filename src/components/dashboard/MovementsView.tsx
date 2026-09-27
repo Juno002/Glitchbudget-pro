@@ -140,7 +140,7 @@ export default function MovementsView() {
         </Tabs>
 
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-[160px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Categoría" />
           </SelectTrigger>
           <SelectContent>
@@ -182,7 +182,7 @@ export default function MovementsView() {
               >
                 {/* Icon */}
                 <div className={cn(
-                  "shrink-0 flex items-center justify-center w-9 h-9 rounded-lg",
+                  "shrink-0 flex items-center justify-center w-10 h-10 rounded-lg",
                   isIncome ? "bg-good/10" : "bg-bad/10"
                 )}>
                   {Icon && <Icon strokeWidth={1.75} className={cn("h-4 w-4", isIncome ? "text-good" : "text-bad")} />}
