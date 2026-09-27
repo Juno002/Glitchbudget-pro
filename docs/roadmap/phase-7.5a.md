@@ -55,6 +55,23 @@ Contrato persistente: `docs/ux/architecture.md`.
 - categorías;
 - fórmulas de reportes.
 
+## Gate técnico
+
+GitHub Actions sobre la rama:
+
+- `npm run check`: aprobado;
+- **194 pruebas aprobadas, 0 fallidas**;
+- TypeScript: aprobado;
+- ESLint: aprobado con 0 warnings;
+- guard local-only: aprobado;
+- `npm run build`: aprobado;
+- exportación estática: aprobada;
+- manifiesto offline: 43 recursos;
+- Dexie permanece en v11;
+- backup permanece en JSON v7.
+
+No se introdujeron migraciones ni cambios del dominio financiero.
+
 ## Siguiente subfase
 
 7.5B — Design System mínimo:
