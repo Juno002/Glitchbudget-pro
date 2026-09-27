@@ -1,12 +1,12 @@
 import { requireRecurringProvenance } from './recurring-rule-service';
 import { requireCategory } from './category-service';
 import { readFinancialPolicies } from './policy-settings';
-import { evaluateBudgetOverspending, BudgetWarning } from '../policies/budget-overspending';
+import { evaluateBudgetOverspendingSet, BudgetWarning } from '../policies/budget-overspending';
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
 import { isValidDate } from './finance-calculations';
-import { periodContaining } from '../domain/periods';
+import { budgetPlansForDate } from '../domain/budgets';
 
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
@@ -101,9 +101,9 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       }
     }
     const settings = await db.settings.get('general');
-    const budgetPeriod = periodContaining(row.date, settings || {});
-    const evaluation = evaluateBudgetOverspending(await db.expenses.toArray(), row, await db.plans.get([budgetPeriod.id, row.categoryId]), policies.budgetOverspendingBehavior, budgetPeriod);
-    if (evaluation.decision === 'block') throw new Error('Este gasto crea o aumenta el exceso del presupuesto de su categoría.');
+    const activeBudgets = budgetPlansForDate(await db.plans.toArray(), row.categoryId, row.date, settings || {});
+    const evaluation = evaluateBudgetOverspendingSet(await db.expenses.toArray(), row, activeBudgets, policies.budgetOverspendingBehavior);
+    if (evaluation.decision === 'block') throw new Error('Este gasto crea o aumenta el exceso de un presupuesto activo de su categoría.');
     if (evaluation.decision === 'warn' && budgetConfirmation !== evaluation.confirmation) throw new BudgetWarning(evaluation);
     if (editing) await db.expenses.put(row);
     else await db.expenses.add(row);
