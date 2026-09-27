@@ -7,7 +7,7 @@ const read = (path: string) => readFileSync(new URL('../' + path, import.meta.ur
 test('Summary remains status-first and keeps category charts out of the home surface', () => {
   const source = read('src/components/dashboard/summary-tab.tsx');
   assert.match(source, /Posición financiera/);
-  assert.match(source, /Presupuesto restante/);
+  assert.match(source, /Presupuesto disponible/);
   assert.doesNotMatch(source, /recharts/);
   assert.doesNotMatch(source, /PieChart/);
 });
