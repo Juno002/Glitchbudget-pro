@@ -18,16 +18,26 @@ export const recurringRuleSchema = z.object({
 export async function saveRecurringRule(input: RecurringRule, editing = false) {
   const row = recurringRuleSchema.parse(input);
   if (row.endDate && row.endDate < row.startDate) throw new Error('La fecha final precede al inicio de la regla.');
-  return db.transaction('rw', db.categories, db.recurrents, async () => {
+  return db.transaction('rw', db.categories, db.recurrents, db.planned_occurrences, async () => {
     const old = editing ? await db.recurrents.get(row.id) : undefined;
     if (editing && !old) throw new Error('La regla ya no existe.');
+    if (old && old.direction !== row.direction) {
+      const pending = await db.planned_occurrences.where('ruleId').equals(row.id).filter(o => o.status === 'pending').count();
+      if (pending) throw new Error('No se puede cambiar el tipo de una regla con ocurrencias pendientes.');
+    }
     await requireCategory(row.categoryId, row.direction, old?.direction === row.direction ? old.categoryId : undefined);
     if (editing) await db.recurrents.put(row); else await db.recurrents.add(row);
   });
 }
 
-/** Historical provenance IDs intentionally survive removal of the planning rule. */
-export async function removeRecurringRule(id: string) { await db.recurrents.delete(id); }
+/** Historical provenance IDs may survive removal, but unresolved pending occurrences may not be orphaned. */
+export async function removeRecurringRule(id: string) {
+  await db.transaction('rw', db.recurrents, db.planned_occurrences, async () => {
+    const pending = await db.planned_occurrences.where('ruleId').equals(id).filter(o => o.status === 'pending').count();
+    if (pending) throw new Error('Esta regla tiene ocurrencias pendientes. Confírmalas u omítelas antes de eliminar la regla.');
+    await db.recurrents.delete(id);
+  });
+}
 
 export async function requireRecurringProvenance(
   id: string | undefined,
