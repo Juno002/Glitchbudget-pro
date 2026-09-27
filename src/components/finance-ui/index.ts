@@ -1,3 +1,4 @@
+export { DeltaValue } from './delta-value';
 export { EmptyState } from './empty-state';
 export { PageHeader, SectionHeader } from './headers';
 export { MetricCard } from './metric-card';
