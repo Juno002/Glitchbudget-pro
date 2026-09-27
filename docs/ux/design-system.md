@@ -1,10 +1,10 @@
-# GlitchBudget Pro — Minimal Finance UI System
+# GlitchBudget Pro — Finance UI System
 
-Fase 7.5B estabiliza un conjunto pequeño de primitives financieros. No pretende sustituir toda la UI ni crear un framework paralelo a los componentes `ui/`.
+Fase 7.5 estabiliza un sistema pequeño y reutilizable para información financiera. No sustituye `ui/` ni mueve reglas de dominio a React.
 
 ## Tokens
 
-Los tokens estructurales viven en `src/app/globals.css` y son compartidos por los tres temas.
+Viven en `src/app/globals.css` y son compartidos por Neón Oscuro, Claro y Minimalista.
 
 ### Spacing
 
@@ -30,6 +30,23 @@ Los tokens estructurales viven en `src/app/globals.css` y son compartidos por lo
 --text-section-title
 --text-metric
 --text-supporting
+--font-money
+```
+
+### Border strength
+
+```text
+--border-subtle
+--border-strong
+```
+
+### Status semantics
+
+```text
+--status-success
+--status-warning
+--status-danger
+--status-info
 ```
 
 ### Motion
@@ -50,7 +67,7 @@ Los tokens estructurales viven en `src/app/globals.css` y son compartidos por lo
 --surface-modal
 ```
 
-Los temas pueden cambiar color/presentación, pero no jerarquía ni estructura UX.
+Los temas cambian presentación, nunca jerarquía, navegación, orden o funcionalidad.
 
 ## Finance UI primitives
 
@@ -62,38 +79,46 @@ src/components/finance-ui/
 
 ### PageHeader
 
-Título de área + descripción + acciones. No contiene reglas financieras.
+Título de área + descripción + acciones globales de esa superficie.
 
 ### SectionHeader
 
-Jerarquía secundaria consistente para módulos dentro de una página.
+Jerarquía secundaria consistente dentro de una página.
+
+### DetailHeader
+
+Patrón de entidad:
+
+```text
+Título
+Tipo/estado secundario
+Métrica primaria
+Supporting text
+Acciones frecuentes
+```
 
 ### MoneyValue
 
-Único patrón de renderizado de importe para nuevas superficies financieras.
-
-Características:
+Renderizado estándar de importes:
+- `formatCurrency` centralizado;
+- `--font-money`;
 - cifras tabulares;
-- formato centralizado mediante `formatCurrency`;
 - signo opcional;
 - tono explícito;
-- soporte de presentación oculta mediante `concealed` sin crear todavía estado global de privacidad.
+- Hide Balances global;
+- etiqueta accesible “Importe oculto”.
 
 ### DeltaValue
 
-Variación monetaria con signo. El tono no se infiere automáticamente porque una subida puede ser buena o mala según la métrica.
+Variación monetaria con signo. El caller define si la variación es buena, mala o neutral.
 
 ### MetricCard
 
-Etiqueta + valor monetario/valor custom + texto de apoyo.
-
-No asigna significado a una cifra; recibe datos ya calculados por domain/application.
+Etiqueta + cifra/valor + supporting text. No calcula métricas.
 
 ### StatusBadge
 
-Estados reutilizables con texto, no solo color.
-
-Vocabulario base:
+Estados con texto y tratamiento visual.
 
 ```text
 pending   → Pendiente
@@ -102,46 +127,151 @@ skipped   → Omitido
 overdue   → Vencido
 ```
 
-También existen estados genéricos de UI:
-`success`, `warning`, `danger`, `neutral`.
+También: `success`, `warning`, `danger`, `neutral`.
 
 ### ProgressMetric
 
-Patrón común para:
-- presupuesto gastado/restante;
-- objetivos;
-- progreso financiero.
-
-Muestra current/total/restante + estado textual.
+Current / total / remaining + progreso + estado textual.
 
 ### EmptyState
 
-Siempre admite:
-- título;
-- explicación útil;
-- acción opcional;
-- icono opcional.
+Debe incluir un mensaje útil y, cuando existe una acción natural, explicar dónde realizarla.
 
-Evitar nuevos “No hay datos” sin contexto.
+Evitar “No hay datos” sin contexto.
+
+### ActionMenu
+
+Agrupa administración secundaria y acciones “More” para no mezclar management con lectura cotidiana.
+
+### FilterChip
+
+Filtro compacto reutilizable con estado activo y clear opcional.
+
+### TransactionRow
+
+Fila de actividad financiera real con:
+- icono;
+- título;
+- metadata;
+- amount;
+- fecha;
+- foco/target consistente.
+
+### PlannedPaymentRow
+
+Fila de planificación con:
+- título;
+- fecha;
+- amount;
+- estado Pending/Confirmed/Skipped/Overdue;
+- Confirmar/Omitir/Ver movimiento según corresponda.
+
+## Loading y feedback
+
+### Loading
+
+Cuando la estructura ya se conoce:
+- preferir `Skeleton`;
+- no sustituir toda la página por un spinner;
+- preservar la jerarquía para evitar saltos grandes.
+
+### Save
+
+Estados recomendados:
+
+```text
+Guardar
+Guardando…
+Guardado
+```
+
+Mientras se guarda:
+- bloquear submits repetidos;
+- no cerrar antes de conocer el resultado.
+
+### Success
+
+Toast breve o feedback inline. No requiere modal adicional.
+
+### Error
+
+Debe responder:
+- qué no se guardó;
+- qué puede hacer el usuario.
+
+Nunca exponer directamente errores técnicos de Dexie.
+
+## Destructive actions
+
+Confirmación obligatoria para:
+- eliminar movimiento;
+- borrar todos los datos;
+- eliminar entidad con impacto histórico;
+- restaurar backup que sobrescribe datos.
+
+El diálogo debe describir el efecto. Acciones reversibles de bajo impacto no requieren confirmación innecesaria.
+
+## Responsive
+
+### Mobile
+
+- una columna por defecto;
+- targets táctiles amplios;
+- Bottom Navigation de cuatro destinos;
+- FAB por encima de safe-area;
+- filtros se envuelven/apilan;
+- actividad cotidiana evita tablas horizontales.
+
+### Tablet/Desktop
+
+- mismo orden conceptual;
+- métricas en grid;
+- reportes pueden usar tablas;
+- master/detail solo cuando reduce navegación.
+
+## Motion
+
+Permitido principalmente para:
+- open/close;
+- transición de estado;
+- success;
+- achievement;
+- charts.
+
+No animar continuamente métricas financieras ni decoración.
+
+La aplicación conserva:
+
+```tsx
+<MotionConfig reducedMotion="user">
+```
+
+## Hide Balances
+
+`balancesHidden` es presentación local.
+
+- quick toggle en Header;
+- control en Ajustes → Privacidad;
+- persistencia en `localStorage`;
+- no Dexie;
+- no backup;
+- no cambia cálculos ni valores almacenados.
+
+Los campos de entrada que el usuario está editando no se enmascaran.
 
 ## Accesibilidad
 
-- estados llevan texto y no dependen de color;
-- valores monetarios mantienen contraste del tema;
-- importes usan cifras tabulares;
-- `concealed` expone “Importe oculto” a tecnología asistiva;
-- acciones se siguen construyendo con Button/primitives accesibles existentes;
-- reduced motion continúa gobernado globalmente por `prefers-reduced-motion`.
-
-## Uso durante 7.5B
-
-Solo se migra una superficie pequeña (`BudgetStatus`) para demostrar el patrón y evitar una reconstrucción masiva.
-
-La adopción estructural de Resumen, Movimientos, Plan, Reportes, Settings y detalles corresponde a 7.5C/7.5D.
+- estados con texto, no solo color;
+- cifras legibles/tabulares;
+- focus visible;
+- icon buttons con `aria-label`;
+- `aria-live` para estados dinámicos útiles;
+- skip link a `main`;
+- dialogs gestionados por primitives Radix;
+- reduced motion respetado;
+- targets táctiles reforzados.
 
 ## Regla de dominio
-
-Estos componentes reciben cifras/estados ya calculados.
 
 ```text
 finance-ui
@@ -149,5 +279,7 @@ finance-ui
 finance-ui
 ≠ Dexie
 finance-ui
-≠ políticas
+≠ políticas financieras
 ```
+
+Los componentes reciben valores ya resueltos por domain/application services.
