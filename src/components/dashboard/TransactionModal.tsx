@@ -508,7 +508,9 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                     <AlertDialogHeader>
                       <AlertTitle>¿Eliminar este registro?</AlertTitle>
                       <AlertDialogDescription>
-                        Esta acción no se puede deshacer.
+                        {editingExpense
+                          ? 'Eliminar este gasto actualizará tus totales, el presupuesto de su categoría y la cuenta o tarjeta vinculada. Esta acción no se puede deshacer.'
+                          : 'Eliminar este ingreso actualizará tus totales y el saldo de la cuenta vinculada. Esta acción no se puede deshacer.'}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
