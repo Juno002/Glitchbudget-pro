@@ -202,7 +202,7 @@ const BudgetStatusReport = () => {
                                     </div>
                                     <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
                                 </div>
-                                <div className="grid grid-cols-3 gap-2 text-sm mt-1">
+                                <div className="grid grid-cols-2 gap-2 text-sm mt-1 sm:grid-cols-4">
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Planificado</span>
                                         <span className="font-mono">{money(b.limit)}</span>
@@ -214,6 +214,10 @@ const BudgetStatusReport = () => {
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Restante</span>
                                         <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{money(b.remaining)}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Porcentaje</span>
+                                        <span className="font-mono font-semibold">{b.percentage}%</span>
                                     </div>
                                 </div>
                                 <Progress 
@@ -237,6 +241,7 @@ const BudgetStatusReport = () => {
                                 <TableHead className="text-right py-4">Planificado</TableHead>
                                 <TableHead className="text-right py-4">Gastado</TableHead>
                                 <TableHead className="text-right py-4">Restante</TableHead>
+                                <TableHead className="text-right py-4">Porcentaje</TableHead>
                                 <TableHead className="py-4">Progreso</TableHead>
                                 <TableHead className="py-4">Estado</TableHead>
                             </TableRow>
@@ -256,6 +261,7 @@ const BudgetStatusReport = () => {
                                         <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
                                             {money(b.remaining)}
                                         </TableCell>
+                                        <TableCell className="text-right py-5 font-mono">{b.percentage}%</TableCell>
                                         <TableCell className="py-5">
                                             <Progress 
                                                 value={progress} 
@@ -272,7 +278,7 @@ const BudgetStatusReport = () => {
                                 )
                             }) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="p-0">{renderBudgetEmptyState()}</TableCell>
+                                    <TableCell colSpan={7} className="p-0">{renderBudgetEmptyState()}</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
