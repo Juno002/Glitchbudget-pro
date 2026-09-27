@@ -45,3 +45,7 @@ export function useTabs() {
   }
   return context;
 }
+
+export function useOptionalTabs() {
+  return useContext(TabsContext);
+}
