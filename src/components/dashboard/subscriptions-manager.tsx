@@ -38,7 +38,7 @@ function dateLabel(value: string) {
 
 export default function SubscriptionsManager() {
   const money = usePrivateCurrency();
-  const { setActiveTab } = useTabs();
+  const { setActiveTab, requestMovementFocus } = useTabs();
   const getCategoryInfo = useCategoryResolver();
   const {
     recurringRules,
@@ -358,7 +358,10 @@ export default function SubscriptionsManager() {
                   kindLabel={rule ? (rule.direction === 'expense' ? 'Gasto' : 'Ingreso') : undefined}
                   status={occurrence.status}
                   actions={occurrence.status === 'confirmed' && occurrence.transactionId ? {
-                    viewMovement: () => setActiveTab('movements'),
+                    viewMovement: () => {
+                      requestMovementFocus(occurrence.transactionId!);
+                      setActiveTab('movements');
+                    },
                   } : undefined}
                 />
               );
