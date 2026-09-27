@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreditCard, Plus, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toCents, cn } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -154,9 +155,27 @@ export default function DebtsTab() {
                       <p className="text-xs text-muted-foreground">Corte: día {debt.billingCycleDay || '--'} • Pago: día {debt.paymentDueDay || '--'}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-bad/50 hover:bg-bad/10 hover:text-bad" onClick={() => deleteDebt(debt.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 text-bad/70 hover:bg-bad/10 hover:text-bad" aria-label={`Eliminar ${debt.name}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Eliminar esta tarjeta?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Se eliminará “{debt.name}”. Si conserva compras o pagos históricos vinculados, la operación puede ser rechazada para proteger el historial.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => void deleteDebt(debt.id)} className="bg-destructive text-destructive-foreground">
+                          Eliminar tarjeta
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
