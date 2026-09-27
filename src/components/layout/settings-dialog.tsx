@@ -17,6 +17,7 @@ import { HelpDialog } from './help-dialog';
 import { db } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
 import { SectionHeader } from '@/components/finance-ui';
+import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
@@ -39,6 +40,7 @@ export function SettingsDialog() {
     resetSettings, isWorking,
   } = useFinances();
   const { toast } = useToast();
+  const { balancesHidden, setBalancesHidden } = useBalanceVisibility();
   const [baseFreq, setBaseFreq] = useState(baseIncome?.freq || 'mensual');
   const [baseAmount, setBaseAmount] = useState(String((baseIncome?.amount || 0) / 100));
 
@@ -165,8 +167,21 @@ export function SettingsDialog() {
 
           <TabsContent value="privacy" className="space-y-5">
             <SectionHeader title="Privacidad y seguridad" description="GlitchBudget funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
-            <div className="rounded-xl border p-4 text-sm">
-              <div className="flex items-start gap-3">
+            <div className="rounded-xl border p-4 text-sm space-y-4">
+              <label className="flex items-start justify-between gap-4">
+                <span>
+                  <span className="block font-medium">Ocultar importes</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador.</span>
+                </span>
+                <input
+                  type="checkbox"
+                  checked={balancesHidden}
+                  onChange={event => setBalancesHidden(event.target.checked)}
+                  aria-label="Ocultar importes"
+                  className="mt-1 h-5 w-5"
+                />
+              </label>
+              <div className="flex items-start gap-3 border-t pt-4">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
                   <p className="font-medium">Almacenamiento local</p>
