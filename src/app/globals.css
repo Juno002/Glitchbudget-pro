@@ -71,6 +71,16 @@ body {
     --surface-card: var(--card);
     --surface-interactive: var(--background);
     --surface-modal: var(--popover);
+
+    --border-subtle: hsl(var(--border) / 0.65);
+    --border-strong: hsl(var(--border) / 1);
+
+    --font-money: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+    --status-success: hsl(var(--good));
+    --status-warning: hsl(var(--warning));
+    --status-danger: hsl(var(--bad));
+    --status-info: hsl(var(--primary));
   }
   .dark {
     --background: 0 0% 3%; /* #080808 */
