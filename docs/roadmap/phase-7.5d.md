@@ -232,8 +232,15 @@ El gate automático cubre tipos, lint, invariantes, build, local-only y contrato
 
 No se realizó en este gate una auditoría visual manual en un teléfono físico ni una auditoría completa con lector de pantalla. Esos controles siguen siendo recomendables antes de una release pública.
 
-## Cierre
+## Nota posterior de revisión
 
-7.5D cerrada. Con esto Fase 7.5 queda funcionalmente completa.
+Este documento conserva el checkpoint técnico de la iteración 7.5D. Después de revisar literalmente `Roadmap septiembre 2026.txt`, el gate de Fase 7.5 continuó con los patrones base faltantes, wireframes estructurales, jerarquía completa de Resumen, Movimientos history-first, compositor global Gasto/Ingreso/Transferencia y el entregable exacto de 10 puntos.
 
-No iniciar Fase 8 automáticamente.
+El cierre vigente está en:
+
+```text
+docs/roadmap/phase-7.5.md
+docs/roadmap/phase-7.5-gate.md
+```
+
+No iniciar Fase 8 hasta revisar ese gate.
