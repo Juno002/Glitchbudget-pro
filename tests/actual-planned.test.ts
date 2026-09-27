@@ -79,10 +79,9 @@ test('rule create/edit/activate/deactivate/delete leaves actual money and histor
   await removeRecurringRule(r.id);const after=await snapshot();assert.deepEqual(metrics(after),expected);assert.deepEqual(after.expenses,before.expenses);assert.deepEqual(after.incomes,before.incomes);
 });
 
-test('explicit payment changes metrics once; later edits/removal of its rule preserve actual provenance',async()=>{
+test('explicit actual payment changes metrics once; later rule changes preserve provenance',async()=>{
   const r=rule();await saveRecurringRule(r);const before=metrics(await snapshot());
-  const results=await Promise.allSettled([saveExpense({...expense,recurringRuleId:r.id}),saveExpense({...expense,id:'double',recurringRuleId:r.id})]);
-  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+  await saveExpense({...expense,recurringRuleId:r.id});
   const actual=(await db.expenses.filter(e=>e.recurringRuleId===r.id).toArray())[0];const after=metrics(await snapshot());
   assert.equal(after.september.spending-before.september.spending,5000);assert.equal(after.position.liquidAssets-before.position.liquidAssets,-5000);assert.equal(after.september.cashFlow-before.september.cashFlow,-5000);
   await saveRecurringRule({...r,title:'Otro importe',amount:25000,active:false},true);assert.deepEqual(await db.expenses.get(actual.id),actual);
@@ -90,10 +89,12 @@ test('explicit payment changes metrics once; later edits/removal of its rule pre
   await saveExpense({...actual,amount:actual.amount/100,concept:'Corrección histórica'},true);assert.equal((await db.expenses.get(actual.id))?.recurringRuleId,r.id);
 });
 
-test('monthly compatibility guard does not limit weekly/biweekly rules to one payment per month',async()=>{
-  for(const cadence of ['weekly','biweekly'] as const){const r=rule(cadence,cadence);await saveRecurringRule(r);
-    await saveExpense({...expense,id:cadence+'1',amount:1,recurringRuleId:r.id});await saveExpense({...expense,id:cadence+'2',date:'2026-09-24',amount:1,recurringRuleId:r.id});}
-  assert.equal(await db.expenses.filter(e=>!!e.recurringRuleId).count(),4);
+test('transaction service no longer imposes a one-payment-per-month recurrence guard',async()=>{
+  for(const cadence of ['monthly','weekly','biweekly'] as const){const r=rule(cadence,cadence);await saveRecurringRule(r);
+    await saveExpense({...expense,id:cadence+'1',amount:1,recurringRuleId:r.id});
+    await saveExpense({...expense,id:cadence+'2',date:'2026-09-24',amount:1,recurringRuleId:r.id});
+  }
+  assert.equal(await db.expenses.filter(e=>!!e.recurringRuleId).count(),6);
 });
 
 test('forecast and income planning rule never become cash; only explicit receipt affects recorded income',async()=>{
