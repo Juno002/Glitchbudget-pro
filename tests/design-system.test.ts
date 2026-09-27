@@ -30,6 +30,6 @@ test('structural design tokens are centralized in globals.css', () => {
     '--surface-interactive',
     '--surface-modal',
   ]) {
-    assert.match(css, new RegExp(token.replace('--', '\\\\-\\\\-')));
+    assert.ok(css.includes(token), `Falta el token ${token}`);
   }
 });
