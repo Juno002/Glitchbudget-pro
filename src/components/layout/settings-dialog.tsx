@@ -32,6 +32,7 @@ const SETTINGS_SECTIONS = [
 export function SettingsDialog() {
   const {
     theme, setTheme,
+    currency,
     preventNegativeAccountBalance, setPreventNegativeAccountBalance,
     budgetOverspendingBehavior, setBudgetOverspendingBehavior,
     periodStartDay, setPeriodStartDay,
@@ -81,6 +82,12 @@ export function SettingsDialog() {
 
           <TabsContent value="general" className="space-y-5">
             <SectionHeader title="General" description="Cómo se organiza tu período financiero." />
+            <div className="max-w-sm rounded-xl border p-4">
+              <p className="text-sm font-medium">Moneda base</p>
+              <p className="mt-1 text-lg font-semibold">{currency}</p>
+              <p className="mt-1 text-xs text-muted-foreground">La edición de moneda y conversión pertenece a la fundación multicurrency de Fase 11.</p>
+            </div>
+
             <label className="block max-w-sm space-y-2 text-sm">
               <span className="font-medium">Inicio del período</span>
               <select
@@ -181,6 +188,16 @@ export function SettingsDialog() {
                   className="mt-1 h-5 w-5"
                 />
               </label>
+              <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
+                <div className="rounded-lg border p-3">
+                  <p className="text-sm font-medium">Bloqueo de aplicación</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Reservado para Fase 17 — Seguridad y privacidad UX.</p>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <p className="text-sm font-medium">Auto-lock</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Reservado para Fase 17; no se muestra un control falso antes de existir el comportamiento.</p>
+                </div>
+              </div>
               <div className="flex items-start gap-3 border-t pt-4">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>
