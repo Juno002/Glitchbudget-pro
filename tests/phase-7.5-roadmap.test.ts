@@ -66,7 +66,12 @@ test('planned payments use the stable row and expose confirmed movement navigati
   const planned = read('src/components/dashboard/subscriptions-manager.tsx');
   assert.match(planned, /PlannedPaymentRow/);
   assert.match(planned, /viewMovement/);
+  assert.match(planned, /requestMovementFocus\(occurrence\.transactionId/);
   assert.match(planned, /setActiveTab\('movements'\)/);
+
+  const movements = read('src/components/dashboard/MovementsView.tsx');
+  assert.match(movements, /movementFocusId/);
+  assert.match(movements, /setModalOpen\(true\)/);
 });
 
 test('settings hierarchy includes roadmap sections without pretending future security exists', () => {
