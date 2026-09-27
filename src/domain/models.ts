@@ -102,7 +102,7 @@ export interface RecurringRule {
   categoryId: string;
   amount: number;              // centavos, positivo
   cadence: 'weekly' | 'biweekly' | 'monthly';
-  day?: number;                // monthly: 1..28, weekly: 0..6
+  day?: number;                // monthly preferred day 1..31; weekly/biweekly scheduling ignores this legacy field
   startDate: string;           // YYYY-MM-DD
   endDate?: string;
   active: boolean;
