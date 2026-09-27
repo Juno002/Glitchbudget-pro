@@ -869,7 +869,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers,
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
