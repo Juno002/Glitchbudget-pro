@@ -23,8 +23,8 @@ const SETTINGS_SECTIONS = [
   ['general', 'General'],
   ['finance', 'Finanzas'],
   ['categories', 'Categorías'],
-  ['privacy', 'Privacidad'],
-  ['data', 'Datos'],
+  ['privacy', 'Privacidad y seguridad'],
+  ['data', 'Datos y backups'],
   ['appearance', 'Apariencia'],
   ['about', 'Acerca de'],
 ] as const;
