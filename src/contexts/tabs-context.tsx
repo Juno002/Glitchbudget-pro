@@ -9,6 +9,9 @@ type TabsContextType = {
   setActiveTab: (tab: string) => void;
   planningTab: PlanningTabValue;
   setPlanningTab: (tab: PlanningTabValue) => void;
+  movementFocusId: string | null;
+  requestMovementFocus: (id: string) => void;
+  clearMovementFocus: () => void;
 };
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
@@ -16,13 +19,17 @@ const TabsContext = createContext<TabsContextType | undefined>(undefined);
 export function TabsProvider({ children, defaultValue }: { children: ReactNode, defaultValue: string }) {
   const [activeTab, setActiveTab] = useState(defaultValue);
   const [planningTab, setPlanningTab] = useState<PlanningTabValue>('budgets');
+  const [movementFocusId, setMovementFocusId] = useState<string | null>(null);
 
   const value = useMemo(() => ({
     activeTab,
     setActiveTab,
     planningTab,
     setPlanningTab,
-  }), [activeTab, planningTab]);
+    movementFocusId,
+    requestMovementFocus: (id: string) => setMovementFocusId(id),
+    clearMovementFocus: () => setMovementFocusId(null),
+  }), [activeTab, planningTab, movementFocusId]);
 
   return (
     <TabsContext.Provider value={value}>
