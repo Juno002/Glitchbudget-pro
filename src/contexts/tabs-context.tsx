@@ -2,20 +2,27 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
+export type PlanningTabValue = 'budgets' | 'goals' | 'subscriptions';
+
 type TabsContextType = {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  planningTab: PlanningTabValue;
+  setPlanningTab: (tab: PlanningTabValue) => void;
 };
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
 export function TabsProvider({ children, defaultValue }: { children: ReactNode, defaultValue: string }) {
   const [activeTab, setActiveTab] = useState(defaultValue);
+  const [planningTab, setPlanningTab] = useState<PlanningTabValue>('budgets');
 
   const value = useMemo(() => ({
     activeTab,
     setActiveTab,
-  }), [activeTab]);
+    planningTab,
+    setPlanningTab,
+  }), [activeTab, planningTab]);
 
   return (
     <TabsContext.Provider value={value}>
