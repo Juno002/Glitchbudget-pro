@@ -309,6 +309,18 @@ test('rule deletion and direction changes are blocked while pending occurrences 
   assert.equal((await db.planned_occurrences.get('occ-rule-integrity'))?.status, 'skipped');
 });
 
+test('schedule edits are blocked while pending occurrences would become stale', async () => {
+  await addPendingOccurrence({ id:'occ-schedule-edit', ruleId:'rule', scheduledDate:'2026-09-15' });
+  const current = (await db.recurrents.get('rule'))!;
+  await assert.rejects(
+    saveRecurringRule({ ...current, cadence:'weekly' }, true),
+    /antes de cambiar el calendario/,
+  );
+  await skipPlannedOccurrence('occ-schedule-edit');
+  await saveRecurringRule({ ...current, cadence:'weekly' }, true);
+  assert.equal((await db.recurrents.get('rule'))?.cadence, 'weekly');
+});
+
 test('rule direction remains immutable after a confirmed occurrence too', async () => {
   await addPendingOccurrence({ id:'occ-direction', ruleId:'rule', scheduledDate:'2026-09-15' });
   await confirmPlannedOccurrence('occ-direction', { accountId:'bank' });
