@@ -538,7 +538,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       />
                       <Button type="button" variant="outline" disabled={!templateReady || !templateName.trim()} onClick={handleSaveTemplate}>
                         <BookmarkPlus className="mr-2 h-4 w-4" />
-                        Guardar
+                        Guardar como plantilla
                       </Button>
                     </div>
                   </div>
