@@ -209,7 +209,7 @@ export async function confirmPlannedOccurrence(
       await saveIncome({
         id: transactionId,
         recurringRuleId: rule.id,
-        accountId: options.accountId,
+        accountId: options.accountId ?? rule.defaultAccountId,
         type: options.incomeType ?? 'extra',
         description: rule.title,
         amount: amountCents / 100,
@@ -220,7 +220,7 @@ export async function confirmPlannedOccurrence(
       await saveExpense({
         id: transactionId,
         recurringRuleId: rule.id,
-        accountId: options.accountId,
+        accountId: options.accountId ?? rule.defaultAccountId,
         nature: options.expenseNature ?? 'Variable',
         concept: rule.title,
         amount: amountCents / 100,
