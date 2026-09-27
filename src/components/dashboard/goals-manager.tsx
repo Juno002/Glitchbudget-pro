@@ -13,6 +13,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { Target, Trash2, PlusCircle, Brain, Calendar, Repeat } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { EmptyState } from '@/components/finance-ui';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -288,11 +289,11 @@ export default function GoalsManager() {
                     </AnimatePresence>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-black/5 dark:bg-white/5">
-                    <Target className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
-                    <h4 className="font-medium text-lg mb-1">Sin metas de ahorro</h4>
-                    <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">Usa el botón inferior para empezar a destinar fondos a tus sueños.</p>
-                </div>
+                <EmptyState
+                    icon={<Target className="h-10 w-10" />}
+                    title="Aún no tienes metas"
+                    description="Crea una meta para calcular cuánto necesitas ahorrar y seguir tu progreso."
+                />
             )}
             
             {/* New Goal Modal (Moved to bottom) */}
