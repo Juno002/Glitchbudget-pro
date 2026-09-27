@@ -15,6 +15,7 @@ import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
 import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod } from '@/lib/budget-rollover';
 import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '@/domain/budgets';
+import { reassignBudgetLimit } from '@/lib/budget-service';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
@@ -472,38 +473,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const transferBetweenBudgets = useCallback(async (month: string, fromCategoryId: string, toCategoryId: string, amount: number, budgetPeriod?: BudgetPeriodRange) => {
     const amountInCents = toCents(amount);
     try {
-      if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error("El monto de la transferencia debe ser positivo.");
-      if (fromCategoryId === toCategoryId) throw new Error('Selecciona dos categorías diferentes.');
       const range = budgetPeriod ?? { ...periodForId(month, activeSettings), kind: 'monthly' as const };
-      await db.transaction('rw', db.plans, db.expenses, db.categories, async () => {
-          const fromBudget = await db.plans.get([range.id, fromCategoryId]);
-          const toBudget = await db.plans.get([range.id, toCategoryId]);
-
-          await requireCategory(fromCategoryId, 'expense', fromBudget?.categoryId);
-          await requireCategory(toCategoryId, 'expense', toBudget?.categoryId);
-          const spent = selectCategorySpendingForPeriod(await db.expenses.toArray(), fromCategoryId, range);
-          if (!fromBudget || fromBudget.limit - spent < amountInCents) {
-              throw new Error("Fondos insuficientes en el presupuesto de origen.");
-          }
-
-          await db.plans.update([range.id, fromCategoryId], { limit: fromBudget.limit - amountInCents });
-
-          if (toBudget) {
-              await db.plans.update([range.id, toCategoryId], { limit: toBudget.limit + amountInCents });
-          } else {
-              await db.plans.add(budgetPlanForRange(range, toCategoryId, amountInCents));
-          }
-      });
+      await reassignBudgetLimit(range, fromCategoryId, toCategoryId, amountInCents);
       toast({
-            title: 'Transferencia de presupuesto completada',
-            description: 'Solo cambió la asignación planificada entre categorías; no se movió dinero real.',
+        title: 'Transferencia de presupuesto completada',
+        description: 'Solo cambió la asignación planificada entre categorías; no se movió dinero real.',
       });
       return true;
-    } catch(error: any) {
+    } catch(error) {
       toast({
-            title: 'Error en la transferencia de presupuesto',
-            description: friendlyError(error),
-            variant: 'destructive',
+        title: 'Error en la transferencia de presupuesto',
+        description: friendlyError(error),
+        variant: 'destructive',
       });
       return false;
     }
