@@ -34,7 +34,7 @@ export function MoneyValue({
   return (
     <span
       className={cn(
-        'font-mono tabular-nums tracking-tight',
+        'tabular-nums tracking-tight [font-family:var(--font-money)]',
         toneClass[tone],
         className,
       )}
