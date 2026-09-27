@@ -1,5 +1,7 @@
 # Fase 7.5 — Prototipos estructurales
 
+**Wireframes canónicos de Fase 7.5**, aprobados con el [Gate 7.5](../roadmap/phase-7.5-gate.md) el 2026-09-27. Sustituyen el boceto inicial `docs/roadmap/phase-7-5-wireframes.html`. En Movimientos rige: **búsqueda → filtros → historial real → cuentas/tarjetas como gestión secundaria**.
+
 Estos wireframes son deliberadamente estructurales. No son pixel-perfect y no introducen lógica financiera nueva.
 
 ## 1. Resumen

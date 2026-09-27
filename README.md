@@ -1,10 +1,14 @@
 # 💰 GlitchBudget Pro
 
+## Estado del roadmap
+
+**Fase 7.5 completada y Gate aprobado el 2026-09-27.** La siguiente fase habilitada es Quick Add 2.0. Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de fase](docs/roadmap/phase-7.5.md), el [Gate aprobado](docs/roadmap/phase-7.5-gate.md) y los [wireframes canónicos](docs/ux/wireframes-phase-7.5.md).
+
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
 ## ✨ Características Principales
 
-- **Dashboard Interactivo:** Un resumen visual de tu salud financiera con KPIs clave adaptables a dispositivos móviles, gráficos de gastos y estado de tus presupuestos.
+- **Resumen:** Posición financiera, presupuesto restante, próximos pagos, metas y movimientos recientes. El análisis por categoría se consulta en Reportes.
 - **Modo Minimalista ("Serious Mode"):** Una interfaz ultra-limpia, en escala de grises y sin distracciones para quienes prefieren un enfoque profesional y sobrio en sus finanzas.
 - **Estrategias de Ahorro Rápidas:** Alterna el objetivo de ahorro general entre un 0% (sin forzar), 5%, 10% o 20% con un solo toque desde tu resumen mensual.
 - **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
@@ -13,7 +17,7 @@
     - **Metas de Ahorro con Calculadora Inteligente:** Crea objetivos de ahorro y recibe sugerencias realistas basadas en tu capacidad financiera.
 - **Registro Detallado de Gastos:** Clasifica tus gastos como fijos, variables u ocasionales. Incluye soporte para **Tarjetas de Crédito** con seguimiento de deudas.
 - **Reportes de Crédito Avanzados:** Visualiza el estado de tus tarjetas, días restantes para el corte y fechas de pago de forma automática.
-- **Gamificación & Logros:** Sistema de logros persistentes como el modo **"Monje Financiero"**, que premia la disciplina extrema (gastos < 20% de ingresos) con banners dinámicos.
+- **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
 - **Cierre de Mes Automatizado (Rollover):** Configura cómo se deben tratar los excedentes o déficits de tus presupuestos al pasar al siguiente mes.
 - **Transferencias Flexibles:** Mueve fondos entre tus presupuestos de diferentes categorías a mitad de mes.
 - **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
@@ -27,11 +31,11 @@
 
 El diseño de la aplicación sigue un ciclo financiero lógico:
 
-1.  **Define tus Ingresos (Pestaña "Ingresos"):** Establece tu ingreso principal y extras.
-2.  **Planifica (Pestaña "Planificación"):** Crea presupuestos y define metas de ahorro inteligentes.
-3.  **Gestiona tus categorías (Ajustes ⚙️):** Personaliza tus categorías con iconos específicos antes de empezar a registrar.
-4.  **Registra tus Gastos (Pestaña "Movimientos"):** Usa el botón de registro rápido para añadir gastos fijos o variables.
-5.  **Monitorea (Reportes):** Revisa el estado de tus tarjetas de crédito y tu progreso mensual.
+1. **Registra operaciones:** El botón global Nuevo movimiento abre el mismo compositor para ingresos, gastos y transferencias.
+2. **Consulta Resumen:** Revisa tu posición financiera y las acciones pendientes.
+3. **Consulta Movimientos:** Busca y filtra el historial real; cuentas y tarjetas quedan como gestión secundaria.
+4. **Organiza Plan:** Presupuestos, Metas y Planificados.
+5. **Analiza en Reportes:** Revisa categorías y comparativas de períodos. Gestiona categorías y preferencias desde el panel de Ajustes.
 
 ## 🛠️ Configuración y Opciones
 

@@ -1,5 +1,7 @@
 # Fase 7.5C — Patrones estructurales
 
+> **Checkpoint histórico, supersedido por el cierre de Fase 7.5.** Sus alcances, pendientes, instrucciones de parada y pruebas describen esta iteración. Consulta el [cierre canónico](phase-7.5.md), el [Gate aprobado](phase-7.5-gate.md) y los [wireframes vigentes](../ux/wireframes-phase-7.5.md). En particular, el orden final de Movimientos prioriza búsqueda, filtros e historial antes de cuentas/tarjetas; los bloques de Resumen aquí pendientes se completaron después.
+
 Fecha: 2026-09-27. Rama: `phase-7.5-ux-architecture`. Base: 7.5B cerrada en `171410c`.
 
 ## Alcance

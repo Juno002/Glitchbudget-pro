@@ -1,5 +1,9 @@
 # Fase 7.5 — UX Architecture & Design System
 
+**Estado vigente: fase completa; Gate 7.5 revisado y aprobado por el usuario el 2026-09-27.** Fase 8 — Quick Add 2.0 queda habilitada. Esta actualización registra la aprobación; no implementa Fase 8.
+
+Fuentes canónicas: este cierre, el [entregable formal del Gate](phase-7.5-gate.md) y los [wireframes estructurales](../ux/wireframes-phase-7.5.md). El [índice del roadmap](README.md) distingue estos documentos de los registros históricos.
+
 Fecha: 2026-09-27. Rama: `phase-7.5-ux-architecture`. Fuente de verdad: `Roadmap septiembre 2026.txt`.
 
 Este documento registra el cumplimiento de **Fase 7.5 completa según el roadmap**, no una reescritura pixel-perfect de toda la aplicación. El objetivo fue fijar y aplicar la arquitectura de interacción, los patrones reutilizables y las restricciones UX antes de Quick Add 2.0.
@@ -412,7 +416,7 @@ Los checks automáticos no sustituyen:
 - contraste manual de combinaciones extremas;
 - revisión humana del entregable UX.
 
-El roadmap exige revisar el gate antes de Fase 8.
+La revisión humana del Gate fue completada y aprobada por el usuario el 2026-09-27. Las comprobaciones físicas de QA anteriores siguen siendo tareas de release; no bloquean el cierre arquitectónico ni el inicio de Fase 8.
 
 ## Siguiente fase
 
@@ -420,4 +424,4 @@ El roadmap exige revisar el gate antes de Fase 8.
 Fase 8 — Quick Add 2.0
 ```
 
-**No iniciar Fase 8 hasta revisar `docs/roadmap/phase-7.5-gate.md`.**
+**Requisito cumplido:** el [Gate 7.5](phase-7.5-gate.md) está revisado y aprobado. Fase 8 mejorará `TransactionModal`, manteniendo el compositor único y las invariantes financieras.

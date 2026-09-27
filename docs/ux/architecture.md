@@ -1,6 +1,6 @@
 # GlitchBudget Pro — UX Architecture Contract
 
-Estado: aprobado como contrato estructural de Fase 7.5A. Este documento define navegación, jerarquías y vocabulario. No modifica reglas financieras ni el modelo persistente.
+Estado: contrato estructural de Fase 7.5, consolidado con el [Gate aprobado el 2026-09-27](../roadmap/phase-7.5-gate.md). Se inició en 7.5A; el [cierre canónico](../roadmap/phase-7.5.md) y los [wireframes vigentes](wireframes-phase-7.5.md) registran la decisión final. Este documento define navegación, jerarquías y vocabulario. No modifica reglas financieras ni el modelo persistente.
 
 ## 1. Navegación principal
 

@@ -1,5 +1,9 @@
 # Gate Fase 7.5 — Entregable de UX Architecture & Design System
 
+**Gate 7.5: APROBADO por el usuario el 2026-09-27.** Se aprueban navegación, Resumen, Plan, estados de planificados, compositor global, sistema visual, privacidad, responsive/accesibilidad y la frontera del dominio financiero. Fase 8 — Quick Add 2.0 puede comenzar sobre `TransactionModal`.
+
+Fuentes canónicas: [cierre de fase](phase-7.5.md), este entregable formal y [wireframes estructurales](../ux/wireframes-phase-7.5.md). Las iteraciones 7.5A–D y los antiguos archivos `phase-7-5-*` son antecedentes, no arquitecturas alternativas vigentes.
+
 Este documento responde literalmente al entregable exigido por `Roadmap septiembre 2026.txt`.
 
 ## 1. Proposed navigation structure
@@ -180,4 +184,6 @@ Privacy visibility behavior: definido.
 
 Prototipos estructurales: `docs/ux/wireframes-phase-7.5.md`.
 
-**No pasar a Fase 8 antes de revisar este gate.**
+> Requisito original del roadmap: No pasar a Fase 8 antes de revisar este gate.
+
+**Cumplido el 2026-09-27:** revisión y aprobación explícita del usuario. Los acuerdos anteriores constituyen el contrato aprobado para Fase 8; las pruebas físicas permanecen en release QA.
