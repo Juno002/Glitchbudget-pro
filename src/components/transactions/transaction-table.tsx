@@ -1,10 +1,8 @@
 'use client';
 
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { format } from 'date-fns';
 import type { Transaction } from '@/lib/types';
@@ -16,7 +14,7 @@ interface TransactionTableProps {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   return (
     <div className="rounded-md border">
@@ -58,7 +56,7 @@ export function TransactionTable({ transactions }: TransactionTableProps) {
                         </TableCell>
                         <TableCell className="hidden md:table-cell">{format(new Date(`${tx.date}T00:00:00`), 'MMM d, yyyy')}</TableCell>
                         <TableCell className={`text-right font-medium ${isIncome ? 'text-green-600' : 'text-foreground'}`}>
-                        {isIncome ? '+' : '-'} {formatCurrency(tx.amount)}
+                        {isIncome ? '+' : '-'} {money(tx.amount)}
                         </TableCell>
                     </TableRow>
                     );

@@ -1,9 +1,7 @@
 'use client';
 
-import { useMoneyFormatter, useMoneyVisibility } from "@/hooks/use-money-visibility";
-
 import { useFinances } from '@/contexts/finance-context';
-
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useState, useEffect } from 'react';
 
@@ -20,16 +18,14 @@ const COLORS = [
     '#00C49F',
 ];
 
-const CustomLegend = (props: any) => {
-  const formatCurrency = useMoneyFormatter();
-  const { payload } = props;
+const CustomLegend = ({ payload, money }: { payload?: any[]; money: (amount: number) => string }) => {
   return (
     <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
       {
-        payload.map((entry: any, index: number) => (
+        (payload || []).map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
-            <span>{formatCurrency(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
+            <span>{money(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
           </li>
         ))
       }
@@ -38,8 +34,7 @@ const CustomLegend = (props: any) => {
 };
 
 export default function ExpenseDonutChart() {
-  const { balancesHidden } = useMoneyVisibility();
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
     const { getExpensesByCategory, currentMonth, loading } = useFinances();
     const data = getExpensesByCategory(currentMonth);
     const [isClient, setIsClient] = useState(false);
@@ -48,7 +43,6 @@ export default function ExpenseDonutChart() {
         setIsClient(true);
     }, []);
 
-    if (balancesHidden) return <p>Gráfico oculto por privacidad.</p>;
     if (loading) return <div className="h-full w-full flex items-center justify-center text-muted-foreground">Cargando...</div>;
 
     if (!isClient) return null; // Prevent server-side rendering of the chart
@@ -61,11 +55,10 @@ export default function ExpenseDonutChart() {
       <ResponsiveContainer width="100%" height="100%">
           <PieChart>
               <Tooltip
-                  formatter={(value: number, name: string) => [formatCurrency(value), name]}
+                  formatter={(value: number, name: string) => [money(value), name]}
               />
-              <Legend content={<CustomLegend />} verticalAlign="bottom" />
+              <Legend content={<CustomLegend money={money} />} verticalAlign="bottom" />
               <Pie
-                  isAnimationActive={false}
                   data={data}
                   cx="50%"
                   cy="50%"

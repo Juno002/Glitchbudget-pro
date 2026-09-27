@@ -46,6 +46,41 @@ body {
     --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
     --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
     --backdrop: rgba(8,8,8,0.85);
+
+    /* 7.5 Design System: structural tokens shared by every theme. */
+    --space-page: 2rem;
+    --space-section: 1.5rem;
+    --space-card: 1rem;
+    --space-control: 0.75rem;
+
+    --radius-card: 1.25rem;
+    --radius-interactive: 0.75rem;
+    --radius-modal: 1.25rem;
+
+    --text-page-title: 1.5rem;
+    --text-section-title: 1.125rem;
+    --text-metric: 1.5rem;
+    --text-supporting: 0.875rem;
+
+    --motion-fast: 120ms;
+    --motion-standard: 180ms;
+    --motion-slow: 280ms;
+
+    --surface-page: var(--background);
+    --surface-section: var(--card);
+    --surface-card: var(--card);
+    --surface-interactive: var(--background);
+    --surface-modal: var(--popover);
+
+    --border-subtle: hsl(var(--border) / 0.65);
+    --border-strong: hsl(var(--border) / 1);
+
+    --font-money: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+    --status-success: hsl(var(--good));
+    --status-warning: hsl(var(--warning));
+    --status-danger: hsl(var(--bad));
+    --status-info: hsl(var(--primary));
   }
   .dark {
     --background: 0 0% 3%; /* #080808 */
@@ -189,20 +224,13 @@ html.serious [class*="rounded-"] { border-radius: 12px; }
 html.light, html.serious { background: hsl(var(--background)); color-scheme: only light; }
 html.dark { color-scheme: only dark; }
 html.light ::-webkit-scrollbar-thumb, html.serious ::-webkit-scrollbar-thumb { background: hsl(var(--border)); }
-/* Phase 7.5: shared layout and interaction tokens across every theme. */
-:root {
-  --space-page: 1rem;
-  --space-section: 1.5rem;
-  --space-card: 1rem;
-  --radius-card: 1rem;
-  --duration-feedback: 150ms;
+
+
+/* Privacy display guard: prevent a stored hidden-balance preference from flashing values before hydration. */
+html[data-balances-hidden='true']:not([data-balances-ready='true']) [data-private-surface='true'] {
+  visibility: hidden;
 }
-.ui-card { padding: var(--space-card); border: 1px solid hsl(var(--border)); border-radius: var(--radius-card); background: hsl(var(--card)); }
-.settings-sections > button { width: 100%; justify-content: flex-start; }
-.settings-sections h3 { margin-top: var(--space-section); }
-button:focus-visible, a:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
-@media (pointer: coarse) {
-  button, [role="button"], [role="tab"], select, input:not([type="checkbox"]):not([type="radio"]) { min-height: 44px; }
+
+html[data-balances-hidden='true'] [data-money-value='true'] {
+  user-select: none;
 }
-@media (min-width: 768px) { :root { --space-page: 2rem; --space-card: 1.25rem; } }
-.settings-sections section > button { width: 100%; justify-content: flex-start; }

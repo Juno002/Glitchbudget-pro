@@ -18,12 +18,12 @@ import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
-import { ensureCashAccount } from '@/lib/accounts';
+import { ensureCashAccount, saveTransfer } from '@/lib/accounts';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -48,6 +48,7 @@ export type BackupFile = { name: string; lastModified: number };
 
 interface FinanceContextType {
   theme: 'light' | 'dark' | 'serious';
+  currency: string;
   preventNegativeAccountBalance: boolean;
   budgetOverspendingBehavior: BudgetOverspendingBehavior;
   rolloverStrategy: RolloverStrategy;
@@ -67,6 +68,7 @@ interface FinanceContextType {
   debtPayments: DebtPayment[] | undefined;
   recurringRules: RecurringRule[] | undefined;
   plannedOccurrences: PlannedOccurrence[] | undefined;
+  accountTransfers: AccountTransfer[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setPreventNegativeAccountBalance: (value: boolean) => void;
@@ -80,6 +82,7 @@ interface FinanceContextType {
   addExpense: (expense: Omit<Expense, "id" | "month">) => Promise<boolean>;
   updateExpense: (expense: Expense) => Promise<boolean>;
   deleteExpense: (id: string) => Promise<boolean>;
+  addAccountTransfer: (transfer: Omit<AccountTransfer, 'id'>) => Promise<boolean>;
   addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => Promise<boolean>;
   updateGoal: (goal: Goal) => Promise<boolean>;
   deleteGoal: (id: string) => void;
@@ -372,6 +375,17 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       toast({ title: 'Error al eliminar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const addAccountTransfer = useCallback(async (transfer: Omit<AccountTransfer, 'id'>) => {
+    try {
+      await saveTransfer({ ...transfer, id: crypto.randomUUID() });
+      toast({ title: 'Transferencia registrada', description: 'Se actualizó la cuenta de origen y destino sin crear ingreso ni gasto.' });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo registrar la transferencia', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
   }, [toast]);
@@ -780,6 +794,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
+    currency: activeSettings.currency,
     preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
     budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
@@ -798,6 +813,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debtPayments,
     recurringRules,
     plannedOccurrences,
+    accountTransfers: transfers,
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
@@ -809,6 +825,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     addExpense,
     updateExpense,
     deleteExpense,
+    addAccountTransfer,
     addGoal,
     updateGoal,
     deleteGoal,
@@ -852,9 +869,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers,
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
-    addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
+    addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,

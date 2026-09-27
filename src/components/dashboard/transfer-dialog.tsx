@@ -1,7 +1,5 @@
 'use client';
 
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
-
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,7 +21,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRightLeft } from 'lucide-react';
-
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 
 const formSchema = z.object({
   fromCategoryId: z.string().min(1, 'Debes seleccionar una categoría de origen'),
@@ -37,7 +35,7 @@ const formSchema = z.object({
 type TransferFormValues = z.infer<typeof formSchema>;
 
 export default function TransferDialog() {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const [open, setOpen] = useState(false);
   const { expenseCategories, transferBetweenBudgets, getBudgetStatusDetails, currentMonth } = useFinances();
@@ -100,7 +98,7 @@ export default function TransferDialog() {
                     <SelectContent>
                       {budgetsWithFunds.map(b => {
                         const cat = getCategoryInfo(b.categoryId);
-                        return cat ? <SelectItem key={cat.id} value={cat.id}>{cat.name} ({formatCurrency(b.remaining)})</SelectItem> : null
+                        return cat ? <SelectItem key={cat.id} value={cat.id}>{cat.name} ({money(b.remaining)})</SelectItem> : null
                       })}
                     </SelectContent>
                   </Select>

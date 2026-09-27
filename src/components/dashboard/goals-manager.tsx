@@ -1,7 +1,5 @@
 'use client';
 
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
-
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFinances } from '@/contexts/finance-context';
 import { Target, Trash2, PlusCircle, Brain, Calendar, Repeat } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { EmptyState } from '@/components/finance-ui';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -42,7 +42,7 @@ const contributionSchema = z.object({
 type ContributionFormValues = z.infer<typeof contributionSchema>;
 
 function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => Promise<boolean> }) {
-  const formatCurrency = useMoneyFormatter();
+    const money = usePrivateCurrency();
     const [open, setOpen] = useState(false);
     const { getDisposable } = useFinances();
     const { toast } = useToast();
@@ -57,7 +57,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
         if ((data.amount * 100) > disposable) {
             toast({
                 title: 'Saldo disponible superado',
-                description: `Estás intentando aportar más de tu disponible mensual de ${formatCurrency(disposable)}.`,
+                description: `Estás intentando aportar más de tu disponible mensual de ${money(disposable)}.`,
                 variant: 'destructive',
             });
             return;
@@ -77,7 +77,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
 
         toast({
             title: willBeCompleted ? '¡Meta Completada! 🎉' : '¡Aporte Exitoso!',
-            description: `Has sumado ${formatCurrency(addedCents)} a "${goal.name}".`
+            description: `Has sumado ${money(addedCents)} a "${goal.name}".`
         });
         form.reset();
         setOpen(false);
@@ -86,14 +86,14 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" className="h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
+                <Button variant="ghost" className="min-h-11 sm:min-h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden gap-0">
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle>Aportar a &quot;{goal.name}&quot;</DialogTitle>
                     <DialogDescription>
-                        Planificado: {formatCurrency(goal.quota)}/mes<br/>
-                        Disponible general: {formatCurrency(disposable)}
+                        Planificado: {money(goal.quota)}/mes<br/>
+                        Disponible general: {money(disposable)}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="px-6 pb-6">
@@ -134,7 +134,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
 
 
 export default function GoalsManager() {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -232,8 +232,8 @@ export default function GoalsManager() {
                                 {/* Progress Section */}
                                 <div className="flex-1 w-full space-y-1.5">
                                     <div className="flex justify-between text-sm">
-                                        <span className="font-medium text-foreground">{formatCurrency(goal.saved)}</span>
-                                        <span className="text-muted-foreground text-xs">de {formatCurrency(goal.target)} ({progress.toFixed(1)}%)</span>
+                                        <span className="font-medium text-foreground">{money(goal.saved)}</span>
+                                        <span className="text-muted-foreground text-xs">de {money(goal.target)} ({progress.toFixed(1)}%)</span>
                                     </div>
                                     <Progress 
                                         value={progress} 
@@ -247,12 +247,12 @@ export default function GoalsManager() {
                                         {goal.status === 'completed' ? (
                                              <span className="font-semibold text-primary">¡Meta Completada! 🎉</span>
                                         ) : (
-                                            <span>Restan {formatCurrency(remaining)}</span>
+                                            <span>Restan {money(remaining)}</span>
                                         )}
                                         {goal.quota > 0 && goal.status === 'active' && (
                                             <span className="flex items-center gap-1">
                                                 <Repeat className="h-3 w-3"/>
-                                                {formatCurrency(goal.quota)}/mes
+                                                {money(goal.quota)}/mes
                                             </span>
                                         )}
                                     </div>
@@ -265,7 +265,7 @@ export default function GoalsManager() {
                                     )}
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-9 w-9">
+                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-11 w-11 sm:h-9 sm:w-9">
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </AlertDialogTrigger>
@@ -289,11 +289,11 @@ export default function GoalsManager() {
                     </AnimatePresence>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-xl bg-black/5 dark:bg-white/5">
-                    <Target className="h-10 w-10 text-muted-foreground mb-3 opacity-50" />
-                    <h4 className="font-medium text-lg mb-1">Sin metas de ahorro</h4>
-                    <p className="text-sm text-muted-foreground mb-4 max-w-[280px]">Usa el botón inferior para empezar a destinar fondos a tus sueños.</p>
-                </div>
+                <EmptyState
+                    icon={<Target className="h-10 w-10" />}
+                    title="Aún no tienes metas"
+                    description="Crea una meta para calcular cuánto necesitas ahorrar y seguir tu progreso."
+                />
             )}
             
             {/* New Goal Modal (Moved to bottom) */}
@@ -333,7 +333,7 @@ export default function GoalsManager() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                      <FormField
                                         control={form.control}
                                         name="name"
@@ -385,7 +385,7 @@ export default function GoalsManager() {
                                             <FormLabel className="text-xs">Plan Sugerido</FormLabel>
                                             {disposable > 0 && (
                                                 <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                                    Libre: {formatCurrency(disposable)}
+                                                    Libre: {money(disposable)}
                                                 </span>
                                             )}
                                         </div>
@@ -415,7 +415,7 @@ export default function GoalsManager() {
                                                     </div>
                                                     {viable && (
                                                         <div className="font-bold shrink-0">
-                                                            {formatCurrency(monthly)}<span className="text-[10px] font-normal opacity-70">/m</span>
+                                                            {money(monthly)}<span className="text-[10px] font-normal opacity-70">/m</span>
                                                         </div>
                                                     )}
                                                 </button>
@@ -443,7 +443,7 @@ export default function GoalsManager() {
                                                         </div>
                                                     </div>
                                                     <div className="font-bold shrink-0">
-                                                        {formatCurrency(requiredByDeadline.monthlyRequired)}<span className="text-[10px] font-normal opacity-70">/m</span>
+                                                        {money(requiredByDeadline.monthlyRequired)}<span className="text-[10px] font-normal opacity-70">/m</span>
                                                     </div>
                                                 </button>
                                             )}

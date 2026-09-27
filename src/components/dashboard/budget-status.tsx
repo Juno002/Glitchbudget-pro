@@ -1,21 +1,12 @@
 'use client';
 
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
-
-import { useTabs } from '@/contexts/tabs-context';
-import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/financial-patterns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { EmptyState, MetricCard, MoneyValue, ProgressMetric } from '@/components/finance-ui';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-
-import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 
 export default function BudgetStatus() {
-  const { setActiveTab, setPlanTab } = useTabs();
-  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   const { getBudgetStatusDetails, currentMonth, loading } = useFinances();
 
@@ -42,6 +33,9 @@ export default function BudgetStatus() {
   }
 
   const trackedBudgets = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
+  const totalLimit = trackedBudgets.reduce((sum, budget) => sum + budget.limit, 0);
+  const totalSpent = trackedBudgets.reduce((sum, budget) => sum + budget.spent, 0);
+  const totalRemaining = totalLimit - totalSpent;
 
   return (
     <Card>
@@ -52,40 +46,37 @@ export default function BudgetStatus() {
       <CardContent>
         {trackedBudgets.length > 0 ? (
           <div className="space-y-6">
+            <MetricCard
+              label="Restante total"
+              amount={totalRemaining}
+              tone={totalRemaining < 0 ? 'negative' : 'neutral'}
+              supporting={<>de <MoneyValue amount={totalLimit} className="text-xs" /> presupuestados · gastado <MoneyValue amount={totalSpent} className="text-xs" /></>}
+            />
             {trackedBudgets.map((budget) => {
               const category = getCategoryInfo(budget.categoryId);
               if (!category) return null;
-
-              const progress = Math.min((budget.spent / budget.limit) * 100, 100);
+              
+              const status = budget.status === 'over' ? 'danger' : budget.status === 'alert' ? 'warning' : 'success';
+              const statusLabel = budget.status === 'over' ? 'Excedido' : budget.status === 'alert' ? 'Cerca del límite' : 'En presupuesto';
 
               return (
-                <div key={budget.categoryId}>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <category.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{category.name}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className={cn("font-semibold", budget.status === 'over' ? "text-destructive" : "text-foreground")}>
-                        {formatCurrency(budget.spent)}
-                      </span>
-                      <span className="text-muted-foreground"> / {formatCurrency(budget.limit)}</span>
-                    </div>
-                  </div>
-                  <p className="mb-2 text-xs text-muted-foreground">{budget.limit - budget.spent < 0 ? "Excedido" : "Restante"}: {formatCurrency(Math.abs(budget.limit - budget.spent))}</p>
-                  <Progress
-                    aria-label={`Consumo del presupuesto de ${category.name}`} value={progress}
-                    className={cn('h-2',
-                      budget.status === 'over' ? '[&>div]:bg-destructive' :
-                      budget.status === 'alert' ? '[&>div]:bg-yellow-500' : ''
-                    )}
-                  />
-                </div>
+                <ProgressMetric
+                  key={budget.categoryId}
+                  label={<span className="inline-flex items-center gap-2"><category.icon className="h-4 w-4 text-muted-foreground" />{category.name}</span>}
+                  current={budget.spent}
+                  total={budget.limit}
+                  remaining={budget.limit - budget.spent}
+                  status={status}
+                  statusLabel={statusLabel}
+                />
               );
             })}
           </div>
         ) : (
-            <EmptyState title="Sin presupuestos en este período" description="Define límites por categoría para saber cuánto te queda por gastar." action={<Button variant="outline" onClick={() => { setPlanTab("budgets"); setActiveTab("planning"); }}>Crear presupuesto</Button>} />
+            <EmptyState
+              title="Aún no tienes presupuestos"
+              description="Ve a Plan → Presupuestos para definir límites y ver cuánto te queda en cada categoría."
+            />
         )}
       </CardContent>
     </Card>

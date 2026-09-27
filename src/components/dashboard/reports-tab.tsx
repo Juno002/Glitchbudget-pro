@@ -1,7 +1,5 @@
 'use client';
 
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
-
 import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
 import { previousComparablePeriod } from '@/domain/periods';
@@ -10,50 +8,53 @@ import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { cn } from "@/lib/utils";
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import { DonutChart } from './category-charts';
 import MonthlyResultChart from "./charts/monthly-result-chart";
+import { EmptyState, PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
     return (
         <Card>
             <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Categoría</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead className="text-right">%</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.length > 0 ? data.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.value)}</TableCell>
-                                    <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow><TableCell colSpan={3} className="text-center text-muted-foreground">Sin datos</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                {data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Categoría</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
+                                  <TableHead className="text-right">%</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {data.map(item => (
+                                  <TableRow key={item.name}>
+                                      <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
+                                      <TableCell className="text-right">{money(item.value)}</TableCell>
+                                      <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </div>
+                ) : (
+                  <EmptyState title="Sin datos para este período" description="Registra movimientos para ver este desglose." />
+                )}
             </CardContent>
         </Card>
     );
 }
 
 const MonthlyComparisonTable = () => {
-  const formatCurrency = useMoneyFormatter();
+    const money = usePrivateCurrency();
     const { getTotals, currentMonth, currentPeriod, periodStartDay } = useFinances();
 
     const { previousPeriod, currentTotals, prevTotals } = useMemo(() => {
@@ -97,9 +98,9 @@ const MonthlyComparisonTable = () => {
                                 return (
                                     <TableRow key={row.label}>
                                         <TableCell>{row.label}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(row.prev)}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(row.curr)}</TableCell>
-                                        <TableCell className={cn("text-right font-semibold", diffColor)}>{diff >= 0 ? '+' : ''}{formatCurrency(diff)}</TableCell>
+                                        <TableCell className="text-right">{money(row.prev)}</TableCell>
+                                        <TableCell className="text-right">{money(row.curr)}</TableCell>
+                                        <TableCell className={cn("text-right font-semibold", diffColor)}>{diff >= 0 ? '+' : ''}{money(diff)}</TableCell>
                                     </TableRow>
                                 )
                             })}
@@ -112,7 +113,7 @@ const MonthlyComparisonTable = () => {
 }
 
 const ExpenseByTypeTable = () => {
-  const formatCurrency = useMoneyFormatter();
+    const money = usePrivateCurrency();
     const { getExpensesByType, currentMonth } = useFinances();
     const data = getExpensesByType(currentMonth);
 
@@ -120,46 +121,47 @@ const ExpenseByTypeTable = () => {
         <Card>
             <CardHeader><CardTitle>📊 Resumen por tipo de gasto</CardTitle></CardHeader>
             <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Tipo de gasto</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead className="text-right">Promedio</TableHead>
-                                <TableHead className="text-right">#</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {data.length > 0 ? data.map(item => (
-                                <TableRow key={item.name}>
-                                    <TableCell>{item.name}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.total)}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.avg)}</TableCell>
-                                    <TableCell className="text-right">{item.count}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">Sin datos</TableCell></TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
+                {data.length > 0 ? (
+                  <div className="overflow-x-auto">
+                      <Table>
+                          <TableHeader>
+                              <TableRow>
+                                  <TableHead>Tipo de gasto</TableHead>
+                                  <TableHead className="text-right">Total</TableHead>
+                                  <TableHead className="text-right">Promedio</TableHead>
+                                  <TableHead className="text-right">#</TableHead>
+                              </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                              {data.map(item => (
+                                  <TableRow key={item.name}>
+                                      <TableCell>{item.name}</TableCell>
+                                      <TableCell className="text-right">{money(item.total)}</TableCell>
+                                      <TableCell className="text-right">{money(item.avg)}</TableCell>
+                                      <TableCell className="text-right">{item.count}</TableCell>
+                                  </TableRow>
+                              ))}
+                          </TableBody>
+                      </Table>
+                  </div>
+                ) : (
+                  <EmptyState title="Sin gastos por clasificar" description="Cuando registres gastos, aquí aparecerá el resumen por naturaleza." />
+                )}
             </CardContent>
         </Card>
     );
 }
 
 const BudgetStatusReport = () => {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
 
-    const statusColors = {
-        ok: 'bg-green-500',
-        alert: 'bg-yellow-500',
-        over: 'bg-red-500',
-    }
+    const statusFor = (status: 'ok' | 'alert' | 'over' | 'unbudgeted') => ({
+        kind: status === 'over' ? 'danger' : status === 'alert' ? 'warning' : status === 'ok' ? 'success' : 'neutral',
+        label: status === 'over' ? 'Excedido' : status === 'alert' ? 'Cerca del límite' : status === 'ok' ? 'En presupuesto' : 'Sin presupuesto',
+    } as const);
 
     return (
         <Card>
@@ -180,23 +182,20 @@ const BudgetStatusReport = () => {
                                         {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                                         {category?.name}
                                     </div>
-                                    <div className="flex items-center gap-1.5 text-xs font-medium">
-                                        <span className={cn("h-2 w-2 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                        <span className="capitalize">{{ ok: 'En orden', alert: 'Cerca del límite', over: 'Excedido', unbudgeted: 'Sin presupuesto' }[b.status]}</span>
-                                    </div>
+                                    <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
                                 </div>
                                 <div className="grid grid-cols-3 gap-2 text-sm mt-1">
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Planificado</span>
-                                        <span className="font-mono">{formatCurrency(b.limit)}</span>
+                                        <span className="font-mono">{money(b.limit)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Gastado</span>
-                                        <span className="font-mono">{formatCurrency(b.spent)}</span>
+                                        <span className="font-mono">{money(b.spent)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Restante</span>
-                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{formatCurrency(b.remaining)}</span>
+                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{money(b.remaining)}</span>
                                     </div>
                                 </div>
                                 <Progress 
@@ -238,10 +237,10 @@ const BudgetStatusReport = () => {
                                             {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                                             {category?.name}
                                         </TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.limit)}</TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.spent)}</TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.limit)}</TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.spent)}</TableCell>
                                         <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
-                                            {formatCurrency(b.remaining)}
+                                            {money(b.remaining)}
                                         </TableCell>
                                         <TableCell className="py-5">
                                             <Progress 
@@ -253,10 +252,7 @@ const BudgetStatusReport = () => {
                                             />
                                         </TableCell>
                                         <TableCell className="py-5">
-                                            <div className="flex items-center gap-2">
-                                                <span className={cn("h-2.5 w-2.5 rounded-full", statusColors[b.status as keyof typeof statusColors])}></span>
-                                                <span className="capitalize font-medium">{b.status}</span>
-                                            </div>
+                                            <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
                                         </TableCell>
                                     </TableRow>
                                 )
@@ -274,7 +270,7 @@ const BudgetStatusReport = () => {
 }
 
 const CreditCardStatusReport = () => {
-  const formatCurrency = useMoneyFormatter();
+    const money = usePrivateCurrency();
     const { debts, debtPayments, expenses } = useFinances();
     const activeCards = (debts || []).filter(d => d.type === 'credit_card' && d.status === 'active');
 
@@ -325,13 +321,13 @@ const CreditCardStatusReport = () => {
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Deuda Actual</span>
                                         <span className={cn("font-mono font-bold text-sm", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {formatCurrency(currentDebt)}
+                                            {money(currentDebt)}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Crédito Disp.</span>
                                         <span className="font-mono font-bold text-sm text-primary">
-                                            {formatCurrency(available)}
+                                            {money(available)}
                                         </span>
                                     </div>
                                 </div>
@@ -363,10 +359,10 @@ const CreditCardStatusReport = () => {
                                     <TableRow key={debt.id}>
                                         <TableCell className="py-5 font-semibold text-base">{debt.name}</TableCell>
                                         <TableCell className={cn("text-right py-5 font-mono text-base font-bold", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {formatCurrency(currentDebt)}
+                                            {money(currentDebt)}
                                         </TableCell>
                                         <TableCell className="text-right py-5 font-mono text-base text-primary">
-                                            {formatCurrency(available)}
+                                            {money(available)}
                                         </TableCell>
                                         <TableCell className="text-center py-5 text-muted-foreground">{debt.billingCycleDay || '-'}</TableCell>
                                         <TableCell className="text-center py-5 text-muted-foreground font-medium">{debt.paymentDueDay || '-'}</TableCell>
@@ -395,18 +391,38 @@ export default function ReportsTab() {
   const expenseData = getExpensesByCategory(currentMonth);
 
   return (
-    <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Reportes</h2>
-        <MonthlyResultChart />
-        <div className="grid gap-4 lg:grid-cols-2"><DonutChart title="Gastos" data={expenseData} /><DonutChart title="Ingresos" data={incomeData} /></div>
-        <MonthlyComparisonTable />
-        <CreditCardStatusReport />
-        <BudgetStatusReport />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />
-            <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
-        </div>
-        <ExpenseByTypeTable />
+    <div className="space-y-8">
+        <PageHeader title="Reportes" description="Analiza resultados, tendencias, deuda y presupuestos sin mezclarlo con las tareas diarias." />
+
+        <section className="space-y-4" aria-labelledby="results-analysis-title">
+          <SectionHeader
+            title={<span id="results-analysis-title">Resultado y comparación</span>}
+            description="Qué ocurrió en el período y cómo se compara con el anterior."
+          />
+          <MonthlyResultChart />
+          <MonthlyComparisonTable />
+        </section>
+
+        <section className="space-y-4" aria-labelledby="commitments-analysis-title">
+          <SectionHeader
+            title={<span id="commitments-analysis-title">Deuda y presupuestos</span>}
+            description="Seguimiento de compromisos y límites registrados."
+          />
+          <CreditCardStatusReport />
+          <BudgetStatusReport />
+        </section>
+
+        <section className="space-y-4" aria-labelledby="breakdowns-title">
+          <SectionHeader
+            title={<span id="breakdowns-title">Desgloses</span>}
+            description="Dónde se concentraron tus ingresos y gastos."
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />
+              <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
+          </div>
+          <ExpenseByTypeTable />
+        </section>
     </div>
   );
 }

@@ -1,6 +1,4 @@
 'use client';
-
-import { useMoneyFormatter } from "@/hooks/use-money-visibility";
 import { selectPosition } from '@/domain/ledger';
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -8,15 +6,20 @@ import { db } from '@/lib/db';
 import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { toCents } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { friendlyError } from '@/lib/errors';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AccountSelect } from './account-select';
+import DebtsTab from './debts-tab';
+import { ActionMenu, DetailHeader } from '@/components/finance-ui';
+import { Pencil, Settings2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AccountsOverview() {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const data = useLiveQuery(() => db.transaction('r', [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts], async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray(), incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), debts: await db.debts.toArray() })));
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -26,6 +29,7 @@ export default function AccountsOverview() {
   const [editingTransfer, setEditingTransfer] = useState('');
   const [name, setName] = useState('');
   const [cashOpen, setCashOpen] = useState(false);
+  const [cardsOpen, setCardsOpen] = useState(false);
   const [opening, setOpening] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -41,15 +45,38 @@ export default function AccountsOverview() {
     try { await action(); toast({ title }); } catch (error) { toast({ title: 'No se guardó el cambio', description: friendlyError(error), variant: 'destructive' }); }
     finally { locked.current = false; setBusy(false); }
   };
-  if (!data) return null;
+  if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
   const cards = data.debts.filter(d => d.type === 'credit_card');
   const { cash, bank, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
   const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
   const account = data.accounts.find(a => a.id === selected);
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
-    <div className="flex flex-wrap items-center justify-between gap-3"><div><h2 className="font-semibold">Mi dinero hoy</h2><div className="flex flex-wrap gap-x-4 gap-y-1 text-sm"><p className="whitespace-nowrap"><span className="text-muted-foreground">Efectivo</span> {formatCurrency(cash)}</p><p className="whitespace-nowrap"><span className="text-muted-foreground">Bancos</span> {formatCurrency(bank)}</p></div></div>
-      <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}><DialogTrigger asChild><Button variant="outline" onClick={() => {setEditingAccount('');setName('');setOpening('');}}>Gestionar bancos</Button></DialogTrigger>
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h3 className="font-semibold">Cuentas y tarjetas</h3>
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Efectivo</span> {money(cash)}</p>
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Bancos</span> {money(bank)}</p>
+          <p className="whitespace-nowrap"><span className="text-muted-foreground">Deuda</span> {money(owed)}</p>
+        </div>
+      </div>
+      <ActionMenu
+        label="Gestionar cuentas y tarjetas"
+        items={[
+          {
+            label: 'Bancos y transferencias',
+            icon: <Settings2 className="h-4 w-4" />,
+            onSelect: () => { setEditingAccount(''); setName(''); setOpening(''); setOpen(true); },
+          },
+          {
+            label: 'Tarjetas y pagos',
+            icon: <Settings2 className="h-4 w-4" />,
+            onSelect: () => setCardsOpen(true),
+          },
+        ]}
+      />
+      <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}>
         <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Bancos y transferencias</DialogTitle><DialogDescription>Registra tus bancos con su saldo actual. Efectivo se administra automáticamente con tus ingresos y gastos.</DialogDescription></DialogHeader>
           <fieldset disabled={busy} className="space-y-6 min-w-0">
             <form className="space-y-3" onSubmit={e => { e.preventDefault(); void run(async () => { await addAccount({ id: editingAccount || crypto.randomUUID(), name, type: 'bank', openingBalance: toCents(opening), startDate: data.accounts.find(a => a.id === editingAccount)?.startDate || localDate() }, !!editingAccount); setName(''); setOpening(''); setEditingAccount(''); }, editingAccount ? 'Cuenta actualizada' : 'Cuenta creada'); }}>
@@ -78,15 +105,55 @@ export default function AccountsOverview() {
           </fieldset>{busy && <p role="status" className="text-sm">Guardando…</p>}
         </DialogContent>
       </Dialog>
+      <Dialog open={cardsOpen} onOpenChange={setCardsOpen}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tarjetas y pagos</DialogTitle>
+            <DialogDescription>Consulta y administra tus tarjetas sin convertirlas en una sección principal.</DialogDescription>
+          </DialogHeader>
+          <DebtsTab />
+        </DialogContent>
+      </Dialog>
     </div>
     <details className="group"><summary className="cursor-pointer text-sm text-muted-foreground">Ver cuentas y deuda</summary><div className="space-y-3 pt-3">
     {!data.accounts.length ? <p className="text-sm text-muted-foreground">Efectivo se prepara automáticamente. Puedes añadir bancos cuando lo necesites.</p> : <>
       {unassigned > 0 && <details className="rounded-xl border p-3 text-sm"><summary className="cursor-pointer font-medium">{unassigned} movimientos anteriores sin cuenta</summary><p className="mt-2 text-muted-foreground">Se conservan en los reportes, pero no modifican tus saldos. Incluye el dinero que te quedaba al comenzar el seguimiento en el saldo inicial de Efectivo (Ver cuentas y deuda → Efectivo → Ajustar saldo inicial). Si un movimiento posterior a esa fecha no está incluido en el saldo inicial, puedes editarlo en el historial y asignarle Efectivo. No vuelvas a registrar el ingreso: se contaría dos veces.</p></details>}
-      <div className="grid grid-cols-2 gap-3">{[['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{formatCurrency(Number(value))}</p></div>)}</div>
-      <p className="text-xs text-muted-foreground">El saldo neto incluye solo las cuentas y tarjetas registradas. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {formatCurrency(credit)}.</>}</p>
-      <div className="grid sm:grid-cols-2 gap-2">{data.accounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · Desde {a.startDate}</span></span><strong>{formatCurrency(accountBalance(a,data))}</strong></button>)}</div>
-      {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.signedBalance >= 0 ? 'deuda' : 'saldo a favor'} {formatCurrency(Math.abs(d.signedBalance))}</p>)}
-      {account && <div className="border-t pt-3 space-y-2"><h3 className="font-semibold">Movimientos de {account.name}</h3><Button variant="outline" onClick={()=>{setEditingAccount(account.id);setName(account.name);setOpening(String(account.openingBalance/100));if(account.type === 'cash') setCashOpen(true); else setOpen(true);}}>{account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar banco'}</Button><p className="text-xs text-muted-foreground">Saldo inicial: {formatCurrency(account.openingBalance)} · {account.startDate}</p>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const t=data.transfers.find(t=>t.id===r.id);if(t){setEditingAccount('');setName('');setOpening('');setEditingTransfer(t.id);setFrom(t.fromAccountId);setTo(t.toAccountId);setAmount(String(t.amount/100));setDate(t.date);setNote(t.note);setOpen(true);}}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{formatCurrency(r.amount)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{[['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{money(Number(value))}</p></div>)}</div>
+      <p className="text-xs text-muted-foreground">El saldo neto incluye solo las cuentas y tarjetas registradas. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {money(credit)}.</>}</p>
+      <div className="grid sm:grid-cols-2 gap-2">{data.accounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex min-h-12 flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · Desde {a.startDate}</span></span><strong>{money(accountBalance(a,data))}</strong></button>)}</div>
+      {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.signedBalance >= 0 ? 'deuda' : 'saldo a favor'} {money(Math.abs(d.signedBalance))}</p>)}
+      {account && <div className="border-t pt-3 space-y-2"><DetailHeader
+        title={account.name}
+        subtitle={account.isDefaultCash ? 'Efectivo predeterminado' : account.type === 'cash' ? 'Efectivo' : 'Cuenta bancaria'}
+        amount={accountBalance(account,data)}
+        supporting={<>Saldo inicial: {money(account.openingBalance)} · Desde {account.startDate}</>}
+        actions={<ActionMenu
+          label={`Acciones de ${account.name}`}
+          items={[
+            {
+              label: account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar cuenta',
+              icon: <Pencil className="h-4 w-4" />,
+              onSelect: () => {
+                setEditingAccount(account.id);
+                setName(account.name);
+                setOpening(String(account.openingBalance / 100));
+                if (account.type === 'cash') setCashOpen(true);
+                else setOpen(true);
+              },
+            },
+            {
+              label: 'Gestionar cuentas y transferencias',
+              icon: <Settings2 className="h-4 w-4" />,
+              onSelect: () => {
+                setEditingAccount('');
+                setName('');
+                setOpening('');
+                setOpen(true);
+              },
+            },
+          ]}
+        />}
+      /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const t=data.transfers.find(t=>t.id===r.id);if(t){setEditingAccount('');setName('');setOpening('');setEditingTransfer(t.id);setFrom(t.fromAccountId);setTo(t.toAccountId);setAmount(String(t.amount/100));setDate(t.date);setNote(t.note);setOpen(true);}}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>
     <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle>Saldo inicial de efectivo</DialogTitle><DialogDescription>Corrige solo el dinero que tenías al iniciar el seguimiento. Los ingresos y gastos registrados se calculan automáticamente.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void run(async () => { const existing = data.accounts.find(a => a.id === editingAccount); if (!existing || existing.type !== 'cash') throw new Error('Cuenta de efectivo no encontrada.'); await addAccount({ ...existing, openingBalance: toCents(opening) }, true); setCashOpen(false); setEditingAccount(''); setName(''); setOpening(''); }, 'Saldo inicial actualizado'); }}><label className="block text-sm">Saldo inicial (RD$)<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label><Button disabled={busy} type="submit">Guardar saldo inicial</Button></form></DialogContent></Dialog>

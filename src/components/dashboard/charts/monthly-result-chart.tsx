@@ -1,6 +1,4 @@
 'use client';
-
-import { useMoneyFormatter, useMoneyVisibility } from "@/hooks/use-money-visibility";
 import { selectMonthlyResultSplit } from '@/domain/metrics';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -8,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 
 interface FlowNode {
   id: string;
@@ -54,7 +52,7 @@ function MobileFlowView({
   destinations: FlowNode[];
   totalIncome: number;
 }) {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const destTotal = destinations.reduce((s, d) => s + d.value, 0);
 
   return (
@@ -80,7 +78,7 @@ function MobileFlowView({
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs font-medium text-muted-foreground truncate">{s.label}</span>
                     <span className="text-xs font-semibold tabular-nums ml-2" style={{ color: s.color }}>
-                      {formatCurrency(s.value)}
+                      {money(s.value)}
                     </span>
                   </div>
                   <div className="h-1 w-full rounded-full bg-foreground/5 mt-1 overflow-hidden">
@@ -127,7 +125,7 @@ function MobileFlowView({
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs font-medium text-muted-foreground truncate">{d.label}</span>
                     <span className="text-xs font-semibold tabular-nums ml-2" style={{ color: d.color }}>
-                      {formatCurrency(d.value)}
+                      {money(d.value)}
                     </span>
                   </div>
                   <div className="h-1 w-full rounded-full bg-foreground/5 mt-1 overflow-hidden">
@@ -161,7 +159,7 @@ function DesktopSankeyView({
   links: FlowLink[];
   totalIncome: number;
 }) {
-  const formatCurrency = useMoneyFormatter();
+  const money = usePrivateCurrency();
   const SVG_W = 680;
   const SVG_H = Math.max(320, Math.max(sources.length, destinations.length) * 56 + 40);
   const NODE_W = 14;
@@ -253,7 +251,7 @@ function DesktopSankeyView({
             {s.icon} {s.label}
           </text>
           <text x={s.x - 6} y={s.y + s.h / 2 + 13} textAnchor="end" dominantBaseline="central" className="text-[9px] fill-white/30 tabular-nums">
-            {formatCurrency(s.value)}
+            {money(s.value)}
           </text>
         </g>
       ))}
@@ -271,7 +269,7 @@ function DesktopSankeyView({
             {d.icon} {d.label}
           </text>
           <text x={d.x + NODE_W + 6} y={d.y + d.h / 2 + 13} textAnchor="start" dominantBaseline="central" className="text-[9px] fill-white/30 tabular-nums">
-            {formatCurrency(d.value)}
+            {money(d.value)}
           </text>
         </g>
       ))}
@@ -281,7 +279,6 @@ function DesktopSankeyView({
 
 // ─── Main Component ─────────────────────────────────────────
 export default function MonthlyResultChart() {
-  const { balancesHidden } = useMoneyVisibility();
   const getCategoryInfo = useCategoryResolver();
   const {
     getTotals,
@@ -364,7 +361,6 @@ export default function MonthlyResultChart() {
     return { sources, destinations: dests, links, totalIncome };
   }, [getTotals, getIncomesByCategory, getExpensesByCategory, currentMonth, getCategoryInfo]);
 
-  if (balancesHidden) return <Card><CardContent className="p-6">Gráfico oculto por privacidad.</CardContent></Card>;
   if (!isClient) return null;
 
   if (totalIncome <= 0) {

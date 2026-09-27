@@ -2,24 +2,34 @@
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
+export type PlanningTabValue = 'budgets' | 'goals' | 'subscriptions';
+
 type TabsContextType = {
-  planTab: string;
-  setPlanTab: (tab: string) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  planningTab: PlanningTabValue;
+  setPlanningTab: (tab: PlanningTabValue) => void;
+  movementFocusId: string | null;
+  requestMovementFocus: (id: string) => void;
+  clearMovementFocus: () => void;
 };
 
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
 export function TabsProvider({ children, defaultValue }: { children: ReactNode, defaultValue: string }) {
-  const [planTab, setPlanTab] = useState('budgets');
   const [activeTab, setActiveTab] = useState(defaultValue);
+  const [planningTab, setPlanningTab] = useState<PlanningTabValue>('budgets');
+  const [movementFocusId, setMovementFocusId] = useState<string | null>(null);
 
   const value = useMemo(() => ({
-    planTab, setPlanTab,
     activeTab,
     setActiveTab,
-  }), [activeTab, planTab]);
+    planningTab,
+    setPlanningTab,
+    movementFocusId,
+    requestMovementFocus: (id: string) => setMovementFocusId(id),
+    clearMovementFocus: () => setMovementFocusId(null),
+  }), [activeTab, planningTab, movementFocusId]);
 
   return (
     <TabsContext.Provider value={value}>
@@ -34,4 +44,8 @@ export function useTabs() {
     throw new Error('useTabs must be used within a TabsProvider');
   }
   return context;
+}
+
+export function useOptionalTabs() {
+  return useContext(TabsContext);
 }
