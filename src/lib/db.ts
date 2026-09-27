@@ -3,8 +3,8 @@ import Dexie, { type Table } from 'dexie';
 import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
 import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
 
-import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
-export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
+import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
+export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
 
 export class GlitchBudgetDB extends Dexie {
   categories!: Table<Category, string>;
@@ -18,12 +18,16 @@ export class GlitchBudgetDB extends Dexie {
   settings!: Table<Settings, 'general'>;
   periods!: Table<Period, string>;
   recurrents!: Table<RecurringRule, string>;
+  planned_occurrences!: Table<PlannedOccurrence, string>;
   debts!: Table<Debt, string>;
   debt_payments!: Table<DebtPayment, string>;
   fxRates!: Table<FxRate, string>;
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
+    this.version(11).stores({
+      planned_occurrences: 'id, ruleId, scheduledDate, status, &[ruleId+scheduledDate], &transactionId',
+    });
     this.version(10).stores({
       expenses: 'id, date, month, categoryId, nature, accountId',
       recurrents: 'id, direction, categoryId, cadence, active, startDate, endDate',

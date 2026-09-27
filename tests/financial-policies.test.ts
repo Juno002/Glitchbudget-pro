@@ -104,10 +104,11 @@ test('simultaneous budget writes serialize and cannot both cross the limit',asyn
  await budget();const result=await Promise.allSettled([saveExpense({...expense,id:'a',amount:400}),saveExpense({...expense,id:'b',amount:400})]);
  assert.equal(result.filter(r=>r.status==='fulfilled').length,1);assert.equal(await db.expenses.count(),2);
 });
-test('pure budget policy preserves inputs and month/category boundaries',()=>{
+test('pure budget policy preserves inputs and period/category boundaries',()=>{
  const plan={month,categoryId:'food',limit:500_000};const input={...expense,amount:100_000,month};const rows=[old,{...old,id:'other',date:'2026-10-20'}];const frozen=JSON.stringify(rows);
- assert.equal(evaluateBudgetOverspending(rows,input,plan,'block').decision,'block');assert.equal(JSON.stringify(rows),frozen);
- assert.equal(evaluateBudgetOverspending(rows,{...input,categoryId:'other'},undefined,'block').decision,'allow');
+ const period={id:month,start:month+'-01',end:month+'-30'};
+ assert.equal(evaluateBudgetOverspending(rows,input,plan,'block',period).decision,'block');assert.equal(JSON.stringify(rows),frozen);
+ assert.equal(evaluateBudgetOverspending(rows,{...input,categoryId:'other'},undefined,'block',period).decision,'allow');
 });
 test('legacy strict converts once; changing old flag cannot override explicit policies',async()=>{
  for(const strictMode of [true,false]){
@@ -135,6 +136,15 @@ test('goal reserves with zero assets ignore both policies and keep atomic valida
  await saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date});assert.equal((await position()).liquidAssets,0);assert.equal((await monthly()).monthlyPlanningMargin,-100_000);
  await assert.rejects(saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date}));assert.equal((await db.goals.get('goal'))?.saved,100_000);
  await assert.rejects(saveGoalContribution({id:'bad',goalId:'missing',amount:1,date}));
+});
+test('budget guard uses the containing custom financial period',async()=>{
+ await db.settings.update('general',{periodStartDay:25,budgetOverspendingBehavior:'block'});
+ await db.plans.add({month:'2026-09',categoryId:'food',limit:500_000});
+ await db.expenses.add({...old,id:'period-old',date:'2026-08-26',month:'2026-08',amount:450_000});
+ await assert.rejects(saveExpense({...expense,id:'period-new',date:'2026-09-24',amount:1000}),/presupuesto/);
+ assert.equal(await db.expenses.get('period-new'),undefined);
+ await saveExpense({...expense,id:'next-period',date:'2026-09-25',amount:1000});
+ assert.ok(await db.expenses.get('next-period'));
 });
 test('moving an expense to another month/category evaluates its destination budget',async()=>{
  await budget();await db.plans.add({month:'2026-10',categoryId:'other',limit:10_000});

@@ -16,8 +16,8 @@ export default function BudgetStatus() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Presupuestos Mensuales</CardTitle>
-                <CardDescription>El progreso de tus gastos para este mes.</CardDescription>
+                <CardTitle>Presupuestos del período</CardTitle>
+                <CardDescription>El progreso de tus gastos para el período seleccionado.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 {[...Array(3)].map((_, i) => (
@@ -39,8 +39,8 @@ export default function BudgetStatus() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Presupuestos Mensuales</CardTitle>
-        <CardDescription>El progreso de tus gastos para este mes.</CardDescription>
+        <CardTitle>Presupuestos del período</CardTitle>
+        <CardDescription>El progreso de tus gastos para el período seleccionado.</CardDescription>
       </CardHeader>
       <CardContent>
         {trackedBudgets.length > 0 ? (
@@ -77,7 +77,7 @@ export default function BudgetStatus() {
             })}
           </div>
         ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No hay presupuestos definidos. Ve a la pestaña de Planificación para añadir algunos.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">No hay presupuestos definidos para este período. Ve a Planificación para añadir algunos.</p>
         )}
       </CardContent>
     </Card>

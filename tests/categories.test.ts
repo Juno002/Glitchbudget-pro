@@ -27,7 +27,7 @@ async function legacy(name:string){const old=new Dexie(name);old.version(8).stor
  await old.table('recurrents').add({id:'rec',type:'income',title:'Renta',categoryId:'solo-recurrente',amount:100,freq:'monthly',startDate:'2026-09-01',active:true});return old;}
 test('v8 to v9 preserves IDs, references, independent order, icons and inferred scopes',async()=>{
  const name='phase4-migration-'+crypto.randomUUID();const old=await legacy(name);const original=await old.table('incomes').toArray();old.close();const current=new GlitchBudgetDB(name);
- try{await current.open();assert.equal(current.verno,10);const rows=await current.categories.toArray();
+ try{await current.open();assert.equal(current.verno,11);const rows=await current.categories.toArray();
  assert.deepEqual(activeCategories(rows,'expense').map(c=>c.id),['otros','alimentacion','comida-trabajo']);
  assert.deepEqual(activeCategories(rows,'income').slice(0,2).map(c=>c.id),['salary','otros']);
  assert.equal(rows.find(c=>c.id==='comida-trabajo')?.type,'both');assert.equal(rows.find(c=>c.id==='comida-trabajo')?.iconName,'coffee');
@@ -82,8 +82,8 @@ for(const version of [3,4])test('legacy backup v'+version+' reconstructs unknown
  const dump=structuredClone(fixture);dump.v=version;dump.expenses[0].categoryId='historia-desconocida';dump.incomes[0].categoryId='historia-desconocida';if(version===3){delete dump.accounts;delete dump.accountTransfers;for(const r of [...dump.incomes,...dump.expenses,...dump.debtPayments])delete r.accountId;}
  await importDataJSON(JSON.stringify(dump));const c=await db.categories.get('historia-desconocida');assert.equal(c?.type,'both');assert.equal(c?.archived,true);assert.equal(c?.name,'Historia desconocida');assert.equal((await db.expenses.get(dump.expenses[0].id))?.categoryId,c?.id);
 });
-test('v6 round trip preserves every category property and rejects corrupt references atomically',async()=>{
- const c=await createCategory('Viajes','both','plane');await updateCategory(c.id,{archived:true,expenseOrder:15,incomeOrder:3});const dump=JSON.parse(await exportDataJSON());assert.equal(dump.v,6);assert.ok(dump.categories.length);assert.equal(dump.settings.expenseCategories,undefined);
+test('v7 round trip preserves every category property and rejects corrupt references atomically',async()=>{
+ const c=await createCategory('Viajes','both','plane');await updateCategory(c.id,{archived:true,expenseOrder:15,incomeOrder:3});const dump=JSON.parse(await exportDataJSON());assert.equal(dump.v,7);assert.ok(dump.categories.length);assert.equal(dump.settings.expenseCategories,undefined);
  const before=await snapshot();await importDataJSON(JSON.stringify(dump));assert.deepEqual(await snapshot(),before);
  for(const table of ['incomes','expenses','plans','recurrents']){const bad=structuredClone(dump);bad[table][0].categoryId='missing';await assert.rejects(importDataJSON(JSON.stringify(bad)),/categoría/);assert.deepEqual(await snapshot(),before);}
  const missing=structuredClone(dump);delete missing.categories;await assert.rejects(importDataJSON(JSON.stringify(missing)),/categorías/);assert.deepEqual(await snapshot(),before);
@@ -92,7 +92,7 @@ test('migration distinguishes legacy duplicate display names without dropping ei
  const rows=reconstructCategories({settings:{expenseCategories:['taxi','Taxi'],incomeCategories:[]}});assert.equal(rows.find(c=>c.id==='taxi')?.name,'Taxi');assert.equal(rows.find(c=>c.id==='Taxi')?.name,'Taxi (Taxi)');assert.equal(rows.filter(c=>!c.archived).length,2);
 });
 
-test('v6 rejects incompatible scopes and duplicate IDs before replacing any table',async()=>{
+test('v7 rejects incompatible scopes and duplicate IDs before replacing any table',async()=>{
  const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
  const wrong=structuredClone(dump);wrong.categories.find((c:{id:string})=>c.id===wrong.expenses[0].categoryId).type='income';
  await assert.rejects(importDataJSON(JSON.stringify(wrong)),/categoría/);assert.deepEqual(await snapshot(),before);

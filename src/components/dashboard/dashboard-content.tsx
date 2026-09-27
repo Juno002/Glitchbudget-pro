@@ -11,32 +11,25 @@ import PlanningTab from "./planning-tab";
 import { CreditCard, X } from "lucide-react";
 import { useFinances } from "@/contexts/finance-context";
 import { useState, useEffect } from "react";
+import { previousComparablePeriod } from "@/domain/periods";
 
 function AchievementMonkMode() {
-  const { getTotals, currentMonth } = useFinances();
+  const { getTotals, currentPeriod, periodStartDay } = useFinances();
   const [qualifies, setQualifies] = useState(false);
   const [closed, setClosed] = useState(false);
 
   useEffect(() => {
-    const p = currentMonth.split('-');
-    let py = parseInt(p[0]), pm = parseInt(p[1]);
-    
+    let period = currentPeriod;
     let isMonk = true;
     for (let i = 1; i <= 3; i++) {
-        let m = pm - i;
-        let y = py;
-        if (m <= 0) {
-            m += 12;
-            y -= 1;
-        }
-        const mStr = `${y}-${String(m).padStart(2, '0')}`;
-        const t = getTotals(mStr);
+        period = previousComparablePeriod(period, { periodStartDay });
+        const t = getTotals(period.id);
         if (t.recordedIncome === 0) { isMonk = false; break; }
         const ratio = t.spending / t.recordedIncome;
-        if (ratio > 0.20 || ratio < 0) { isMonk = false; break; } // Negative check to prevent glitches
+        if (ratio > 0.20 || ratio < 0) { isMonk = false; break; }
     }
     setQualifies(isMonk);
-  }, [currentMonth, getTotals]);
+  }, [currentPeriod, periodStartDay, getTotals]);
 
   if (!qualifies || closed) return null;
 

@@ -7,6 +7,8 @@ export interface Settings {
   preventNegativeAccountBalance?: boolean;
   budgetOverspendingBehavior?: 'allow' | 'warn' | 'block';
   rolloverStrategy: 'reset' | 'accumulate_surplus' | 'accumulate_debt';
+  /** Day 1..31 on which each financial period starts. Default: 1. */
+  periodStartDay?: number;
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
   expenseCategories?: string[];
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
@@ -22,8 +24,9 @@ export interface Settings {
   savePct: number; // Porcentaje de ahorro sugerido
 }
 
+/** Legacy persisted calendar marker; financial ranges are resolved by domain/periods.ts. */
 export interface Period {
-    id: string, // YYYY-MM
+    id: string, // YYYY-MM compatibility id
     year: number,
     month: number,
     createdAt: string
@@ -65,7 +68,7 @@ export interface Expense {
 }
 
 export interface Plan {
-  month: string; // YYYY-MM
+  month: string; // YYYY-MM period id; field name retained for storage compatibility
   categoryId: string;
   limit: number;
 };
@@ -98,11 +101,23 @@ export interface RecurringRule {
   title: string;
   categoryId: string;
   amount: number;              // centavos, positivo
+  defaultAccountId?: string;   // cuenta sugerida al confirmar
   cadence: 'weekly' | 'biweekly' | 'monthly';
-  day?: number;                // monthly: 1..28, weekly: 0..6
+  day?: number;                // monthly preferred day 1..31; weekly/biweekly scheduling ignores this legacy field
   startDate: string;           // YYYY-MM-DD
   endDate?: string;
   active: boolean;
+}
+
+export type PlannedOccurrenceStatus = 'pending' | 'confirmed' | 'skipped';
+
+export interface PlannedOccurrence {
+  id: string;
+  ruleId: string;
+  scheduledDate: string; // YYYY-MM-DD
+  status: PlannedOccurrenceStatus;
+  /** Present only when a confirmed occurrence is linked to its actual movement. */
+  transactionId?: string;
 }
 
 export interface Debt {

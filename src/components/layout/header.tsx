@@ -2,6 +2,8 @@
 'use client';
 
 import { localDate } from '@/lib/finance-calculations';
+import { periodContaining } from '@/domain/periods';
+import { formatPeriodRange } from '@/lib/period-format';
 import { HelpDialog } from './help-dialog';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -34,7 +36,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
   const { 
     theme, setTheme, 
     preventNegativeAccountBalance, setPreventNegativeAccountBalance, budgetOverspendingBehavior, setBudgetOverspendingBehavior,
-    currentMonth, setCurrentMonth, 
+    currentMonth, setCurrentMonth, currentPeriod, periodStartDay, setPeriodStartDay,
     rolloverStrategy, setRolloverStrategy,
     baseIncome: baseIncomeSettings, setBaseIncome,
     resetSettings, isWorking
@@ -84,10 +86,10 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
             <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
                 <div className="relative min-w-0 w-[104px] sm:w-[145px] h-9 rounded-full border border-input bg-background focus-within:ring-2 focus-within:ring-ring">
-                  <span aria-hidden="true" className="flex h-full items-center justify-center px-2 text-xs sm:text-sm capitalize pointer-events-none">{new Date(`${currentMonth}-02T12:00:00`).toLocaleDateString('es-DO', { month: 'short', year: 'numeric' })}</span>
+                  <span aria-hidden="true" className="flex h-full items-center justify-center px-2 text-[10px] sm:text-xs capitalize pointer-events-none">{formatPeriodRange(currentPeriod)}</span>
                   <Input id="month" type="month" value={currentMonth} onChange={(e) => { if (e.target.value) setCurrentMonth(e.target.value); }} aria-label="Mes del presupuesto" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 </div>
-                <Button variant="outline" className="h-9 px-2 text-xs sm:text-sm" onClick={() => setCurrentMonth(localDate().slice(0, 7))}>Este mes</Button>
+                <Button variant="outline" className="h-9 px-2 text-xs sm:text-sm" onClick={() => setCurrentMonth(periodContaining(localDate(), { periodStartDay }).id)}>Período actual</Button>
             </div>
             
              <Dialog>
@@ -181,18 +183,28 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                     </DialogContent>
                 </Dialog>
 
+                <label className="flex flex-col gap-2 px-2 py-2 text-sm">
+                  Inicio del período
+                  <select aria-label="Día inicial del período" value={periodStartDay} onChange={e => void setPeriodStartDay(Number(e.target.value))}>
+                    {Array.from({ length: 31 }, (_, index) => index + 1).map(day => (
+                      <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
+                    ))}
+                  </select>
+                  <span className="text-[11px] text-muted-foreground">Ej.: día 25 → 25 del mes anterior al 24 del mes seleccionado.</span>
+                </label>
+
                 <Dialog>
                     <DialogTrigger asChild>
                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                             <RefreshCw className="mr-2 h-4 w-4" />
-                            <span>Cierre de Mes</span>
+                            <span>Cierre de período</span>
                         </DropdownMenuItem>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Estrategia de Cierre de Mes</DialogTitle>
+                            <DialogTitle>Estrategia de cierre de período</DialogTitle>
                             <DialogDescription>
-                                ¿Qué ocurre con tus presupuestos cuando empieza un mes nuevo?
+                                ¿Qué ocurre con tus presupuestos cuando comienza el siguiente período financiero?
                             </DialogDescription>
                         </DialogHeader>
                         <div className="py-4">
@@ -201,21 +213,21 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                                     <RadioGroupItem value="reset" id="r1" />
                                     <Label htmlFor="r1" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><RefreshCw className="h-4 w-4 text-slate-400" /> Resetear a cero</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Descarta lo sobrante y empieza de nuevo con los límites base.</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Descarta lo sobrante y empieza el siguiente período con los límites base.</span>
                                     </Label>
                                 </div>
                                 <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="accumulate_surplus" id="r2" />
                                     <Label htmlFor="r2" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Plus className="h-4 w-4 text-primary" /> Acumular Sobrante</span>
-                                        <span className="text-xs text-muted-foreground mt-1">El dinero que no gastaste se suma al presupuesto del mes siguiente.</span>
+                                        <span className="text-xs text-muted-foreground mt-1">El dinero que no gastaste se suma al presupuesto del período siguiente.</span>
                                     </Label>
                                 </div>
                                 <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
                                     <RadioGroupItem value="accumulate_debt" id="r3" />
                                     <Label htmlFor="r3" className="flex flex-col cursor-pointer">
                                         <span className="flex items-center gap-2 font-medium"><Minus className="h-4 w-4 text-rose-500" /> Acumular Deuda</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Si gastaste de más, se te restará del presupuesto base del nuevo mes.</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Si gastaste de más, se restará del presupuesto base del siguiente período.</span>
                                     </Label>
                                 </div>
                             </RadioGroup>

@@ -132,13 +132,13 @@ test('credit spending requires an active card and does not spend cash', async ()
 test('editing a deleted movement does not recreate it', async () => {
   await assert.rejects(saveExpense({ ...expense, amount: 1 }, true), /ya no existe/);
 });
-test('legacy monthly subscription guard prevents repeated UI payments', async () => {
+test('legacy month-wide recurrence duplicate guard is retired', async () => {
   await db.recurrents.add({id:'subscription',direction:'expense',title:'Plan',categoryId:'food',amount:1000,cadence:'monthly',startDate:'2026-09-01',active:true});
   await saveIncome({ id:'funds',date:'2026-09-01',amount:100,type:'extra',description:'',categoryId:'salary' });
   await saveExpense({ ...expense, recurringRuleId: 'subscription', amount: 10 });
-  await assert.rejects(saveExpense({ ...expense, id: 'second', recurringRuleId: 'subscription', amount: 10 }), /ya tiene un pago/);
+  await saveExpense({ ...expense, id: 'second', recurringRuleId: 'subscription', amount: 10 });
   await saveExpense({ ...expense, id: 'next-month', date: '2026-10-01', recurringRuleId: 'subscription', amount: 10 });
-  assert.equal(await db.expenses.count(), 2);
+  assert.equal(await db.expenses.count(), 3);
 });
 test('JSON round trip preserves expense nature, goal quotas and settings', async () => {
   await db.expenses.add({ ...expense, nature: 'Fijo' });
@@ -152,6 +152,35 @@ test('JSON round trip preserves expense nature, goal quotas and settings', async
   assert.equal((await db.incomes.get('i'))!.type, 'gift');
   assert.equal((await db.goals.get('g'))!.quota, 5000);
 });
+test('period start day round-trips in v6 and invalid values reject atomically', async () => {
+  await db.settings.update('general', { periodStartDay: 25 });
+  const backup = JSON.parse(await exportDataJSON());
+  assert.equal(backup.settings.periodStartDay, 25);
+  await importDataJSON(JSON.stringify(backup));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, 25);
+
+  const invalid = structuredClone(backup);
+  invalid.settings.periodStartDay = 32;
+  await assert.rejects(importDataJSON(JSON.stringify(invalid)));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, 25);
+
+  const legacy = structuredClone(backup);
+  delete legacy.settings.periodStartDay;
+  await importDataJSON(JSON.stringify(legacy));
+  assert.equal((await db.settings.get('general'))?.periodStartDay, undefined);
+});
+
+test('budget rollover uses the previous financial period date range', async () => {
+  await db.settings.update('general', { periodStartDay: 25, rolloverStrategy: 'accumulate_surplus' });
+  await db.plans.add({ month: '2026-09', categoryId: 'food', limit: 50_000 });
+  await db.expenses.bulkAdd([
+    { id:'inside', month:'2026-08', date:'2026-08-26', categoryId:'food', amount:30_000, concept:'Dentro', nature:'Variable' },
+    { id:'outside', month:'2026-09', date:'2026-09-25', categoryId:'food', amount:40_000, concept:'Siguiente', nature:'Variable' },
+  ]);
+  assert.equal(await rollBudgetsIntoMonth('2026-10'), true);
+  assert.equal((await db.plans.get(['2026-10','food']))?.limit, 70_000);
+});
+
 test('old v3 backups still restore with explicit defaults', async () => {
   await db.expenses.add(expense);
   const backup = JSON.parse(await exportDataJSON());

@@ -39,14 +39,18 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   data.recurrents=data.recurrents.map(({direction,cadence,...rest}: any)=>({...rest,type:direction,freq:cadence}));
   const before=metrics(data);const name='phase5-migration-'+crypto.randomUUID();const old=new Dexie(name);
   old.version(9).stores({...schema,accounts:'id, type',account_transfers:'id, fromAccountId, toAccountId, date',categories:'id, type'});
-  for(const [table,rows] of Object.entries(data)) await old.table(table).bulkAdd(rows);
+  for(const [table,rows] of Object.entries(data)) {
+    if (table === 'planned_occurrences') continue;
+    await old.table(table).bulkAdd(rows);
+  }
   old.close();const current=new GlitchBudgetDB(name);
   try{
-    await current.open();assert.equal(current.verno,10);const migrated=await snapshot(current);
+    await current.open();assert.equal(current.verno,11);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
-    for(const table of Object.keys(data).filter(t=>!['expenses','recurrents'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
+    for(const table of Object.keys(data).filter(t=>!['expenses','recurrents','planned_occurrences'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
+    assert.deepEqual(migrated.planned_occurrences,[]);
     assert.equal(migrated.expenses.find((e: any)=>e.recurringRuleId)?.recurringRuleId,'removed-rule');
   }finally{await current.delete();}
 });
@@ -75,10 +79,9 @@ test('rule create/edit/activate/deactivate/delete leaves actual money and histor
   await removeRecurringRule(r.id);const after=await snapshot();assert.deepEqual(metrics(after),expected);assert.deepEqual(after.expenses,before.expenses);assert.deepEqual(after.incomes,before.incomes);
 });
 
-test('explicit payment changes metrics once; later edits/removal of its rule preserve actual provenance',async()=>{
+test('explicit actual payment changes metrics once; later rule changes preserve provenance',async()=>{
   const r=rule();await saveRecurringRule(r);const before=metrics(await snapshot());
-  const results=await Promise.allSettled([saveExpense({...expense,recurringRuleId:r.id}),saveExpense({...expense,id:'double',recurringRuleId:r.id})]);
-  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+  await saveExpense({...expense,recurringRuleId:r.id});
   const actual=(await db.expenses.filter(e=>e.recurringRuleId===r.id).toArray())[0];const after=metrics(await snapshot());
   assert.equal(after.september.spending-before.september.spending,5000);assert.equal(after.position.liquidAssets-before.position.liquidAssets,-5000);assert.equal(after.september.cashFlow-before.september.cashFlow,-5000);
   await saveRecurringRule({...r,title:'Otro importe',amount:25000,active:false},true);assert.deepEqual(await db.expenses.get(actual.id),actual);
@@ -86,10 +89,12 @@ test('explicit payment changes metrics once; later edits/removal of its rule pre
   await saveExpense({...actual,amount:actual.amount/100,concept:'Corrección histórica'},true);assert.equal((await db.expenses.get(actual.id))?.recurringRuleId,r.id);
 });
 
-test('monthly compatibility guard does not limit weekly/biweekly rules to one payment per month',async()=>{
-  for(const cadence of ['weekly','biweekly'] as const){const r=rule(cadence,cadence);await saveRecurringRule(r);
-    await saveExpense({...expense,id:cadence+'1',amount:1,recurringRuleId:r.id});await saveExpense({...expense,id:cadence+'2',date:'2026-09-24',amount:1,recurringRuleId:r.id});}
-  assert.equal(await db.expenses.filter(e=>!!e.recurringRuleId).count(),4);
+test('transaction service no longer imposes a one-payment-per-month recurrence guard',async()=>{
+  for(const cadence of ['monthly','weekly','biweekly'] as const){const r=rule(cadence,cadence);await saveRecurringRule(r);
+    await saveExpense({...expense,id:cadence+'1',amount:1,recurringRuleId:r.id});
+    await saveExpense({...expense,id:cadence+'2',date:'2026-09-24',amount:1,recurringRuleId:r.id});
+  }
+  assert.equal(await db.expenses.filter(e=>!!e.recurringRuleId).count(),6);
 });
 
 test('forecast and income planning rule never become cash; only explicit receipt affects recorded income',async()=>{
@@ -110,9 +115,9 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
   assert.equal(metrics(await snapshot()).october.spending,0);
 });
 
-test('v6 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
+test('v7 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
   const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
-  assert.equal(dump.v,6);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
+  assert.equal(dump.v,7);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
   await importDataJSON(JSON.stringify(dump));assert.deepEqual(clean(await snapshot()),clean(before));
   for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(clean(await snapshot()),clean(before));}
 });

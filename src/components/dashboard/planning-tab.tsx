@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { playIncome } from '@/lib/sounds';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatPeriodRange } from '@/lib/period-format';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
@@ -231,7 +232,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
 
              {/* Amount Input */}
              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground font-medium">2. Establece el límite mensual</label>
+                <label className="text-xs text-muted-foreground font-medium">2. Establece el límite del período</label>
                 <div className="flex items-center gap-3">
                     {selectedInfo ? (
                         <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
@@ -246,7 +247,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">RD$</span>
                         <Input
                             type="number"
-                            aria-label="Límite mensual del presupuesto"
+                            aria-label="Límite del período del presupuesto"
                             min="0" step="0.01"
                             inputMode="decimal"
                             value={amount}
@@ -279,7 +280,7 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
 }
 
 export default function PlanningTab() {
-  const { currentMonth, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
+  const { currentMonth, currentPeriod, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
   const [activeTab, setActiveTab] = useState('budgets');
 
@@ -310,14 +311,17 @@ export default function PlanningTab() {
   return (
     <div className="space-y-6 pb-24 md:pb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <h2 className="text-2xl font-bold">Planificación Mensual</h2>
+        <div>
+          <h2 className="text-2xl font-bold">Planificación</h2>
+          <p className="text-sm text-muted-foreground">{formatPeriodRange(currentPeriod)}</p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
           <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
           <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
-          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Suscripciones</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Planificados</TabsTrigger>
           <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Tarjetas</TabsTrigger>
         </TabsList>
 
@@ -328,7 +332,7 @@ export default function PlanningTab() {
 
         {/* --- PRESUPUESTOS TAB --- */}
         <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{formatCurrency(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{formatCurrency(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del mes tras reservas: <strong>{formatCurrency(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
+            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{formatCurrency(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{formatCurrency(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del período tras reservas: <strong>{formatCurrency(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
             <Card>
                 <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
                     <div className="space-y-1">

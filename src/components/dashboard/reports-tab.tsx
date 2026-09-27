@@ -2,6 +2,8 @@
 
 import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
+import { previousComparablePeriod } from '@/domain/periods';
+import { formatPeriodRange } from '@/lib/period-format';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
@@ -47,19 +49,14 @@ const BreakdownTable = ({ title, data }: { title: string, data: { name: string, 
 }
 
 const MonthlyComparisonTable = () => {
-    const { getTotals, currentMonth } = useFinances();
-    
-    const { prevMonth, currentTotals, prevTotals } = useMemo(() => {
-        const parts = currentMonth.split('-').map(Number);
-        let py = parts[0], pm = parts[1] - 1;
-        if (pm <= 0) { pm = 12; py -= 1; }
-        const prevMonth = `${py}-${String(pm).padStart(2, '0')}`;
+    const { getTotals, currentMonth, currentPeriod, periodStartDay } = useFinances();
 
+    const { previousPeriod, currentTotals, prevTotals } = useMemo(() => {
+        const previousPeriod = previousComparablePeriod(currentPeriod, { periodStartDay });
         const currentTotals = getTotals(currentMonth);
-        const prevTotals = getTotals(prevMonth);
-        
-        return { prevMonth, currentTotals, prevTotals };
-    }, [currentMonth, getTotals]);
+        const prevTotals = getTotals(previousPeriod.id);
+        return { previousPeriod, currentTotals, prevTotals };
+    }, [currentMonth, currentPeriod, periodStartDay, getTotals]);
 
 
     const rows = [
@@ -67,13 +64,13 @@ const MonthlyComparisonTable = () => {
         { label: 'Gastos', prev: prevTotals.spending, curr: currentTotals.spending },
         { label: 'Resultado (ingresos − gastos)', prev: prevTotals.monthlyResult, curr: currentTotals.monthlyResult },
         { label: 'Pagos de tarjeta', prev: prevTotals.cardPayments, curr: currentTotals.cardPayments },
-        { label: 'Flujo de efectivo del mes', prev: prevTotals.cashFlow, curr: currentTotals.cashFlow }
+        { label: 'Flujo de efectivo del período', prev: prevTotals.cashFlow, curr: currentTotals.cashFlow }
     ];
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>📊 Comparativa mensual</CardTitle>
+                <CardTitle>📊 Comparativa de períodos</CardTitle>
                 <CardDescription>Operaciones registradas. Las compras a crédito son gastos; sus pagos solo afectan al flujo de efectivo.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -82,8 +79,8 @@ const MonthlyComparisonTable = () => {
                         <TableHeader>
                             <TableRow>
                                 <TableHead></TableHead>
-                                <TableHead className="text-right">{prevMonth}</TableHead>
-                                <TableHead className="text-right">{currentMonth}</TableHead>
+                                <TableHead className="text-right">{formatPeriodRange(previousPeriod)}</TableHead>
+                                <TableHead className="text-right">{formatPeriodRange(currentPeriod)}</TableHead>
                                 <TableHead className="text-right">Diferencia</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -161,7 +158,7 @@ const BudgetStatusReport = () => {
         <Card>
             <CardHeader>
                 <CardTitle>📝 Estado de Presupuestos</CardTitle>
-                <CardDescription>Un resumen detallado del rendimiento de tus presupuestos para el mes.</CardDescription>
+                <CardDescription>Un resumen detallado del rendimiento de tus presupuestos para el período seleccionado.</CardDescription>
             </CardHeader>
             <CardContent>
                 {/* MOBILE VIEW: Expandable Cards */}
@@ -206,7 +203,7 @@ const BudgetStatusReport = () => {
                         )
                     }) : (
                         <div className="text-center text-muted-foreground p-6 bg-black/5 dark:bg-white/5 rounded-xl border border-dashed border-border/50">
-                            No hay presupuestos configurados para este mes.
+                            No hay presupuestos configurados para este período.
                         </div>
                     )}
                 </div>
@@ -258,7 +255,7 @@ const BudgetStatusReport = () => {
                                 )
                             }) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 text-lg">No hay presupuestos configurados para este mes.</TableCell>
+                                    <TableCell colSpan={6} className="text-center text-muted-foreground py-10 text-lg">No hay presupuestos configurados para este período.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
