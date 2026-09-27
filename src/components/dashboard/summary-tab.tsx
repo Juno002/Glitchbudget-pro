@@ -90,7 +90,7 @@ export default function SummaryTab() {
               supporting="Efectivo + bancos registrados. No incluye crédito disponible."
             />
             <MetricCard
-              label="Deuda"
+              label="Deuda de tarjetas"
               amount={position.liabilities}
               tone={position.liabilities > 0 ? 'negative' : 'neutral'}
               supporting="Saldo adeudado en tarjetas registradas."
