@@ -212,7 +212,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
       <DialogContent className="sm:max-w-[420px] p-0 gap-0 overflow-x-hidden overflow-y-auto">
         <DialogHeader className="sr-only">
-          <DialogDescription>Completa el monto, la categoría y la fecha del movimiento.</DialogDescription>
+          <DialogDescription>Completa el monto y los datos que correspondan al tipo de movimiento.</DialogDescription>
           <DialogTitle>{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
         </DialogHeader>
 
@@ -493,7 +493,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           )}
 
           {/* Action buttons */}
-          {!saved && Number(amount) > 0 && !categoryId && <p className="text-xs text-muted-foreground" role="status">Selecciona una categoría para continuar.</p>}
+          {!saved && txType !== 'transfer' && Number(amount) > 0 && !categoryId && <p className="text-xs text-muted-foreground" role="status">Selecciona una categoría para continuar.</p>}
+          {!saved && txType === 'transfer' && Number(amount) > 0 && (!accountId || !toAccountId || accountId === toAccountId) && <p className="text-xs text-muted-foreground" role="status">Selecciona dos cuentas diferentes para continuar.</p>}
           {!saved && (
             <div className="flex gap-2">
               {isEditing && (
@@ -530,7 +531,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 disabled={!canSave}
                 onClick={handleSave}
               >
-                {isSaving ? 'Guardando…' : isEditing ? 'Guardar Cambios' : (txType === 'expense' ? 'Crear Gasto' : 'Crear Ingreso')}
+                {isSaving ? 'Guardando…' : isEditing ? 'Guardar Cambios' : txType === 'expense' ? 'Crear gasto' : txType === 'income' ? 'Crear ingreso' : 'Registrar transferencia'}
               </Button>
               </motion.div>
             </div>
@@ -547,7 +548,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               className="flex items-center justify-center py-4"
             >
               <p className="text-sm text-muted-foreground">
-                {txType === 'expense' ? '✅ Gasto registrado' : '✅ Ingreso registrado'}
+                {txType === 'expense' ? '✅ Gasto registrado' : txType === 'income' ? '✅ Ingreso registrado' : '✅ Transferencia registrada'}
               </p>
             </motion.div>
           )}
