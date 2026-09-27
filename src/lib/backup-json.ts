@@ -266,6 +266,11 @@ export async function importDataJSON(text: string): Promise<{
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
   }
+  for (const rule of d.recurrents || []) {
+    if (rule.defaultAccountId && !accountMap.has(rule.defaultAccountId)) {
+      throw new Error('El respaldo contiene una regla recurrente con cuenta predeterminada desconocida.');
+    }
+  }
   for (const transfer of d.accountTransfers || []) {
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
       if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
