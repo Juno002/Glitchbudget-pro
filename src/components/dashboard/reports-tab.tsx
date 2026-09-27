@@ -13,7 +13,7 @@ import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
-import { PageHeader } from '@/components/finance-ui';
+import { PageHeader, SectionHeader } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const getCategoryInfo = useCategoryResolver();
@@ -388,17 +388,38 @@ export default function ReportsTab() {
   const expenseData = getExpensesByCategory(currentMonth);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
         <PageHeader title="Reportes" description="Analiza resultados, tendencias, deuda y presupuestos sin mezclarlo con las tareas diarias." />
-        <MonthlyResultChart />
-        <MonthlyComparisonTable />
-        <CreditCardStatusReport />
-        <BudgetStatusReport />
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />
-            <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
-        </div>
-        <ExpenseByTypeTable />
+
+        <section className="space-y-4" aria-labelledby="results-analysis-title">
+          <SectionHeader
+            title={<span id="results-analysis-title">Resultado y comparación</span>}
+            description="Qué ocurrió en el período y cómo se compara con el anterior."
+          />
+          <MonthlyResultChart />
+          <MonthlyComparisonTable />
+        </section>
+
+        <section className="space-y-4" aria-labelledby="commitments-analysis-title">
+          <SectionHeader
+            title={<span id="commitments-analysis-title">Deuda y presupuestos</span>}
+            description="Seguimiento de compromisos y límites registrados."
+          />
+          <CreditCardStatusReport />
+          <BudgetStatusReport />
+        </section>
+
+        <section className="space-y-4" aria-labelledby="breakdowns-title">
+          <SectionHeader
+            title={<span id="breakdowns-title">Desgloses</span>}
+            description="Dónde se concentraron tus ingresos y gastos."
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />
+              <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
+          </div>
+          <ExpenseByTypeTable />
+        </section>
     </div>
   );
 }
