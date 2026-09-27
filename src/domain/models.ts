@@ -68,9 +68,18 @@ export interface Expense {
 }
 
 export interface Plan {
-  month: string; // YYYY-MM period id; field name retained for storage compatibility
+  /**
+   * Storage period key. Legacy monthly rows use YYYY-MM.
+   * Phase 9 ranges may use weekly:/yearly:/one-time: prefixes.
+   */
+  month: string;
   categoryId: string;
   limit: number;
+  /** Missing on legacy rows, which are interpreted as monthly budgets. */
+  periodType?: 'weekly' | 'monthly' | 'yearly' | 'one_time';
+  /** Inclusive date range for Phase 9 rows. Legacy monthly rows derive it from Period Engine settings. */
+  periodStart?: string;
+  periodEnd?: string;
 };
 
 export interface Goal {
