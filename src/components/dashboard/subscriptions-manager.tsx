@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { CalendarDays, CheckCircle2, CirclePause, CirclePlay, Clock3, Plus, SkipForward } from 'lucide-react';
+import { CalendarDays, CirclePause, CirclePlay, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { EmptyState, StatusBadge } from '@/components/finance-ui';
+import { EmptyState, PlannedPaymentRow, StatusBadge } from '@/components/finance-ui';
+import { useTabs } from '@/contexts/tabs-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { groupUpcomingOccurrences, type UpcomingBucket } from '@/domain/upcoming';
@@ -37,6 +38,7 @@ function dateLabel(value: string) {
 
 export default function SubscriptionsManager() {
   const money = usePrivateCurrency();
+  const { setActiveTab } = useTabs();
   const getCategoryInfo = useCategoryResolver();
   const {
     recurringRules,
@@ -315,30 +317,21 @@ export default function SubscriptionsManager() {
                   const rule = rulesById.get(occurrence.ruleId);
                   if (!rule) return null;
                   const category = getCategoryInfo(rule.categoryId);
-                  const busy = workingId === occurrence.id;
                   return (
-                    <div key={occurrence.id} className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <Clock3 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                          <span className="truncate font-medium">{rule.title}</span>
-                          <span className="text-xs text-muted-foreground">{rule.direction === 'expense' ? 'Gasto' : 'Ingreso'}</span>
-                          <StatusBadge status={group.key === 'overdue' ? 'overdue' : 'pending'} />
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {dateLabel(occurrence.scheduledDate)} · {money(rule.amount)}
-                          {category ? ` · ${category.name}` : ''}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="min-h-11 sm:min-h-9" disabled={!!workingId} onClick={() => skip(occurrence)}>
-                          <SkipForward className="mr-1 h-3.5 w-3.5" /> Omitir
-                        </Button>
-                        <Button size="sm" className="min-h-11 sm:min-h-9" disabled={!!workingId} onClick={() => confirm(occurrence)}>
-                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> {busy ? 'Guardando…' : 'Confirmar'}
-                        </Button>
-                      </div>
-                    </div>
+                    <PlannedPaymentRow
+                      key={occurrence.id}
+                      title={rule.title}
+                      amount={rule.amount}
+                      dateLabel={dateLabel(occurrence.scheduledDate)}
+                      kindLabel={rule.direction === 'expense' ? 'Gasto' : 'Ingreso'}
+                      status={group.key === 'overdue' ? 'overdue' : 'pending'}
+                      meta={category?.name}
+                      actions={{
+                        confirm: () => { void confirm(occurrence); },
+                        skip: () => { void skip(occurrence); },
+                        disabled: !!workingId,
+                      }}
+                    />
                   );
                 })}
               </div>
@@ -357,16 +350,17 @@ export default function SubscriptionsManager() {
             {recentResolved.map(occurrence => {
               const rule = rulesById.get(occurrence.ruleId);
               return (
-                <div key={occurrence.id} className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{rule?.title || 'Regla eliminada'}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {dateLabel(occurrence.scheduledDate)}
-                      {rule ? ` · ${money(rule.amount)}` : ''}
-                    </p>
-                  </div>
-                  <StatusBadge status={occurrence.status} />
-                </div>
+                <PlannedPaymentRow
+                  key={occurrence.id}
+                  title={rule?.title || 'Regla eliminada'}
+                  amount={rule?.amount}
+                  dateLabel={dateLabel(occurrence.scheduledDate)}
+                  kindLabel={rule ? (rule.direction === 'expense' ? 'Gasto' : 'Ingreso') : undefined}
+                  status={occurrence.status}
+                  actions={occurrence.status === 'confirmed' && occurrence.transactionId ? {
+                    viewMovement: () => setActiveTab('movements'),
+                  } : undefined}
+                />
               );
             })}
           </div>
