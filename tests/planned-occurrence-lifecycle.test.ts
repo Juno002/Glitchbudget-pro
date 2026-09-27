@@ -195,6 +195,45 @@ test('income occurrence creates one income and may use an actual date different 
   assert.equal((await db.planned_occurrences.get('occ-income'))?.scheduledDate, '2026-09-15');
 });
 
+test('recurring default account is used when confirmation provides no override', async () => {
+  await saveRecurringRule({
+    id:'default-account-rule',
+    direction:'expense',
+    title:'Internet',
+    categoryId:'food',
+    amount:1200,
+    defaultAccountId:'bank',
+    cadence:'monthly',
+    day:15,
+    startDate:'2026-09-01',
+    active:true,
+  });
+  await addPendingOccurrence({ id:'occ-default-account', ruleId:'default-account-rule', scheduledDate:'2026-09-15' });
+  const result = await confirmPlannedOccurrence('occ-default-account');
+  assert.equal((await db.expenses.get(result.transactionId))?.accountId, 'bank');
+});
+
+test('backup rejects an unknown recurring default account atomically', async () => {
+  await saveRecurringRule({
+    id:'default-account-backup',
+    direction:'expense',
+    title:'Internet',
+    categoryId:'food',
+    amount:1200,
+    defaultAccountId:'bank',
+    cadence:'monthly',
+    day:15,
+    startDate:'2026-09-01',
+    active:true,
+  });
+  const backup = JSON.parse(await exportDataJSON());
+  const row = backup.recurrents.find((rule: {id:string}) => rule.id === 'default-account-backup');
+  row.defaultAccountId = 'missing-account';
+  const before = await db.recurrents.get('default-account-backup');
+  await assert.rejects(importDataJSON(JSON.stringify(backup)), /cuenta predeterminada desconocida/);
+  assert.deepEqual(await db.recurrents.get('default-account-backup'), before);
+});
+
 test('skipping is idempotent and skipped occurrences cannot later be confirmed', async () => {
   await addPendingOccurrence({ id:'occ-skip', ruleId:'rule', scheduledDate:'2026-09-15' });
   const first = await skipPlannedOccurrence('occ-skip');
