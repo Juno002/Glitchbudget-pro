@@ -62,6 +62,16 @@ test('global movement composer offers expense income and transfer in one surface
   assert.match(modal, /Cuenta de destino/);
 });
 
+test('mobile header prioritizes brand period privacy and settings while gamification stays secondary', () => {
+  const header = read('src/components/layout/header.tsx');
+  assert.match(header, /GlitchBudget Pro/);
+  assert.match(header, /BalanceVisibilityToggle/);
+  assert.match(header, /SettingsDialog/);
+  assert.match(header, /Período actual/);
+  assert.match(header, /hidden md:block/);
+  assert.doesNotMatch(header, /Nuevo movimiento/);
+});
+
 test('planned payments use the stable row and expose confirmed movement navigation', () => {
   const planned = read('src/components/dashboard/subscriptions-manager.tsx');
   assert.match(planned, /PlannedPaymentRow/);
