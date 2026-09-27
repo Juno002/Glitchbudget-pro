@@ -18,7 +18,7 @@ import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer, type Account } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
@@ -69,6 +69,7 @@ interface FinanceContextType {
   recurringRules: RecurringRule[] | undefined;
   plannedOccurrences: PlannedOccurrence[] | undefined;
   accountTransfers: AccountTransfer[] | undefined;
+  accounts: Account[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setPreventNegativeAccountBalance: (value: boolean) => void;
@@ -814,6 +815,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     recurringRules,
     plannedOccurrences,
     accountTransfers: transfers,
+    accounts,
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
@@ -869,7 +871,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts,
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
