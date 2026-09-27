@@ -7,7 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useState, useMemo, useEffect } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import type { Expense, Income } from '@/lib/db';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,6 +30,7 @@ type UnifiedItem = {
 };
 
 export default function MovementsView() {
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 
@@ -205,7 +207,7 @@ export default function MovementsView() {
                     "text-sm font-semibold tabular-nums",
                     neutral ? 'text-foreground' : isIncome ? "text-emerald-500" : "text-rose-500"
                   )}>
-                    {neutral ? '' : isIncome ? '+' : '-'}{formatCurrency(item.amount)}
+                    {neutral ? '' : isIncome ? '+' : '-'}{money(item.amount)}
                   </div>
                   <div className="text-[10px] text-muted-foreground">
                     {new Date(item.date + 'T00:00:00').toLocaleDateString('es-DO', { day: 'numeric', month: 'short' })}
@@ -217,7 +219,7 @@ export default function MovementsView() {
         </div>
       )}
 
-      <Dialog open={!!detailItem} onOpenChange={open => { if (!open) setDetailItem(null); }}><DialogContent><DialogHeader><DialogTitle>{detailItem?.label}</DialogTitle><DialogDescription>{detailItem?.detail}</DialogDescription></DialogHeader><p>{formatCurrency(detailItem?.amount || 0)} · {detailItem?.date}</p>{detailItem?.kind === 'transfer' && <p className="text-sm text-muted-foreground">Puedes editar la transferencia en Mi dinero hoy, abriendo la cuenta de origen o destino.</p>}</DialogContent></Dialog>
+      <Dialog open={!!detailItem} onOpenChange={open => { if (!open) setDetailItem(null); }}><DialogContent><DialogHeader><DialogTitle>{detailItem?.label}</DialogTitle><DialogDescription>{detailItem?.detail}</DialogDescription></DialogHeader><p>{money(detailItem?.amount || 0)} · {detailItem?.date}</p>{detailItem?.kind === 'transfer' && <p className="text-sm text-muted-foreground">Puedes editar la transferencia en Mi dinero hoy, abriendo la cuenta de origen o destino.</p>}</DialogContent></Dialog>
       {/* Edit modal */}
       <TransactionModal
         open={modalOpen}
