@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatPeriodRange } from '@/lib/period-format';
 import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
 import { PageHeader } from '@/components/finance-ui';
+import { useTabs } from '@/contexts/tabs-context';
 
 // --- Compact Budget Item with Auto-Save ---
 function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
@@ -287,7 +288,7 @@ export default function PlanningTab() {
   const money = usePrivateCurrency();
   const { currentMonth, currentPeriod, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
-  const [activeTab, setActiveTab] = useState('budgets');
+  const { planningTab, setPlanningTab } = useTabs();
 
   const budgetDetails = useMemo(() => getBudgetStatusDetails(currentMonth), [currentMonth, getBudgetStatusDetails]);
 
@@ -320,7 +321,7 @@ export default function PlanningTab() {
         description={<>Presupuestos, metas y movimientos planificados · {formatPeriodRange(currentPeriod)}</>}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={planningTab} onValueChange={value => setPlanningTab(value as typeof planningTab)} className="w-full">
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
           {PLAN_SECTIONS.map(section => (
             <TabsTrigger key={section.value} value={section.value} className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">
