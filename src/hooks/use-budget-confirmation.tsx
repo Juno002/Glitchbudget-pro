@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { BudgetWarning } from '@/policies/budget-overspending';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from '@/components/ui/alert-dialog';
+import { formatPeriodRange } from '@/lib/period-format';
 export function useBudgetConfirmation(currency: string, locale: string) {
   const [warning, setWarning] = useState<BudgetWarning | null>(null);
   const resolver = useRef<((value: boolean) => void) | null>(null);
@@ -15,7 +16,7 @@ export function useBudgetConfirmation(currency: string, locale: string) {
   const dialog = <AlertDialog open={!!warning} onOpenChange={open => { if (!open) finish(false); }}>
     <AlertDialogContent className="z-[100]">
       <AlertDialogHeader><AlertDialogTitle>El gasto supera el presupuesto</AlertDialogTitle>
-        <AlertDialogDescription>{warning && <>En {warning.evaluation.month}, el gasto de esta categoría quedaría en {amount(warning.evaluation.after)}, frente a un presupuesto de {amount(warning.evaluation.limit ?? 0)}. Todavía no se ha guardado. ¿Quieres continuar?</>}</AlertDialogDescription>
+        <AlertDialogDescription>{warning && <>En {formatPeriodRange(warning.evaluation.period)}, el gasto de esta categoría quedaría en {amount(warning.evaluation.after)}, frente a un presupuesto de {amount(warning.evaluation.limit ?? 0)}.{warning.evaluation.affectedCount > 1 ? ` También excedería otros ${warning.evaluation.affectedCount - 1} presupuestos activos.` : ''} Todavía no se ha guardado. ¿Quieres continuar?</>}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter><AlertDialogCancel onClick={() => finish(false)}>Volver al gasto</AlertDialogCancel><AlertDialogAction onClick={() => finish(true)}>Guardar de todos modos</AlertDialogAction></AlertDialogFooter>
     </AlertDialogContent>
