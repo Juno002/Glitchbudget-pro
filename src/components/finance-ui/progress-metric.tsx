@@ -10,6 +10,7 @@ export function ProgressMetric({
   total,
   remaining,
   status = 'neutral',
+  statusLabel,
   supporting,
   className,
 }: {
@@ -18,6 +19,7 @@ export function ProgressMetric({
   total: number;
   remaining?: number;
   status?: FinancialStatus;
+  statusLabel?: string;
   supporting?: ReactNode;
   className?: string;
 }) {
@@ -30,7 +32,7 @@ export function ProgressMetric({
           <div className="text-sm font-medium">{label}</div>
           {supporting ? <div className="text-xs text-muted-foreground">{supporting}</div> : null}
         </div>
-        <StatusBadge status={status} />
+        <StatusBadge status={status} label={statusLabel} />
       </div>
       <Progress value={percent} className={cn(
         'h-2',
