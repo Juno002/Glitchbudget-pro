@@ -12,7 +12,7 @@ El usuario revisó y aprobó el Gate 7.5 el **2026-09-27**. La siguiente fase ha
 
 El contrato se desarrolla en [arquitectura UX](../ux/architecture.md) y [sistema de diseño](../ux/design-system.md). En Movimientos, el orden aprobado es **búsqueda → filtros → historial real → cuentas/tarjetas como gestión secundaria**.
 
-El cierre registra **214/214 pruebas**, typecheck, lint, local-only y build estático correctos. Es evidencia del gate técnico consolidado; no representa una nueva ejecución durante esta limpieza documental.
+El cierre histórico registraba 214/214 pruebas. La **revisión final contra `Roadmap septiembre 2026.txt`** añadió regresiones específicas para 7.5.17 y 7.5.19 y volvió a ejecutar el gate técnico: GitHub Actions `Quality checks` run 299 completó correctamente `npm run check` y `npm run build` antes del merge de cierre.
 
 ## Antecedentes históricos
 
