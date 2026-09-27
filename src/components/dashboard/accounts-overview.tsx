@@ -14,7 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { AccountSelect } from './account-select';
 import DebtsTab from './debts-tab';
-import { DetailHeader } from '@/components/finance-ui';
+import { ActionMenu, DetailHeader } from '@/components/finance-ui';
+import { Pencil, Settings2 } from 'lucide-react';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
@@ -102,7 +103,32 @@ export default function AccountsOverview() {
         subtitle={account.isDefaultCash ? 'Efectivo predeterminado' : account.type === 'cash' ? 'Efectivo' : 'Cuenta bancaria'}
         amount={accountBalance(account,data)}
         supporting={<>Saldo inicial: {money(account.openingBalance)} · Desde {account.startDate}</>}
-        actions={<Button variant="outline" onClick={()=>{setEditingAccount(account.id);setName(account.name);setOpening(String(account.openingBalance/100));if(account.type === 'cash') setCashOpen(true); else setOpen(true);}}>{account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar banco'}</Button>}
+        actions={<ActionMenu
+          label={`Acciones de ${account.name}`}
+          items={[
+            {
+              label: account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar cuenta',
+              icon: <Pencil className="h-4 w-4" />,
+              onSelect: () => {
+                setEditingAccount(account.id);
+                setName(account.name);
+                setOpening(String(account.openingBalance / 100));
+                if (account.type === 'cash') setCashOpen(true);
+                else setOpen(true);
+              },
+            },
+            {
+              label: 'Gestionar cuentas y transferencias',
+              icon: <Settings2 className="h-4 w-4" />,
+              onSelect: () => {
+                setEditingAccount('');
+                setName('');
+                setOpening('');
+                setOpen(true);
+              },
+            },
+          ]}
+        />}
       /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const t=data.transfers.find(t=>t.id===r.id);if(t){setEditingAccount('');setName('');setOpening('');setEditingTransfer(t.id);setFrom(t.fromAccountId);setTo(t.toAccountId);setAmount(String(t.amount/100));setDate(t.date);setNote(t.note);setOpen(true);}}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>
