@@ -214,3 +214,13 @@ html.serious [class*="rounded-"] { border-radius: 12px; }
 html.light, html.serious { background: hsl(var(--background)); color-scheme: only light; }
 html.dark { color-scheme: only dark; }
 html.light ::-webkit-scrollbar-thumb, html.serious ::-webkit-scrollbar-thumb { background: hsl(var(--border)); }
+
+
+/* Privacy display guard: prevent a stored hidden-balance preference from flashing values before hydration. */
+html[data-balances-hidden='true']:not([data-balances-ready='true']) [data-private-surface='true'] {
+  visibility: hidden;
+}
+
+html[data-balances-hidden='true'] [data-money-value='true'] {
+  user-select: none;
+}
