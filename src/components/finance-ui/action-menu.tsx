@@ -40,10 +40,7 @@ export function ActionMenu({
             {item.separatorBefore ? <DropdownMenuSeparator /> : null}
             <DropdownMenuItem
               disabled={item.disabled}
-              onSelect={event => {
-                event.preventDefault();
-                item.onSelect();
-              }}
+              onSelect={() => item.onSelect()}
               className={item.destructive ? 'text-destructive focus:text-destructive' : undefined}
             >
               {item.icon}
