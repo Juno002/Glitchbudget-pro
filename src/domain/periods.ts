@@ -148,9 +148,14 @@ export interface BudgetPeriodRange extends PeriodRange {
 }
 
 function weekdayMondayZero(value: string): number {
-  const { year, month, day } = parseDate(value);
-  const jsDay = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
-  return (jsDay + 6) % 7;
+  const parsed = parseDate(value);
+  let year = parsed.year;
+  const month = parsed.month;
+  const day = parsed.day;
+  const offsets = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+  if (month < 3) year -= 1;
+  const sundayZero = (year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400) + offsets[month - 1] + day) % 7;
+  return (sundayZero + 6) % 7;
 }
 
 export function budgetPeriodContaining(
