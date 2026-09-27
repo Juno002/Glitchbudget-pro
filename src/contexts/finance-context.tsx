@@ -1,5 +1,8 @@
 'use client';
 import { saveRecurringRule, removeRecurringRule } from '@/lib/recurring-rule-service';
+import { confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOccurrence, type ConfirmPlannedOccurrenceOptions } from '@/lib/planned-occurrence-service';
+import { plannedOccurrenceWindow } from '@/domain/upcoming';
+import { BudgetWarning } from '@/policies/budget-overspending';
 import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
 import { createCategory, resetCategories, requireCategory, savePlans } from '@/lib/category-service';
 
@@ -15,7 +18,7 @@ import { rollBudgetsIntoMonth } from '@/lib/budget-rollover';
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
@@ -63,6 +66,7 @@ interface FinanceContextType {
   debts: Debt[] | undefined;
   debtPayments: DebtPayment[] | undefined;
   recurringRules: RecurringRule[] | undefined;
+  plannedOccurrences: PlannedOccurrence[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setPreventNegativeAccountBalance: (value: boolean) => void;
@@ -93,6 +97,8 @@ interface FinanceContextType {
   addRecurringRule: (recurring: Omit<RecurringRule, 'id'>) => Promise<boolean>;
   updateRecurringRule: (recurring: RecurringRule) => Promise<boolean>;
   deleteRecurringRule: (id: string) => Promise<boolean>;
+  confirmPlannedOccurrenceItem: (id: string, options?: Omit<ConfirmPlannedOccurrenceOptions, 'budgetConfirmation'>) => Promise<boolean>;
+  skipPlannedOccurrenceItem: (id: string) => Promise<boolean>;
 
   getMonthlyAverages: () => { incomeAvgMonthly: number, expenseAvgMonthly: number };
   getDisposable: (safetyPct?: number) => number;
@@ -160,11 +166,20 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const expenseCategories = useMemo(() => activeCategories(categories || [], 'expense').map(c => c.id), [categories]);
   const incomeCategories = useMemo(() => activeCategories(categories || [], 'income').map(c => c.id), [categories]);
   const recurringRules = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
+  const plannedOccurrences = useLiveQuery(() => db.planned_occurrences.toArray(), [dataVersion]);
   useEffect(() => {
     if (accounts && !accounts.some(a => a.isDefaultCash)) {
       void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
     }
   }, [accounts, toast]);
+
+  useEffect(() => {
+    if (!recurringRules) return;
+    const today = localDate();
+    void materializePendingOccurrences(plannedOccurrenceWindow(today)).catch(error => {
+      toast({ title: 'No se pudieron actualizar los pagos planificados', description: friendlyError(error), variant: 'destructive' });
+    });
+  }, [recurringRules, toast]);
 
   const settings = useMemo(() => {
     const s: Partial<Settings> = rawSettings ?? {};
@@ -180,7 +195,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
   }, [rawSettings]);
 
-  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, accounts, transfers, categories]);
+  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories]);
   const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings]);
 
   useEffect(() => {
@@ -697,7 +712,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const addRecurringRule = useCallback(async (recurring: Omit<RecurringRule, "id">) => {
     try {
       await saveRecurringRule({ ...recurring, id: crypto.randomUUID() });
-      toast({ title: 'Suscripción registrada' });
+      toast({ title: 'Planificación registrada' });
       return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
@@ -708,7 +723,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const updateRecurringRule = useCallback(async (recurring: RecurringRule) => {
     try {
       await saveRecurringRule(recurring, true);
-      toast({ title: 'Suscripción actualizada' });
+      toast({ title: 'Planificación actualizada' });
       return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
@@ -719,10 +734,46 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const deleteRecurringRule = useCallback(async (id: string) => {
     try {
       await removeRecurringRule(id);
-      toast({ title: 'Suscripción borrada' });
+      toast({ title: 'Planificación borrada' });
       return true;
     } catch (e: any) {
       toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const confirmPlannedOccurrenceItem = useCallback(async (
+    id: string,
+    options: Omit<ConfirmPlannedOccurrenceOptions, 'budgetConfirmation'> = {},
+  ) => {
+    let budgetConfirmation: string | undefined;
+    for (;;) {
+      try {
+        const result = await confirmPlannedOccurrence(id, { ...options, budgetConfirmation });
+        if (!result.alreadyConfirmed) {
+          if (result.direction === 'expense') playExpense(); else playIncome();
+          toast({ title: result.direction === 'expense' ? 'Pago confirmado' : 'Ingreso confirmado' });
+        }
+        return true;
+      } catch (error) {
+        if (error instanceof BudgetWarning) {
+          if (!await confirmBudget(error)) return false;
+          budgetConfirmation = error.evaluation.confirmation;
+          continue;
+        }
+        toast({ title: 'No se pudo confirmar', description: friendlyError(error), variant: 'destructive' });
+        return false;
+      }
+    }
+  }, [confirmBudget, toast]);
+
+  const skipPlannedOccurrenceItem = useCallback(async (id: string) => {
+    try {
+      await skipPlannedOccurrence(id);
+      toast({ title: 'Pago planificado omitido' });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo omitir', description: friendlyError(error), variant: 'destructive' });
       return false;
     }
   }, [toast]);
@@ -746,6 +797,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debts,
     debtPayments,
     recurringRules,
+    plannedOccurrences,
     setTheme,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
@@ -772,6 +824,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     addRecurringRule,
     updateRecurringRule,
     deleteRecurringRule,
+    confirmPlannedOccurrenceItem,
+    skipPlannedOccurrenceItem,
     getMonthlyAverages,
     getDisposable,
     getTotals,
@@ -798,13 +852,13 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences,
     setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,
-    addRecurringRule, updateRecurringRule, deleteRecurringRule,
+    addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
     getMonthlyAverages, getDisposable, getTotals, getPosition, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
