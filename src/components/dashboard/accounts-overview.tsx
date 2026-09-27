@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { AccountSelect } from './account-select';
+import DebtsTab from './debts-tab';
 
 export default function AccountsOverview() {
   const data = useLiveQuery(() => db.transaction('r', [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts], async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray(), incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), debts: await db.debts.toArray() })));
@@ -73,6 +74,16 @@ export default function AccountsOverview() {
               <Button type="submit">Confirmar saldo actual</Button>
             </form>}
           </fieldset>{busy && <p role="status" className="text-sm">Guardando…</p>}
+        </DialogContent>
+      </Dialog>
+      <Dialog>
+        <DialogTrigger asChild><Button variant="outline">Gestionar tarjetas</Button></DialogTrigger>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tarjetas y pagos</DialogTitle>
+            <DialogDescription>Consulta y administra tus tarjetas sin convertirlas en una sección principal de Plan.</DialogDescription>
+          </DialogHeader>
+          <DebtsTab />
         </DialogContent>
       </Dialog>
     </div>
