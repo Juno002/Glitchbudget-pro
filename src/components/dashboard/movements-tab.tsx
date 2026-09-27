@@ -12,20 +12,20 @@ export default function MovementsTab() {
         description="Consulta tu actividad real. Los planificados pendientes siguen separados hasta que los confirmes."
       />
 
-      <section className="space-y-3" aria-labelledby="money-now-title">
-        <SectionHeader
-          title={<span id="money-now-title">Mi dinero hoy</span>}
-          description="Cuentas, tarjetas y situación actual como navegación secundaria."
-        />
-        <AccountsOverview />
-      </section>
-
       <section className="space-y-3" aria-labelledby="history-title">
         <SectionHeader
           title={<span id="history-title">Historial</span>}
           description="Busca, filtra y abre movimientos registrados."
         />
         <MovementsView />
+      </section>
+
+      <section className="space-y-3 border-t pt-6" aria-labelledby="accounts-title">
+        <SectionHeader
+          title={<span id="accounts-title">Cuentas y tarjetas</span>}
+          description="Acceso secundario para consultar saldos, transferir, conciliar o administrar cuentas."
+        />
+        <AccountsOverview />
       </section>
     </div>
   );
