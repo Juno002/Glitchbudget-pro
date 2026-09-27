@@ -32,7 +32,7 @@ import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadg
 import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
 import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
 
-export default function Header({ onNewMovement }: { onNewMovement?: () => void }) {
+export default function Header() {
   const { 
     theme, setTheme, 
     preventNegativeAccountBalance, setPreventNegativeAccountBalance, budgetOverspendingBehavior, setBudgetOverspendingBehavior,
@@ -81,7 +81,6 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                 </div>
             </Link>
         </div>
-        {onNewMovement && <Button className="md:hidden shrink-0" size="icon" onClick={onNewMovement} aria-label="Nuevo movimiento"><Plus className="h-5 w-5" /></Button>}
         <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
