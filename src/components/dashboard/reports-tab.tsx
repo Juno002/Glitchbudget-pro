@@ -7,7 +7,8 @@ import { formatPeriodRange } from '@/lib/period-format';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { formatCurrency, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
@@ -16,6 +17,7 @@ import MonthlyResultChart from "./charts/monthly-result-chart";
 import { PageHeader, SectionHeader } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
     return (
@@ -35,7 +37,7 @@ const BreakdownTable = ({ title, data }: { title: string, data: { name: string, 
                             {data.length > 0 ? data.map(item => (
                                 <TableRow key={item.name}>
                                     <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.value)}</TableCell>
+                                    <TableCell className="text-right">{money(item.value)}</TableCell>
                                     <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
                                 </TableRow>
                             )) : (
@@ -50,6 +52,7 @@ const BreakdownTable = ({ title, data }: { title: string, data: { name: string, 
 }
 
 const MonthlyComparisonTable = () => {
+    const money = usePrivateCurrency();
     const { getTotals, currentMonth, currentPeriod, periodStartDay } = useFinances();
 
     const { previousPeriod, currentTotals, prevTotals } = useMemo(() => {
@@ -93,9 +96,9 @@ const MonthlyComparisonTable = () => {
                                 return (
                                     <TableRow key={row.label}>
                                         <TableCell>{row.label}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(row.prev)}</TableCell>
-                                        <TableCell className="text-right">{formatCurrency(row.curr)}</TableCell>
-                                        <TableCell className={cn("text-right font-semibold", diffColor)}>{diff >= 0 ? '+' : ''}{formatCurrency(diff)}</TableCell>
+                                        <TableCell className="text-right">{money(row.prev)}</TableCell>
+                                        <TableCell className="text-right">{money(row.curr)}</TableCell>
+                                        <TableCell className={cn("text-right font-semibold", diffColor)}>{diff >= 0 ? '+' : ''}{money(diff)}</TableCell>
                                     </TableRow>
                                 )
                             })}
@@ -108,6 +111,7 @@ const MonthlyComparisonTable = () => {
 }
 
 const ExpenseByTypeTable = () => {
+    const money = usePrivateCurrency();
     const { getExpensesByType, currentMonth } = useFinances();
     const data = getExpensesByType(currentMonth);
 
@@ -129,8 +133,8 @@ const ExpenseByTypeTable = () => {
                             {data.length > 0 ? data.map(item => (
                                 <TableRow key={item.name}>
                                     <TableCell>{item.name}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.total)}</TableCell>
-                                    <TableCell className="text-right">{formatCurrency(item.avg)}</TableCell>
+                                    <TableCell className="text-right">{money(item.total)}</TableCell>
+                                    <TableCell className="text-right">{money(item.avg)}</TableCell>
                                     <TableCell className="text-right">{item.count}</TableCell>
                                 </TableRow>
                             )) : (
@@ -145,6 +149,7 @@ const ExpenseByTypeTable = () => {
 }
 
 const BudgetStatusReport = () => {
+  const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
@@ -182,15 +187,15 @@ const BudgetStatusReport = () => {
                                 <div className="grid grid-cols-3 gap-2 text-sm mt-1">
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Planificado</span>
-                                        <span className="font-mono">{formatCurrency(b.limit)}</span>
+                                        <span className="font-mono">{money(b.limit)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Gastado</span>
-                                        <span className="font-mono">{formatCurrency(b.spent)}</span>
+                                        <span className="font-mono">{money(b.spent)}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Restante</span>
-                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{formatCurrency(b.remaining)}</span>
+                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{money(b.remaining)}</span>
                                     </div>
                                 </div>
                                 <Progress 
@@ -232,10 +237,10 @@ const BudgetStatusReport = () => {
                                             {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
                                             {category?.name}
                                         </TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.limit)}</TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{formatCurrency(b.spent)}</TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.limit)}</TableCell>
+                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.spent)}</TableCell>
                                         <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
-                                            {formatCurrency(b.remaining)}
+                                            {money(b.remaining)}
                                         </TableCell>
                                         <TableCell className="py-5">
                                             <Progress 
@@ -268,6 +273,7 @@ const BudgetStatusReport = () => {
 }
 
 const CreditCardStatusReport = () => {
+    const money = usePrivateCurrency();
     const { debts, debtPayments, expenses } = useFinances();
     const activeCards = (debts || []).filter(d => d.type === 'credit_card' && d.status === 'active');
 
@@ -318,13 +324,13 @@ const CreditCardStatusReport = () => {
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Deuda Actual</span>
                                         <span className={cn("font-mono font-bold text-sm", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {formatCurrency(currentDebt)}
+                                            {money(currentDebt)}
                                         </span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Crédito Disp.</span>
                                         <span className="font-mono font-bold text-sm text-primary">
-                                            {formatCurrency(available)}
+                                            {money(available)}
                                         </span>
                                     </div>
                                 </div>
@@ -356,10 +362,10 @@ const CreditCardStatusReport = () => {
                                     <TableRow key={debt.id}>
                                         <TableCell className="py-5 font-semibold text-base">{debt.name}</TableCell>
                                         <TableCell className={cn("text-right py-5 font-mono text-base font-bold", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {formatCurrency(currentDebt)}
+                                            {money(currentDebt)}
                                         </TableCell>
                                         <TableCell className="text-right py-5 font-mono text-base text-primary">
-                                            {formatCurrency(available)}
+                                            {money(available)}
                                         </TableCell>
                                         <TableCell className="text-center py-5 text-muted-foreground">{debt.billingCycleDay || '-'}</TableCell>
                                         <TableCell className="text-center py-5 text-muted-foreground font-medium">{debt.paymentDueDay || '-'}</TableCell>
