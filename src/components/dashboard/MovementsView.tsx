@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { EmptyState, FilterChip, TransactionRow } from '@/components/finance-ui';
 import { TrendingUp, TrendingDown, Pin } from 'lucide-react';
 import TransactionModal from './TransactionModal';
+import { useTabs } from '@/contexts/tabs-context';
 
 type UnifiedItem = {
   id: string;
@@ -31,6 +32,7 @@ type UnifiedItem = {
 export default function MovementsView() {
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
+  const { movementFocusId, clearMovementFocus } = useTabs();
   const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 
   const accountData = useLiveQuery(() => db.transaction('r', db.accounts, db.account_transfers, async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray() })));
@@ -105,6 +107,24 @@ export default function MovementsView() {
   useEffect(() => {
     if (filterCategory !== 'all' && !presentCategories.some(c => c.id === filterCategory)) setFilterCategory('all');
   }, [presentCategories, filterCategory]);
+
+  useEffect(() => {
+    if (!movementFocusId) return;
+    const item = periodItems.find(row => row.id === movementFocusId);
+    if (!item) return;
+    if (item.kind === 'expense') {
+      setEditingExpense(item.raw as Expense);
+      setEditingIncome(undefined);
+      setModalOpen(true);
+    } else if (item.kind === 'income') {
+      setEditingIncome(item.raw as Income);
+      setEditingExpense(undefined);
+      setModalOpen(true);
+    } else {
+      setDetailItem(item);
+    }
+    clearMovementFocus();
+  }, [movementFocusId, periodItems, clearMovementFocus]);
 
   const handleItemClick = (item: UnifiedItem) => {
     if (item.kind !== 'income' && item.kind !== 'expense') { setDetailItem(item); return; }
