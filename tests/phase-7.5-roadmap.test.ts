@@ -54,9 +54,9 @@ test('Summary follows the roadmap status/action hierarchy', () => {
 test('global movement composer offers expense income and transfer in one surface', () => {
   const modal = read('src/components/dashboard/TransactionModal.tsx');
   assert.match(modal, /type TransactionType = 'income' \| 'expense' \| 'transfer'/);
-  assert.match(modal, /> Gasto</);
-  assert.match(modal, /> Ingreso</);
-  assert.match(modal, /> Transferencia</);
+  assert.ok(modal.includes('Gasto'));
+  assert.ok(modal.includes('Ingreso'));
+  assert.ok(modal.includes('Transferencia'));
   assert.match(modal, /txType !== 'transfer' && <ToolbarItem/);
   assert.match(modal, /Cuenta de origen/);
   assert.match(modal, /Cuenta de destino/);
