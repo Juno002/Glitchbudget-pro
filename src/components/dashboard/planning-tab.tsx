@@ -1,185 +1,173 @@
 'use client';
-import { selectBudgetRemaining } from '@/domain/metrics';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { monthlyAmount } from '@/lib/finance-calculations';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft, Plus } from 'lucide-react';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { Skeleton } from '../ui/skeleton';
-import ExpenseCategoryManager from './expense-category-manager';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { currentBudgetRange } from '@/domain/budgets';
+import type { BudgetPeriodKind, BudgetPeriodRange } from '@/domain/periods';
+import { monthlyAmount } from '@/lib/finance-calculations';
+import { formatPeriodRange } from '@/lib/period-format';
+import { cn } from '@/lib/utils';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { CheckCircle2, Loader2, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { PageHeader, StatusBadge } from '@/components/finance-ui';
+import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
+import { useTabs } from '@/contexts/tabs-context';
 import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
-import IncomeCategoryManager from './income-category-manager';
 import SubscriptionsManager from './subscriptions-manager';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { playIncome } from '@/lib/sounds';
-import { motion, AnimatePresence } from 'framer-motion';
-import { formatPeriodRange } from '@/lib/period-format';
-import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
-import { PageHeader } from '@/components/finance-ui';
-import { useTabs } from '@/contexts/tabs-context';
 
-// --- Compact Budget Item with Auto-Save ---
-function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
+const BUDGET_PERIODS: Array<{ value: BudgetPeriodKind; label: string }> = [
+  { value: 'weekly', label: 'Semanal' },
+  { value: 'monthly', label: 'Mensual' },
+  { value: 'yearly', label: 'Anual' },
+  { value: 'one_time', label: 'Único' },
+];
+
+const STATUS_LABELS = {
+  ok: 'En presupuesto',
+  alert: 'Cerca del límite',
+  over: 'Excedido',
+  unbudgeted: 'Sin presupuesto',
+} as const;
+
+function BudgetItem({
+  categoryId,
+  currentPlan,
+  spent,
+  remaining,
+  percentage,
+  budgetStatus,
+  onSave,
+}: {
   categoryId: string;
   currentPlan: number;
   spent: number;
+  remaining: number;
+  percentage: number;
+  budgetStatus: keyof typeof STATUS_LABELS;
   onSave: (val: number) => Promise<boolean>;
 }) {
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const category = getCategoryInfo(categoryId);
   const [inputValue, setInputValue] = useState(String(currentPlan / 100));
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); }, []);
+  useEffect(() => () => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+  }, []);
 
-  // Sync if external changes happen
   useEffect(() => {
-    if (status === 'idle') {
-      setInputValue(String(currentPlan / 100));
-    }
-  }, [currentPlan, status]);
+    if (saveStatus === 'idle') setInputValue(String(currentPlan / 100));
+  }, [currentPlan, saveStatus]);
 
   if (!category) return null;
 
-  const handleSave = async (valStr: string) => {
-    const num = parseFloat(valStr) || 0;
-    if (num * 100 === currentPlan) return; // No change
-
-    setStatus('saving');
-    const success = await onSave(num);
-    setStatus(success ? 'saved' : 'idle');
-    setTimeout(() => setStatus('idle'), 2000);
+  const handleSave = async (value: string) => {
+    const numberValue = parseFloat(value) || 0;
+    if (Math.round(numberValue * 100) === currentPlan) return;
+    setSaveStatus('saving');
+    const success = await onSave(numberValue);
+    setSaveStatus(success ? 'saved' : 'idle');
+    if (success) setTimeout(() => setSaveStatus('idle'), 1800);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-    setStatus('idle');
-
-    // Optional: Auto-save on stop typing (debounce)
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+    setSaveStatus('idle');
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-       handleSave(e.target.value);
-    }, 1000);
+    debounceTimer.current = setTimeout(() => { void handleSave(event.target.value); }, 900);
   };
 
-  const handleBlur = () => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    handleSave(inputValue);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.currentTarget.blur();
-    }
-  };
-
-  const plan = currentPlan;
-  const left = selectBudgetRemaining(plan, spent).unspentBudgetReservation;
-  const pct = plan ? Math.min(100, Math.round((spent / plan) * 100)) : 0;
-  const over = plan > 0 && spent > plan;
+  const statusTone = budgetStatus === 'over' ? 'danger' : budgetStatus === 'alert' ? 'warning' : budgetStatus === 'ok' ? 'success' : 'neutral';
+  const progress = currentPlan > 0 ? Math.min(100, Math.max(0, percentage)) : 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
-      className={cn(
-        "flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-md",
-        over ? "border-amber-500/30 bg-amber-500/5 hover:shadow-amber-500/10" : "border-black/5 dark:border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/5 dark:bg-white/5 hover:border-black/10 dark:hover:border-[rgba(255,255,255,0.12)]"
-    )}>
-      {/* Category Info */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className={cn(
-            "shrink-0 flex items-center justify-center w-10 h-10 rounded-lg",
-            over ? "bg-amber-500/20 text-amber-500" : "bg-black/5 dark:bg-white/10 text-muted-foreground"
-        )}>
-          <category.icon className="h-5 w-5" />
+    <motion.article
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.16 }}
+      className="space-y-3 rounded-xl border p-4"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted/40">
+            <category.icon className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="font-medium">{category.name}</h3>
+            <StatusBadge status={statusTone} label={STATUS_LABELS[budgetStatus]} />
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-             <span className="font-medium text-sm truncate">{category.name}</span>
-             {over && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold">Excedido</span>}
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-            <span>Gastado: {money(spent)}</span>
-            <span>•</span>
-            <span className={cn(left === 0 && plan > 0 && "text-amber-500")}>Resta: {money(left)}</span>
-          </div>
+        <div className="flex items-center gap-2" aria-live="polite">
+          {saveStatus === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
+          {saveStatus === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden="true" />}
+          <span className="sr-only">{saveStatus === 'saving' ? 'Guardando presupuesto' : saveStatus === 'saved' ? 'Presupuesto guardado' : ''}</span>
         </div>
       </div>
 
-      {/* Input & Status */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">RD$</span>
+      <div className="grid gap-3 text-sm sm:grid-cols-5">
+        <label className="space-y-1">
+          <span className="block text-xs text-muted-foreground">Límite</span>
+          <div className="relative">
+            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">RD$</span>
             <Input
-                type="number"
-                aria-label={`Presupuesto de ${category.name}`}
-                min="0" step="0.01"
-                inputMode="decimal"
-                value={inputValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                onKeyDown={handleKeyDown}
-                className={cn(
-                    "w-[130px] h-10 pl-10 pr-4 text-right font-medium",
-                    status === 'saving' && "opacity-50"
-                )}
-                placeholder="0.00"
+              type="number"
+              aria-label={`Límite de ${category.name}`}
+              min="0"
+              step="0.01"
+              inputMode="decimal"
+              value={inputValue}
+              onChange={handleChange}
+              onBlur={() => { if (debounceTimer.current) clearTimeout(debounceTimer.current); void handleSave(inputValue); }}
+              onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); }}
+              className={cn('h-9 pl-9 text-right tabular-nums', saveStatus === 'saving' && 'opacity-60')}
             />
-        </div>
-
-        <div className="w-5 flex justify-center" aria-live="polite">
-            {status === 'saving' && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />}
-            {status === 'saved' && <CheckCircle2 className="h-4 w-4 text-primary animate-in zoom-in" aria-hidden="true" />}
-            <span className="sr-only">{status === 'saving' ? 'Guardando presupuesto' : status === 'saved' ? 'Presupuesto guardado' : ''}</span>
-        </div>
+          </div>
+        </label>
+        <div><span className="block text-xs text-muted-foreground">Gastado</span><strong className="tabular-nums">{money(spent)}</strong></div>
+        <div><span className="block text-xs text-muted-foreground">Restante</span><strong className={cn('tabular-nums', remaining < 0 && 'text-bad')}>{money(remaining)}</strong></div>
+        <div><span className="block text-xs text-muted-foreground">Porcentaje</span><strong className="tabular-nums">{percentage}%</strong></div>
+        <div><span className="block text-xs text-muted-foreground">Estado</span><strong>{STATUS_LABELS[budgetStatus]}</strong></div>
       </div>
 
-      {/* Mini Progress Bar (Mobile only, beneath input) */}
-      {plan > 0 && (
-          <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden sm:hidden mt-1">
-              <div className={cn("h-full rounded-full transition-all", over ? "bg-bad" : "bg-primary")} style={{ width: `${pct}%` }} />
-          </div>
-      )}
-    </motion.div>
+      <div className="h-2 overflow-hidden rounded-full bg-muted" aria-label={`${percentage}% del presupuesto utilizado`}>
+        <div className={cn('h-full rounded-full', budgetStatus === 'over' ? 'bg-bad' : budgetStatus === 'alert' ? 'bg-warning' : 'bg-good')} style={{ width: `${progress}%` }} />
+      </div>
+    </motion.article>
   );
 }
 
-// --- New Budget Modal ---
-function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: string[], onSave: (categoryId: string, amount: number) => Promise<boolean> }) {
+function NewBudgetDialog({
+  inactiveCategories,
+  onSave,
+}: {
+  inactiveCategories: string[];
+  onSave: (categoryId: string, amount: number) => Promise<boolean>;
+}) {
   const getCategoryInfo = useCategoryResolver();
   const [open, setOpen] = useState(false);
-  const [selectedCatId, setSelectedCatId] = useState<string>('');
+  const [selectedCatId, setSelectedCatId] = useState('');
   const [amount, setAmount] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Group inactive by their mapped models for easy rendering
-  const inactiveInfo = inactiveCategories
-      .map(id => getCategoryInfo(id))
-      .filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
-
-  const selectedInfo = getCategoryInfo(selectedCatId);
+  const inactiveInfo = inactiveCategories.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
 
   const handleSave = async () => {
-    const num = parseFloat(amount) || 0;
-    if (num <= 0 || !selectedCatId) return;
+    const numberValue = parseFloat(amount) || 0;
+    if (!selectedCatId || numberValue <= 0) return;
     setSaving(true);
-    const success = await onSave(selectedCatId, num);
+    const success = await onSave(selectedCatId, numberValue);
     setSaving(false);
     if (!success) return;
-    playIncome();
     setOpen(false);
     setSelectedCatId('');
     setAmount('');
@@ -188,97 +176,39 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-black/10 dark:border-white/10 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all font-bold group"
-        >
-            <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Nuevo Presupuesto
-        </motion.button>
+        <button className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed text-sm font-semibold text-primary hover:bg-primary/10">
+          <Plus className="h-4 w-4" /> Nuevo presupuesto
+        </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px] p-0 overflow-hidden gap-0">
-         <DialogHeader className="p-6 pb-2">
-            <DialogTitle>Añadir Presupuesto</DialogTitle>
-            <DialogDescription>Asigna un límite de gasto a una de tus categorías libres.</DialogDescription>
-         </DialogHeader>
-
-         <div className="px-6 pb-6 space-y-6">
-             {/* Category Grid */}
-             <div className="space-y-2">
-                 <label className="text-xs text-muted-foreground font-medium">1. Selecciona categoría</label>
-                 {inactiveInfo.length === 0 ? (
-                     <div className="text-center p-4 border border-dashed rounded-xl bg-muted/5 text-sm text-muted-foreground">
-                         No hay categorías disponibles.
-                     </div>
-                 ) : (
-                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[160px] overflow-y-auto pr-2">
-                        {inactiveInfo.map(cat => {
-                            const Icon = cat.icon;
-                            const isSelected = selectedCatId === cat.id;
-                            return (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedCatId(cat.id)}
-                                    className={cn(
-                                        "flex flex-col items-center justify-center gap-1 p-2 rounded-xl transition-all border",
-                                        isSelected
-                                            ? "border-primary bg-primary/10 text-primary"
-                                            : "border-transparent hover:bg-black/5 dark:hover:bg-white/5 text-muted-foreground"
-                                    )}
-                                >
-                                    <Icon className="h-6 w-6" />
-                                    <span className="text-[10px] truncate w-full text-center leading-tight">{cat.name}</span>
-                                </button>
-                            );
-                        })}
-                     </div>
-                 )}
-             </div>
-
-             {/* Amount Input */}
-             <div className="space-y-2">
-                <label className="text-xs text-muted-foreground font-medium">2. Establece el límite del período</label>
-                <div className="flex items-center gap-3">
-                    {selectedInfo ? (
-                        <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
-                            <selectedInfo.icon className="h-6 w-6 text-primary dark:text-primary" />
-                        </div>
-                    ) : (
-                        <div className="w-12 h-12 shrink-0 rounded-xl bg-black/5 dark:bg-white/5 flex items-center justify-center">
-                            <span className="text-muted-foreground">?</span>
-                        </div>
-                    )}
-                    <div className="relative flex-1">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">RD$</span>
-                        <Input
-                            type="number"
-                            aria-label="Límite del período del presupuesto"
-                            min="0" step="0.01"
-                            inputMode="decimal"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0.00"
-                            className="h-12 pl-12 text-lg font-bold bg-transparent"
-                            disabled={!selectedCatId}
-                        />
-                    </div>
-                </div>
-             </div>
-
-             {/* Save Button */}
-             <button
-                disabled={!selectedCatId || !amount || parseFloat(amount) <= 0 || saving}
-                onClick={handleSave}
-                className={cn(
-                     "w-full h-12 rounded-xl font-bold flex items-center justify-center transition-all",
-                     selectedCatId && parseFloat(amount) > 0 && !saving
-                        ? "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
-                        : "bg-[rgba(255,255,255,0.04)] text-muted-foreground cursor-not-allowed"
-                )}
-             >
-                {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar Presupuesto"}
-             </button>
-         </div>
+      <DialogContent className="sm:max-w-[420px]">
+        <DialogHeader>
+          <DialogTitle>Añadir presupuesto</DialogTitle>
+          <DialogDescription>Asigna un límite a una categoría para el rango seleccionado.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <label className="block space-y-1 text-sm">
+            <span>Categoría</span>
+            <select
+              value={selectedCatId}
+              onChange={event => setSelectedCatId(event.target.value)}
+              className="h-11 w-full rounded-md border border-input bg-background px-3"
+            >
+              <option value="">Selecciona una categoría</option>
+              {inactiveInfo.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+            </select>
+          </label>
+          <label className="block space-y-1 text-sm">
+            <span>Límite</span>
+            <Input type="number" min="0.01" step="0.01" inputMode="decimal" value={amount} onChange={event => setAmount(event.target.value)} placeholder="0.00" />
+          </label>
+          <button
+            disabled={!selectedCatId || !(parseFloat(amount) > 0) || saving}
+            onClick={() => void handleSave()}
+            className="h-11 w-full rounded-md bg-primary/10 font-semibold text-primary disabled:opacity-50"
+          >
+            {saving ? 'Guardando…' : 'Guardar presupuesto'}
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -286,109 +216,182 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
 
 export default function PlanningTab() {
   const money = usePrivateCurrency();
-  const { currentMonth, currentPeriod, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
-  const [showAll, setShowAll] = useState(false);
+  const {
+    currentMonth,
+    currentPeriod,
+    periodStartDay,
+    baseIncome,
+    getTotals,
+    updateAllBudgets,
+    getBudgetStatusDetails,
+    prepareBudgetPeriod,
+    expenseCategories,
+    loading,
+  } = useFinances();
   const { planningTab, setPlanningTab } = useTabs();
+  const [showAll, setShowAll] = useState(false);
+  const [budgetPeriodKind, setBudgetPeriodKind] = useState<BudgetPeriodKind>('monthly');
+  const [oneTimeStart, setOneTimeStart] = useState(currentPeriod.start);
+  const [oneTimeEnd, setOneTimeEnd] = useState(currentPeriod.end);
 
-  const budgetDetails = useMemo(() => getBudgetStatusDetails(currentMonth), [currentMonth, getBudgetStatusDetails]);
+  useEffect(() => {
+    setOneTimeStart(currentPeriod.start);
+    setOneTimeEnd(currentPeriod.end);
+  }, [currentPeriod.start, currentPeriod.end]);
 
-  // Handle single budget save
+  const budgetPeriod = useMemo<BudgetPeriodRange | null>(() => {
+    try {
+      const oneTime = budgetPeriodKind === 'one_time' ? { start: oneTimeStart, end: oneTimeEnd } : undefined;
+      const anchor = budgetPeriodKind === 'one_time' ? oneTimeStart : currentPeriod.end;
+      return currentBudgetRange(anchor, budgetPeriodKind, { periodStartDay }, oneTime);
+    } catch {
+      return null;
+    }
+  }, [budgetPeriodKind, oneTimeStart, oneTimeEnd, currentPeriod.end, periodStartDay]);
+
+  useEffect(() => {
+    if (budgetPeriod) void prepareBudgetPeriod(budgetPeriod);
+  }, [budgetPeriod, prepareBudgetPeriod]);
+
+  const budgetDetails = useMemo(
+    () => budgetPeriod ? getBudgetStatusDetails(currentMonth, budgetPeriod) : [],
+    [currentMonth, budgetPeriod, getBudgetStatusDetails],
+  );
+
   const handleSaveBudget = async (categoryId: string, limitValue: number) => {
-    return updateAllBudgets(currentMonth, [{ categoryId, limit: limitValue }]);
+    if (!budgetPeriod) return false;
+    return updateAllBudgets(currentMonth, [{ categoryId, limit: limitValue }], budgetPeriod);
   };
 
   const { active, inactive } = useMemo(() => {
-      const activeIds = new Set<string>();
-      const inactiveIds = new Set<string>();
-
-      Array.from(new Set([...expenseCategories, ...budgetDetails.filter(b => b.limit > 0 || b.spent > 0).map(b => b.categoryId)])).forEach(catId => {
-          const detail = budgetDetails.find(b => b.categoryId === catId);
-          if ((detail?.limit ?? 0) > 0 || (detail?.spent ?? 0) > 0) {
-              activeIds.add(catId);
-          } else {
-              inactiveIds.add(catId);
-          }
-      });
-      return { active: Array.from(activeIds), inactive: Array.from(inactiveIds) };
+    const activeIds = new Set<string>();
+    const inactiveIds = new Set<string>();
+    for (const categoryId of new Set([...expenseCategories, ...budgetDetails.map(detail => detail.categoryId)])) {
+      const detail = budgetDetails.find(item => item.categoryId === categoryId);
+      if ((detail?.limit ?? 0) > 0 || (detail?.spent ?? 0) > 0) activeIds.add(categoryId);
+      else inactiveIds.add(categoryId);
+    }
+    return { active: Array.from(activeIds), inactive: Array.from(inactiveIds) };
   }, [expenseCategories, budgetDetails]);
 
   const displayedCategories = showAll ? [...active, ...inactive] : active;
+  const monthlyTotals = getTotals(currentMonth);
 
   return (
     <div className="space-y-6 pb-24 md:pb-8">
-      <PageHeader
-        title="Plan"
-        description={<>Presupuestos, metas y movimientos planificados · {formatPeriodRange(currentPeriod)}</>}
-      />
+      <PageHeader title="Plan" description={<>Presupuestos, metas y movimientos planificados · {formatPeriodRange(currentPeriod)}</>} />
 
       <Tabs value={planningTab} onValueChange={value => setPlanningTab(value as typeof planningTab)} className="w-full">
-        <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
+        <TabsList className="mb-6 flex w-full justify-start gap-1 overflow-x-auto pb-2 sm:justify-center sm:pb-0">
           {PLAN_SECTIONS.map(section => (
-            <TabsTrigger key={section.value} value={section.value} className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">
+            <TabsTrigger key={section.value} value={section.value} className="shrink-0 whitespace-nowrap text-xs">
               {section.label}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {/* --- METAS TAB --- */}
-        <TabsContent value="goals" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-           <GoalsManager />
+        <TabsContent value="goals" className="space-y-4">
+          <GoalsManager />
         </TabsContent>
 
-        {/* --- PRESUPUESTOS TAB --- */}
-        <TabsContent value="budgets" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <div className="rounded-xl border p-4 space-y-2"><div className="flex flex-wrap gap-x-6 gap-y-2 text-sm"><p>Ingreso previsto: <strong>{money(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p><p>Ingresos registrados: <strong>{money(getTotals(currentMonth).recordedIncome)}</strong></p><p>Margen del período tras reservas: <strong>{money(getTotals(currentMonth).monthlyPlanningMargin)}</strong></p></div><p className="text-xs text-muted-foreground">La previsión se configura en Ajustes y no se suma al cobro real. El margen resta gastos, presupuestos pendientes, aportes a metas y ahorro sugerido; no es el saldo de tus cuentas.</p></div>
-            <Card>
-                <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
-                    <div className="space-y-1">
-                        <CardTitle className="text-lg">Límites de Gasto</CardTitle>
-                        <CardDescription>
-                            Tus presupuestos se guardan automáticamente al editar.
-                        </CardDescription>
-                    </div>
-                    {/* Wrapped to prevent squash */}
-                    <div className="shrink-0 w-full sm:w-auto flex justify-end">
-                        <TransferDialog />
-                    </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    {loading ? (
-                        <div className="space-y-3">
-                            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}
-                        </div>
-                    ) : (
-                    <>
-                    <div className="flex flex-col gap-3">
-                    {displayedCategories.map(catId => {
-                        const detail = budgetDetails.find(b => b.categoryId === catId);
-                        return (
-                            <BudgetItem
-                                key={`${currentMonth}-${catId}`}
-                                categoryId={catId}
-                                currentPlan={detail?.limit ?? 0}
-                                spent={detail?.spent ?? 0}
-                                onSave={(val) => handleSaveBudget(catId, val)}
-                            />
-                        )
-                    })}
-                    </div>
-                    {/* Fixed 'New Budget' UX */}
-                    <NewBudgetDialog inactiveCategories={inactive} onSave={handleSaveBudget} />
-                    </>
+        <TabsContent value="budgets" className="space-y-4">
+          {budgetPeriodKind === 'monthly' && (
+            <div className="space-y-2 rounded-xl border p-4">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                <p>Ingreso previsto: <strong>{money(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p>
+                <p>Ingresos registrados: <strong>{money(monthlyTotals.recordedIncome)}</strong></p>
+                <p>Margen del período tras reservas: <strong>{money(monthlyTotals.monthlyPlanningMargin)}</strong></p>
+              </div>
+              <p className="text-xs text-muted-foreground">Este margen pertenece al período financiero mensual. Los presupuestos semanales, anuales y únicos mantienen su propio rango.</p>
+            </div>
+          )}
+
+          <Card>
+            <CardHeader className="space-y-4">
+              <div>
+                <CardTitle>Presupuestos 2.0</CardTitle>
+                <CardDescription>Un solo motor de rangos para límites semanales, mensuales, anuales y únicos.</CardDescription>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Tipo de período del presupuesto">
+                {BUDGET_PERIODS.map(option => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={budgetPeriodKind === option.value}
+                    onClick={() => setBudgetPeriodKind(option.value)}
+                    className={cn(
+                      'min-h-11 rounded-lg border px-3 text-sm font-medium',
+                      budgetPeriodKind === option.value ? 'border-primary/40 bg-primary/10 text-primary' : 'text-muted-foreground',
                     )}
-                </CardContent>
-            </Card>
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              {budgetPeriodKind === 'one_time' && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <label className="space-y-1 text-sm"><span>Inicio</span><Input type="date" value={oneTimeStart} onChange={event => setOneTimeStart(event.target.value)} /></label>
+                  <label className="space-y-1 text-sm"><span>Fin</span><Input type="date" value={oneTimeEnd} onChange={event => setOneTimeEnd(event.target.value)} /></label>
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/30 p-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Rango:</span>{' '}
+                  <strong>{budgetPeriod ? formatPeriodRange(budgetPeriod) : 'Selecciona un rango válido'}</strong>
+                </div>
+                {budgetPeriod && <TransferDialog budgetPeriod={budgetPeriod} />}
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              {!budgetPeriod ? (
+                <p role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm text-destructive">La fecha inicial debe ser igual o anterior a la final.</p>
+              ) : loading ? (
+                <div className="space-y-3">{[...Array(4)].map((_, index) => <Skeleton key={index} className="h-36 w-full rounded-xl" />)}</div>
+              ) : (
+                <>
+                  <div className="space-y-3">
+                    {displayedCategories.map(categoryId => {
+                      const detail = budgetDetails.find(item => item.categoryId === categoryId);
+                      return (
+                        <BudgetItem
+                          key={`${budgetPeriod.id}-${categoryId}`}
+                          categoryId={categoryId}
+                          currentPlan={detail?.limit ?? 0}
+                          spent={detail?.spent ?? 0}
+                          remaining={detail?.remaining ?? 0}
+                          percentage={detail?.percentage ?? 0}
+                          budgetStatus={detail?.status ?? 'unbudgeted'}
+                          onSave={value => handleSaveBudget(categoryId, value)}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {active.length === 0 && !showAll && (
+                    <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
+                      No hay límites configurados en este rango. Añade un presupuesto o muestra todas las categorías.
+                    </div>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <button type="button" className="min-h-11 rounded-md border px-3 text-sm" onClick={() => setShowAll(value => !value)}>
+                      {showAll ? 'Ocultar categorías sin presupuesto' : 'Mostrar todas las categorías'}
+                    </button>
+                  </div>
+                  <NewBudgetDialog inactiveCategories={inactive} onSave={handleSaveBudget} />
+                </>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* --- SUSCRIPCIONES TAB --- */}
-        <TabsContent value="subscriptions" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <Card>
-                <CardContent className="pt-6">
-                    <SubscriptionsManager />
-                </CardContent>
-            </Card>
+        <TabsContent value="subscriptions" className="space-y-4">
+          <Card><CardContent className="pt-6"><SubscriptionsManager /></CardContent></Card>
         </TabsContent>
-
       </Tabs>
     </div>
   );
