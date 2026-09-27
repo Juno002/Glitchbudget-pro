@@ -77,7 +77,7 @@ test('confirming an expense occurrence creates one actual transaction and is ide
 
   const second = await confirmPlannedOccurrence('occ-expense', { accountId:'cash', actualAmountCents:9999 });
   assert.equal(second.alreadyConfirmed, true);
-  assert.equal(await db.expenses.where('recurringRuleId').equals('rule').filter(e => e.id === 'actual:occ-expense').count(), 1);
+  assert.equal(await db.expenses.filter(e => e.recurringRuleId === 'rule' && e.id === 'actual:occ-expense').count(), 1);
   assert.deepEqual(await septemberMetrics(), afterFirst);
 });
 
