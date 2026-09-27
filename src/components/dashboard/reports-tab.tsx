@@ -13,6 +13,7 @@ import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import MonthlyResultChart from "./charts/monthly-result-chart";
+import { PageHeader } from '@/components/finance-ui';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const getCategoryInfo = useCategoryResolver();
@@ -388,7 +389,7 @@ export default function ReportsTab() {
 
   return (
     <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Reportes</h2>
+        <PageHeader title="Reportes" description="Analiza resultados, tendencias, deuda y presupuestos sin mezclarlo con las tareas diarias." />
         <MonthlyResultChart />
         <MonthlyComparisonTable />
         <CreditCardStatusReport />
