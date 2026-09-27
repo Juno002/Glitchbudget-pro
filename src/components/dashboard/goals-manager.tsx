@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useFinances } from '@/contexts/finance-context';
 import { Target, Trash2, PlusCircle, Brain, Calendar, Repeat } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -40,6 +41,7 @@ const contributionSchema = z.object({
 type ContributionFormValues = z.infer<typeof contributionSchema>;
 
 function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => Promise<boolean> }) {
+    const money = usePrivateCurrency();
     const [open, setOpen] = useState(false);
     const { getDisposable } = useFinances();
     const { toast } = useToast();
@@ -54,7 +56,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
         if ((data.amount * 100) > disposable) {
             toast({
                 title: 'Saldo disponible superado',
-                description: `Estás intentando aportar más de tu disponible mensual de ${formatCurrency(disposable)}.`,
+                description: `Estás intentando aportar más de tu disponible mensual de ${money(disposable)}.`,
                 variant: 'destructive',
             });
             return;
@@ -74,7 +76,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
 
         toast({
             title: willBeCompleted ? '¡Meta Completada! 🎉' : '¡Aporte Exitoso!',
-            description: `Has sumado ${formatCurrency(addedCents)} a "${goal.name}".`
+            description: `Has sumado ${money(addedCents)} a "${goal.name}".`
         });
         form.reset();
         setOpen(false);
@@ -89,8 +91,8 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle>Aportar a &quot;{goal.name}&quot;</DialogTitle>
                     <DialogDescription>
-                        Planificado: {formatCurrency(goal.quota)}/mes<br/>
-                        Disponible general: {formatCurrency(disposable)}
+                        Planificado: {money(goal.quota)}/mes<br/>
+                        Disponible general: {money(disposable)}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="px-6 pb-6">
@@ -131,6 +133,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
 
 
 export default function GoalsManager() {
+  const money = usePrivateCurrency();
   const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -228,8 +231,8 @@ export default function GoalsManager() {
                                 {/* Progress Section */}
                                 <div className="flex-1 w-full space-y-1.5">
                                     <div className="flex justify-between text-sm">
-                                        <span className="font-medium text-foreground">{formatCurrency(goal.saved)}</span>
-                                        <span className="text-muted-foreground text-xs">de {formatCurrency(goal.target)} ({progress.toFixed(1)}%)</span>
+                                        <span className="font-medium text-foreground">{money(goal.saved)}</span>
+                                        <span className="text-muted-foreground text-xs">de {money(goal.target)} ({progress.toFixed(1)}%)</span>
                                     </div>
                                     <Progress 
                                         value={progress} 
@@ -243,12 +246,12 @@ export default function GoalsManager() {
                                         {goal.status === 'completed' ? (
                                              <span className="font-semibold text-primary">¡Meta Completada! 🎉</span>
                                         ) : (
-                                            <span>Restan {formatCurrency(remaining)}</span>
+                                            <span>Restan {money(remaining)}</span>
                                         )}
                                         {goal.quota > 0 && goal.status === 'active' && (
                                             <span className="flex items-center gap-1">
                                                 <Repeat className="h-3 w-3"/>
-                                                {formatCurrency(goal.quota)}/mes
+                                                {money(goal.quota)}/mes
                                             </span>
                                         )}
                                     </div>
@@ -381,7 +384,7 @@ export default function GoalsManager() {
                                             <FormLabel className="text-xs">Plan Sugerido</FormLabel>
                                             {disposable > 0 && (
                                                 <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                                    Libre: {formatCurrency(disposable)}
+                                                    Libre: {money(disposable)}
                                                 </span>
                                             )}
                                         </div>
@@ -411,7 +414,7 @@ export default function GoalsManager() {
                                                     </div>
                                                     {viable && (
                                                         <div className="font-bold shrink-0">
-                                                            {formatCurrency(monthly)}<span className="text-[10px] font-normal opacity-70">/m</span>
+                                                            {money(monthly)}<span className="text-[10px] font-normal opacity-70">/m</span>
                                                         </div>
                                                     )}
                                                 </button>
@@ -439,7 +442,7 @@ export default function GoalsManager() {
                                                         </div>
                                                     </div>
                                                     <div className="font-bold shrink-0">
-                                                        {formatCurrency(requiredByDeadline.monthlyRequired)}<span className="text-[10px] font-normal opacity-70">/m</span>
+                                                        {money(requiredByDeadline.monthlyRequired)}<span className="text-[10px] font-normal opacity-70">/m</span>
                                                     </div>
                                                 </button>
                                             )}
