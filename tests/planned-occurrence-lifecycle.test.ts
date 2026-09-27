@@ -244,7 +244,7 @@ test('editing a confirmed actual keeps the occurrence link and scheduled date', 
 test('direct deletion of a confirmed actual is blocked for both expenses and incomes', async () => {
   await addPendingOccurrence({ id:'occ-delete-expense', ruleId:'rule', scheduledDate:'2026-09-15' });
   const expense = await confirmPlannedOccurrence('occ-delete-expense', { accountId:'bank' });
-  await assert.rejects(removeExpense(expense.transactionId), /Deshaz la confirmación/);
+  await assert.rejects(removeExpense(expense.transactionId), /no puede eliminarse directamente/);
   assert.ok(await db.expenses.get(expense.transactionId));
 
   await saveRecurringRule({
@@ -253,7 +253,7 @@ test('direct deletion of a confirmed actual is blocked for both expenses and inc
   });
   await addPendingOccurrence({ id:'occ-delete-income', ruleId:'income-delete-rule', scheduledDate:'2026-09-15' });
   const income = await confirmPlannedOccurrence('occ-delete-income', { accountId:'bank' });
-  await assert.rejects(removeIncome(income.transactionId), /Deshaz la confirmación/);
+  await assert.rejects(removeIncome(income.transactionId), /no puede eliminarse directamente/);
   assert.ok(await db.incomes.get(income.transactionId));
 });
 
@@ -268,6 +268,27 @@ test('rule deletion and direction changes are blocked while pending occurrences 
   await removeRecurringRule('rule');
   assert.equal(await db.recurrents.get('rule'), undefined);
   assert.equal((await db.planned_occurrences.get('occ-rule-integrity'))?.status, 'skipped');
+});
+
+test('rule direction remains immutable after a confirmed occurrence too', async () => {
+  await addPendingOccurrence({ id:'occ-direction', ruleId:'rule', scheduledDate:'2026-09-15' });
+  await confirmPlannedOccurrence('occ-direction', { accountId:'bank' });
+  const current = (await db.recurrents.get('rule'))!;
+  await assert.rejects(
+    saveRecurringRule({ ...current, direction:'income', categoryId:'salary' }, true),
+    /ocurrencias materializadas/,
+  );
+});
+
+test('backup rejects an orphaned pending occurrence before replacing data', async () => {
+  await addPendingOccurrence({ id:'occ-orphan-backup', ruleId:'rule', scheduledDate:'2026-09-15' });
+  const backup = JSON.parse(await exportDataJSON());
+  backup.recurrents = backup.recurrents.filter((row: {id:string}) => row.id !== 'rule');
+  backup.settings.savePct = 0.66;
+  const beforePct = (await db.settings.get('general'))?.savePct;
+  await assert.rejects(importDataJSON(JSON.stringify(backup)), /pendiente sin su regla/);
+  assert.equal((await db.settings.get('general'))?.savePct, beforePct);
+  assert.ok(await db.recurrents.get('rule'));
 });
 
 test('backup v7 validates confirmed links and round-trips a valid confirmation', async () => {
