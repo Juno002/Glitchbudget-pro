@@ -83,7 +83,7 @@ Limitación deliberada: las plantillas son configuración local del Quick Add y 
 
 ## Definition of Done
 
-Gate final: GitHub Actions `Quality checks` run **318**.
+Gate final previo al merge: GitHub Actions `Quality checks` run **322**.
 
 ```text
 npm run check  ✓
