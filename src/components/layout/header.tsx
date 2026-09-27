@@ -22,60 +22,60 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-10 flex h-auto items-center gap-4 border-b bg-background/80 px-4 py-2 backdrop-blur-sm md:px-6">
-        <div className="flex w-full flex-wrap items-center gap-2">
-          <div className="mr-auto flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-[hsl(var(--primary)_/_0.08)] px-3 py-1.5 text-primary shadow-[0_0_15px_hsl(var(--primary)_/_0.1)] transition-all hover:bg-primary/10">
-                <span className="text-lg" aria-hidden="true">💰</span>
-                <span className="font-syne font-bold tracking-wide">GlitchBudget Pro</span>
-              </div>
-            </Link>
-          </div>
-
-          <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 pt-2 sm:w-auto sm:pt-0">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <label htmlFor="period-picker" className="hidden text-sm text-muted-foreground md:inline">Período</label>
-              <div className="relative h-9 min-w-0 w-[104px] rounded-full border border-input bg-background focus-within:ring-2 focus-within:ring-ring sm:w-[145px]">
-                <span aria-hidden="true" className="pointer-events-none flex h-full items-center justify-center px-2 text-[10px] capitalize sm:text-xs">
-                  {formatPeriodRange(currentPeriod)}
-                </span>
-                <Input
-                  id="period-picker"
-                  type="month"
-                  value={currentMonth}
-                  onChange={e => { if (e.target.value) setCurrentMonth(e.target.value); }}
-                  aria-label="Período financiero"
-                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                />
-              </div>
-              <Button
-                variant="outline"
-                className="h-9 px-2 text-xs sm:text-sm"
-                onClick={() => setCurrentMonth(periodContaining(localDate(), { periodStartDay }).id)}
-              >
-                Período actual
-              </Button>
+      <header className="sticky top-0 z-10 border-b bg-background/80 px-4 py-2 backdrop-blur-sm md:px-6">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">
+          <Link href="/" className="flex min-w-0 items-center gap-2">
+            <div className="flex min-w-0 items-center gap-2 rounded-full border border-primary/20 bg-[hsl(var(--primary)_/_0.08)] px-3 py-1.5 text-primary shadow-[0_0_15px_hsl(var(--primary)_/_0.1)] transition-all hover:bg-primary/10">
+              <span className="text-lg" aria-hidden="true">💰</span>
+              <span className="truncate font-syne font-bold tracking-wide">GlitchBudget Pro</span>
             </div>
+          </Link>
 
+          <div className="ml-auto flex shrink-0 items-center gap-2">
             <BalanceVisibilityToggle />
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="Ver logros">
-                  <AchievementHeaderBadge />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>🏆 Logros</DialogTitle>
-                  <DialogDescription>Tu progreso y medallas desbloqueadas.</DialogDescription>
-                </DialogHeader>
-                <AchievementsDialogContent />
-              </DialogContent>
-            </Dialog>
+            <div className="hidden md:block">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="Ver logros">
+                    <AchievementHeaderBadge />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>🏆 Logros</DialogTitle>
+                    <DialogDescription>Tu progreso y medallas desbloqueadas.</DialogDescription>
+                  </DialogHeader>
+                  <AchievementsDialogContent />
+                </DialogContent>
+              </Dialog>
+            </div>
 
             <SettingsDialog />
+          </div>
+
+          <div className="order-last flex w-full min-w-0 items-center gap-2 pt-1 md:order-none md:ml-auto md:w-auto md:pt-0">
+            <label htmlFor="period-picker" className="hidden text-sm text-muted-foreground lg:inline">Período</label>
+            <div className="relative h-9 min-w-0 flex-1 rounded-full border border-input bg-background focus-within:ring-2 focus-within:ring-ring md:w-[150px] md:flex-none">
+              <span aria-hidden="true" className="pointer-events-none flex h-full items-center justify-center px-2 text-[10px] capitalize sm:text-xs">
+                {formatPeriodRange(currentPeriod)}
+              </span>
+              <Input
+                id="period-picker"
+                type="month"
+                value={currentMonth}
+                onChange={e => { if (e.target.value) setCurrentMonth(e.target.value); }}
+                aria-label="Período financiero"
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+            </div>
+            <Button
+              variant="outline"
+              className="h-9 shrink-0 px-2 text-xs sm:text-sm"
+              onClick={() => setCurrentMonth(periodContaining(localDate(), { periodStartDay }).id)}
+            >
+              Período actual
+            </Button>
           </div>
         </div>
       </header>
