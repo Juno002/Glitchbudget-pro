@@ -101,6 +101,7 @@ export interface RecurringRule {
   title: string;
   categoryId: string;
   amount: number;              // centavos, positivo
+  defaultAccountId?: string;   // cuenta sugerida al confirmar
   cadence: 'weekly' | 'biweekly' | 'monthly';
   day?: number;                // monthly preferred day 1..31; weekly/biweekly scheduling ignores this legacy field
   startDate: string;           // YYYY-MM-DD
@@ -115,7 +116,7 @@ export interface PlannedOccurrence {
   ruleId: string;
   scheduledDate: string; // YYYY-MM-DD
   status: PlannedOccurrenceStatus;
-  /** Present only after a future lifecycle step links this occurrence to an actual movement. */
+  /** Present only when a confirmed occurrence is linked to its actual movement. */
   transactionId?: string;
 }
 
