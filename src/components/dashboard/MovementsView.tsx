@@ -12,7 +12,7 @@ import type { Expense, Income } from '@/lib/db';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+import { EmptyState } from '@/components/finance-ui';
 import { TrendingUp, TrendingDown, Pin } from 'lucide-react';
 import TransactionModal from './TransactionModal';
 
@@ -160,9 +160,10 @@ export default function MovementsView() {
 
       {/* Items list */}
       {items.length === 0 ? (
-        <Card className="flex items-center justify-center p-8 text-center text-sm text-muted-foreground">
-          No hay movimientos registrados que coincidan con estos filtros.
-        </Card>
+        <EmptyState
+          title="No hay movimientos"
+          description="No hay movimientos registrados que coincidan con estos filtros."
+        />
       ) : (
         <div className="space-y-1.5">
           {items.map(item => {
