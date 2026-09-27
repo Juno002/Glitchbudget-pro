@@ -40,9 +40,11 @@ export function ProgressMetric({
         status === 'warning' && '[&>div]:bg-warning',
         (status === 'success' || status === 'confirmed') && '[&>div]:bg-good',
       )} />
-      <div className="flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-        <span><MoneyValue amount={current} className="text-xs" /> de <MoneyValue amount={total} className="text-xs" /></span>
-        {remaining !== undefined ? <span>Restante: <MoneyValue amount={remaining} className="text-xs font-semibold" /></span> : null}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-4">
+        <span>Gastado: <MoneyValue amount={current} className="text-xs font-semibold" /></span>
+        <span>Límite: <MoneyValue amount={total} className="text-xs font-semibold" /></span>
+        {remaining !== undefined ? <span>Restante: <MoneyValue amount={remaining} className="text-xs font-semibold" /></span> : <span>Restante: —</span>}
+        <span>Porcentaje: <strong className="tabular-nums text-foreground">{Math.round(total > 0 ? (current / total) * 100 : 0)}%</strong></span>
       </div>
     </div>
   );
