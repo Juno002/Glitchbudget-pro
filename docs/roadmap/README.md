@@ -1,5 +1,9 @@
 # Roadmap: documentación vigente
 
+## Fase 8 — completada
+
+Fase 8 — Quick Add 2.0 está cerrada contra `Roadmap septiembre 2026.txt`. El cierre y la Definition of Done están en [phase-8.md](phase-8.md). La siguiente fase del orden canónico es **Fase 9 — Budgets 2.0**, pero no se inicia automáticamente.
+
 ## Fase 7.5 — completada y aprobada
 
 El usuario revisó y aprobó el Gate 7.5 el **2026-09-27**. La siguiente fase habilitada es **Fase 8 — Quick Add 2.0**, que mejora `TransactionModal` y conserva el compositor único. Esta limpieza documental no implementa Fase 8.
