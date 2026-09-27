@@ -1,11 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { EmptyState, ProgressMetric } from '@/components/finance-ui';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency } from '@/lib/utils';
-import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 
 export default function BudgetStatus() {
@@ -49,35 +47,27 @@ export default function BudgetStatus() {
               const category = getCategoryInfo(budget.categoryId);
               if (!category) return null;
               
-              const progress = Math.min((budget.spent / budget.limit) * 100, 100);
+              const status = budget.status === 'over' ? 'danger' : budget.status === 'alert' ? 'warning' : 'success';
+              const statusLabel = budget.status === 'over' ? 'Excedido' : budget.status === 'alert' ? 'Cerca del límite' : 'En presupuesto';
 
               return (
-                <div key={budget.categoryId}>
-                  <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                      <category.icon className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{category.name}</span>
-                    </div>
-                    <div className="text-sm">
-                      <span className={cn("font-semibold", budget.status === 'over' ? "text-destructive" : "text-foreground")}>
-                        {formatCurrency(budget.spent)}
-                      </span>
-                      <span className="text-muted-foreground"> / {formatCurrency(budget.limit)}</span>
-                    </div>
-                  </div>
-                  <Progress 
-                    value={progress} 
-                    className={cn('h-2', 
-                      budget.status === 'over' ? '[&>div]:bg-destructive' :
-                      budget.status === 'alert' ? '[&>div]:bg-yellow-500' : ''
-                    )}
-                  />
-                </div>
+                <ProgressMetric
+                  key={budget.categoryId}
+                  label={<span className="inline-flex items-center gap-2"><category.icon className="h-4 w-4 text-muted-foreground" />{category.name}</span>}
+                  current={budget.spent}
+                  total={budget.limit}
+                  remaining={budget.limit - budget.spent}
+                  status={status}
+                  statusLabel={statusLabel}
+                />
               );
             })}
           </div>
         ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No hay presupuestos definidos para este período. Ve a Planificación para añadir algunos.</p>
+            <EmptyState
+              title="Aún no tienes presupuestos"
+              description="Ve a Plan → Presupuestos para definir límites y ver cuánto te queda en cada categoría."
+            />
         )}
       </CardContent>
     </Card>
