@@ -71,6 +71,9 @@ export default function SummaryTab() {
     goals,
     incomes,
     expenses,
+    debtPayments,
+    goalContributions,
+    accountTransfers,
   } = useFinances();
   const { setActiveTab, setPlanningTab } = useTabs();
   const getCategoryInfo = useCategoryResolver();
@@ -100,9 +103,12 @@ export default function SummaryTab() {
     const rows = [
       ...(incomes || []).map(row => ({ id:row.id, kind:'income' as const, title:row.description || 'Ingreso', amount:row.amount, date:row.date, categoryId:row.categoryId })),
       ...(expenses || []).map(row => ({ id:row.id, kind:'expense' as const, title:row.concept || 'Gasto', amount:row.amount, date:row.date, categoryId:row.categoryId })),
+      ...(accountTransfers || []).map(row => ({ id:row.id, kind:'transfer' as const, title:row.note || 'Transferencia', amount:row.amount, date:row.date, categoryId:'' })),
+      ...(debtPayments || []).map(row => ({ id:row.id, kind:'payment' as const, title:'Pago de tarjeta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
+      ...(goalContributions || []).map(row => ({ id:row.id, kind:'saving' as const, title:'Aporte a meta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
     ];
     return rows.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, 5);
-  }, [incomes, expenses]);
+  }, [incomes, expenses, accountTransfers, debtPayments, goalContributions]);
 
   return (
     <div className="space-y-7">
@@ -224,17 +230,19 @@ export default function SummaryTab() {
         {recent.length ? (
           <div className="space-y-2">
             {recent.map(item => {
-              const category = getCategoryInfo(item.categoryId);
+              const category = item.categoryId ? getCategoryInfo(item.categoryId) : undefined;
               const Icon = category?.icon;
+              const tone = item.kind === 'income' ? 'positive' : item.kind === 'expense' ? 'negative' : 'neutral';
+              const meta = category?.name || (item.kind === 'transfer' ? 'Transferencia entre cuentas' : item.kind === 'payment' ? 'Reduce deuda; no repite el gasto' : item.kind === 'saving' ? 'Seguimiento de meta' : undefined);
               return (
                 <TransactionRow
                   key={`${item.kind}-${item.id}`}
                   title={item.title}
-                  meta={category?.name}
+                  meta={meta}
                   amount={item.amount}
-                  tone={item.kind === 'income' ? 'positive' : 'negative'}
+                  tone={tone}
                   dateLabel={dateLabel(item.date)}
-                  icon={Icon ? <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', item.kind === 'income' ? 'bg-good/10 text-good' : 'bg-bad/10 text-bad')}><Icon className="h-4 w-4" /></div> : undefined}
+                  icon={Icon ? <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', item.kind === 'income' ? 'bg-good/10 text-good' : item.kind === 'expense' ? 'bg-bad/10 text-bad' : 'bg-muted/20 text-muted-foreground')}><Icon className="h-4 w-4" /></div> : undefined}
                   onClick={() => setActiveTab('movements')}
                 />
               );
