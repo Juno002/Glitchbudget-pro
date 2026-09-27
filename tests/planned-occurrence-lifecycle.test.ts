@@ -16,6 +16,7 @@ import { removeExpense, removeIncome, saveExpense } from '../src/lib/transaction
 import { removeRecurringRule, saveRecurringRule } from '../src/lib/recurring-rule-service';
 import { readAccountSnapshot } from '../src/lib/accounts';
 import { selectMonthlyMetrics } from '../src/domain/metrics';
+import { selectPosition } from '../src/domain/ledger';
 
 const fixture = JSON.parse(readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'));
 
@@ -114,6 +115,36 @@ test('budget warning aborts both the actual movement and occurrence state until 
   await confirmPlannedOccurrence('occ-warning', { accountId:'bank', budgetConfirmation:token });
   assert.ok(await db.expenses.get('actual:occ-warning'));
   assert.equal((await db.planned_occurrences.get('occ-warning'))?.status, 'confirmed');
+});
+
+test('account protection aborts confirmation atomically when real funds are insufficient', async () => {
+  await db.settings.update('general', { budgetOverspendingBehavior:'allow', preventNegativeAccountBalance:true });
+  await addPendingOccurrence({ id:'occ-no-funds', ruleId:'rule', scheduledDate:'2026-09-15' });
+  await assert.rejects(
+    confirmPlannedOccurrence('occ-no-funds', { accountId:'cash', actualAmountCents:500000 }),
+    /fondos|saldo|déficit/i,
+  );
+  assert.equal(await db.expenses.get('actual:occ-no-funds'), undefined);
+  assert.equal((await db.planned_occurrences.get('occ-no-funds'))?.status, 'pending');
+});
+
+test('credit-card confirmation increases spending and liability without reducing liquid cash', async () => {
+  await db.settings.update('general', { budgetOverspendingBehavior:'allow' });
+  await addPendingOccurrence({ id:'occ-credit', ruleId:'rule', scheduledDate:'2026-09-15' });
+  const beforeRows = await readAccountSnapshot();
+  const beforePosition = selectPosition(await db.accounts.toArray(), await db.debts.toArray(), beforeRows, '2026-09-30');
+  const beforeMetrics = await septemberMetrics();
+
+  await confirmPlannedOccurrence('occ-credit', { paymentMethod:'credit', debtId:'card', actualAmountCents:5000 });
+
+  const afterRows = await readAccountSnapshot();
+  const afterPosition = selectPosition(await db.accounts.toArray(), await db.debts.toArray(), afterRows, '2026-09-30');
+  const afterMetrics = await septemberMetrics();
+  assert.equal(afterPosition.liquidAssets, beforePosition.liquidAssets);
+  assert.equal(afterPosition.liabilities, beforePosition.liabilities + 5000);
+  assert.equal(afterPosition.netWorth, beforePosition.netWorth - 5000);
+  assert.equal(afterMetrics.spending, beforeMetrics.spending + 5000);
+  assert.equal((await db.expenses.get('actual:occ-credit'))?.accountId, undefined);
 });
 
 test('inactive source rules can confirm already-materialized occurrences', async () => {
