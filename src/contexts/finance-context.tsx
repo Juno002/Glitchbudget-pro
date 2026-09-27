@@ -770,7 +770,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const skipPlannedOccurrenceItem = useCallback(async (id: string) => {
     try {
       await skipPlannedOccurrence(id);
-      toast({ title: 'Pago planificado omitido' });
+      toast({ title: 'Planificación omitida' });
       return true;
     } catch (error) {
       toast({ title: 'No se pudo omitir', description: friendlyError(error), variant: 'destructive' });
