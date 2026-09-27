@@ -321,7 +321,7 @@ export default function PlanningTab() {
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
           <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
           <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
-          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Suscripciones</TabsTrigger>
+          <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Planificados</TabsTrigger>
           <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Tarjetas</TabsTrigger>
         </TabsList>
 
