@@ -1,5 +1,7 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
 import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
 import { previousComparablePeriod } from '@/domain/periods';
@@ -7,14 +9,16 @@ import { formatPeriodRange } from '@/lib/period-format';
 import { useFinances } from "@/contexts/finance-context";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { formatCurrency, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Progress } from "../ui/progress";
 import { useMemo } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
+import { DonutChart } from './category-charts';
 import MonthlyResultChart from "./charts/monthly-result-chart";
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
     const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
     return (
@@ -49,6 +53,7 @@ const BreakdownTable = ({ title, data }: { title: string, data: { name: string, 
 }
 
 const MonthlyComparisonTable = () => {
+  const formatCurrency = useMoneyFormatter();
     const { getTotals, currentMonth, currentPeriod, periodStartDay } = useFinances();
 
     const { previousPeriod, currentTotals, prevTotals } = useMemo(() => {
@@ -107,6 +112,7 @@ const MonthlyComparisonTable = () => {
 }
 
 const ExpenseByTypeTable = () => {
+  const formatCurrency = useMoneyFormatter();
     const { getExpensesByType, currentMonth } = useFinances();
     const data = getExpensesByType(currentMonth);
 
@@ -144,6 +150,7 @@ const ExpenseByTypeTable = () => {
 }
 
 const BudgetStatusReport = () => {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
     const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
@@ -267,6 +274,7 @@ const BudgetStatusReport = () => {
 }
 
 const CreditCardStatusReport = () => {
+  const formatCurrency = useMoneyFormatter();
     const { debts, debtPayments, expenses } = useFinances();
     const activeCards = (debts || []).filter(d => d.type === 'credit_card' && d.status === 'active');
 
@@ -390,6 +398,7 @@ export default function ReportsTab() {
     <div className="space-y-6">
         <h2 className="text-2xl font-bold">Reportes</h2>
         <MonthlyResultChart />
+        <div className="grid gap-4 lg:grid-cols-2"><DonutChart title="Gastos" data={expenseData} /><DonutChart title="Ingresos" data={incomeData} /></div>
         <MonthlyComparisonTable />
         <CreditCardStatusReport />
         <BudgetStatusReport />

@@ -1,5 +1,7 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
 import { recordedExpenseForMonth as expenseForMonth } from '@/lib/finance-calculations';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
@@ -7,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { useState, useMemo, useEffect } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { Expense, Income } from '@/lib/db';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,6 +31,7 @@ type UnifiedItem = {
 };
 
 export default function MovementsView() {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   const { incomes, expenses, currentMonth, debtPayments, debts, goalContributions, goals } = useFinances();
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useFinances } from '@/contexts/finance-context';
 import { Target, Trash2, PlusCircle, Brain, Calendar, Repeat } from 'lucide-react';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { Progress } from '../ui/progress';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
@@ -40,6 +42,7 @@ const contributionSchema = z.object({
 type ContributionFormValues = z.infer<typeof contributionSchema>;
 
 function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => Promise<boolean> }) {
+  const formatCurrency = useMoneyFormatter();
     const [open, setOpen] = useState(false);
     const { getDisposable } = useFinances();
     const { toast } = useToast();
@@ -131,6 +134,7 @@ function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribu
 
 
 export default function GoalsManager() {
+  const formatCurrency = useMoneyFormatter();
   const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);

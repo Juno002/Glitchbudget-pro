@@ -1,15 +1,20 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
+import { StatusBadge } from '@/components/ui/financial-patterns';
+import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
+import TransactionModal from './TransactionModal';
 import { AccountSelect } from './account-select';
 import { localDate } from '@/lib/finance-calculations';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, CheckCircle2, CirclePause, CirclePlay, Clock3, Plus, SkipForward } from 'lucide-react';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { groupUpcomingOccurrences, type UpcomingBucket } from '@/domain/upcoming';
@@ -34,9 +39,10 @@ function dateLabel(value: string) {
 }
 
 export default function SubscriptionsManager() {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   const {
-    recurringRules,
+    recurringRules, incomes, expenses,
     plannedOccurrences,
     addRecurringRule,
     updateRecurringRule,
@@ -46,6 +52,9 @@ export default function SubscriptionsManager() {
     incomeCategories,
   } = useFinances();
 
+  const addingRef = useRef(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [historyId, setHistoryId] = useState<string | null>(null);
   const [accountOverride, setAccountOverride] = useState('');
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [workingId, setWorkingId] = useState<string | null>(null);
@@ -79,9 +88,12 @@ export default function SubscriptionsManager() {
 
   const handleAddSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (addingRef.current) return;
     const amountCents = Math.round(Number(newRule.amount) * 100);
     if (!newRule.title.trim() || amountCents <= 0 || !newRule.categoryId || !newRule.startDate) return;
 
+    addingRef.current = true; setIsAdding(true);
+    try {
     const success = await addRecurringRule({
       title: newRule.title.trim(),
       amount: amountCents,
@@ -106,6 +118,7 @@ export default function SubscriptionsManager() {
       categoryId: '',
       defaultAccountId: '',
     });
+    } finally { addingRef.current = false; setIsAdding(false); }
   };
 
   const confirm = async (occurrence: PlannedOccurrence) => {
@@ -146,24 +159,24 @@ export default function SubscriptionsManager() {
         <div>
           <h3 className="text-lg font-bold">Movimientos planificados</h3>
           <p className="text-sm text-muted-foreground">
-            Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un ingreso o gasto real.
+            Programa cobros y pagos. Tu saldo cambia únicamente cuando confirmas el movimiento.
           </p>
         </div>
 
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <Dialog open={isAddOpen} onOpenChange={open => { if (!addingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
             <Button size="sm" variant="outline" className="border-primary/30 text-primary hover:bg-primary/10">
-              <Plus className="mr-2 h-4 w-4" /> Añadir regla
+              <Plus className="mr-2 h-4 w-4" /> Nuevo planificado
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nueva planificación recurrente</DialogTitle>
+              <DialogTitle>Nueva planificación recurrente</DialogTitle><DialogDescription>Define el importe y la frecuencia. Confirmar cada cobro o pago actualizará tus cuentas.</DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleAddSubmit} className="space-y-4 pt-4">
+            <form onSubmit={handleAddSubmit} className="space-y-4 pt-4"><fieldset disabled={isAdding} className="space-y-4">
               <div className="space-y-2">
-                <Label>Nombre</Label>
-                <Input
+                <Label htmlFor="planned-nombre">Nombre</Label>
+                <Input id="planned-nombre"
                   value={newRule.title}
                   onChange={e => setNewRule({ ...newRule, title:e.target.value })}
                   placeholder="Ej. Internet, nómina"
@@ -173,13 +186,13 @@ export default function SubscriptionsManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tipo</Label>
+                  <Label htmlFor="planned-tipo">Tipo</Label>
                   <Select
                     value={newRule.direction}
                     onValueChange={(value: RecurringRule['direction']) =>
                       setNewRule({ ...newRule, direction:value, categoryId:'' })}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger id="planned-tipo"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="expense">Gasto</SelectItem>
                       <SelectItem value="income">Ingreso</SelectItem>
@@ -187,8 +200,8 @@ export default function SubscriptionsManager() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Monto (RD$)</Label>
-                  <Input
+                  <Label htmlFor="planned-monto-rd-">Monto (RD$)</Label>
+                  <Input id="planned-monto-rd-"
                     type="number"
                     min="0.01"
                     step="0.01"
@@ -203,12 +216,12 @@ export default function SubscriptionsManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Frecuencia</Label>
+                  <Label htmlFor="planned-frecuencia">Frecuencia</Label>
                   <Select
                     value={newRule.cadence}
                     onValueChange={(value: RecurringRule['cadence']) => setNewRule({ ...newRule, cadence:value })}
                   >
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger id="planned-frecuencia"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="weekly">Semanal</SelectItem>
                       <SelectItem value="biweekly">Quincenal</SelectItem>
@@ -217,8 +230,8 @@ export default function SubscriptionsManager() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Fecha inicial</Label>
-                  <Input
+                  <Label htmlFor="planned-fecha-inicial">Fecha inicial</Label>
+                  <Input id="planned-fecha-inicial"
                     type="date"
                     value={newRule.startDate}
                     onChange={e => setNewRule({ ...newRule, startDate:e.target.value })}
@@ -229,9 +242,9 @@ export default function SubscriptionsManager() {
 
               {newRule.cadence === 'monthly' && (
                 <div className="space-y-2">
-                  <Label>Día preferido</Label>
+                  <Label htmlFor="planned-dia-preferido">Día preferido</Label>
                   <Select value={newRule.day} onValueChange={day => setNewRule({ ...newRule, day })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger id="planned-dia-preferido"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {Array.from({ length:31 }, (_, index) => index + 1).map(day => (
                         <SelectItem key={day} value={String(day)}>{day}</SelectItem>
@@ -243,9 +256,9 @@ export default function SubscriptionsManager() {
               )}
 
               <div className="space-y-2">
-                <Label>Categoría</Label>
+                <Label htmlFor="planned-categoria">Categoría</Label>
                 <Select value={newRule.categoryId} onValueChange={categoryId => setNewRule({ ...newRule, categoryId })}>
-                  <SelectTrigger><SelectValue placeholder="Selecciona..." /></SelectTrigger>
+                  <SelectTrigger id="planned-categoria"><SelectValue placeholder="Selecciona..." /></SelectTrigger>
                   <SelectContent>
                     {categoryIds.map(id => {
                       const info = getCategoryInfo(id);
@@ -261,8 +274,8 @@ export default function SubscriptionsManager() {
                 label="Cuenta predeterminada al confirmar (opcional)"
               />
 
-              <Button type="submit" className="w-full">Guardar regla</Button>
-            </form>
+              <Button type="submit" className="w-full">{isAdding ? 'Guardando…' : 'Guardar regla'}</Button>
+            </fieldset></form>
           </DialogContent>
         </Dialog>
       </div>
@@ -274,7 +287,7 @@ export default function SubscriptionsManager() {
           label="Reemplazar cuenta al confirmar (opcional)"
         />
         <p className="text-xs text-muted-foreground">
-          Vacío usa la cuenta predeterminada de la regla; si tampoco existe, se utiliza Efectivo para movimientos cash/bank.
+          Vacío usa la cuenta predeterminada de la regla; si tampoco existe, se utiliza Efectivo para ingresos y gastos en cuentas.
         </p>
       </div>
 
@@ -282,14 +295,14 @@ export default function SubscriptionsManager() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h4 id="upcoming-title" className="font-semibold">Próximos movimientos</h4>
-            <p className="text-xs text-muted-foreground">{unresolvedCount} pendientes dentro de la planificación materializada.</p>
+            <p className="text-xs text-muted-foreground">{unresolvedCount} movimientos pendientes.</p>
           </div>
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
 
         {unresolvedCount === 0 ? (
           <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-            No hay ocurrencias pendientes en la ventana actual.
+            No tienes movimientos pendientes. Usa Nuevo planificado para programar uno.
           </div>
         ) : (
           GROUPS.map(group => {
@@ -310,7 +323,7 @@ export default function SubscriptionsManager() {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <Clock3 className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                          <span className="truncate font-medium">{rule.title}</span>
+                          <span className="truncate font-medium">{rule.title}</span><StatusBadge status={occurrenceDisplayStatus(occurrence, today)} />
                           <span className="text-xs text-muted-foreground">{rule.direction === 'expense' ? 'Gasto' : 'Ingreso'}</span>
                         </div>
                         <p className="mt-1 text-xs text-muted-foreground">
@@ -335,10 +348,12 @@ export default function SubscriptionsManager() {
         )}
       </section>
 
+      <details className="rounded-xl border p-4"><summary className="cursor-pointer font-medium">Historial de planificados</summary><div className="mt-3 space-y-3">{(plannedOccurrences ?? []).filter(o => o.status !== 'pending').slice().sort((a,b) => b.scheduledDate.localeCompare(a.scheduledDate)).map(o => <div key={o.id} className="flex flex-wrap items-center justify-between gap-2 border-t pt-3"><div><p>{rulesById.get(o.ruleId)?.title || 'Planificado'}</p><p className="text-xs text-muted-foreground">{dateLabel(o.scheduledDate)}</p></div><StatusBadge status={o.status} />{o.status === 'confirmed' && o.transactionId && <Button variant="outline" onClick={() => setHistoryId(o.transactionId!)}>Ver movimiento</Button>}</div>)}{!(plannedOccurrences ?? []).some(o => o.status !== 'pending') && <p className="text-sm text-muted-foreground">Aquí aparecerán los movimientos confirmados y omitidos.</p>}</div></details>
+      <TransactionModal open={!!historyId} onClose={() => setHistoryId(null)} mode="edit" editingIncome={incomes?.find(i => i.id === historyId)} editingExpense={expenses?.find(e => e.id === historyId)} />
       <section className="space-y-3" aria-labelledby="rules-title">
         <div>
           <h4 id="rules-title" className="font-semibold">Reglas recurrentes</h4>
-          <p className="text-xs text-muted-foreground">Pausar una regla detiene nuevas ocurrencias; las pendientes ya creadas se conservan.</p>
+          <p className="text-xs text-muted-foreground">Pausar una regla detiene los próximos recordatorios; los pendientes existentes se conservan.</p>
         </div>
 
         {sortedRules.length === 0 ? (

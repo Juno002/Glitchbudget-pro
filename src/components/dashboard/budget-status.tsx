@@ -1,14 +1,21 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
+import { useTabs } from '@/contexts/tabs-context';
+import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/financial-patterns';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency } from '@/lib/utils';
+
 import { cn } from '@/lib/utils';
 import { Skeleton } from '../ui/skeleton';
 
 export default function BudgetStatus() {
+  const { setActiveTab, setPlanTab } = useTabs();
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   const { getBudgetStatusDetails, currentMonth, loading } = useFinances();
 
@@ -48,7 +55,7 @@ export default function BudgetStatus() {
             {trackedBudgets.map((budget) => {
               const category = getCategoryInfo(budget.categoryId);
               if (!category) return null;
-              
+
               const progress = Math.min((budget.spent / budget.limit) * 100, 100);
 
               return (
@@ -65,9 +72,10 @@ export default function BudgetStatus() {
                       <span className="text-muted-foreground"> / {formatCurrency(budget.limit)}</span>
                     </div>
                   </div>
-                  <Progress 
-                    value={progress} 
-                    className={cn('h-2', 
+                  <p className="mb-2 text-xs text-muted-foreground">{budget.limit - budget.spent < 0 ? "Excedido" : "Restante"}: {formatCurrency(Math.abs(budget.limit - budget.spent))}</p>
+                  <Progress
+                    aria-label={`Consumo del presupuesto de ${category.name}`} value={progress}
+                    className={cn('h-2',
                       budget.status === 'over' ? '[&>div]:bg-destructive' :
                       budget.status === 'alert' ? '[&>div]:bg-yellow-500' : ''
                     )}
@@ -77,7 +85,7 @@ export default function BudgetStatus() {
             })}
           </div>
         ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">No hay presupuestos definidos para este período. Ve a Planificación para añadir algunos.</p>
+            <EmptyState title="Sin presupuestos en este período" description="Define límites por categoría para saber cuánto te queda por gastar." action={<Button variant="outline" onClick={() => { setPlanTab("budgets"); setActiveTab("planning"); }}>Crear presupuesto</Button>} />
         )}
       </CardContent>
     </Card>

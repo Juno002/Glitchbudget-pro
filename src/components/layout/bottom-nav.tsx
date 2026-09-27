@@ -3,15 +3,11 @@
 import { useTabs } from "@/contexts/tabs-context";
 import { cn } from "@/lib/utils";
 import { BarChart2, NotebookPen, FileText, ArrowLeftRight } from "lucide-react";
+import { PRIMARY_AREAS } from '@/lib/navigation';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navItems = [
-  { value: "summary", label: "Dashboard", icon: BarChart2, href: "/" },
-  { value: "movements", label: "Movimientos", icon: ArrowLeftRight, href: "/"},
-  { value: "planning", label: "Plan", icon: NotebookPen, href: "/" },
-  { value: "reports", label: "Reportes", icon: FileText, href: "/" },
-];
+const navItems = PRIMARY_AREAS;
 
 export default function BottomNav() {
   const { activeTab, setActiveTab } = useTabs();
@@ -29,6 +25,7 @@ export default function BottomNav() {
              <Link
               key={item.value}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               onClick={() => setActiveTab(item.value)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 p-2 flex-1 rounded-[12px] transition-all duration-300",

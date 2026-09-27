@@ -13,19 +13,16 @@ import { useEffect, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { Moon, Sun, Settings, RefreshCw, Plus, Minus, Loader, Info, Briefcase } from 'lucide-react';
 import OpfsBackupDialog from '@/components/backup/opfs-backup-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/components/ui/dropdown-menu"
+
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useMoneyVisibility } from '@/hooks/use-money-visibility';
+import { Eye, EyeOff } from 'lucide-react';
+import { reconstructCategories } from '@/domain/categories';
 import { db } from '@/lib/db';
 
 import { AchievementsDialogContent, AchievementToastLayer, AchievementHeaderBadge } from '@/components/dashboard/achievements-panel';
@@ -33,29 +30,32 @@ import ExpenseCategoryManager from '@/components/dashboard/expense-category-mana
 import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
 
 export default function Header({ onNewMovement }: { onNewMovement?: () => void }) {
-  const { 
-    theme, setTheme, 
+  const {
+    theme, setTheme, savePct, updateSettings,
     preventNegativeAccountBalance, setPreventNegativeAccountBalance, budgetOverspendingBehavior, setBudgetOverspendingBehavior,
     currentMonth, setCurrentMonth, currentPeriod, periodStartDay, setPeriodStartDay,
     rolloverStrategy, setRolloverStrategy,
     baseIncome: baseIncomeSettings, setBaseIncome,
     resetSettings, isWorking
   } = useFinances();
+  const { balancesHidden, setBalancesHidden } = useMoneyVisibility();
   const [baseFreq, setBaseFreq] = useState(baseIncomeSettings?.freq || 'mensual');
   const [baseAmount, setBaseAmount] = useState(String((baseIncomeSettings?.amount || 0) / 100));
   const { toast } = useToast();
+  useEffect(() => { setBaseFreq(baseIncomeSettings.freq); setBaseAmount(String(baseIncomeSettings.amount / 100)); }, [baseIncomeSettings.freq, baseIncomeSettings.amount]);
 
 
 
 
   // Theme toggle moved to explicit selector dialog
-  
+
   const handleClearData = async () => {
     try {
         await db.transaction('rw', db.tables, async () => {
             for (const table of db.tables) {
                 await table.clear();
             }
+            await db.categories.bulkPut(reconstructCategories({}));
         });
         // Also clear achievements stored in localStorage
         localStorage.removeItem('glitchbudget_achievements');
@@ -65,7 +65,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
         setTimeout(() => window.location.reload(), 1500);
     } catch (error) {
         console.error("Failed to clear data:", error);
-        toast({ title: "Error al limpiar los datos", description: "No se pudieron borrar los datos. Revisa la consola.", variant: 'destructive'});
+        toast({ title: "Error al limpiar los datos", description: "No se pudieron borrar los datos. Cierra otras pestañas de la app y vuelve a intentarlo.", variant: 'destructive'});
     }
   }
 
@@ -81,7 +81,8 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                 </div>
             </Link>
         </div>
-        {onNewMovement && <Button className="md:hidden shrink-0" size="icon" onClick={onNewMovement} aria-label="Nuevo movimiento"><Plus className="h-5 w-5" /></Button>}
+        {onNewMovement && <Button className="hidden md:flex shrink-0" size="icon" onClick={onNewMovement} aria-label="Nuevo movimiento"><Plus className="h-5 w-5" /></Button>}
+        <Button variant="ghost" size="icon" aria-label={balancesHidden ? "Mostrar importes" : "Ocultar importes"} aria-pressed={balancesHidden} onClick={() => setBalancesHidden(!balancesHidden)}>{balancesHidden ? <Eye /> : <EyeOff />}</Button>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 pt-2 sm:pt-0 w-full sm:w-auto">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <label htmlFor="month" className="text-sm text-muted-foreground hidden md:inline">Período</label>
@@ -91,7 +92,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                 </div>
                 <Button variant="outline" className="h-9 px-2 text-xs sm:text-sm" onClick={() => setCurrentMonth(periodContaining(localDate(), { periodStartDay }).id)}>Período actual</Button>
             </div>
-            
+
              <Dialog>
                <DialogTrigger asChild>
                  <Button variant="outline" size="icon" className="relative" aria-label="Ver logros">
@@ -109,14 +110,21 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                </DialogContent>
              </Dialog>
 
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+             <Dialog>
+              <DialogTrigger asChild>
                 <Button variant="outline" size="icon" aria-label="Ajustes">
                   { isWorking ? <Loader className="animate-spin" /> : <Settings className="h-4 w-4" /> }
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10">
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Ajustes</DialogTitle><DialogDescription>Preferencias de este dispositivo. Tus datos permanecen aquí.</DialogDescription></DialogHeader><div className="settings-sections space-y-4"><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">General</h3><p className="text-xs text-muted-foreground">Moneda base: peso dominicano (DOP)</p><label className="flex flex-col gap-2 px-2 py-2 text-sm">
+                  Inicio del período
+                  <select aria-label="Día inicial del período" value={periodStartDay} onChange={e => void setPeriodStartDay(Number(e.target.value))}>
+                    {Array.from({ length: 31 }, (_, index) => index + 1).map(day => (
+                      <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
+                    ))}
+                  </select>
+                  <span className="text-[11px] text-muted-foreground">Ej.: día 25 → 25 del mes anterior al 24 del mes seleccionado.</span>
+                </label></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Finanzas</h3><label className="flex flex-col gap-2 text-sm">Ahorro sugerido<select value={savePct} onChange={e => void updateSettings({ savePct: Number(e.target.value) })}><option value="0">Ninguno · 0%</option><option value="0.05">Conservador · 5%</option><option value="0.1">Estándar · 10%</option><option value="0.2">Agresivo · 20%</option></select><span className="text-xs text-muted-foreground">Reserva de planificación; no mueve dinero.</span></label><div className="relative flex cursor-default select-none items-center rounded-[6px] px-2 py-1.5 text-sm outline-none transition-colors hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10">
                     <label className="flex flex-1 items-center cursor-pointer gap-2">
                         <input type="checkbox" checked={preventNegativeAccountBalance} onChange={e => setPreventNegativeAccountBalance(e.target.checked)} />
                         <span>Proteger saldo de cuentas</span>
@@ -134,71 +142,16 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                             </p>
                         </PopoverContent>
                     </Popover>
-                </div>
-
-                <label className="flex flex-col gap-2 px-2 py-2 text-sm">Al exceder un presupuesto
+                </div><label className="flex flex-col gap-2 px-2 py-2 text-sm">Al exceder un presupuesto
                   <select aria-label="Al exceder un presupuesto" value={budgetOverspendingBehavior} onChange={e => setBudgetOverspendingBehavior(e.target.value as 'allow' | 'warn' | 'block')}>
                     <option value="allow">Permitir</option><option value="warn">Pedir confirmación</option><option value="block">Bloquear</option>
                   </select>
-                </label>
-                <Dialog>
+                </label><Dialog>
                     <DialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                            {theme === 'light' ? <Sun className="mr-2 h-4 w-4" /> : theme === 'serious' ? <Briefcase className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
-                            <span>Apariencia</span>
-                        </DropdownMenuItem>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Apariencia visual</DialogTitle>
-                            <DialogDescription>
-                                Personaliza los colores y el estilo de la aplicación.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4">
-                            <RadioGroup value={theme} onValueChange={(value) => setTheme(value as any)} className="gap-4">
-                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
-                                    <RadioGroupItem value="dark" id="t1" />
-                                    <Label htmlFor="t1" className="flex flex-col cursor-pointer">
-                                        <span className="flex items-center gap-2 font-medium"><Moon className="h-4 w-4 text-slate-400" /> Neón Oscuro (Default)</span>
-                                        <span className="text-xs text-muted-foreground mt-1">El tema clásico de GlitchBudget con colores vibrantes.</span>
-                                    </Label>
-                                </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
-                                    <RadioGroupItem value="light" id="t2" />
-                                    <Label htmlFor="t2" className="flex flex-col cursor-pointer">
-                                        <span className="flex items-center gap-2 font-medium"><Sun className="h-4 w-4 text-amber-500" /> Modo Claro</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Superficies claras y colores de alto contraste.</span>
-                                    </Label>
-                                </div>
-                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
-                                    <RadioGroupItem value="serious" id="t3" />
-                                    <Label htmlFor="t3" className="flex flex-col cursor-pointer">
-                                        <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Minimalista</span>
-                                        <span className="text-xs text-muted-foreground mt-1">Superficies mate, tipografía sencilla y acentos discretos.</span>
-                                    </Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
-                    </DialogContent>
-                </Dialog>
-
-                <label className="flex flex-col gap-2 px-2 py-2 text-sm">
-                  Inicio del período
-                  <select aria-label="Día inicial del período" value={periodStartDay} onChange={e => void setPeriodStartDay(Number(e.target.value))}>
-                    {Array.from({ length: 31 }, (_, index) => index + 1).map(day => (
-                      <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
-                    ))}
-                  </select>
-                  <span className="text-[11px] text-muted-foreground">Ej.: día 25 → 25 del mes anterior al 24 del mes seleccionado.</span>
-                </label>
-
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Button variant="outline">
                             <RefreshCw className="mr-2 h-4 w-4" />
                             <span>Cierre de período</span>
-                        </DropdownMenuItem>
+                        </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -233,14 +186,12 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                             </RadioGroup>
                         </div>
                     </DialogContent>
-                </Dialog>
-
-                <Dialog>
+                </Dialog><Dialog>
                     <DialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Button variant="outline">
                             <Briefcase className="mr-2 h-4 w-4" />
                             <span>Ingreso previsto</span>
-                        </DropdownMenuItem>
+                        </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
@@ -252,7 +203,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                         <div className="space-y-4 py-4">
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <select
-                                    value={baseFreq}
+                                    aria-label="Frecuencia del ingreso previsto" value={baseFreq}
                                     onChange={(e) => setBaseFreq(e.target.value as any)}
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
@@ -261,7 +212,7 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                                     <option value="semanal">Semanal (4.33x mes)</option>
                                 </select>
                                 <Input
-                                    type="number"
+                                    aria-label="Importe del ingreso previsto" type="number"
                                     placeholder="0.00"
                                     min="0"
                                     step="0.01"
@@ -279,18 +230,14 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                             </Button>
                         </div>
                     </DialogContent>
-                </Dialog>
-
-                <DropdownMenuSeparator />
-
-                <Dialog>
+                </Dialog></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Categorías</h3><Dialog>
                     <DialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        <Button variant="outline">
                             <div className="flex items-center">
                                 <span className="mr-2 text-base">🏷️</span>
                                 <span>Categorías</span>
                             </div>
-                        </DropdownMenuItem>
+                        </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
@@ -304,29 +251,17 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                             <IncomeCategoryManager />
                         </div>
                     </DialogContent>
-                </Dialog>
-
-                <DropdownMenuSeparator />
-                 {(
-                    <>
-                        <OpfsBackupDialog />
-                        <DropdownMenuSeparator />
-                    </>
-                 )}
-                
-                <HelpDialog />
-                <DropdownMenuSeparator />
-                <AlertDialog>
+                </Dialog></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Privacidad y seguridad</h3><Button variant="outline" aria-pressed={balancesHidden} onClick={() => setBalancesHidden(!balancesHidden)}>{balancesHidden ? <Eye className="mr-2 h-4 w-4" /> : <EyeOff className="mr-2 h-4 w-4" />}{balancesHidden ? 'Mostrar importes' : 'Ocultar importes'}</Button><p className="text-xs text-muted-foreground">Oculta saldos e importes de consulta. Los formularios de edición y las copias exportadas conservan sus valores. No bloquea el acceso a la aplicación.</p></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Datos y backups</h3><OpfsBackupDialog /><div className="rounded-xl border border-destructive/30 p-3"><p className="mb-2 text-sm">Borrado irreversible del dispositivo</p><AlertDialog>
                     <AlertDialogTrigger asChild>
-                         <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-[hsl(var(--bad)_/_0.9)] focus:bg-[hsl(var(--bad)_/_0.15)] focus:text-[hsl(var(--bad)_/_1)]">
+                         <Button variant="outline" className="text-[hsl(var(--bad)_/_0.9)] focus:bg-[hsl(var(--bad)_/_0.15)] focus:text-[hsl(var(--bad)_/_1)]">
                             <span>Limpiar datos</span>
-                        </DropdownMenuItem>
+                        </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>¿Borrar todos los datos?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                Esta acción no se puede deshacer. Se borrarán todos sus ingresos, gastos, metas, presupuestos y logros.
+                                Esta acción no se puede deshacer. Se borrarán cuentas, tarjetas, movimientos, metas, presupuestos, planificados y logros de este dispositivo. Exporta una copia antes de continuar.
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -334,9 +269,48 @@ export default function Header({ onNewMovement }: { onNewMovement?: () => void }
                             <AlertDialogAction onClick={handleClearData} className='bg-destructive text-destructive-foreground'>Borrar</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </AlertDialog></div></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Apariencia</h3><Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline">
+                            {theme === 'light' ? <Sun className="mr-2 h-4 w-4" /> : theme === 'serious' ? <Briefcase className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
+                            <span>Apariencia</span>
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Apariencia visual</DialogTitle>
+                            <DialogDescription>
+                                Personaliza los colores y el estilo de la aplicación.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="py-4">
+                            <RadioGroup value={theme} onValueChange={(value) => setTheme(value as any)} className="gap-4">
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
+                                    <RadioGroupItem value="dark" id="t1" />
+                                    <Label htmlFor="t1" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Moon className="h-4 w-4 text-slate-400" /> Neón Oscuro (Default)</span>
+                                        <span className="text-xs text-muted-foreground mt-1">El tema clásico de GlitchBudget con colores vibrantes.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
+                                    <RadioGroupItem value="light" id="t2" />
+                                    <Label htmlFor="t2" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Sun className="h-4 w-4 text-amber-500" /> Modo Claro</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Superficies claras y colores de alto contraste.</span>
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2 rounded-lg border border-black/10 dark:border-white/10 p-4 hover:bg-black/5 dark:bg-white/5 transition-colors">
+                                    <RadioGroupItem value="serious" id="t3" />
+                                    <Label htmlFor="t3" className="flex flex-col cursor-pointer">
+                                        <span className="flex items-center gap-2 font-medium"><Briefcase className="h-4 w-4 text-blue-500" /> Minimalista</span>
+                                        <span className="text-xs text-muted-foreground mt-1">Superficies mate, tipografía sencilla y acentos discretos.</span>
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                    </DialogContent>
+                </Dialog></section><section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Acerca de</h3><HelpDialog /></section></div></DialogContent>
+            </Dialog>
         </div>
       </div>
     </header>

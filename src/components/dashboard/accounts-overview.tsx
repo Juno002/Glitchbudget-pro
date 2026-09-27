@@ -1,11 +1,13 @@
 'use client';
+
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
 import { selectPosition } from '@/domain/ledger';
 import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '@/lib/db';
 import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
-import { formatCurrency, toCents } from '@/lib/utils';
+import { toCents } from '@/lib/utils';
 import { friendlyError } from '@/lib/errors';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { AccountSelect } from './account-select';
 
 export default function AccountsOverview() {
+  const formatCurrency = useMoneyFormatter();
   const data = useLiveQuery(() => db.transaction('r', [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts], async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray(), incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), debts: await db.debts.toArray() })));
   const { toast } = useToast();
   const [open, setOpen] = useState(false);

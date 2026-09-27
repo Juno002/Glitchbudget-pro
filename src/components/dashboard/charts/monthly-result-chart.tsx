@@ -1,4 +1,6 @@
 'use client';
+
+import { useMoneyFormatter, useMoneyVisibility } from "@/hooks/use-money-visibility";
 import { selectMonthlyResultSplit } from '@/domain/metrics';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -6,7 +8,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { formatCurrency } from '@/lib/utils';
+
 
 interface FlowNode {
   id: string;
@@ -52,6 +54,7 @@ function MobileFlowView({
   destinations: FlowNode[];
   totalIncome: number;
 }) {
+  const formatCurrency = useMoneyFormatter();
   const destTotal = destinations.reduce((s, d) => s + d.value, 0);
 
   return (
@@ -158,6 +161,7 @@ function DesktopSankeyView({
   links: FlowLink[];
   totalIncome: number;
 }) {
+  const formatCurrency = useMoneyFormatter();
   const SVG_W = 680;
   const SVG_H = Math.max(320, Math.max(sources.length, destinations.length) * 56 + 40);
   const NODE_W = 14;
@@ -277,6 +281,7 @@ function DesktopSankeyView({
 
 // ─── Main Component ─────────────────────────────────────────
 export default function MonthlyResultChart() {
+  const { balancesHidden } = useMoneyVisibility();
   const getCategoryInfo = useCategoryResolver();
   const {
     getTotals,
@@ -359,6 +364,7 @@ export default function MonthlyResultChart() {
     return { sources, destinations: dests, links, totalIncome };
   }, [getTotals, getIncomesByCategory, getExpensesByCategory, currentMonth, getCategoryInfo]);
 
+  if (balancesHidden) return <Card><CardContent className="p-6">Gráfico oculto por privacidad.</CardContent></Card>;
   if (!isClient) return null;
 
   if (totalIncome <= 0) {

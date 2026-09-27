@@ -1,5 +1,7 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
 import { AccountSelect } from './account-select';
 import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
@@ -11,10 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CreditCard, Plus, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react';
-import { formatCurrency, toCents, cn } from '@/lib/utils';
+import { toCents, cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DebtsTab() {
+  const formatCurrency = useMoneyFormatter();
   const { debts, expenses, debtPayments, addDebt, deleteDebt, addDebtPayment } = useFinances();
   const savingRef = useRef(false);
   const [saving, setSaving] = useState(false);

@@ -1,4 +1,7 @@
 'use client';
+import { useTabs } from '@/contexts/tabs-context';
+
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
 import { selectBudgetRemaining } from '@/domain/metrics';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -7,7 +10,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { formatCurrency, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { Wallet, Info, CheckCircle2, Loader2, ArrowRightLeft, Plus } from 'lucide-react';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Skeleton } from '../ui/skeleton';
@@ -16,7 +19,6 @@ import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
 import IncomeCategoryManager from './income-category-manager';
 import SubscriptionsManager from './subscriptions-manager';
-import DebtsTab from './debts-tab';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -31,6 +33,7 @@ function BudgetItem({ categoryId, currentPlan, spent, onSave }: {
   spent: number;
   onSave: (val: number) => Promise<boolean>;
 }) {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   const category = getCategoryInfo(categoryId);
   const [inputValue, setInputValue] = useState(String(currentPlan / 100));
@@ -280,9 +283,10 @@ function NewBudgetDialog({ inactiveCategories, onSave }: { inactiveCategories: s
 }
 
 export default function PlanningTab() {
+  const formatCurrency = useMoneyFormatter();
   const { currentMonth, currentPeriod, baseIncome, getTotals, updateAllBudgets, getBudgetStatusDetails, expenseCategories, loading } = useFinances();
   const [showAll, setShowAll] = useState(false);
-  const [activeTab, setActiveTab] = useState('budgets');
+  const { planTab: activeTab, setPlanTab: setActiveTab } = useTabs();
 
   const budgetDetails = useMemo(() => getBudgetStatusDetails(currentMonth), [currentMonth, getBudgetStatusDetails]);
 
@@ -312,17 +316,16 @@ export default function PlanningTab() {
     <div className="space-y-6 pb-24 md:pb-8">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Planificación</h2>
+          <h2 className="text-2xl font-bold">Plan</h2>
           <p className="text-sm text-muted-foreground">{formatPeriodRange(currentPeriod)}</p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="flex w-full overflow-x-auto justify-start sm:justify-center mb-6 pb-2 sm:pb-0 gap-1 no-scrollbar">
-          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
           <TabsTrigger value="budgets" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Presupuestos</TabsTrigger>
+          <TabsTrigger value="goals" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Metas</TabsTrigger>
           <TabsTrigger value="subscriptions" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Planificados</TabsTrigger>
-          <TabsTrigger value="cards" className="text-[10px] sm:text-xs md:text-sm whitespace-nowrap flex-shrink-0">Tarjetas</TabsTrigger>
         </TabsList>
 
         {/* --- METAS TAB --- */}
@@ -380,15 +383,6 @@ export default function PlanningTab() {
             <Card>
                 <CardContent className="pt-6">
                     <SubscriptionsManager />
-                </CardContent>
-            </Card>
-        </TabsContent>
-
-        {/* --- TARJETAS TAB --- */}
-        <TabsContent value="cards" className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-            <Card>
-                <CardContent className="pt-6">
-                    <DebtsTab />
                 </CardContent>
             </Card>
         </TabsContent>

@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 type TabsContextType = {
+  planTab: string;
+  setPlanTab: (tab: string) => void;
   activeTab: string;
   setActiveTab: (tab: string) => void;
 };
@@ -10,12 +12,14 @@ type TabsContextType = {
 const TabsContext = createContext<TabsContextType | undefined>(undefined);
 
 export function TabsProvider({ children, defaultValue }: { children: ReactNode, defaultValue: string }) {
+  const [planTab, setPlanTab] = useState('budgets');
   const [activeTab, setActiveTab] = useState(defaultValue);
 
   const value = useMemo(() => ({
+    planTab, setPlanTab,
     activeTab,
     setActiveTab,
-  }), [activeTab]);
+  }), [activeTab, planTab]);
 
   return (
     <TabsContext.Provider value={value}>

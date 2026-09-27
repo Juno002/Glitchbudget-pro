@@ -1,8 +1,10 @@
 'use client';
 
+import { useMoneyFormatter } from "@/hooks/use-money-visibility";
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { formatCurrency } from '@/lib/utils';
+
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { format } from 'date-fns';
 import type { Transaction } from '@/lib/types';
@@ -14,6 +16,7 @@ interface TransactionTableProps {
 }
 
 export function TransactionTable({ transactions }: TransactionTableProps) {
+  const formatCurrency = useMoneyFormatter();
   const getCategoryInfo = useCategoryResolver();
   return (
     <div className="rounded-md border">
