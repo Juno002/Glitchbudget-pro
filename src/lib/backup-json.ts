@@ -1,6 +1,6 @@
 import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
 import { recurringRuleSchema } from './recurring-rule-service';
-import { plannedOccurrenceSchema, validatePlannedOccurrenceSet } from './planned-occurrence-service';
+import { plannedOccurrenceSchema, validateOccurrenceLedgerLinks, validatePlannedOccurrenceSet } from './planned-occurrence-service';
 import { reconstructCategories, withoutLegacyCategories, appliesTo } from '../domain/categories';
 import { categorySchema, validateCategorySet } from './category-service';
 import { normalizeFinancialPolicies } from '../policies/settings';
@@ -234,7 +234,7 @@ export async function exportDataJSON(): Promise<string> {
   dump.settings = withoutLegacyCategories(dump.settings);
   validateCategorySet(categories);
   validateCategoryReferences(dump, categories);
-  validatePlannedOccurrenceSet(plannedOccurrences);
+  validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
   DumpV7.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
@@ -343,7 +343,7 @@ export async function importDataJSON(text: string): Promise<{
 
   const recurrents = d.recurrents ?? [];
   const plannedOccurrences = d.plannedOccurrences ?? [];
-  validatePlannedOccurrenceSet(plannedOccurrences);
+  validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
   const debts = d.debts ?? [];
   const debtPayments = d.debtPayments ?? [];
   const fxRates = d.fxRates ?? [];
