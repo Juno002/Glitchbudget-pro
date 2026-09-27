@@ -10,8 +10,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
+      <a
+        href="#main-content"
+        className="sr-only z-[100] rounded-md bg-background px-3 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:ring-2 focus:ring-primary"
+      >
+        Saltar al contenido
+      </a>
       <Header />
-      <main data-private-surface="true" className="flex-1 p-4 sm:p-6 lg:p-8 pb-[100px] md:pb-8">
+      <main id="main-content" tabIndex={-1} data-private-surface="true" className="flex-1 p-4 sm:p-6 lg:p-8 pb-[100px] md:pb-8">
         <div className="mx-auto w-full max-w-6xl">
           {children}
         </div>
