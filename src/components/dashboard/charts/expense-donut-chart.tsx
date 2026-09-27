@@ -18,12 +18,11 @@ const COLORS = [
     '#00C49F',
 ];
 
-const CustomLegend = (props: any) => {
-  const { payload } = props;
+const CustomLegend = ({ payload, money }: { payload?: any[]; money: (amount: number) => string }) => {
   return (
     <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs">
       {
-        payload.map((entry: any, index: number) => (
+        (payload || []).map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-1">
             <span className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }}></span>
             <span>{money(entry.value)} ({`${(entry.payload.percent * 100).toFixed(0)}%`})</span>
@@ -58,7 +57,7 @@ export default function ExpenseDonutChart() {
               <Tooltip
                   formatter={(value: number, name: string) => [money(value), name]}
               />
-              <Legend content={<CustomLegend />} verticalAlign="bottom" />
+              <Legend content={<CustomLegend money={money} />} verticalAlign="bottom" />
               <Pie
                   data={data}
                   cx="50%"
