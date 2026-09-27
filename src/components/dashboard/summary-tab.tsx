@@ -105,6 +105,14 @@ export default function SummaryTab() {
         )}
       </section>
 
+      <section className="space-y-3" aria-labelledby="budget-title">
+        <SectionHeader
+          title={<span id="budget-title">Presupuesto restante</span>}
+          description="Qué tan cerca estás de los límites que definiste en Plan."
+        />
+        <BudgetStatus />
+      </section>
+
       <section className="space-y-3" aria-labelledby="activity-title">
         <SectionHeader
           title={<span id="activity-title">Actividad registrada</span>}
@@ -120,14 +128,6 @@ export default function SummaryTab() {
             supporting="Ingresos − gastos. No es el saldo de tus cuentas."
           />
         </div>
-      </section>
-
-      <section className="space-y-3" aria-labelledby="budget-title">
-        <SectionHeader
-          title={<span id="budget-title">Presupuesto restante</span>}
-          description="Qué tan cerca estás de los límites que definiste en Plan."
-        />
-        <BudgetStatus />
       </section>
 
       <section className="space-y-3" aria-labelledby="saving-title">
