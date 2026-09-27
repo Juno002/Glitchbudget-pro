@@ -125,8 +125,6 @@ export default function MovementsView() {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Historial de Movimientos</h3>
-
       <Input aria-label="Buscar movimientos" placeholder="Buscar movimientos…" value={search} onChange={e => setSearch(e.target.value)} />
       {/* Filter bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
@@ -162,8 +160,8 @@ export default function MovementsView() {
 
       {/* Items list */}
       {items.length === 0 ? (
-        <Card className="flex items-center justify-center p-8 text-muted-foreground text-sm">
-          No hay movimientos para este periodo.
+        <Card className="flex items-center justify-center p-8 text-center text-sm text-muted-foreground">
+          No hay movimientos registrados que coincidan con estos filtros.
         </Card>
       ) : (
         <div className="space-y-1.5">
