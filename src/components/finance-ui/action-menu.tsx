@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,7 +36,7 @@ export function ActionMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
         {items.map((item, index) => (
-          <span key={`${item.label}-${index}`} className="contents">
+          <Fragment key={`${item.label}-${index}`}>
             {item.separatorBefore ? <DropdownMenuSeparator /> : null}
             <DropdownMenuItem
               disabled={item.disabled}
@@ -49,7 +49,7 @@ export function ActionMenu({
               {item.icon}
               {item.label}
             </DropdownMenuItem>
-          </span>
+          </Fragment>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
