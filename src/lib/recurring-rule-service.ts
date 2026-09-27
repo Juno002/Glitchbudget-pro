@@ -29,10 +29,17 @@ export async function saveRecurringRule(input: RecurringRule, editing = false) {
 /** Historical provenance IDs intentionally survive removal of the planning rule. */
 export async function removeRecurringRule(id: string) { await db.recurrents.delete(id); }
 
-export async function requireRecurringProvenance(id: string | undefined, direction: RecurringRule['direction'], previousId?: string) {
+export async function requireRecurringProvenance(
+  id: string | undefined,
+  direction: RecurringRule['direction'],
+  previousId?: string,
+  options: { allowInactive?: boolean } = {},
+) {
   if (id === previousId) return; // Includes historical links to removed/inactive rules.
   if (previousId !== undefined) throw new Error('No se puede cambiar la procedencia de un movimiento registrado.');
   if (!id) return;
   const rule = await db.recurrents.get(id);
-  if (!rule || !rule.active || rule.direction !== direction) throw new Error('Selecciona una regla activa del mismo tipo.');
+  if (!rule || (!options.allowInactive && !rule.active) || rule.direction !== direction) {
+    throw new Error(options.allowInactive ? 'La regla recurrente no existe o no coincide con el tipo del movimiento.' : 'Selecciona una regla activa del mismo tipo.');
+  }
 }
