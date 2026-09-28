@@ -5,7 +5,8 @@ import { plannedOccurrenceSchema, validateOccurrenceLedgerLinks, validatePlanned
 import { reconstructCategories, withoutLegacyCategories, appliesTo } from '../domain/categories';
 import { categorySchema, validateCategorySet } from './category-service';
 import { normalizeFinancialPolicies } from '../policies/settings';
-import { accountSchema, transferSchema } from './accounts';
+import { accountSchema, legacyAccountSchema, transferSchema } from './accounts';
+import { normalizeCurrencyCode } from '../domain/currency';
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
@@ -18,6 +19,7 @@ const ISODateTime = z.string().datetime();
 const MonthID = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/,'Mes inválido');
 const Id = z.string().min(1);
 const MoneyCents = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
+const CurrencyCode = z.string().regex(/^[A-Z]{3}$/, 'Moneda inválida');
 
 const SettingsV3 = z.object({
   id: z.literal('general').default('general'),
@@ -130,6 +132,11 @@ const DebtPaymentV3 = z.object({
   accountId: Id.optional(),
   id: Id, debtId: Id, date: z.union([ISODate, ISODateTime]), amount: MoneyCents, note: z.string().optional(),
 });
+const DebtPaymentV9 = DebtPaymentV3.extend({
+  currency: CurrencyCode,
+  fxRate: z.number().finite().positive(),
+  amountBase: MoneyCents,
+});
 const FxRateV3 = z.object({
   id: Id, quote: Id, base: Id, rate: z.number().finite().positive(), updatedAt: ISODateTime,
 });
@@ -137,7 +144,7 @@ const FxRateV3 = z.object({
 const DumpV3 = z.object({
   v: z.union([z.literal(3), z.literal(4), z.literal(5)]),
   categories: z.array(categorySchema).optional(),
-  accounts: z.array(accountSchema).optional(),
+  accounts: z.array(legacyAccountSchema).optional(),
   accountTransfers: z.array(transferSchema).optional(),
   exportedAt: ISODateTime,
   settings: SettingsV3,
@@ -155,9 +162,21 @@ const DumpV3 = z.object({
 const DumpV6 = DumpV3.extend({ v:z.literal(6), incomes:z.array(IncomeV6), expenses:z.array(ExpenseV6), recurrents:z.array(recurringRuleSchema) });
 const DumpV7 = DumpV6.extend({ v:z.literal(7), plans:z.array(PlanV7), plannedOccurrences:z.array(plannedOccurrenceSchema) });
 const DumpV8 = DumpV7.extend({ v:z.literal(8), goals:z.array(GoalV8), goalContributions:z.array(GoalContribV8) });
-type DumpV8T = z.infer<typeof DumpV8>;
+const SettingsV9 = SettingsV3.extend({ currency: CurrencyCode });
+const IncomeV9 = IncomeV6.extend({ currency:CurrencyCode, fxRate:z.number().finite().positive(), amountBase:MoneyCents });
+const ExpenseV9 = ExpenseV6.extend({ currency:CurrencyCode, fxRate:z.number().finite().positive(), amountBase:MoneyCents });
+const DumpV9 = DumpV8.extend({
+  v:z.literal(9),
+  settings:SettingsV9,
+  accounts:z.array(accountSchema),
+  incomes:z.array(IncomeV9),
+  expenses:z.array(ExpenseV9),
+  debtPayments:z.array(DebtPaymentV9),
+});
+type DumpV9T = z.infer<typeof DumpV9>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===9) return DumpV9.parse(raw);
  if (version===8) return DumpV8.parse(raw);
  if (version===7) return DumpV7.parse(raw);
  if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: []};
@@ -192,17 +211,19 @@ export async function exportDataJSON(): Promise<string> {
   ]));
 
   const goalData = migrateGoalRecords(goals, goalContributions);
-  // Current v8 contract; progress is represented only by contributions.
-  const dump: DumpV8T = {
-    v: 8,
+  const baseCurrency = normalizeCurrencyCode(settings.currency);
+  const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
+  // Current v9 contract: account currency is explicit and direct ledger amounts are base-currency normalized.
+  const dump: DumpV9T = {
+    v: 9,
     categories,
-    accounts, accountTransfers,
+    accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
     exportedAt: nowIsoZ(),
     settings: {
       ...settings,
       savePct: settings.savePct ?? 0,
       id: 'general',
-      currency: settings.currency ?? 'DOP',
+      currency: baseCurrency,
       locale: settings.locale ?? 'es-DO',
       theme: (settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
       strictMode: settings.strictMode ?? false,
@@ -221,13 +242,19 @@ export async function exportDataJSON(): Promise<string> {
       type: i.type,
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
       amount: toCents(i.amount), description: i.description, recurringRuleId:i.recurringRuleId,
-      accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+      accountId: i.accountId,
+      currency: accountCurrencies.get(i.accountId || '') || baseCurrency,
+      fxRate: 1,
+      amountBase: toCents(i.amount),
     })),
     expenses: expenses.map(e => ({
       nature: e.nature,
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
-      accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+      accountId: e.accountId,
+      currency: accountCurrencies.get(e.accountId || '') || baseCurrency,
+      fxRate: 1,
+      amountBase: toCents(e.amount),
       paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
     })),
     plans: plans.map(p => ({
@@ -249,7 +276,12 @@ export async function exportDataJSON(): Promise<string> {
     recurrents,
     plannedOccurrences,
     debts,
-    debtPayments,
+    debtPayments: debtPayments.map(payment => ({
+      ...payment,
+      currency:accountCurrencies.get(payment.accountId || '') || baseCurrency,
+      fxRate:1,
+      amountBase:toCents(payment.amount),
+    })),
     fxRates,
   };
 
@@ -259,7 +291,7 @@ export async function exportDataJSON(): Promise<string> {
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV8.parse(dump);
+  DumpV9.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -286,8 +318,16 @@ export async function importDataJSON(text: string): Promise<{
   const categories=d.v>=5 ? d.categories! : reconstructCategories({settings:d.settings,incomes:d.incomes,expenses:d.expenses,plans:d.plans,recurrents:d.recurrents.map(r=>({categoryId:r.categoryId,type:r.direction}))});
   validateCategorySet(categories);
   validateCategoryReferences(d, categories);
-  const accountMap = new Map((d.accounts || []).map(a => [a.id, a]));
-  if ((d.accounts || []).filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
+  const baseCurrency = normalizeCurrencyCode(d.settings.currency);
+  const accounts = (d.accounts || []).map(account => ({
+    ...account,
+    currency: normalizeCurrencyCode('currency' in account ? account.currency : undefined, baseCurrency),
+  }));
+  if (accounts.some(account => account.currency !== baseCurrency)) {
+    throw new Error('Este respaldo contiene cuentas en otra moneda. Fase 11 requiere conversión manual antes de admitirlas.');
+  }
+  const accountMap = new Map(accounts.map(a => [a.id, a]));
+  if (accounts.filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
   }
@@ -299,6 +339,9 @@ export async function importDataJSON(text: string): Promise<{
   for (const transfer of d.accountTransfers || []) {
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
       if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
+    }
+    if (accountMap.get(transfer.fromAccountId)!.currency !== accountMap.get(transfer.toAccountId)!.currency) {
+      throw new Error('El respaldo contiene una transferencia entre monedas sin una conversión manual compatible.');
     }
   }
   const goalIds = new Set(d.goals.map(g => g.id));
@@ -328,7 +371,7 @@ export async function importDataJSON(text: string): Promise<{
   const settingsRow = {
     ...d.settings,
     id: 'general',
-    currency: d.settings.currency ?? 'DOP',
+    currency: baseCurrency,
     locale:   d.settings.locale   ?? 'es-DO',
     theme:    (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
     strictMode: d.settings.strictMode ?? false,
@@ -345,13 +388,19 @@ export async function importDataJSON(text: string): Promise<{
   const incomes = d.incomes.map(i => ({
     id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
     amount: i.amount, description: i.description, type: i.type, recurringRuleId: 'recurringRuleId' in i ? i.recurringRuleId : undefined,
-    accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+    accountId: i.accountId,
+    currency: i.accountId ? accountMap.get(i.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: i.amount,
   }));
 
   const expenses = d.expenses.map(e => ({
     id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
     amount: e.amount, concept: e.concept ?? '', nature: e.nature,
-    accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+    accountId: e.accountId,
+    currency: e.accountId ? accountMap.get(e.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: e.amount,
     paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
   }));
 
@@ -372,7 +421,12 @@ export async function importDataJSON(text: string): Promise<{
   const plannedOccurrences = d.plannedOccurrences ?? [];
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
   const debts = d.debts ?? [];
-  const debtPayments = d.debtPayments ?? [];
+  const debtPayments = (d.debtPayments ?? []).map(payment => ({
+    ...payment,
+    currency: payment.accountId ? accountMap.get(payment.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: payment.amount,
+  }));
   const fxRates = d.fxRates ?? [];
 
 
@@ -399,7 +453,7 @@ export async function importDataJSON(text: string): Promise<{
       ]);
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
       if(categories.length) await db.categories.bulkAdd(categories);
-      if (d.accounts?.length) await db.accounts.bulkAdd(d.accounts);
+      if (accounts.length) await db.accounts.bulkAdd(accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
       if (incomes.length) await db.incomes.bulkAdd(incomes as any);
@@ -428,7 +482,12 @@ export async function importDataJSON(text: string): Promise<{
   }};
 }
 
-function validateCategoryReferences(data: Pick<DumpV8T, 'incomes'|'expenses'|'plans'|'recurrents'>, categories: import('../domain/models').Category[]) {
+function validateCategoryReferences(data: {
+  incomes: Array<{ categoryId:string }>;
+  expenses: Array<{ categoryId:string }>;
+  plans: Array<{ categoryId:string }>;
+  recurrents?: Array<{ categoryId:string; direction:'income'|'expense' }>;
+}, categories: import('../domain/models').Category[]) {
  const map=new Map(categories.map(c=>[c.id,c]));
  const check=(id:string,type:'income'|'expense')=>{const row=map.get(id);if(!row || !appliesTo(row,type))throw new Error('El respaldo contiene una categoría inexistente o incompatible: '+id);};
  data.incomes.forEach(r=>check(r.categoryId,'income'));data.expenses.forEach(r=>check(r.categoryId,'expense'));data.plans.forEach(r=>check(r.categoryId,'expense'));data.recurrents?.forEach(r=>check(r.categoryId,r.direction));

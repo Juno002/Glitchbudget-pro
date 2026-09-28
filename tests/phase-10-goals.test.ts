@@ -90,7 +90,7 @@ test('goal services reject invalid dates and overflow atomically and strip deriv
 
 test('goal deletion releases reservations without touching real accounts or movements', async () => {
   await saveGoal(goal);
-  await db.accounts.add({id:'cash',name:'Efectivo',type:'cash',openingBalance:10000,startDate:'2026-09-01'});
+  await db.accounts.add({id:'cash',name:'Efectivo',type:'cash', currency:'DOP', openingBalance:10000,startDate:'2026-09-01'});
   await db.incomes.add({id:'salary',type:'extra',description:'Cobro',amount:1000,date:'2026-09-25',categoryId:'salary',month:'2026-09',accountId:'cash'});
   const realBefore = {accounts:await db.accounts.toArray(),incomes:await db.incomes.toArray()};
   await recordGoalContribution(contribution);
@@ -100,7 +100,7 @@ test('goal deletion releases reservations without touching real accounts or move
   for (const table of [db.expenses,db.account_transfers,db.debt_payments]) assert.equal(await table.count(),0);
 });
 
-test('v7 backup migrates progress to v8 once without creating a monthly reservation for the opening balance', async () => {
+test('v7 backup migrates goal progress once into the current contract without creating a monthly reservation for the opening balance', async () => {
   await saveGoal(goal); await recordGoalContribution(contribution);
   const legacy = JSON.parse(await exportDataJSON());
   legacy.v = 7; legacy.goals[0].saved = 500; legacy.goals[0].status = 'completed';
@@ -110,7 +110,7 @@ test('v7 backup migrates progress to v8 once without creating a monthly reservat
   const metrics = selectPeriodMetrics({settings:(await db.settings.get('general'))!,incomes:[],expenses:[],debtPayments:[],budgets:[],goalContributions:contributions},periodForId('2026-09'));
   assert.equal(metrics.goalContributions,200); assert.equal(metrics.monthlyPlanningMargin,-200);
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v,8); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
+  assert.equal(exported.v,9); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
   assert.deepEqual(await snapshot(),before);
@@ -124,19 +124,20 @@ async function legacyDatabase(name:string, saved:number) {
   old.version(11).stores(schema);
   await old.table('goals').put({...goal,saved,status:'active'});
   await old.table('goal_contributions').put(contribution);
-  await old.table('accounts').put({id:'cash',name:'Efectivo',type:'cash',openingBalance:12345,startDate:'2026-09-01'});
+  await old.table('accounts').put({id:'cash',name:'Efectivo',type:'cash', currency:'DOP', openingBalance:12345,startDate:'2026-09-01'});
   old.close();
 }
 
-test('Dexie v11 upgrades to v12 with canonical goal contributions and unchanged real accounts', async () => {
+test('Dexie v11 upgrades through v13 with canonical goal contributions and currency-normalized real accounts', async () => {
   const name = 'phase10-migration-'+crypto.randomUUID();
   await legacyDatabase(name,500);
   const current = new GlitchBudgetDB(name);
   try {
-    await current.open(); assert.equal(current.verno,12);
+    await current.open(); assert.equal(current.verno,13);
     assert.deepEqual(await current.goals.get(goal.id),goal);
     assert.equal(goalSaved(goal.id,await current.goal_contributions.toArray()),500);
     assert.equal((await current.accounts.get('cash'))?.openingBalance,12345);
+    assert.equal((await current.accounts.get('cash'))?.currency,'DOP');
     current.close(); await current.open();
     assert.equal(await current.goal_contributions.count(),2);
   } finally { await current.delete(); }

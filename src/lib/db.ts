@@ -3,6 +3,7 @@ import Dexie, { type Table } from 'dexie';
 import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
 import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
 import { migrateGoalRecords } from '../domain/goals';
+import { normalizeCurrencyCode } from '../domain/currency';
 
 import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
 export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
@@ -26,6 +27,26 @@ export class GlitchBudgetDB extends Dexie {
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
+    this.version(13).stores({ accounts: 'id, type' }).upgrade(async tx => {
+      const settings = await tx.table('settings').get('general');
+      const baseCurrency = normalizeCurrencyCode(settings?.currency);
+      if (settings && settings.currency !== baseCurrency) {
+        await tx.table('settings').update('general', { currency: baseCurrency });
+      }
+
+      const accounts = await tx.table('accounts').toArray();
+      for (const account of accounts) account.currency = baseCurrency;
+      if (accounts.length) await tx.table('accounts').bulkPut(accounts);
+
+      const normalizeMovement = (row: any) => {
+        row.currency = baseCurrency;
+        row.fxRate = 1;
+        row.amountBase = row.amount;
+      };
+      await tx.table('incomes').toCollection().modify(normalizeMovement);
+      await tx.table('expenses').toCollection().modify(normalizeMovement);
+      await tx.table('debt_payments').toCollection().modify(normalizeMovement);
+    });
     this.version(12).stores({ goals: 'id' }).upgrade(async tx => {
       const migrated = migrateGoalRecords(await tx.table('goals').toArray(), await tx.table('goal_contributions').toArray());
       await tx.table('goals').bulkPut(migrated.goals);

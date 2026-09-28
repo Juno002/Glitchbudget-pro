@@ -1,12 +1,22 @@
 # Roadmap: documentación vigente
 
+## Fase 11 — Currency foundation completada
+
+Fase 11 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-11.md](phase-11.md).
+
+El cierre define **moneda base + `Account.currency`**, migra el esquema a **Dexie v13**, eleva el respaldo canónico a **JSON v9** y mantiene lectura de v3–v8. Las cuentas preexistentes adoptan la moneda base configurada; los movimientos actuales se normalizan sin alterar su valor numérico. No existe FX remoto ni conversión automática, y una operación cross-currency se rechaza mientras no exista una tasa manual explícita.
+
+El gate `Quality checks` run `36450157254` verificó **268/268 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 11 cerrada. **Fase 12 — Investments 1.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+
 ## Fases 9 y 10 — completadas
 
 **Fase 9 — Budgets 2.0** y **Fase 10 — Goals 2.0** están completadas e integradas en `main` desde el **2026-09-28** mediante el PR #6, con merge commit `60b50e964d34d441fb6e236a55ec5d8a3aa2ce29`. La continuación de ambas fases había sido autorizada el 2026-09-27.
 
 Los contratos, migraciones, comprobaciones, invariantes financieras y límites quedan registrados en [phase-9.md](phase-9.md) y [phase-10.md](phase-10.md). El gate técnico integrado verificó **259/259 pruebas**, typecheck, lint, guard local-only y build estático; el manifiesto offline final contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 10 cerrada. **Fase 11 no se ha iniciado** y no se considera autorizada por continuidad implícita. La fuente de verdad sigue siendo [`Roadmap septiembre 2026.txt`](../../Roadmap%20septiembre%202026.txt).
+La fuente de verdad sigue siendo [`Roadmap septiembre 2026.txt`](../../Roadmap%20septiembre%202026.txt).
 
 ## Fase 8 — completada
 

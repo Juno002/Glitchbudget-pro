@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { formatCurrency } from '@/lib/utils';
+import { useFinances } from '@/contexts/finance-context';
 
 const STORAGE_KEY = 'glitchbudget_balances_hidden_v1';
 
@@ -54,5 +55,6 @@ export function useBalanceVisibility() {
 
 export function usePrivateCurrency() {
   const { balancesHidden } = useBalanceVisibility();
-  return useCallback((amount: number) => balancesHidden ? '••••••' : formatCurrency(amount), [balancesHidden]);
+  const { currency } = useFinances();
+  return useCallback((amount: number, amountCurrency = currency) => balancesHidden ? '••••••' : formatCurrency(amount, amountCurrency, 'es-DO'), [balancesHidden, currency]);
 }

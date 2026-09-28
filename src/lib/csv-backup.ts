@@ -7,6 +7,7 @@ import { migrateGoalRecords, goalSaved } from '../domain/goals';
 import { validateBudgetPlans } from '../domain/budgets';
 import { parseCSV, encodeCSV, decodeCSVField } from './csv';
 import { localDate } from './finance-calculations';
+import { normalizeCurrencyCode } from '../domain/currency';
 
 const columns = {
   incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId'],
@@ -58,25 +59,39 @@ export const exportGoalContribCSV = () => exportTable('goal_contributions');
 
 export async function importIncomesCSV(file: File) {
   const rows = await readRows(file, 'incomes', IncomeV6);
-  await db.transaction('rw', db.incomes, db.accounts, db.categories, async () => {
-    for (const row of rows) if (row.accountId) await requireAccount(row.accountId, row.date);
-    await preserveImportedCategories(rows,'income');
+  await db.transaction('rw', db.incomes, db.accounts, db.categories, db.settings, async () => {
+    const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+    const normalized = [];
+    for (const row of rows) {
+      const account = row.accountId ? await requireAccount(row.accountId, row.date) : undefined;
+      if (account && account.currency !== baseCurrency) {
+        throw new Error('El CSV contiene una cuenta en otra moneda. Usa una conversión manual antes de importar.');
+      }
+      normalized.push({ ...row, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
+    }
+    await preserveImportedCategories(normalized,'income');
     await db.incomes.clear();
-    await db.incomes.bulkAdd(rows.map(row => ({ ...row, month: row.date.slice(0, 7) })));
+    await db.incomes.bulkAdd(normalized);
   });
 }
 export async function importExpensesCSV(file: File) {
   const rows = await readRows(file, 'expenses', ExpenseCSV);
-  await db.transaction('rw', db.expenses, db.debts, db.accounts, db.categories, async () => {
+  await db.transaction('rw', [db.expenses, db.debts, db.accounts, db.categories, db.settings], async () => {
+    const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+    const normalized = [];
     for (const row of rows) {
-      if (row.accountId) await requireAccount(row.accountId, row.date);
+      const account = row.accountId ? await requireAccount(row.accountId, row.date) : undefined;
+      if (account && account.currency !== baseCurrency) {
+        throw new Error('El CSV contiene una cuenta en otra moneda. Usa una conversión manual antes de importar.');
+      }
       if (row.paymentMethod === 'credit' && (!row.debtId || !await db.debts.get(row.debtId))) {
         throw new Error('El CSV contiene una tarjeta desconocida. Restaura el respaldo JSON completo.');
       }
+      normalized.push({ ...row, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(rows,'expense');
+    await preserveImportedCategories(rows as Array<{ categoryId:string }>,'expense');
     await db.expenses.clear();
-    await db.expenses.bulkAdd(rows.map(row => ({ ...row, concept: row.concept ?? '', month: row.date.slice(0, 7) })));
+    await db.expenses.bulkAdd(normalized);
   });
 }
 export async function importPlansCSV(file: File) {

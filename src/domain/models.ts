@@ -15,6 +15,7 @@ export interface Settings {
   incomeCategories?: string[];
   /** @deprecated Only for pre-v9 database / v3-v4 backup migration. */
   customCategoryIcons?: { [catId: string]: string };
+  /** Base currency for planning, reports and canonical amounts. */
   currency: string;
   locale: string;
   baseIncome: {
@@ -148,8 +149,11 @@ export interface DebtPayment {
   id: string;
   debtId: string;
   date: string;                // ISO
-  amount: number;              // centavos
+  amount: number;              // centavos in the account/base currency
   note?: string;
+  currency?: string;
+  fxRate?: number;
+  amountBase?: number;
 }
 
 export interface FxRate {
@@ -166,6 +170,8 @@ export interface Account {
   id: string;
   name: string;
   type: 'cash' | 'bank';
+  /** Native currency of this account. Phase 11 creates accounts only in the base currency. */
+  currency: string;
   openingBalance: number;
   startDate: string;
 }

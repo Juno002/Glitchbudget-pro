@@ -107,8 +107,8 @@ test('rollover uses the same engine for weekly and yearly budgets and skips one-
 test('budget reassignment changes planned limits only and never moves real money', async () => {
   const weekly = budgetPeriodContaining('2026-09-23', 'weekly', settings);
   await db.accounts.bulkAdd([
-    { id:'cash', name:'Efectivo', type:'cash', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true },
-    { id:'bank', name:'Banco', type:'bank', openingBalance:80_000, startDate:'2026-09-01' },
+    { id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true },
+    { id:'bank', name:'Banco', type:'bank', currency:'DOP', openingBalance:80_000, startDate:'2026-09-01' },
   ]);
   await db.plans.bulkAdd([
     budgetPlanForRange(weekly, 'food', 20_000),
@@ -128,7 +128,7 @@ test('budget reassignment changes planned limits only and never moves real money
 });
 
 test('weekly and yearly budgets participate in the existing overspending policy', async () => {
-  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', openingBalance:2_000_000, startDate:'2026-09-01', isDefaultCash:true });
+  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:2_000_000, startDate:'2026-09-01', isDefaultCash:true });
   const weekly = budgetPeriodContaining('2026-09-23', 'weekly', settings);
   const yearly = budgetPeriodContaining('2026-09-23', 'yearly', settings);
   await db.plans.bulkAdd([
@@ -153,7 +153,7 @@ test('current backup round-trips Phase 9 metadata and still imports v7', async (
 
   const text = await exportDataJSON();
   const backup = JSON.parse(text);
-  assert.equal(backup.v, 8);
+  assert.equal(backup.v, 9);
   await importDataJSON(JSON.stringify({...backup, v:7}));
   assert.equal(backup.plans[0].periodType, 'weekly');
   assert.equal(backup.plans[0].periodStart, '2026-09-21');
@@ -193,7 +193,7 @@ test('budget reassignment rejects overflow without changing either limit', async
 });
 
 test('invalid budget ranges and duplicate keys cannot replace a valid backup', async () => {
-  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', openingBalance:1234, startDate:'2026-09-01', isDefaultCash:true });
+  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:1234, startDate:'2026-09-01', isDefaultCash:true });
   const valid = budgetPlanForRange(budgetPeriodContaining('2026-09-23', 'weekly'), 'food', 100);
   await db.plans.add(valid);
   const original = await exportDataJSON();
@@ -222,7 +222,7 @@ test('plan persistence rejects invalid limits and ranges atomically', async () =
 
 test('overlapping ranges warn together and stale consent never bypasses a changed budget', async () => {
   await db.settings.update('general', { budgetOverspendingBehavior:'warn' });
-  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true });
+  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true });
   const weekly = budgetPeriodContaining('2026-09-23', 'weekly');
   const yearly = budgetPeriodContaining('2026-09-23', 'yearly');
   await db.plans.bulkAdd([budgetPlanForRange(weekly, 'food', 100), budgetPlanForRange(yearly, 'food', 100)]);
@@ -317,7 +317,7 @@ test('a configured zero limit remains distinct from a category without a budget'
 
 test('expense validation materializes weekly rollover even when Plan has never been opened', async () => {
   await db.settings.update('general', { rolloverStrategy:'accumulate_surplus' });
-  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true });
+  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:50_000, startDate:'2026-09-01', isDefaultCash:true });
   const target = budgetPeriodContaining('2026-09-21', 'weekly');
   await db.plans.add(budgetPlanForRange(previousBudgetPeriod(target)!, 'food', 1000));
   const expense = { id:'rollover-guard', date:'2026-09-21', accountId:'cash', categoryId:'food', amount:100, concept:'', nature:'Variable' as const };

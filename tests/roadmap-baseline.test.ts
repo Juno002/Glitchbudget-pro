@@ -25,7 +25,7 @@ for (const version of [6, 7]) {
     const current = new GlitchBudgetDB(name);
     try {
       await current.open();
-      assert.equal(current.verno, 12);
+      assert.equal(current.verno, 13);
       for (const [table, rows] of Object.entries(source.tables)) {
         let expected = structuredClone(rows) as any[];
         if (table === 'goals') expected=migrateGoalRecords(source.tables.goals,source.tables.goal_contributions).goals;
@@ -33,6 +33,10 @@ for (const version of [6, 7]) {
         if (table === 'expenses') expected=expected.map(migrateActualExpense);
         if (table === 'recurrents') expected=expected.map(migrateRecurringRule);
         if (table === 'settings') expected[0] = withoutLegacyCategories(expected[0]);
+        const baseCurrency = source.tables.settings?.[0]?.currency || 'DOP';
+        if (table === 'incomes' || table === 'expenses' || table === 'debt_payments') {
+          expected = expected.map(row => ({ ...row, currency:baseCurrency, fxRate:1, amountBase:row.amount }));
+        }
         const sort = (a: any, b: any) => JSON.stringify(a).localeCompare(JSON.stringify(b));
         assert.deepEqual(clean(await current.table(table).toArray()).sort(sort), expected.sort(sort), table);
       }

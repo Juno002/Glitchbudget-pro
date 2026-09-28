@@ -38,7 +38,7 @@ async function financialSnapshot() {
   };
 }
 
-test('v10 -> v11 adds an empty planned occurrence store without rewriting existing data', async () => {
+test('v10 upgrades through the current schema, adds planned occurrences, and only currency-normalizes money rows', async () => {
   const name = 'phase7a-v10-' + crypto.randomUUID();
   const schema = {
     expenses: 'id, date, month, categoryId, nature, accountId',
@@ -71,10 +71,10 @@ test('v10 -> v11 adds an empty planned occurrence store without rewriting existi
   const current = new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno, 12);
+    assert.equal(current.verno, 13);
     assert.deepEqual(clean(await current.settings.toArray()), clean(before.settings));
     assert.deepEqual(clean(await current.recurrents.toArray()), clean(before.recurrents));
-    assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses));
+    assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses.map(row => ({ ...row, currency:'DOP', fxRate:1, amountBase:row.amount }))));
     assert.equal(await current.planned_occurrences.count(), 0);
   } finally {
     await current.delete();
@@ -134,7 +134,7 @@ test('storing a pending occurrence does not change financial metrics or position
 test('backup v7 round-trips planned occurrences exactly', async () => {
   await addPendingOccurrence({ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15' });
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v, 8);
+  assert.equal(exported.v, 9);
   assert.deepEqual(exported.plannedOccurrences, [{ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15', status:'pending' }]);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
