@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
 import { ensureCashAccount, saveTransfer } from '@/lib/accounts';
+import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
@@ -76,6 +77,7 @@ interface FinanceContextType {
   accounts: Account[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
+  setBaseCurrency: (currency: string) => Promise<boolean>;
   setPreventNegativeAccountBalance: (value: boolean) => void;
   setBudgetOverspendingBehavior: (value: BudgetOverspendingBehavior) => void;
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
@@ -295,6 +297,16 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
 
   const setTheme = useCallback((theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme), [updateSetting]);
+  const setBaseCurrency = useCallback(async (currency: string) => {
+    try {
+      const next = await persistBaseCurrency(currency);
+      toast({ title: 'Moneda base actualizada', description: `Los importes nuevos usarán ${next}.` });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo cambiar la moneda base', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
   const setPreventNegativeAccountBalance = useCallback((value: boolean) => updateSetting('preventNegativeAccountBalance', value), [updateSetting]);
   const setBudgetOverspendingBehavior = useCallback((value: BudgetOverspendingBehavior) => updateSetting('budgetOverspendingBehavior', value), [updateSetting]);
   const setRolloverStrategy = useCallback((strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy), [updateSetting]);
@@ -802,6 +814,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     accountTransfers: transfers,
     accounts,
     setTheme,
+    setBaseCurrency,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
     setRolloverStrategy,
     setPeriodStartDay,
@@ -858,7 +871,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     isWorking,
   }), [
     activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts,
-    setTheme, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
+    setTheme, setBaseCurrency, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
