@@ -5,7 +5,8 @@ import { plannedOccurrenceSchema, validateOccurrenceLedgerLinks, validatePlanned
 import { reconstructCategories, withoutLegacyCategories, appliesTo } from '../domain/categories';
 import { categorySchema, validateCategorySet } from './category-service';
 import { normalizeFinancialPolicies } from '../policies/settings';
-import { accountSchema, transferSchema } from './accounts';
+import { accountSchema, legacyAccountSchema, transferSchema } from './accounts';
+import { normalizeCurrencyCode } from '../domain/currency';
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
@@ -18,6 +19,7 @@ const ISODateTime = z.string().datetime();
 const MonthID = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/,'Mes inválido');
 const Id = z.string().min(1);
 const MoneyCents = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
+const CurrencyCode = z.string().regex(/^[A-Z]{3}$/, 'Moneda inválida');
 
 const SettingsV3 = z.object({
   id: z.literal('general').default('general'),
@@ -130,6 +132,11 @@ const DebtPaymentV3 = z.object({
   accountId: Id.optional(),
   id: Id, debtId: Id, date: z.union([ISODate, ISODateTime]), amount: MoneyCents, note: z.string().optional(),
 });
+const DebtPaymentV9 = DebtPaymentV3.extend({
+  currency: CurrencyCode,
+  fxRate: z.number().finite().positive(),
+  amountBase: MoneyCents,
+});
 const FxRateV3 = z.object({
   id: Id, quote: Id, base: Id, rate: z.number().finite().positive(), updatedAt: ISODateTime,
 });
@@ -137,7 +144,7 @@ const FxRateV3 = z.object({
 const DumpV3 = z.object({
   v: z.union([z.literal(3), z.literal(4), z.literal(5)]),
   categories: z.array(categorySchema).optional(),
-  accounts: z.array(accountSchema).optional(),
+  accounts: z.array(legacyAccountSchema).optional(),
   accountTransfers: z.array(transferSchema).optional(),
   exportedAt: ISODateTime,
   settings: SettingsV3,
@@ -155,9 +162,21 @@ const DumpV3 = z.object({
 const DumpV6 = DumpV3.extend({ v:z.literal(6), incomes:z.array(IncomeV6), expenses:z.array(ExpenseV6), recurrents:z.array(recurringRuleSchema) });
 const DumpV7 = DumpV6.extend({ v:z.literal(7), plans:z.array(PlanV7), plannedOccurrences:z.array(plannedOccurrenceSchema) });
 const DumpV8 = DumpV7.extend({ v:z.literal(8), goals:z.array(GoalV8), goalContributions:z.array(GoalContribV8) });
-type DumpV8T = z.infer<typeof DumpV8>;
+const SettingsV9 = SettingsV3.extend({ currency: CurrencyCode });
+const IncomeV9 = IncomeV6.extend({ currency:CurrencyCode, fxRate:z.number().finite().positive(), amountBase:MoneyCents });
+const ExpenseV9 = ExpenseV6.extend({ currency:CurrencyCode, fxRate:z.number().finite().positive(), amountBase:MoneyCents });
+const DumpV9 = DumpV8.extend({
+  v:z.literal(9),
+  settings:SettingsV9,
+  accounts:z.array(accountSchema),
+  incomes:z.array(IncomeV9),
+  expenses:z.array(ExpenseV9),
+  debtPayments:z.array(DebtPaymentV9),
+});
+type DumpV9T = z.infer<typeof DumpV9>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===9) return DumpV9.parse(raw);
  if (version===8) return DumpV8.parse(raw);
  if (version===7) return DumpV7.parse(raw);
  if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: []};
@@ -192,17 +211,19 @@ export async function exportDataJSON(): Promise<string> {
   ]));
 
   const goalData = migrateGoalRecords(goals, goalContributions);
-  // Current v8 contract; progress is represented only by contributions.
-  const dump: DumpV8T = {
-    v: 8,
+  const baseCurrency = normalizeCurrencyCode(settings.currency);
+  const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
+  // Current v9 contract: account currency is explicit and direct ledger amounts are base-currency normalized.
+  const dump: DumpV9T = {
+    v: 9,
     categories,
-    accounts, accountTransfers,
+    accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
     exportedAt: nowIsoZ(),
     settings: {
       ...settings,
       savePct: settings.savePct ?? 0,
       id: 'general',
-      currency: settings.currency ?? 'DOP',
+      currency: baseCurrency,
       locale: settings.locale ?? 'es-DO',
       theme: (settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
       strictMode: settings.strictMode ?? false,
@@ -221,13 +242,19 @@ export async function exportDataJSON(): Promise<string> {
       type: i.type,
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
       amount: toCents(i.amount), description: i.description, recurringRuleId:i.recurringRuleId,
-      accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+      accountId: i.accountId,
+      currency: accountCurrencies.get(i.accountId || '') || baseCurrency,
+      fxRate: 1,
+      amountBase: toCents(i.amount),
     })),
     expenses: expenses.map(e => ({
       nature: e.nature,
       id: e.id, month: e.month, date: e.date, categoryId: e.categoryId,
       amount: toCents(e.amount), concept: e.concept,
-      accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+      accountId: e.accountId,
+      currency: accountCurrencies.get(e.accountId || '') || baseCurrency,
+      fxRate: 1,
+      amountBase: toCents(e.amount),
       paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
     })),
     plans: plans.map(p => ({
@@ -249,7 +276,12 @@ export async function exportDataJSON(): Promise<string> {
     recurrents,
     plannedOccurrences,
     debts,
-    debtPayments,
+    debtPayments: debtPayments.map(payment => ({
+      ...payment,
+      currency:accountCurrencies.get(payment.accountId || '') || baseCurrency,
+      fxRate:1,
+      amountBase:toCents(payment.amount),
+    })),
     fxRates,
   };
 
@@ -259,7 +291,7 @@ export async function exportDataJSON(): Promise<string> {
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV8.parse(dump);
+  DumpV9.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
