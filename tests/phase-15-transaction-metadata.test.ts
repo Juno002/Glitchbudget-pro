@@ -97,6 +97,10 @@ test('saved filters are local, normalized and removable without financial persis
   assert.deepEqual(normalizeTransactionFilters({type:'bogus',amountMin:-1,dateStart:'bad'}),{
     accountId:undefined,categoryId:undefined,dateStart:undefined,dateEnd:undefined,amountMin:undefined,amountMax:undefined,necessity:undefined,label:undefined,type:undefined,
   });
+  const repaired=normalizeTransactionFilters({dateStart:'2026-09-30',dateEnd:'2026-09-01',amountMin:9000,amountMax:1000});
+  assert.deepEqual({dateStart:repaired.dateStart,dateEnd:repaired.dateEnd,amountMin:repaired.amountMin,amountMax:repaired.amountMax},{
+    dateStart:'2026-09-01',dateEnd:'2026-09-30',amountMin:1000,amountMax:9000,
+  });
 });
 
 test('quick-add templates preserve selective metadata without adding automation',()=>{
