@@ -175,7 +175,7 @@ test('Phase 15 UI exposes metadata, every roadmap filter and local saved filters
 
   for(const text of ['Necesidad','Etiquetas','must','need','want']) assert.ok(modal.includes(text),text);
   for(const text of ['Filtrar por tipo','Filtrar por cuenta','Filtrar por categoría','Filtrar por necesidad','Desde','Hasta','Monto mínimo','Monto máximo','Filtrar por etiqueta','Guardar filtro']) assert.ok(movements.includes(text),text);
-  assert.match(reset,/SAVED_TRANSACTION_FILTERS_KEY/);
+  assert.match(reset,/clearLocalAutomation/);
   assert.doesNotMatch(modal,/ubicación|garantía|loyalty|receipt/i);
   assert.doesNotMatch(movements,/ubicación|garantía|loyalty|receipt/i);
 });
