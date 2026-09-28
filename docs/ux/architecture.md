@@ -443,4 +443,5 @@ Si una decisión UX requiere alterar esas reglas, se detiene y se trata como cam
 - Fase 12 Investments está implementada sin crear pestaña primaria; vive como activo secundario dentro de Movimientos y en la posición financiera de Resumen.
 - Fase 13 Reports 2.0 está implementada con rangos y selectors compartidos con Resumen.
 - Fase 14 Home 2.0 está implementada como read model de cinco módulos, con personalización local y sin volver a decidir fórmulas de Reports.
+- Fase 15 Transaction Metadata + filtros añade necessity/labels y saved filters locales sin incorporar ubicación, receipts ni automatización.
 - Fase 17 añade app lock/auto-lock y seguridad adicional; balancesHidden ya existe como preferencia visual local.
