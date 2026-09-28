@@ -33,14 +33,14 @@ test('Movements prioritizes real activity before secondary account management', 
   assert.ok(history < accounts, 'AccountsOverview vuelve a empujar el historial hacia abajo.');
 });
 
-test('Summary follows the roadmap status/action hierarchy', () => {
+test('Summary preserves status/action hierarchy while Phase 14 replaces the historical recent-movements block', () => {
   const source = read('src/components/dashboard/summary-tab.tsx');
   const headings = [
     'Posición financiera',
     'Presupuesto disponible',
     'Próximos pagos',
     'Metas relevantes',
-    'Movimientos recientes',
+    'Inversiones',
   ];
   let last = -1;
   for (const heading of headings) {
@@ -48,6 +48,7 @@ test('Summary follows the roadmap status/action hierarchy', () => {
     assert.ok(index > last, `Orden incorrecto o faltante: ${heading}`);
     last = index;
   }
+  assert.doesNotMatch(source, /Movimientos recientes/);
   assert.doesNotMatch(source, /PieChart|recharts/);
 });
 
