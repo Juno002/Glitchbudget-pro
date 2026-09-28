@@ -1,3 +1,4 @@
+import { goalSaved } from '../src/domain/goals';
 import { seedTestCategories } from './category-fixture';
 import 'fake-indexeddb/auto';
 import assert from 'node:assert/strict';
@@ -20,8 +21,8 @@ beforeEach(async()=>{
  await db.transaction('rw',db.tables,async()=>{for(const t of db.tables)await t.clear();});
  await db.settings.put({id:'general',theme:'dark',strictMode:true,preventNegativeAccountBalance:true,budgetOverspendingBehavior:'block',rolloverStrategy:'reset',baseIncome:{amount:0,freq:'mensual'},savePct:0,currency:'DOP',locale:'es-DO',expenseCategories:['food'],incomeCategories:['salary']});
  await db.accounts.bulkAdd([cash,{...cash,id:'bank',name:'Banco',type:'bank',openingBalance:0,isDefaultCash:false}]);
- await db.goals.add({id:'goal',name:'Meta',target:2_000_000,saved:0,quota:0,startDate:date,status:'active'});
- await db.debts.add({id:'card',name:'Tarjeta',type:'credit_card',principal:1_000_000,apr:0,minPayment:0,status:'active',createdAt:date+'T00:00:00.000Z'});
+ await db.goals.add({id:'goal',name:'Meta',target:2_000_000,quota:0,startDate:date});
+ await db.debts.add({id:'card',name:'Tarjeta',type:'credit_card',status:'active',principal:1_000_000,apr:0,minPayment:0,createdAt:date+'T00:00:00.000Z'});
 });
 beforeEach(seedTestCategories);
 after(()=>db.close());
@@ -134,7 +135,7 @@ test('invalid backup policy cannot destroy existing data',async()=>{
 test('goal reserves with zero assets ignore both policies and keep atomic validation',async()=>{
  await db.accounts.update('cash',{openingBalance:0});await db.plans.add({month,categoryId:'food',limit:0});
  await saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date});assert.equal((await position()).liquidAssets,0);assert.equal((await monthly()).monthlyPlanningMargin,-100_000);
- await assert.rejects(saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date}));assert.equal((await db.goals.get('goal'))?.saved,100_000);
+ await assert.rejects(saveGoalContribution({id:'g',goalId:'goal',amount:100_000,date}));assert.equal(goalSaved('goal', await db.goal_contributions.toArray()),100_000);
  await assert.rejects(saveGoalContribution({id:'bad',goalId:'missing',amount:1,date}));
 });
 test('budget guard uses the containing custom financial period',async()=>{

@@ -35,7 +35,7 @@ export function selectPeriodMetrics(data: FinanceSnapshot, period: PeriodRange) 
   const plannedBudgetTotal = periodBudgets.reduce((s,b) => s+b.limit,0);
   const remainingBudgets = periodBudgets.reduce((s,b) =>
     s + selectBudgetRemaining(b.limit, selectCategorySpendingForPeriod(periodExpenses, b.categoryId, period)).unspentBudgetReservation, 0);
-  const goalContributions = data.goalContributions.filter(c => contains(period, c.date)).reduce((s,c) => s+c.amount,0);
+  const goalContributions = data.goalContributions.filter(c => c.kind !== 'legacy_balance' && contains(period, c.date)).reduce((s,c) => s+c.amount,0);
   const suggestedSave = Math.round(recordedIncome * data.settings.savePct);
   const planningReservations = remainingBudgets + goalContributions + suggestedSave;
   const periodResult = recordedIncome-spending;

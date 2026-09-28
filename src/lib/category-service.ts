@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { validateBudgetPlans } from '../domain/budgets';
 import { db } from './db';
 import type { Category, Plan } from '../domain/models';
 import { reconstructCategories, appliesTo, categoryNameKey, categorySeeds, type CategoryDirection } from '../domain/categories';
@@ -45,6 +46,7 @@ export async function resetCategories(direction:CategoryDirection){
  });
 }
 export async function savePlans(rows:Plan[]){return db.transaction('rw',db.categories,db.plans,async()=>{
+ validateBudgetPlans(rows);
  for(const row of rows){const old=await db.plans.get([row.month,row.categoryId]);await requireCategory(row.categoryId,'expense',old?.categoryId);}await db.plans.bulkPut(rows);
  });}
 

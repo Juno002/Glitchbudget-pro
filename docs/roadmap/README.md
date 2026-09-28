@@ -1,12 +1,16 @@
 # Roadmap: documentación vigente
 
+## Fases 9 y 10 — cierre de implementación
+
+La continuación de **Fase 9 — Budgets 2.0** y **Fase 10 — Goals 2.0** fue autorizada por el usuario el 2026-09-27. Los contratos, migraciones, comprobaciones y límites están en [phase-9.md](phase-9.md) y [phase-10.md](phase-10.md). Fase 11 no se inicia automáticamente.
+
 ## Fase 8 — completada
 
-Fase 8 — Quick Add 2.0 está cerrada contra `Roadmap septiembre 2026.txt`. El cierre y la Definition of Done están en [phase-8.md](phase-8.md). La siguiente fase del orden canónico es **Fase 9 — Budgets 2.0**, pero no se inicia automáticamente.
+Fase 8 — Quick Add 2.0 está cerrada contra `Roadmap septiembre 2026.txt`. El cierre histórico y la Definition of Done están en [phase-8.md](phase-8.md). Las fases posteriores autorizadas se registran arriba.
 
 ## Fase 7.5 — completada y aprobada
 
-El usuario revisó y aprobó el Gate 7.5 el **2026-09-27**. La siguiente fase habilitada es **Fase 8 — Quick Add 2.0**, que mejora `TransactionModal` y conserva el compositor único. Esta limpieza documental no implementa Fase 8.
+El usuario revisó y aprobó el Gate 7.5 el **2026-09-27**. Ese gate habilitó Fase 8 — Quick Add 2.0 sobre `TransactionModal`, conservando el compositor único. Los documentos siguientes preservan ese cierre histórico.
 
 | Documento canónico | Función |
 |---|---|

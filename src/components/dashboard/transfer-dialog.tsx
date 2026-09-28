@@ -22,6 +22,7 @@ import { useCategoryResolver } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRightLeft } from 'lucide-react';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import type { BudgetPeriodRange } from '@/domain/periods';
 
 const formSchema = z.object({
   fromCategoryId: z.string().min(1, 'Debes seleccionar una categoría de origen'),
@@ -34,7 +35,7 @@ const formSchema = z.object({
 
 type TransferFormValues = z.infer<typeof formSchema>;
 
-export default function TransferDialog() {
+export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: BudgetPeriodRange }) {
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const [open, setOpen] = useState(false);
@@ -50,11 +51,11 @@ export default function TransferDialog() {
     },
   });
 
-  const budgetsWithFunds = getBudgetStatusDetails(currentMonth).filter(b => b.remaining > 0);
+  const budgetsWithFunds = getBudgetStatusDetails(currentMonth, budgetPeriod).filter(b => b.remaining > 0);
 
   async function onSubmit(values: TransferFormValues) {
     try {
-        if (!await transferBetweenBudgets(currentMonth, values.fromCategoryId, values.toCategoryId, values.amount)) return;
+        if (!await transferBetweenBudgets(currentMonth, values.fromCategoryId, values.toCategoryId, values.amount, budgetPeriod)) return;
         form.reset();
         setOpen(false);
     } catch (error: any) {
@@ -71,14 +72,14 @@ export default function TransferDialog() {
       <DialogTrigger asChild>
         <Button variant="outline">
           <ArrowRightLeft className="mr-2 h-4 w-4" />
-          Transferir entre Planes
+          Reasignar presupuesto
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Transferir Fondos</DialogTitle>
+          <DialogTitle>Reasignar presupuesto</DialogTitle>
           <DialogDescription>
-            Mueve montos entre tus categorías de presupuesto para el período seleccionado.
+            Reasigna límite entre categorías del mismo período. Esto no mueve dinero entre cuentas ni crea movimientos reales.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -143,7 +144,7 @@ export default function TransferDialog() {
               )}
             />
             <DialogFooter>
-                <Button disabled={form.formState.isSubmitting} type="submit" className="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Confirmar Transferencia</Button>
+                <Button disabled={form.formState.isSubmitting} type="submit" className="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Confirmar reasignación</Button>
             </DialogFooter>
           </form>
         </Form>

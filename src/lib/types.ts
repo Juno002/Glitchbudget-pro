@@ -22,25 +22,8 @@ export type Budget = {
   limit: number;
 };
 
-export interface Goal {
-    id: string;
-    name: string;
-    target: number;
-    saved: number;
-    date?: string; // YYYY-MM-DD (deadline)
-    quota: number; // Monto de la cuota mensual planificada
-    startDate: string; // YYYY-MM-DD
-    status: 'active' | 'completed';
-}
-
-export interface GoalContribution {
-  id: string;
-  goalId: string;
-  amount: number;
-  date: string; // YYYY-MM-DD
-}
+export type { GoalView as Goal } from '../domain/goals';
+export type { GoalContribution } from '../domain/models';
 
 
 export type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
-
-    

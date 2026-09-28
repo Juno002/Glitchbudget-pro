@@ -68,20 +68,27 @@ export interface Expense {
 }
 
 export interface Plan {
-  month: string; // YYYY-MM period id; field name retained for storage compatibility
+  /**
+   * Storage period key. Legacy monthly rows use YYYY-MM.
+   * Phase 9 ranges may use weekly:/yearly:/one-time: prefixes.
+   */
+  month: string;
   categoryId: string;
   limit: number;
+  /** Missing on legacy rows, which are interpreted as monthly budgets. */
+  periodType?: 'weekly' | 'monthly' | 'yearly' | 'one_time';
+  /** Inclusive date range for Phase 9 rows. Legacy monthly rows derive it from Period Engine settings. */
+  periodStart?: string;
+  periodEnd?: string;
 };
 
 export interface Goal {
     id: string;
     name: string;
     target: number;
-    saved: number;
     date?: string; // YYYY-MM-DD (deadline)
     quota: number; // Monto de la cuota mensual planificada
     startDate: string; // YYYY-MM-DD
-    status: 'active' | 'completed';
 }
 
 export interface GoalContribution {
@@ -89,6 +96,8 @@ export interface GoalContribution {
   goalId: string;
   amount: number;
   date: string; // YYYY-MM-DD
+  /** Imported progress without a dated reservation; never reduces a period's planning margin. */
+  kind?: 'legacy_balance';
 }
 
 

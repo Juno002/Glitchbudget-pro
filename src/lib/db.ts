@@ -2,6 +2,7 @@
 import Dexie, { type Table } from 'dexie';
 import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
 import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
+import { migrateGoalRecords } from '../domain/goals';
 
 import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
 export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
@@ -25,6 +26,11 @@ export class GlitchBudgetDB extends Dexie {
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
+    this.version(12).stores({ goals: 'id' }).upgrade(async tx => {
+      const migrated = migrateGoalRecords(await tx.table('goals').toArray(), await tx.table('goal_contributions').toArray());
+      await tx.table('goals').bulkPut(migrated.goals);
+      await tx.table('goal_contributions').bulkPut(migrated.contributions);
+    });
     this.version(11).stores({
       planned_occurrences: 'id, ruleId, scheduledDate, status, &[ruleId+scheduledDate], &transactionId',
     });
