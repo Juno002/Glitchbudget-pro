@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
 import { localDate } from '@/lib/finance-calculations';
@@ -48,19 +48,13 @@ export default function ReportsTab() {
   const [customStart,setCustomStart]=useState(initial.start);
   const [customEnd,setCustomEnd]=useState(initial.end);
 
-  const { range, rangeError } = useMemo(() => {
-    try {
-      return {
-        range:resolveReportRange(preset,today,preset==='custom'?{start:customStart,end:customEnd}:undefined),
-        rangeError:'',
-      };
-    } catch(error) {
-      return {
-        range:initial,
-        rangeError:error instanceof Error ? error.message : 'Rango inválido.',
-      };
-    }
-  },[preset,today,customStart,customEnd,initial.start,initial.end]);
+  let range=initial;
+  let rangeError='';
+  try {
+    range=resolveReportRange(preset,today,preset==='custom'?{start:customStart,end:customEnd}:undefined);
+  } catch(error) {
+    rangeError=error instanceof Error ? error.message : 'Rango inválido.';
+  }
 
   const report=getReportSnapshot(range,range.end);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
