@@ -119,13 +119,13 @@ test('16.2 engine is pure local evaluation with no UI, persistence, AI or networ
   assert.doesNotMatch(source,/applyAutomatically|autoApply|saveExpense|saveIncome|update/i);
 });
 
-test('16.2 does not integrate Rules into Quick Add or storage yet', () => {
+test('16.2 engine may be consumed by 16.3 Quick Add while persistence remains absent', () => {
   const modal=readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8');
   const templates=readFileSync(new URL('../src/lib/quick-add-templates.ts',import.meta.url),'utf8');
   const filters=readFileSync(new URL('../src/lib/saved-transaction-filters.ts',import.meta.url),'utf8');
   const db=readFileSync(new URL('../src/lib/db.ts',import.meta.url),'utf8');
 
-  assert.doesNotMatch(modal,/evaluateTransactionRule|evaluateTransactionRules|RuleMatch/);
+  assert.match(modal,/evaluateTransactionRules/);
   assert.doesNotMatch(templates,/evaluateTransactionRule|evaluateTransactionRules|RuleMatch/);
   assert.doesNotMatch(filters,/evaluateTransactionRule|evaluateTransactionRules|RuleMatch/);
   assert.doesNotMatch(db,/transaction_rules|rules!:/);
