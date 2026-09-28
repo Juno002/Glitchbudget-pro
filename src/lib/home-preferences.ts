@@ -45,10 +45,16 @@ export function normalizeHomePreferences(value: unknown): HomePreferences {
 }
 
 export function moveHomeModule(preferences:HomePreferences,id:HomeModuleId,direction:-1|1):HomePreferences {
+  if(preferences.hidden.includes(id)) return preferences;
+  const visible=preferences.order.filter(value=>!preferences.hidden.includes(value));
+  const visibleIndex=visible.indexOf(id);
+  const targetVisibleIndex=visibleIndex+direction;
+  if(visibleIndex<0 || targetVisibleIndex<0 || targetVisibleIndex>=visible.length) return preferences;
+
+  const targetId=visible[targetVisibleIndex];
   const order=[...preferences.order];
   const index=order.indexOf(id);
-  const next=index+direction;
-  if(index<0 || next<0 || next>=order.length) return preferences;
-  [order[index],order[next]]=[order[next],order[index]];
+  const targetIndex=order.indexOf(targetId);
+  [order[index],order[targetIndex]]=[order[targetIndex],order[index]];
   return {...preferences,order};
 }
