@@ -44,6 +44,7 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false, 
     else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) {
       const account = await requireAccount(row.accountId, row.date);
+      if (account.type === 'investment') throw new Error('Las cuentas de inversión no reciben ingresos operativos en Investments 1.0.');
       const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
       if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar movimientos.');
       row.currency = account.currency;
@@ -109,6 +110,7 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       if (!row.accountId && (!editing || existing?.accountId || existing?.paymentMethod === 'credit')) row.accountId = existing?.accountId || (await ensureCashAccount(row.date)).id;
       if (row.accountId) {
         const account = await requireAccount(row.accountId, row.date);
+        if (account.type === 'investment') throw new Error('Las cuentas de inversión no pagan gastos en Investments 1.0.');
         const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
         if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar movimientos.');
         row.currency = account.currency;
@@ -148,6 +150,7 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
     payment = { ...payment, accountId: payment.accountId || (await ensureCashAccount(payment.date)).id };
     if (payment.accountId) {
       const account = await requireAccount(payment.accountId, payment.date);
+      if (account.type === 'investment') throw new Error('Las cuentas de inversión no pagan tarjetas en Investments 1.0.');
       const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
       if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar pagos.');
       payment = { ...payment, currency: account.currency, fxRate: 1, amountBase: payment.amount };
