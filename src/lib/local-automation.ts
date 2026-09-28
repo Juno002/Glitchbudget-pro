@@ -11,7 +11,7 @@ import {
   loadTransactionRules,
 } from './transaction-rules';
 
-type LocalAutomationStorage = Pick<Storage, 'getItem' | 'removeItem'>;
+type LocalAutomationStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 
 export const LOCAL_AUTOMATION_LAYERS = [
   {
