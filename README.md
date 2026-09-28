@@ -2,7 +2,7 @@
 
 ## Estado del roadmap
 
-**Fase 12 — Investments 1.0 completada técnicamente el 2026-09-28.** Las inversiones con rendimiento conocido son activos no líquidos: abrir una desde un banco crea una transferencia patrimonial, no un gasto. El esquema actual es Dexie v14 / JSON v10 y el gate verificó **278/278 pruebas**. **Fase 13 — Reports 2.0 no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 12](docs/roadmap/phase-12.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 13 — Reports 2.0 completada técnicamente el 2026-09-28.** Reportes ofrece rangos 7D/30D/3M/6M/1Y/Custom, Spending, Cash Flow, Net Worth y comparación contra un período inmediatamente anterior de igual duración. Resumen y Reportes consumen los mismos selectors de dominio. Persistencia permanece en Dexie v14 / JSON v10 y el gate verificó **286/286 pruebas**. **Fase 14 — Home 2.0 no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 13](docs/roadmap/phase-13.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
@@ -16,13 +16,13 @@
     - **Presupuestos por Categoría:** Asigna límites semanales, mensuales, anuales o de rango único. Cada presupuesto muestra límite, gastado, restante, porcentaje y estado sobre el mismo Period Engine.
     - **Metas de Ahorro:** Crea objetivos con plazo y aportes. El progreso se deriva del historial de aportes y el aporte mensual requerido se calcula con el restante, la fecha límite y el Period Engine.
 - **Registro Detallado de Gastos:** Clasifica tus gastos como fijos, variables u ocasionales. Incluye soporte para **Tarjetas de Crédito** con seguimiento de deudas.
-- **Reportes de Crédito Avanzados:** Visualiza el estado de tus tarjetas, días restantes para el corte y fechas de pago de forma automática.
+- **Tarjetas de Crédito:** Registra compras y pagos sin duplicar gasto; deuda y patrimonio usan el mismo ledger que Reportes.
 - **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
 - **Rollover de Presupuestos:** Aplica la estrategia configurada a presupuestos semanales, mensuales y anuales; los rangos únicos no se repiten automáticamente.
 - **Reasignación de Límites:** Redistribuye límite planificado entre categorías del mismo rango sin mover dinero real, saldos de cuentas ni movimientos del ledger.
 - **Fundación de Moneda:** Moneda base explícita y moneda por cuenta. Fase 11 conserva todos los saldos existentes, no consulta FX remoto y bloquea operaciones que requerirían una conversión no definida.
 - **Investments 1.0:** Certificados, depósitos a plazo e inversiones de rendimiento conocido se registran como activos no líquidos. El valor futuro se calcula localmente y se etiqueta como estimado; nunca se suma silenciosamente al patrimonio real.
-- **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
+- **Reports 2.0:** Analiza gasto, cash flow y patrimonio en 7D, 30D, 3M, 6M, 1Y o un rango personalizado. Incluye categorías, transacciones mayores, naturaleza del gasto y comparación con una ventana anterior comparable.
 - **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
 - **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.
 - **Glassmorphism UI:** Una experiencia visual premium con componentes translúcidos, sombras dinámicas y gradientes finamente trabajados.
@@ -37,7 +37,7 @@ El diseño de la aplicación sigue un ciclo financiero lógico:
 2. **Consulta Resumen:** Revisa tu posición financiera y las acciones pendientes.
 3. **Consulta Movimientos:** Busca y filtra el historial real; cuentas y tarjetas quedan como gestión secundaria.
 4. **Organiza Plan:** Presupuestos, Metas y Planificados.
-5. **Analiza en Reportes:** Revisa categorías y comparativas de períodos. Gestiona categorías y preferencias desde el panel de Ajustes.
+5. **Analiza en Reportes:** Elige un rango y revisa Spending, Cash Flow, Net Worth, categorías, transacciones mayores y comparación con el rango anterior. Gestiona categorías y preferencias desde Ajustes.
 
 ## 🛠️ Configuración y Opciones
 

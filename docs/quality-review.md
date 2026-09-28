@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras posteriores quedan supersedidas por Fases 9–12. Fase 12 añade inversiones como activos no líquidos y mantiene toda proyección fuera del patrimonio real. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md) y [phase-12.md](roadmap/phase-12.md).
+> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras posteriores quedan supersedidas por Fases 9–13. Fase 13 centraliza analytics en selectors compartidos por Resumen y Reportes sin cambiar persistencia. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md) y [phase-13.md](roadmap/phase-13.md).
 
 ## Correcciones de esta revisión
 
@@ -83,5 +83,8 @@ Los diálogos normales y de confirmación se dimensionan con visualViewport (alt
 - **Invariante patrimonial:** mover principal desde un banco a una inversión conserva patrimonio neto; rendimiento futuro estimado no modifica saldo ni patrimonio.
 - **Gate Fases 9–10 (histórico):** GitHub Actions verificó 259/259 pruebas sobre ese cierre.
 - **Gate Fase 11 (histórico):** `Quality checks` verificó 268/268 pruebas.
-- **Gate Fase 12:** `Quality checks` run `36454064247` verificó **278/278 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+- **Gate Fase 12:** `Quality checks` run `36454064247` verificó **278/278 pruebas**, typecheck, lint, guard local-only y build estático.
+- **Reports 2.0:** Spending, Cash Flow, Net Worth y Comparison usan selectors puros comunes. Net Worth es acumulativo a la fecha final; el rango limita actividad analítica, no borra movimientos históricos que aún afectan saldos.
+- **Persistencia tras Fase 13:** sin cambios; Dexie **v14**, JSON **v10**.
+- **Gate Fase 13:** `Quality checks` run `36458493360` verificó **286/286 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 - La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.

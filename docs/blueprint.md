@@ -1,8 +1,8 @@
 # **App Name**: Glitchbudget
 
-> Documento de origen conservado como referencia histórica. El contrato vigente hasta Fase 12 se rige por [Roadmap: documentación vigente](roadmap/README.md), [arquitectura UX](ux/architecture.md) y [sistema de diseño](ux/design-system.md). Las reglas visuales originales del final de este archivo no sustituyen el sistema de diseño actual.
+> Documento de origen conservado como referencia histórica. El contrato vigente hasta Fase 13 se rige por [Roadmap: documentación vigente](roadmap/README.md), [arquitectura UX](ux/architecture.md) y [sistema de diseño](ux/design-system.md). Las reglas visuales originales del final de este archivo no sustituyen el sistema de diseño actual.
 
-## Core Features (current through Phase 10):
+## Core Features (current through Phase 13):
 
 - Income Recording: Record income transactions with descriptions and amounts.
 - Expense Recording: Record expense transactions with descriptions, amounts, and categories.
@@ -13,6 +13,7 @@
 - Budget Rollover and Reassignment: Weekly, monthly, and yearly limits can apply the configured rollover policy. Reassignment changes planned limits within the same range; it is not a bank transfer.
 - Currency Foundation: A configured base currency and explicit account currency preserve monetary meaning. Existing accounts migrate to the configured base without automatic conversion; remote FX is not used and cross-currency transfers remain blocked until a manual-rate workflow exists.
 - Investments 1.0: Certificates, term deposits and known-yield products are non-liquid assets backed by investment accounts. Funding is an internal asset transfer, existing holdings use an opening value, and projected interest never enters actual net worth.
+- Reports 2.0: Shared pure selectors provide Spending, Cash Flow, Net Worth and comparable-period analysis over 7D, 30D, 3M, 6M, 1Y and custom ranges. Home and Reports consume the same financial selector contract.
 - Transaction History: View and filter past transactions.
 - Summary Dashboard: Local summaries based on recorded transactions.
 

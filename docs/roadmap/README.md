@@ -1,5 +1,17 @@
 # Roadmap: documentación vigente
 
+## Fase 13 — Reports 2.0 completada
+
+Fase 13 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-13.md](phase-13.md).
+
+Reports 2.0 centraliza en `src/domain/reports.ts` los selectors de Spending, Cash Flow, Net Worth, comparación y rangos. **Resumen y Reportes consumen el mismo `selectReportsSnapshot`**; cambia el rango solicitado, no la fórmula.
+
+Rangos implementados: **7D, 30D, 3M, 6M, 1Y y Custom**. El previous comparable period es la ventana inmediatamente anterior con igual número de días.
+
+Fase 13 no cambia persistencia: se mantiene **Dexie v14 / JSON v10**. El gate `Quality checks` run `36458493360` verificó **286/286 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 13 cerrada. **Fase 14 — Home 2.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+
 ## Fase 12 — Investments 1.0 completada
 
 Fase 12 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-12.md](phase-12.md).
@@ -8,7 +20,7 @@ Las inversiones pasan a ser activos no líquidos vinculados a cuentas `investmen
 
 Persistencia actual: **Dexie v14 / JSON v10**, con lectura de backups v3–v9. El gate `Quality checks` run `36454064247` verificó **278/278 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 12 cerrada. **Fase 13 — Reports 2.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+Fase 12 queda como fundamento patrimonial vigente para Net Worth en Reports 2.0.
 
 ## Fase 11 — Currency foundation completada
 
