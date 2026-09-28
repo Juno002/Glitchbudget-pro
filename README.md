@@ -2,7 +2,7 @@
 
 ## Estado del roadmap
 
-**Fase 15 — Transaction Metadata + filtros completada técnicamente el 2026-09-28.** Gastos admiten Must/Need/Want y etiquetas; ingresos admiten etiquetas. Movimientos filtra por cuenta, categoría, fecha, monto, necesidad, etiqueta y tipo, con filtros guardados localmente. Dexie permanece en v14 y el backup canónico pasa a JSON v11. El gate verificó **300/300 pruebas**. **Fase 16 — Automatización local no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 15](docs/roadmap/phase-15.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 16 — Automatización local en progreso.** El checkpoint **16.1 — Contrato de Rules** está completado: solo define reglas deterministas `description contains` que podrán sugerir categoría y/o Must/Need/Want. Aún no existe motor, UI, almacenamiento de rules ni aplicación automática. El gate verificó **306/306 pruebas**. Consulta el [checkpoint 16.1](docs/roadmap/phase-16-1.md), el [índice de documentación vigente](docs/roadmap/README.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
