@@ -191,13 +191,17 @@ export default function MovementsView() {
 
   const clearFilters=()=>{
     setFilters(monthRange(currentMonth));
+    setSearch('');
     setSelectedSavedId('');
   };
 
   const applySaved=(id:string)=>{
     setSelectedSavedId(id);
     const saved=savedFilters.find(row=>row.id===id);
-    if(saved) setFilters(normalizeTransactionFilters(saved.filters));
+    if(saved) {
+      setSearch('');
+      setFilters(normalizeTransactionFilters(saved.filters));
+    }
   };
 
   const saveCurrentFilter=()=>{
