@@ -276,16 +276,16 @@ export default function MovementsView() {
           </label>
 
           <label className="text-sm">Desde
-            <Input type="date" value={filters.dateStart||''} onChange={event=>updateFilter('dateStart',event.target.value||undefined)} />
+            <Input type="date" max={filters.dateEnd} value={filters.dateStart||''} onChange={event=>updateFilter('dateStart',event.target.value||undefined)} />
           </label>
 
           <label className="text-sm">Hasta
-            <Input type="date" value={filters.dateEnd||''} onChange={event=>updateFilter('dateEnd',event.target.value||undefined)} />
+            <Input type="date" min={filters.dateStart} value={filters.dateEnd||''} onChange={event=>updateFilter('dateEnd',event.target.value||undefined)} />
           </label>
 
           <label className="text-sm">Monto mínimo
             <Input
-              type="number" min="0" step="0.01" inputMode="decimal"
+              type="number" min="0" max={filters.amountMax===undefined?undefined:filters.amountMax/100} step="0.01" inputMode="decimal"
               value={filters.amountMin===undefined?'':filters.amountMin/100}
               onChange={event=>updateFilter('amountMin',event.target.value===''?undefined:Math.max(0,toCents(event.target.value)))}
             />
@@ -293,7 +293,7 @@ export default function MovementsView() {
 
           <label className="text-sm">Monto máximo
             <Input
-              type="number" min="0" step="0.01" inputMode="decimal"
+              type="number" min={filters.amountMin===undefined?0:filters.amountMin/100} step="0.01" inputMode="decimal"
               value={filters.amountMax===undefined?'':filters.amountMax/100}
               onChange={event=>updateFilter('amountMax',event.target.value===''?undefined:Math.max(0,toCents(event.target.value)))}
             />
