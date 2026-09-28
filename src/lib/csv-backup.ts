@@ -76,7 +76,7 @@ export async function importIncomesCSV(file: File) {
 }
 export async function importExpensesCSV(file: File) {
   const rows = await readRows(file, 'expenses', ExpenseCSV);
-  await db.transaction('rw', db.expenses, db.debts, db.accounts, db.categories, db.settings, async () => {
+  await db.transaction('rw', [db.expenses, db.debts, db.accounts, db.categories, db.settings], async () => {
     const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
     const normalized = [];
     for (const row of rows) {
@@ -89,7 +89,7 @@ export async function importExpensesCSV(file: File) {
       }
       normalized.push({ ...row, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(normalized,'expense');
+    await preserveImportedCategories(rows as Array<{ categoryId:string }>,'expense');
     await db.expenses.clear();
     await db.expenses.bulkAdd(normalized);
   });
