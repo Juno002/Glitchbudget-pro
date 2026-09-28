@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras que cambiaron después quedan supersedidas por Fase 9 y Fase 10. En particular, los aportes a metas ya **no se bloquean por saldo ni mueven dinero real**; son reservas de planificación, y el progreso se deriva de `goal_contributions`. Los presupuestos ya no son solo mensuales: usan rangos semanales, mensuales, anuales y únicos sobre el mismo Period Engine. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md) y [phase-10.md](roadmap/phase-10.md).
+> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras que cambiaron después quedan supersedidas por Fases 9–11. Los presupuestos usan un Period Engine común; el progreso de metas se deriva de `goal_contributions`; y Fase 11 define moneda base + moneda por cuenta sin FX remoto ni conversiones automáticas. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md) y [phase-11.md](roadmap/phase-11.md).
 
 ## Correcciones de esta revisión
 
@@ -79,6 +79,7 @@ Los diálogos normales y de confirmación se dimensionan con visualViewport (alt
 
 - **Budgets 2.0:** límites semanales, mensuales, anuales y únicos comparten un solo contrato de rango. El rollover aplica a semana/mes/año; un rango único no se repite automáticamente. Reasignar presupuesto modifica límites planificados y nunca crea transferencias de dinero real.
 - **Goals 2.0:** `saved` y `status` dejaron de persistirse en la meta. El progreso se deriva de la suma de aportes; el saldo histórico incompatible se conserva, cuando corresponde, como `legacy_balance`. Aportar a una meta puede llevar el margen de planificación a negativo y no altera efectivo, bancos ni patrimonio.
-- **Persistencia:** esquema Dexie actual v12. El respaldo JSON canónico es v8 y mantiene lectura de v3–v7; los rangos presupuestarios y el modelo de metas se validan antes de reemplazar datos.
-- **Gate integrado:** GitHub Actions `Quality checks` verificó 259/259 pruebas, typecheck, lint, guard local-only y build estático sobre el merge de Fases 9–10. El manifiesto offline final contiene 42 recursos y cada HTML conserva `connect-src 'none'`.
+- **Persistencia tras Fase 11:** esquema Dexie actual **v13**. El respaldo JSON canónico es **v9** y mantiene lectura de v3–v8. Cuentas y movimientos legacy se normalizan a la moneda base sin cambiar su valor numérico.
+- **Gate Fases 9–10 (histórico):** GitHub Actions verificó 259/259 pruebas sobre ese cierre.
+- **Gate Fase 11:** `Quality checks` run `36450157254` verificó **268/268 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 - La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.

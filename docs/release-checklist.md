@@ -11,7 +11,12 @@ Usar Node.js 22 o superior, instalar con npm ci, ejecutar npm run check y npm ru
 - Reasignar límite entre dos categorías del mismo rango y comprobar que no cambian cuentas, ingresos, gastos ni transferencias reales.
 - Crear tarjeta, registrar compra y pago. Intentar exceder el saldo de una cuenta con un **movimiento real** en modo estricto y comprobar que no se guardó.
 - Crear meta con plazo y aporte. Confirmar que el progreso deriva de los aportes, que el aporte mensual requerido usa el período financiero y que aportar no cambia saldos de cuentas aunque el margen de planificación quede negativo.
-- Exportar JSON, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
+- En una base limpia, cambiar la moneda base y confirmar que Efectivo/cuentas nuevas adoptan el nuevo código sin modificar importes.
+- Con cualquier importe financiero ya registrado, intentar cambiar la moneda base: debe rechazarse sin alterar ajustes, cuentas ni movimientos.
+- Confirmar que una transferencia entre cuentas de monedas distintas es rechazada mientras no exista tasa manual; no debe aparecer ingreso, gasto ni transferencia parcial.
+- Exportar JSON v9, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
+- Importar un backup legacy v8 y comprobar que cuentas/movimientos adoptan la moneda base, fxRate 1 y amountBase equivalente al importe histórico.
+- Importar CSV de ingreso/gasto con metadatos de otra moneda y una cuenta base válida: el registro final debe normalizarse a la moneda de la cuenta, no conservar una tasa inyectada.
 - Instalar app, cerrar/abrir sin conexión, registrar movimiento y volver a conectar. Publicar una actualización de prueba y verificar datos y tema conservados.
 - Recorrer claro, oscuro y minimalista con importes grandes y nombres largos, a 320/360 px y escritorio, zoom 200 % y teclado móvil.
 

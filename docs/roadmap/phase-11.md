@@ -2,7 +2,7 @@
 
 Fuente de verdad: Roadmap septiembre 2026.txt, Fase 11.
 
-Estado: **implementación candidata; gate final pendiente**.
+Estado: **completada técnicamente; pendiente únicamente de integración en main**.
 
 ## Objetivo
 
@@ -147,14 +147,17 @@ Las regresiones históricas fueron actualizadas únicamente cuando el nuevo cont
 
 ## Gate
 
-Pendiente de registrar después del último Quality checks verde:
+GitHub Actions `Quality checks` run `36450157254`, sobre el commit de cierre documental de la rama de Fase 11:
 
-- número total de pruebas;
-- typecheck;
-- lint;
-- guard local-only;
-- build estático;
-- cantidad final de recursos del manifiesto offline;
-- verificación de connect-src 'none'.
+- `npm run check`: **268/268 pruebas**, 0 fallos;
+- typecheck: aprobado;
+- lint con cero warnings: aprobado;
+- guard local-only: aprobado;
+- `npm run build`: aprobado;
+- manifiesto offline: **42 recursos**;
+- salida estática: verificada;
+- CSP: `connect-src 'none'` en cada página HTML.
+
+El gate no utilizó datos financieros reales del navegador habitual del usuario.
 
 Fase 12 — Investments 1.0 **no se inicia automáticamente**.

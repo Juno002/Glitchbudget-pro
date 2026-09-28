@@ -4,10 +4,10 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 ## Uso
 
-1. Efectivo se crea automáticamente en cero; si ya existía una cuenta de efectivo, se conserva su saldo y se usa como predeterminada. En Movimientos, pulsa esa cuenta y Editar cuenta para indicar el dinero que tenías al iniciar el seguimiento. Crea cada banco desde Gestionar bancos con su saldo actual. No hacen falta números de cuenta ni credenciales.
+1. Efectivo se crea automáticamente en cero; si ya existía una cuenta de efectivo, se conserva su saldo y se usa como predeterminada. Cada cuenta tiene una moneda explícita y, en Fase 11, todas las cuentas operativas usan la moneda base. En Movimientos, pulsa esa cuenta y Editar cuenta para indicar el dinero que tenías al iniciar el seguimiento. Crea cada banco desde Gestionar bancos con su saldo actual. No hacen falta números de cuenta ni credenciales.
 2. Incluye en el saldo inicial las operaciones que ya hiciste hoy. Los movimientos antiguos quedan sin cuenta para no contarlos dos veces.
-3. Todo ingreso nuevo se deposita en Efectivo. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar el ingreso al banco, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
-4. Para sacar efectivo del banco, usa Gestionar bancos → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. Una comisión se registra como gasto separado.
+3. Todo ingreso nuevo usa Efectivo por defecto, pero puede elegirse otra cuenta de destino. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar dinero entre cuentas, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
+4. Para sacar efectivo del banco, usa Gestionar bancos → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. En Fase 11 la transferencia exige que origen y destino tengan la misma moneda; una futura transferencia cross-currency necesitará una tasa manual. Una comisión se registra como gasto separado.
 5. Conciliar deuda actual permite introducir lo que debes en cada tarjeta, independientemente de sus movimientos anteriores. Un saldo negativo significa saldo a favor.
 6. Pulsa una cuenta para consultar sus 50 movimientos recientes y editar sus datos. Las transferencias se pueden editar desde ese historial.
 
@@ -21,11 +21,17 @@ En modo estricto, un gasto con cuenta comprueba el saldo de esa cuenta. Los movi
 
 ## Datos y recuperación
 
-El esquema Dexie actual es **v12**. Históricamente, v8 introdujo `accounts` y `account_transfers`; los movimientos anteriores no recibieron una cuenta automáticamente y las relaciones opcionales conservaron el historial. Fase 10 llevó el esquema a v12 para normalizar metas sin reescribir los saldos reales.
+## Moneda y Fase 11
 
-El respaldo JSON canónico actual es **v8** y mantiene lectura de v3–v7. La compatibilidad de cuentas apareció originalmente en JSON v4; los respaldos actuales conservan cuentas, transferencias, referencias de movimientos, metas/aportes y rangos presupuestarios. Importar valida primero y reemplaza el contenido de forma transaccional. Para trasladar el estado completo entre versiones, usa siempre el JSON generado por la versión actual.
+`Settings.currency` es la moneda base y `Account.currency` es obligatorio. Las cuentas existentes se migran a la base configurada sin convertir sus importes. Los movimientos de una cuenta guardan su moneda, `fxRate = 1` y `amountBase = amount` bajo el contrato actual.
 
-CSV de ingresos/gastos conserva accountId; para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
+Cambiar la moneda base solo está permitido mientras no existan importes financieros registrados. Una vez hay saldos, movimientos, presupuestos, metas, deudas o reglas monetarias, GlitchBudget rechaza el cambio para evitar reinterpretar valores. No se consultan tasas FX en internet.
+
+El esquema Dexie actual es **v13**. Históricamente, v8 introdujo `accounts` y `account_transfers`; Fase 10 llevó el esquema a v12 para normalizar metas y Fase 11 añade el contrato monetario explícito en v13 sin reescribir los valores de los saldos.
+
+El respaldo JSON canónico actual es **v9** y mantiene lectura de v3–v8. JSON v9 conserva moneda base, moneda por cuenta y metadatos monetarios de ingresos, gastos y pagos. Los backups anteriores se normalizan a la moneda base al importarse. Un backup v9 con una cuenta en otra moneda se rechaza mientras no exista conversión manual.
+
+CSV de ingresos/gastos conserva `accountId`, `currency`, `fxRate` y `amountBase`; al importar, la moneda se normaliza a la cuenta/base y no puede inyectarse una moneda distinta. Para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
 
 ## Validación
 

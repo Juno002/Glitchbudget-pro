@@ -2,7 +2,7 @@
 
 ## Estado del roadmap
 
-**Fases 9 y 10 completadas e integradas en `main` el 2026-09-28.** Budgets 2.0 y Goals 2.0 están cerradas contra `Roadmap septiembre 2026.txt`; **Fase 11 aún no se ha iniciado**. Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 9](docs/roadmap/phase-9.md), el [cierre de Fase 10](docs/roadmap/phase-10.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 11 — Currency foundation completada técnicamente el 2026-09-28.** Define moneda base, `Account.currency`, migración Dexie v13 y backup JSON v9 sin FX remoto ni conversiones automáticas. El gate verificó **268/268 pruebas** y build estático correcto. **Fase 12 — Investments 1.0 no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 11](docs/roadmap/phase-11.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
@@ -20,6 +20,7 @@
 - **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
 - **Rollover de Presupuestos:** Aplica la estrategia configurada a presupuestos semanales, mensuales y anuales; los rangos únicos no se repiten automáticamente.
 - **Reasignación de Límites:** Redistribuye límite planificado entre categorías del mismo rango sin mover dinero real, saldos de cuentas ni movimientos del ledger.
+- **Fundación de Moneda:** Moneda base explícita y moneda por cuenta. Fase 11 conserva todos los saldos existentes, no consulta FX remoto y bloquea operaciones que requerirían una conversión no definida.
 - **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
 - **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
 - **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.
