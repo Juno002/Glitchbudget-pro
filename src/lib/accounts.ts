@@ -7,15 +7,19 @@ import { isValidDate, localDate } from './finance-calculations';
 import { normalizeCurrencyCode, requireCurrencyCode } from '../domain/currency';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
-const accountFields = z.object({
+const commonAccountFields = {
   id: z.string().min(1),
   name: z.string().trim().min(1).max(80),
-  type: z.enum(['cash', 'bank']),
   openingBalance: cents,
   startDate: date,
   isDefaultCash: z.boolean().optional(),
-});
-export const legacyAccountSchema = accountFields.refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+};
+const legacyAccountFields = z.object({ ...commonAccountFields, type:z.enum(['cash','bank']) });
+export const legacyAccountSchema = legacyAccountFields.refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+export const phase11AccountSchema = legacyAccountFields.extend({
+  currency: z.string().transform(requireCurrencyCode),
+}).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+const accountFields = z.object({ ...commonAccountFields, type:z.enum(['cash','bank','investment']) });
 export const accountSchema = accountFields.extend({
   currency: z.string().transform(requireCurrencyCode),
 }).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
@@ -60,7 +64,7 @@ export async function readAccountSnapshot(): Promise<AccountSnapshot> {
   return { incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), transfers: await db.account_transfers.toArray() };
 }
 export async function requireAccount(id: string | undefined, movementDate: string) {
-  if (!id) throw new Error('Selecciona la cuenta de efectivo o banco del movimiento.');
+  if (!id) throw new Error('Selecciona una cuenta del movimiento.');
   const account = await db.accounts.get(id);
   if (!account) throw new Error('La cuenta ya no existe.');
   if (movementDate < account.startDate) throw new Error('La fecha es anterior al inicio del seguimiento de esta cuenta.');
@@ -68,6 +72,7 @@ export async function requireAccount(id: string | undefined, movementDate: strin
 }
 export async function addAccount(input: Account, editing = false) {
   const account = accountSchema.parse(input);
+  if (account.type === 'investment') throw new Error('Las cuentas de inversión se crean desde Investments 1.0.');
   if (!editing && account.startDate !== localDate()) throw new Error('Introduce el saldo actual para comenzar el seguimiento hoy.');
   await db.transaction('rw', [...accountTables, db.settings], async () => {
     const settings = await db.settings.get('general');
@@ -100,6 +105,9 @@ export async function saveTransfer(input: AccountTransfer, editing = false) {
   await db.transaction('rw', [...accountTables, db.settings], async () => {
     const fromAccount = await requireAccount(transfer.fromAccountId, transfer.date);
     const toAccount = await requireAccount(transfer.toAccountId, transfer.date);
+    if (fromAccount.type === 'investment' || toAccount.type === 'investment') {
+      throw new Error('Las transferencias de inversión se administran desde Investments 1.0; retiros y vencimientos pertenecen a Investments 1.1.');
+    }
     if (fromAccount.currency !== toAccount.currency) {
       throw new Error('Las transferencias entre monedas requieren una tasa manual y todavía no están habilitadas.');
     }
@@ -132,5 +140,5 @@ export async function reconcileDebt(id: string, balance: number) {
 /** Compatibility shape for pre-domain callers; no financial formulas here. */
 export function accountPosition(accounts: Account[], debts: import('./db').Debt[], data: AccountSnapshot, through = localDate()) {
  const p = selectPosition(accounts, debts, data, through);
- return { cash:p.cash, bank:p.bank, liquid:p.liquidAssets, owed:p.liabilities, credit:p.cardPositiveBalance, net:p.netWorth, balances:p.balances.map(({signedBalance, ...card}) => ({...card, balance:signedBalance})) };
+ return { cash:p.cash, bank:p.bank, investments:p.investmentAssets, liquid:p.liquidAssets, owed:p.liabilities, credit:p.cardPositiveBalance, net:p.netWorth, balances:p.balances.map(({signedBalance, ...card}) => ({...card, balance:signedBalance})) };
 }
