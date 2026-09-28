@@ -30,10 +30,13 @@ export async function ensureCashAccount(startDate = localDate()): Promise<Accoun
     const existing = defaultCashAccount(accounts);
     if (existing) {
       const currency = normalizeCurrencyCode(existing.currency, baseCurrency);
-      if (!existing.isDefaultCash || existing.currency !== currency) {
-        await db.accounts.update(existing.id, { isDefaultCash: true, currency });
+      if (currency !== baseCurrency) {
+        throw new Error('La cuenta de efectivo está en otra moneda y necesita una conversión manual.');
       }
-      return { ...existing, currency, isDefaultCash: true };
+      if (!existing.isDefaultCash || existing.currency !== baseCurrency) {
+        await db.accounts.update(existing.id, { isDefaultCash: true, currency:baseCurrency });
+      }
+      return { ...existing, currency:baseCurrency, isDefaultCash: true };
     }
     const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', currency: baseCurrency, openingBalance: 0, startDate, isDefaultCash: true };
     await db.accounts.add(account);
