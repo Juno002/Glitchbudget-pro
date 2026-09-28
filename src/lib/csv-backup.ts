@@ -8,6 +8,7 @@ import { validateBudgetPlans } from '../domain/budgets';
 import { parseCSV, encodeCSV, decodeCSVField } from './csv';
 import { localDate } from './finance-calculations';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 
 const columns = {
   incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId', 'labels'],
@@ -76,7 +77,7 @@ export async function importIncomesCSV(file: File) {
       if (account && account.currency !== baseCurrency) {
         throw new Error('El CSV contiene una cuenta en otra moneda. Usa una conversión manual antes de importar.');
       }
-      normalized.push({ ...row, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
+      normalized.push({ ...row, labels:'labels' in row && row.labels ? normalizeTransactionLabels(row.labels) : undefined, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
     await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'income');
     await db.incomes.clear();
@@ -96,7 +97,7 @@ export async function importExpensesCSV(file: File) {
       if (row.paymentMethod === 'credit' && (!row.debtId || !await db.debts.get(row.debtId))) {
         throw new Error('El CSV contiene una tarjeta desconocida. Restaura el respaldo JSON completo.');
       }
-      normalized.push({ ...row, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
+      normalized.push({ ...row, labels:'labels' in row && row.labels ? normalizeTransactionLabels(row.labels) : undefined, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
     await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'expense');
     await db.expenses.clear();
