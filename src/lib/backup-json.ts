@@ -336,9 +336,21 @@ export async function importDataJSON(text: string): Promise<{
     throw new Error('Este respaldo contiene cuentas en otra moneda. Fase 11 requiere conversión manual antes de admitirlas.');
   }
   const accountMap = new Map(accounts.map(a => [a.id, a]));
+  const investments = d.investments ?? [];
+  const investmentAccountIds = new Set<string>();
+  for (const investment of investments) {
+    const account = accountMap.get(investment.accountId);
+    if (!account || account.type !== 'investment') throw new Error('El respaldo contiene una inversión sin su cuenta de inversión.');
+    if (investmentAccountIds.has(investment.accountId)) throw new Error('El respaldo contiene varias inversiones para la misma cuenta.');
+    investmentAccountIds.add(investment.accountId);
+  }
+  if (accounts.some(account => account.type === 'investment' && !investmentAccountIds.has(account.id))) {
+    throw new Error('El respaldo contiene una cuenta de inversión sin metadatos de inversión.');
+  }
   if (accounts.filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
+    if (row.accountId && accountMap.get(row.accountId)!.type === 'investment') throw new Error('El respaldo usa una inversión como cuenta operativa.');
   }
   for (const rule of d.recurrents || []) {
     if (rule.defaultAccountId && !accountMap.has(rule.defaultAccountId)) {
@@ -349,8 +361,13 @@ export async function importDataJSON(text: string): Promise<{
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
       if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
     }
-    if (accountMap.get(transfer.fromAccountId)!.currency !== accountMap.get(transfer.toAccountId)!.currency) {
+    const fromAccount = accountMap.get(transfer.fromAccountId)!;
+    const toAccount = accountMap.get(transfer.toAccountId)!;
+    if (fromAccount.currency !== toAccount.currency) {
       throw new Error('El respaldo contiene una transferencia entre monedas sin una conversión manual compatible.');
+    }
+    if (fromAccount.type === 'investment') {
+      throw new Error('El respaldo contiene un retiro de inversión que no pertenece a Investments 1.0.');
     }
   }
   const goalIds = new Set(d.goals.map(g => g.id));
@@ -459,11 +476,13 @@ export async function importDataJSON(text: string): Promise<{
         db.fxRates.clear(),
         db.accounts.clear(),
         db.account_transfers.clear(),
+        db.investments.clear(),
       ]);
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
       if(categories.length) await db.categories.bulkAdd(categories);
       if (accounts.length) await db.accounts.bulkAdd(accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
+      if (investments.length) await db.investments.bulkAdd(investments);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
       if (incomes.length) await db.incomes.bulkAdd(incomes as any);
       if (expenses.length) await db.expenses.bulkAdd(expenses as any);
@@ -479,15 +498,15 @@ export async function importDataJSON(text: string): Promise<{
   );
 
   // 5) Conteo post-import (para logs o toasts)
-  const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr] = await Promise.all([
+  const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr, cinv] = await Promise.all([
     db.settings.count(), db.periods.count(), db.incomes.count(), db.expenses.count(),
     db.plans.count(), db.goals.count(), db.goal_contributions.count(),
-    db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(),
+    db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(), db.investments.count(),
   ]);
 
   return { counts: {
     settings: cs, periods: cp, incomes: ci, expenses: ce, plans: cpl, goals: cg, goal_contributions: cgc,
-    recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr,
+    recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr, investments:cinv,
   }};
 }
 
