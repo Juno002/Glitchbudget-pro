@@ -1,17 +1,32 @@
 import type { Investment } from './models';
 
-const MS_PER_DAY = 86_400_000;
+function isLeapYear(year: number): boolean {
+  return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
 
+function daysInMonth(year: number, month: number): number {
+  if (month === 2) return isLeapYear(year) ? 29 : 28;
+  return [4,6,9,11].includes(month) ? 30 : 31;
+}
+
+/** Gregorian civil date -> deterministic day ordinal, with no clock/timezone dependency. */
 function dayNumber(value: string): number {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) throw new Error('Fecha de inversión inválida.');
-  const [, y, m, d] = match;
-  const time = Date.UTC(Number(y), Number(m) - 1, Number(d));
-  const date = new Date(time);
-  if (date.getUTCFullYear() !== Number(y) || date.getUTCMonth() !== Number(m) - 1 || date.getUTCDate() !== Number(d)) {
+  let year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) {
     throw new Error('Fecha de inversión inválida.');
   }
-  return Math.floor(time / MS_PER_DAY);
+
+  year -= month <= 2 ? 1 : 0;
+  const era = Math.floor(year / 400);
+  const yearOfEra = year - era * 400;
+  const shiftedMonth = month + (month > 2 ? -3 : 9);
+  const dayOfYear = Math.floor((153 * shiftedMonth + 2) / 5) + day - 1;
+  const dayOfEra = yearOfEra * 365 + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100) + dayOfYear;
+  return era * 146097 + dayOfEra;
 }
 
 export type InvestmentProjection = {
