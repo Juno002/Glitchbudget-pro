@@ -1,3 +1,4 @@
+import { normalizeNecessity, normalizeTransactionLabels } from '../domain/transaction-metadata';
 export type QuickAddTransactionType = 'expense' | 'income' | 'transfer';
 
 export type QuickAddTemplate = {
@@ -14,6 +15,8 @@ export type QuickAddTemplate = {
   paymentMethod?: 'cash' | 'credit';
   debtId?: string;
   transferNote?: string;
+  necessity?: 'must' | 'need' | 'want';
+  labels?: string[];
 };
 
 type TemplateStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -48,6 +51,8 @@ function normalizeTemplate(value: unknown): QuickAddTemplate | null {
       ? raw.paymentMethod as QuickAddTemplate['paymentMethod'] : undefined,
     debtId: cleanString(raw.debtId, 100) || undefined,
     transferNote: cleanString(raw.transferNote) || undefined,
+    necessity: raw.type === 'expense' ? normalizeNecessity(raw.necessity) : undefined,
+    labels: raw.type === 'transfer' ? undefined : normalizeTransactionLabels(raw.labels),
   };
 }
 
