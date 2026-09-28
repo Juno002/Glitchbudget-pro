@@ -14,7 +14,7 @@ export function AccountSelect({ value, onChange, label = 'Cuenta de origen', dis
         {accounts?.map(account => {
           const type = account.type === 'cash' ? 'Efectivo' : 'Banco';
           const name = account.name.trim().toLocaleLowerCase('es') === type.toLocaleLowerCase('es') ? account.name : `${account.name} · ${type}`;
-          return <option key={account.id} value={account.id}>{name}{account.isDefaultCash || account.id === defaultAccount?.id ? ' (predeterminada)' : ''}</option>;
+          return <option key={account.id} value={account.id}>{name} · {account.currency}{account.isDefaultCash || account.id === defaultAccount?.id ? ' (predeterminada)' : ''}</option>;
         })}
       </select>
     </label>
