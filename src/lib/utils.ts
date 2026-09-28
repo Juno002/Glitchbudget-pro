@@ -13,16 +13,29 @@ export function toCents(amount: number | string): number {
 }
 
 
-export function formatCurrency(amountInCents: number) {
+export function formatCurrency(amountInCents: number, currency = 'DOP', locale = 'es-DO') {
   if (typeof amountInCents !== 'number') {
     amountInCents = 0;
   }
   const amount = amountInCents / 100;
-  const formatted = new Intl.NumberFormat('es-DO', {
+  const code = typeof currency === 'string' && /^[A-Z]{3}$/.test(currency.trim().toUpperCase()) ? currency.trim().toUpperCase() : 'DOP';
+  const formatted = new Intl.NumberFormat(locale || 'es-DO', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
-  return `RD$ ${formatted}`;
+  return `${code === 'DOP' ? 'RD
+
+export function formatDate(dateString: string | undefined | null) {
+    if(!dateString) return 'N/A';
+    // Add time component to avoid timezone issues
+    try {
+        const date = new Date(`${dateString}T00:00:00`);
+        return date.toLocaleDateString('es-DO',{year:'numeric', month:'long', day:'numeric'});
+    } catch(e) {
+        return 'Fecha inválida';
+    }
+}
+ : code} ${formatted}`;
 }
 
 export function formatDate(dateString: string | undefined | null) {
