@@ -35,21 +35,13 @@ export class GlitchBudgetDB extends Dexie {
       }
 
       const accounts = await tx.table('accounts').toArray();
-      const accountCurrencies = new Map<string, string>();
-      for (const account of accounts) {
-        const currency = normalizeCurrencyCode(account.currency, baseCurrency);
-        account.currency = currency;
-        accountCurrencies.set(account.id, currency);
-      }
+      for (const account of accounts) account.currency = baseCurrency;
       if (accounts.length) await tx.table('accounts').bulkPut(accounts);
 
       const normalizeMovement = (row: any) => {
-        const currency = row.accountId ? (accountCurrencies.get(row.accountId) || baseCurrency) : baseCurrency;
-        row.currency = currency;
-        if (currency === baseCurrency) {
-          row.fxRate = 1;
-          row.amountBase = row.amount;
-        }
+        row.currency = baseCurrency;
+        row.fxRate = 1;
+        row.amountBase = row.amount;
       };
       await tx.table('incomes').toCollection().modify(normalizeMovement);
       await tx.table('expenses').toCollection().modify(normalizeMovement);
