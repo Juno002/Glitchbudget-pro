@@ -26,7 +26,11 @@ const emptyDraft = {
   necessity: '' as NecessityDraft,
 };
 
-export default function TransactionRuleManager() {
+type TransactionRuleManagerProps = {
+  onRuleCountChange?: (count: number) => void;
+};
+
+export default function TransactionRuleManager({ onRuleCountChange }: TransactionRuleManagerProps) {
   const { expenseCategories, incomeCategories } = useFinances();
   const getCategoryInfo = useCategoryResolver();
   const [rules, setRules] = useState<TransactionRule[]>([]);
@@ -37,8 +41,16 @@ export default function TransactionRuleManager() {
   const [necessity, setNecessity] = useState<NecessityDraft>(emptyDraft.necessity);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') setRules(loadTransactionRules(window.localStorage));
-  }, []);
+    if (typeof window === 'undefined') return;
+    const loaded = loadTransactionRules(window.localStorage);
+    setRules(loaded);
+    onRuleCountChange?.(loaded.length);
+  }, [onRuleCountChange]);
+
+  const commitRules = (next: TransactionRule[]) => {
+    setRules(next);
+    onRuleCountChange?.(next.length);
+  };
 
   const categoryOptions = useMemo(() => {
     const ids = [...new Set([...(expenseCategories || []), ...(incomeCategories || [])])];
@@ -86,7 +98,7 @@ export default function TransactionRuleManager() {
     };
 
     try {
-      setRules(upsertTransactionRule(window.localStorage, rule));
+      commitRules(upsertTransactionRule(window.localStorage, rule));
       resetDraft();
     } catch {
       // The form validation below keeps this path exceptional; storage helpers still reject malformed data.
@@ -95,17 +107,17 @@ export default function TransactionRuleManager() {
 
   const updateEnabled = (id: string, enabled: boolean) => {
     if (typeof window === 'undefined') return;
-    setRules(setTransactionRuleEnabled(window.localStorage, id, enabled));
+    commitRules(setTransactionRuleEnabled(window.localStorage, id, enabled));
   };
 
   const moveRule = (id: string, direction: 'up' | 'down') => {
     if (typeof window === 'undefined') return;
-    setRules(moveTransactionRule(window.localStorage, id, direction));
+    commitRules(moveTransactionRule(window.localStorage, id, direction));
   };
 
   const deleteRule = (id: string) => {
     if (typeof window === 'undefined') return;
-    setRules(removeTransactionRule(window.localStorage, id));
+    commitRules(removeTransactionRule(window.localStorage, id));
     if (editingId === id) resetDraft();
   };
 
