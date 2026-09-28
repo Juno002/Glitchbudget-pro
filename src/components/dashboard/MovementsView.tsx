@@ -1,7 +1,7 @@
 'use client';
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { db } from '@/lib/db';
 import type { Expense, Income } from '@/lib/db';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -349,7 +349,7 @@ export default function MovementsView() {
             const isIncome=item.kind==='income';
             const isExpense=item.kind==='expense';
             const tone=isIncome?'positive':isExpense?'negative':'neutral';
-            const badges:React.ReactNode[]=[];
+            const badges:ReactNode[]=[];
             if(item.isFixed) badges.push(<span key="fixed" className="inline-flex items-center gap-0.5 rounded bg-muted/20 px-1.5 py-0.5 text-[10px] font-medium"><Pin className="h-2.5 w-2.5" /> Fijo</span>);
             if(item.necessity) badges.push(<span key="necessity" className="rounded bg-muted/20 px-1.5 py-0.5 text-[10px] font-medium">{NECESSITY_LABELS[item.necessity]}</span>);
             for(const label of (item.labels||[]).slice(0,2)) badges.push(<span key={'label-'+label} className="rounded border px-1.5 py-0.5 text-[10px]">{label}</span>);
