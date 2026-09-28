@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Info } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,7 @@ const SETTINGS_SECTIONS = [
 export function SettingsDialog() {
   const {
     theme, setTheme,
-    currency,
+    currency, setBaseCurrency,
     preventNegativeAccountBalance, setPreventNegativeAccountBalance,
     budgetOverspendingBehavior, setBudgetOverspendingBehavior,
     periodStartDay, setPeriodStartDay,
@@ -45,6 +45,8 @@ export function SettingsDialog() {
   const { balancesHidden, setBalancesHidden } = useBalanceVisibility();
   const [baseFreq, setBaseFreq] = useState(baseIncome?.freq || 'mensual');
   const [baseAmount, setBaseAmount] = useState(String((baseIncome?.amount || 0) / 100));
+  const [baseCurrencyDraft, setBaseCurrencyDraft] = useState(currency);
+  useEffect(() => setBaseCurrencyDraft(currency), [currency]);
 
   const handleClearData = async () => {
     try {
@@ -84,11 +86,22 @@ export function SettingsDialog() {
 
           <TabsContent value="general" className="space-y-5">
             <SectionHeader title="General" description="Cómo se organiza tu período financiero." />
-            <div className="max-w-sm rounded-xl border p-4">
-              <p className="text-sm font-medium">Moneda base</p>
-              <p className="mt-1 text-lg font-semibold">{currency}</p>
-              <p className="mt-1 text-xs text-muted-foreground">La edición de moneda y conversión pertenece a la fundación multicurrency de Fase 11.</p>
-            </div>
+            <form className="max-w-sm rounded-xl border p-4 space-y-3" onSubmit={e => { e.preventDefault(); void setBaseCurrency(baseCurrencyDraft); }}>
+              <div>
+                <p className="text-sm font-medium">Moneda base</p>
+                <p className="mt-1 text-xs text-muted-foreground">Código de tres letras. No hay tasas remotas ni conversión automática.</p>
+              </div>
+              <Input
+                aria-label="Moneda base"
+                value={baseCurrencyDraft}
+                onChange={e => setBaseCurrencyDraft(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3))}
+                minLength={3}
+                maxLength={3}
+                placeholder="DOP"
+              />
+              <p className="text-xs text-muted-foreground">Por seguridad solo puede cambiarse mientras no existan importes registrados. Las cuentas existentes sin movimientos adoptan la nueva moneda.</p>
+              <Button type="submit" variant="outline" disabled={baseCurrencyDraft.length !== 3 || baseCurrencyDraft === currency}>Guardar moneda base</Button>
+            </form>
 
             <label className="block max-w-sm space-y-2 text-sm">
               <span className="font-medium">Inicio del período</span>
