@@ -50,26 +50,28 @@ test('16.3 preserves input order and never mutates rule matches',()=>{
   assert.deepEqual(matches,original);
 });
 
-test('16.3 Quick Add wiring is suggestion-only: accept/ignore are explicit and rules default to empty',()=>{
+test('16.3 Quick Add wiring remains suggestion-only after 16.4 adds a persistent rule source',()=>{
   const modal=readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8');
 
-  assert.match(modal,/rules = \[\]/);
+  assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
+  assert.match(modal,/loadTransactionRules/);
   assert.match(modal,/evaluateTransactionRules/);
   assert.match(modal,/quickAddRuleSuggestions/);
   assert.match(modal,/Aceptar sugerencia/);
   assert.match(modal,/Ignorar sugerencia/);
   assert.match(modal,/setCategoryId/);
   assert.match(modal,/setNecessity/);
-  assert.doesNotMatch(modal,/localStorage.*rule|rule.*localStorage/i);
   assert.doesNotMatch(modal,/applyAutomatically|autoApply/i);
 });
 
-test('16.3 still has no persistent rule source or rule-management UI',()=>{
+test('16.3 suggestion behavior stays outside financial persistence when 16.4 adds management',()=>{
   const context=readFileSync(new URL('../src/contexts/finance-context.tsx',import.meta.url),'utf8');
   const db=readFileSync(new URL('../src/lib/db.ts',import.meta.url),'utf8');
   const settings=readFileSync(new URL('../src/components/layout/settings-dialog.tsx',import.meta.url),'utf8');
+  const storage=readFileSync(new URL('../src/lib/transaction-rules.ts',import.meta.url),'utf8');
 
   assert.doesNotMatch(context,/transactionRules|rules:/);
   assert.doesNotMatch(db,/transaction_rules|rules!:/);
-  assert.doesNotMatch(settings,/Crear regla|Gestionar reglas|Reglas locales/);
+  assert.match(settings,/TransactionRuleManager/);
+  assert.match(storage,/TRANSACTION_RULES_KEY/);
 });
