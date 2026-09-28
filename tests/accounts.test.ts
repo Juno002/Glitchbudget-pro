@@ -9,8 +9,8 @@ import { saveIncome, saveExpense, saveDebtPayment, removeIncome } from '../src/l
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { localDate, calculateRecordedTotals, recordedCategories } from '../src/lib/finance-calculations';
 const today = localDate();
-const bank: Account = { id:'bank', name:'Banco', type:'bank', openingBalance:100_000, startDate:today };
-const cash: Account = { id:'cash', name:'Efectivo', type:'cash', openingBalance:0, startDate:today };
+const bank: Account = { id:'bank', name:'Banco', type:'bank', currency:'DOP', openingBalance:100_000, startDate:today };
+const cash: Account = { id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:0, startDate:today };
 beforeEach(async()=>{
   await db.transaction('rw',db.tables,async()=>{for(const t of db.tables)await t.clear();});
   await db.settings.put({id:'general',theme:'light',strictMode:true,rolloverStrategy:'reset',baseIncome:{freq:'mensual',amount:0},savePct:0,currency:'DOP',locale:'es-DO',incomeCategories:['salary'],expenseCategories:['food']});
