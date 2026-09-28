@@ -6,7 +6,7 @@ Alcance original: aplicación personal con datos locales, sin sincronización ni
 
 ## Correcciones de esta revisión
 
-- Pagos de tarjetas y aportes a metas validan fecha, monto y saldo del mes en modo estricto dentro de una transacción. Operaciones simultáneas no pueden gastar el mismo saldo.
+- **Registro histórico de esta revisión:** pagos de tarjetas y, en el modelo vigente entonces, aportes a metas validaban fecha, monto y saldo del mes en modo estricto dentro de una transacción. La parte relativa a metas fue supersedida por Goals 2.0; los aportes actuales no consumen saldo real.
 - Cierre de mes transaccional: conserva presupuestos existentes, no duplica el arrastre y cruza diciembre/enero correctamente. La estrategia reset conserva su comportamiento actual: no genera presupuestos nuevos automáticamente.
 - Exportación/importación accesible aunque el navegador no admita OPFS.
 - Aviso de actualización disponible sin forzar una recarga ni descartar formularios.
@@ -20,7 +20,7 @@ Alcance original: aplicación personal con datos locales, sin sincronización ni
 | Área | Estado | Evidencia y alcance |
 | --- | --- | --- |
 | Cálculos y escritura de movimientos | Aprobado en casos cubiertos | Pruebas de fechas, centavos, reservas de presupuestos, modo estricto y concurrencia. |
-| Metas y pagos | Aprobado en casos cubiertos | Rechazo por saldo o fecha, tarjeta cerrada, rollback de aporte y pago/aporte simultáneos. |
+| Metas y pagos | Evidencia histórica | En esta revisión se comprobó rechazo por saldo o fecha, tarjeta cerrada, rollback de aporte y pago/aporte simultáneos. **Goals 2.0 supersede el rechazo por saldo para aportes a metas**; los pagos reales mantienen sus propias políticas de saldo. |
 | Cambio de mes | Aprobado en casos cubiertos | Diciembre/enero, exceso que reduce límite a cero, doble solicitud y mes preparado manualmente. |
 | JSON y CSV | Aprobado a nivel de servicio | Validación previa, respaldo antiguo v3, integridad de referencias, rollback y descripciones con comas/comillas/saltos. |
 | Historial amplio | Aprobado a nivel de servicio | Exportar/restaurar 10.000 gastos y conservar cantidad y total. No equivale a medir fluidez en teléfono. |
