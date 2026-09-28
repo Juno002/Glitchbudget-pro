@@ -80,7 +80,7 @@ test('Home module order is locally reorderable without changing visibility or de
   assert.deepEqual(moved.hidden,[]);
   assert.equal(moved.defaultSection,'position');
 
-  const withHidden={...DEFAULT_HOME_PREFERENCES,hidden:['budget'] as const};
+  const withHidden=normalizeHomePreferences({...DEFAULT_HOME_PREFERENCES,hidden:['budget']});
   const visibleMove=moveHomeModule(withHidden,'upcoming',-1);
   assert.deepEqual(visibleMove.order,['upcoming','budget','position','goals','investments']);
 });
