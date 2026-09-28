@@ -1,6 +1,8 @@
 # Revisión de preparación comercial — 17 de septiembre de 2026
 
-Alcance: aplicación personal con datos locales, sin cuentas, sincronización ni IA. Estado: candidata a prueba piloto; no certificada para venta general.
+Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
+
+> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras que cambiaron después quedan supersedidas por Fase 9 y Fase 10. En particular, los aportes a metas ya **no se bloquean por saldo ni mueven dinero real**; son reservas de planificación, y el progreso se deriva de `goal_contributions`. Los presupuestos ya no son solo mensuales: usan rangos semanales, mensuales, anuales y únicos sobre el mismo Period Engine. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md) y [phase-10.md](roadmap/phase-10.md).
 
 ## Correcciones de esta revisión
 
@@ -71,3 +73,12 @@ Los puertos locales 9003, 9004, 9005 y 9006 son pruebas con almacenamiento separ
 Las capturas aportadas muestran mes truncado, botón flotante sobre importes, pestañas inactivas con mayor fondo que la activa y formulario desplazado fuera de pantalla al abrir el teclado. Se abrevia el mes conservando el año, el botón de alta móvil pasa a la cabecera y las pestañas resaltan únicamente la opción activa. Los gráficos reciben títulos, nombres de categorías legibles y tooltip con superficie del tema.
 
 Los diálogos normales y de confirmación se dimensionan con visualViewport (altura y desplazamiento), con actualización al abrir teclado o desplazar la vista. Verificado en navegador a 320 × 400: diálogo entre y=16 e y=384, desplazamiento interno y aviso de categoría pendiente. Esta simulación no confirma por sí sola el comportamiento del teclado físico; queda pendiente repetir en el teléfono de las capturas.
+
+
+## Actualización canónica — Fases 9 y 10 (28 de septiembre de 2026)
+
+- **Budgets 2.0:** límites semanales, mensuales, anuales y únicos comparten un solo contrato de rango. El rollover aplica a semana/mes/año; un rango único no se repite automáticamente. Reasignar presupuesto modifica límites planificados y nunca crea transferencias de dinero real.
+- **Goals 2.0:** `saved` y `status` dejaron de persistirse en la meta. El progreso se deriva de la suma de aportes; el saldo histórico incompatible se conserva, cuando corresponde, como `legacy_balance`. Aportar a una meta puede llevar el margen de planificación a negativo y no altera efectivo, bancos ni patrimonio.
+- **Persistencia:** esquema Dexie actual v12. El respaldo JSON canónico es v8 y mantiene lectura de v3–v7; los rangos presupuestarios y el modelo de metas se validan antes de reemplazar datos.
+- **Gate integrado:** GitHub Actions `Quality checks` verificó 259/259 pruebas, typecheck, lint, guard local-only y build estático sobre el merge de Fases 9–10. El manifiesto offline final contiene 42 recursos y cada HTML conserva `connect-src 'none'`.
+- La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.

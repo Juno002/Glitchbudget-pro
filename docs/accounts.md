@@ -17,13 +17,13 @@ Mi dinero hoy usa saldos iniciales más cobros reales menos pagos reales y trans
 
 El resumen muestra Dinero en cuentas hoy (efectivo más bancos), ingresos registrados y gastos registrados del mes. Las compras con tarjeta cuentan como gasto; pagarlas reduce cuenta y deuda sin repetir el gasto. Reportes distingue resultado (ingresos menos compras) de flujo de efectivo (cobros menos gastos pagados directamente y pagos de tarjeta). El sueldo configurado no deposita dinero ni se suma a los ingresos reales. Un gasto fijo registrado afecta a la cuenta una vez; no se repite automáticamente en el historial ni en gráficos de meses posteriores. Registrar el pago real de cada período es necesario para mantener el saldo de la cuenta. Para pagos repetitivos conviene usar Suscripciones y registrar cada pago.
 
-En modo estricto, un gasto con cuenta comprueba el saldo de esa cuenta. Los movimientos antiguos sin cuenta conservan la validación mensual anterior. El historial incluye saldos iniciales, transferencias, pagos de tarjeta y aportes a metas. Los aportes a metas y el ahorro sugerido reservan presupuesto, pero no trasladan dinero físicamente; una transferencia registra un traslado entre bancos o efectivo.
+En modo estricto, un gasto con cuenta comprueba el saldo de esa cuenta. Los movimientos antiguos sin cuenta conservan la validación mensual anterior. El historial de cuentas incluye saldos iniciales, ingresos/gastos asignados, transferencias y pagos de tarjeta. **Los aportes a metas no son movimientos de cuenta y no aparecen como traslados de dinero:** reservan margen de planificación, pero no modifican efectivo, bancos ni patrimonio. El ahorro sugerido también es planificación; una transferencia sí registra un traslado real entre bancos o efectivo.
 
 ## Datos y recuperación
 
-Base de datos v8: añade accounts y account_transfers; los movimientos anteriores no reciben una cuenta automáticamente. Las nuevas relaciones son opcionales para conservar el historial.
+El esquema Dexie actual es **v12**. Históricamente, v8 introdujo `accounts` y `account_transfers`; los movimientos anteriores no recibieron una cuenta automáticamente y las relaciones opcionales conservaron el historial. Fase 10 llevó el esquema a v12 para normalizar metas sin reescribir los saldos reales.
 
-Respaldo JSON v4: conserva la cuenta de efectivo predeterminada e incluye cuentas, transferencias, referencias de movimientos y ajuste inicial de tarjetas. Se aceptan respaldos v3 antiguos, que restauran sin cuentas. Importar reemplaza el contenido actual, igual que antes. Versiones viejas de la app no pueden leer un respaldo v4; usa la versión actualizada para restaurarlo.
+El respaldo JSON canónico actual es **v8** y mantiene lectura de v3–v7. La compatibilidad de cuentas apareció originalmente en JSON v4; los respaldos actuales conservan cuentas, transferencias, referencias de movimientos, metas/aportes y rangos presupuestarios. Importar valida primero y reemplaza el contenido de forma transaccional. Para trasladar el estado completo entre versiones, usa siempre el JSON generado por la versión actual.
 
 CSV de ingresos/gastos conserva accountId; para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
 

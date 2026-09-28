@@ -6,8 +6,11 @@ Usar Node.js 22 o superior, instalar con npm ci, ejecutar npm run check y npm ru
 
 ## Recorridos del piloto
 
-- Configurar ingreso, crear presupuesto, registrar gasto, editar fecha e importe y comprobar los meses afectados.
-- Crear tarjeta, registrar compra y pago; crear meta y aporte. Intentar exceder saldo en modo estricto y comprobar que no se guardó.
+- Configurar ingreso y crear presupuestos semanal, mensual, anual y único. Registrar un gasto y comprobar que afecta cada rango que contiene su fecha sin duplicarse en el ledger. Editar fecha e importe y verificar que los rangos afectados se recalculan.
+- Probar rollover en un rango repetible y confirmar que no sobrescribe un período ya editado; comprobar que un presupuesto único no se repite automáticamente.
+- Reasignar límite entre dos categorías del mismo rango y comprobar que no cambian cuentas, ingresos, gastos ni transferencias reales.
+- Crear tarjeta, registrar compra y pago. Intentar exceder el saldo de una cuenta con un **movimiento real** en modo estricto y comprobar que no se guardó.
+- Crear meta con plazo y aporte. Confirmar que el progreso deriva de los aportes, que el aporte mensual requerido usa el período financiero y que aportar no cambia saldos de cuentas aunque el margen de planificación quede negativo.
 - Exportar JSON, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
 - Instalar app, cerrar/abrir sin conexión, registrar movimiento y volver a conectar. Publicar una actualización de prueba y verificar datos y tema conservados.
 - Recorrer claro, oscuro y minimalista con importes grandes y nombres largos, a 320/360 px y escritorio, zoom 200 % y teclado móvil.
