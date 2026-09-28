@@ -33,6 +33,8 @@ export interface Period {
     createdAt: string
 }
 
+export type TransactionNecessity = 'must' | 'need' | 'want';
+
 /** An actual recorded receipt; forecasts are never stored here. */
 export interface Income {
     recurringRuleId?: string;
@@ -47,6 +49,8 @@ export interface Income {
     currency?: string;
     fxRate?: number;
     amountBase?: number;
+    /** Optional user labels for filtering/organization. */
+    labels?: string[];
 }
 
 /** An actual dated purchase, counted once regardless of its nature. */
@@ -66,6 +70,10 @@ export interface Expense {
     debtId?: string;
     /** Origin only; never repeats this actual transaction. */
     recurringRuleId?: string;
+    /** Optional spending-necessity classification. */
+    necessity?: TransactionNecessity;
+    /** Optional user labels for filtering/organization. */
+    labels?: string[];
 }
 
 export interface Plan {
