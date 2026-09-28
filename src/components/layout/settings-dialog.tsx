@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SectionHeader } from '@/components/finance-ui';
 import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 import { QUICK_ADD_TEMPLATES_KEY } from '@/lib/quick-add-templates';
+import { HOME_PREFERENCES_KEY } from '@/lib/home-preferences';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
@@ -39,6 +40,7 @@ export function SettingsDialog() {
     periodStartDay, setPeriodStartDay,
     rolloverStrategy, setRolloverStrategy,
     baseIncome, setBaseIncome,
+    savePct, updateSettings,
     resetSettings, isWorking,
   } = useFinances();
   const { toast } = useToast();
@@ -56,6 +58,7 @@ export function SettingsDialog() {
       localStorage.removeItem('glitchbudget_achievements');
       localStorage.removeItem('glitchbudget_contribution_streak');
       localStorage.removeItem(QUICK_ADD_TEMPLATES_KEY);
+      localStorage.removeItem(HOME_PREFERENCES_KEY);
       await resetSettings();
       toast({ title:'Datos eliminados', description:'Todos los datos han sido borrados. La página se recargará.' });
       setTimeout(() => window.location.reload(), 1500);
@@ -178,6 +181,29 @@ export function SettingsDialog() {
                 <Input type="number" min="0" step="0.01" value={baseAmount} onChange={e => setBaseAmount(e.target.value)} placeholder="0.00" />
               </div>
               <Button variant="outline" onClick={() => setBaseIncome({ freq:baseFreq as 'mensual'|'quincenal'|'semanal', amount:Number(baseAmount) })}>Guardar ingreso previsto</Button>
+            </div>
+
+            <div className="space-y-3 border-t pt-5">
+              <h3 className="font-semibold">Ahorro sugerido</h3>
+              <p className="text-xs text-muted-foreground">Referencia de planificación. Cambiarla no mueve dinero ni modifica el ledger.</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  ['Ninguno 0%',0],
+                  ['Conservador 5%',0.05],
+                  ['Estándar 10%',0.10],
+                  ['Agresivo 20%',0.20],
+                ].map(([label,value]) => (
+                  <Button
+                    key={String(value)}
+                    type="button"
+                    size="sm"
+                    variant={Math.abs(savePct-Number(value))<0.001?'default':'outline'}
+                    onClick={()=>void updateSettings({savePct:Number(value)})}
+                  >
+                    {String(label)}
+                  </Button>
+                ))}
+              </div>
             </div>
           </TabsContent>
 

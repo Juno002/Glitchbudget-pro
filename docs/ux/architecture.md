@@ -32,12 +32,13 @@ Esos conceptos viven dentro de una de las cuatro áreas o en navegación secunda
 ### Responsabilidad
 
 **Resumen**
-- situación financiera actual;
+- read model de situación financiera actual;
 - presupuesto restante;
 - próximos movimientos planificados;
-- metas/inversiones relevantes;
-- actividad reciente;
-- señales que requieran atención.
+- metas relevantes;
+- inversiones relevantes;
+- señales que requieran atención;
+- personalización local de visibilidad/orden sin alterar el dominio.
 
 **Movimientos**
 - actividad financiera real;
@@ -95,27 +96,44 @@ No contiene Tarjetas como cuarto subtab.
 
 ## 3. Jerarquía de Resumen
 
-Orden objetivo:
+Fase 14 fija Home 2.0 como **read model**, no como otra fuente de cálculos.
+
+Orden por defecto:
 
 ```text
 1. Posición financiera
-2. Presupuesto restante
-3. Próximos planificados
-4. Metas / inversiones relevantes
-5. Movimientos recientes
+2. Presupuesto disponible
+3. Próximos pagos
+4. Metas relevantes
+5. Inversiones
 ```
 
 La posición financiera diferencia:
 
 ```text
 Disponible líquido
+Inversiones registradas
 Deuda
 Patrimonio neto
 ```
 
-El crédito disponible nunca se presenta como dinero propio.
+El crédito disponible nunca se presenta como dinero propio. El rendimiento futuro estimado tampoco entra en patrimonio.
 
-Resumen es “status + action”, no “analysis + exploration”. Los donuts de categoría deben salir progresivamente de Resumen y vivir en Reportes.
+Resumen consume `selectReportsSnapshot` y compone el resto mediante `selectHomeReadModel`; no duplica fórmulas de Reports, Budgets, Goals, Planned Occurrences o Investments.
+
+Movimientos recientes sale de Home: el historial real vive en Movimientos. La preferencia de ahorro sugerido se administra desde Ajustes → Finanzas.
+
+Home permite personalización **solo local**:
+
+```text
+show/hide
+reorder
+default opening section
+```
+
+Se guarda en `localStorage`, no en Dexie ni backups, y nunca permite ocultar todos los módulos.
+
+Resumen sigue siendo “status + action”, no “analysis + exploration”. El análisis histórico y por categoría vive en Reportes.
 
 ## 4. Jerarquía de Movimientos
 
@@ -270,6 +288,7 @@ Acerca de
 
 **Finanzas**
 - ingreso previsto;
+- ahorro sugerido;
 - rollover;
 - protección de saldo;
 - comportamiento al exceder presupuesto.
@@ -423,5 +442,5 @@ Si una decisión UX requiere alterar esas reglas, se detiene y se trata como cam
 - Fase 10 Goals 2.0 vive dentro de Plan → Metas.
 - Fase 12 Investments está implementada sin crear pestaña primaria; vive como activo secundario dentro de Movimientos y en la posición financiera de Resumen.
 - Fase 13 Reports 2.0 está implementada con rangos y selectors compartidos con Resumen.
-- Fase 14 Home 2.0 refina la jerarquía definida aquí sin volver a decidir fórmulas de Reports.
+- Fase 14 Home 2.0 está implementada como read model de cinco módulos, con personalización local y sin volver a decidir fórmulas de Reports.
 - Fase 17 añade app lock/auto-lock y seguridad adicional; balancesHidden ya existe como preferencia visual local.

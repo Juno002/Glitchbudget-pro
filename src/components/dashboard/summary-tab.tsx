@@ -1,67 +1,108 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { Settings2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
-import { formatPeriodRange } from '@/lib/period-format';
-import { PageHeader, SectionHeader, MetricCard, EmptyState, PlannedPaymentRow, ProgressMetric, TransactionRow } from '@/components/finance-ui';
+import { PageHeader, SectionHeader, MetricCard, EmptyState, PlannedPaymentRow, ProgressMetric } from '@/components/finance-ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import BudgetStatus from './budget-status';
-import { cn } from '@/lib/utils';
-import { groupUpcomingOccurrences } from '@/domain/upcoming';
-import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { localDate } from '@/lib/finance-calculations';
-import { useCategoryResolver } from '@/hooks/use-categories';
 import { useTabs } from '@/contexts/tabs-context';
-import { goalFundingSchedule } from '@/domain/goals';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { selectHomeReadModel, type HomeModuleId } from '@/domain/home';
+import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
+import { useHomePreferences } from '@/hooks/use-home-preferences';
+import { HOME_MODULES } from '@/lib/home-preferences';
+import { formatPeriodRange } from '@/lib/period-format';
 
-function formatMonth(value: string) {
-  return format(new Date(`${value}-02`), 'MMMM', { locale:es });
+function dateLabel(value:string) {
+  return new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
 }
 
-function dateLabel(value: string) {
-  return new Intl.DateTimeFormat('es-DO', { day:'numeric', month:'short' }).format(new Date(`${value}T12:00:00`));
-}
-
-function SaveStrategy() {
-  const { savePct, updateSettings } = useFinances();
-  const options = [
-    { label:'Ninguno 0%', value:0 },
-    { label:'Conservador 5%', value:0.05 },
-    { label:'Estándar 10%', value:0.10 },
-    { label:'Agresivo 20%', value:0.20 },
-  ];
-
+function HomePreferencesDialog({
+  visibleOrder,
+  hidden,
+  defaultSection,
+  onHiddenChange,
+  onMove,
+  onDefaultChange,
+  onReset,
+}: {
+  visibleOrder:HomeModuleId[];
+  hidden:HomeModuleId[];
+  defaultSection:HomeModuleId;
+  onHiddenChange:(id:HomeModuleId,hidden:boolean)=>void;
+  onMove:(id:HomeModuleId,direction:-1|1)=>void;
+  onDefaultChange:(id:HomeModuleId)=>void;
+  onReset:()=>void;
+}) {
+  const visibleCount=HOME_MODULES.length-hidden.length;
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map(option => {
-        const active = Math.abs(savePct - option.value) < 0.001;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => updateSettings({ savePct:option.value })}
-            className={cn(
-              'rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-              active
-                ? 'border-primary/30 bg-primary/10 text-primary'
-                : 'border-border text-muted-foreground hover:bg-muted/30 hover:text-foreground',
-            )}
-          >
-            {option.label}
-          </button>
-        );
-      })}
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-2 h-4 w-4" />Personalizar Home</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Personalizar Home</DialogTitle>
+          <DialogDescription>La preferencia se guarda solo en este navegador. No cambia datos ni cálculos financieros.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Mostrar y ordenar módulos</p>
+            {HOME_MODULES.map(module=>{
+              const isHidden=hidden.includes(module.id);
+              const orderIndex=visibleOrder.indexOf(module.id);
+              return (
+                <div key={module.id} className="flex items-center gap-2 rounded-lg border p-3">
+                  <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!isHidden}
+                      disabled={!isHidden && visibleCount===1}
+                      onChange={event=>onHiddenChange(module.id,!event.target.checked)}
+                      aria-label={'Mostrar '+module.label}
+                    />
+                    <span>{module.label}</span>
+                  </label>
+                  <Button type="button" size="icon" variant="ghost" disabled={isHidden || orderIndex<=0} aria-label={'Subir '+module.label} onClick={()=>onMove(module.id,-1)}>
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" size="icon" variant="ghost" disabled={isHidden || orderIndex<0 || orderIndex===visibleOrder.length-1} aria-label={'Bajar '+module.label} onClick={()=>onMove(module.id,1)}>
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <label className="block space-y-2 text-sm">
+            <span className="font-medium">Sección inicial al abrir Home</span>
+            <select
+              className="h-10 w-full rounded-md border border-input bg-background px-3"
+              value={defaultSection}
+              onChange={event=>onDefaultChange(event.target.value as HomeModuleId)}
+            >
+              {HOME_MODULES.filter(module=>!hidden.includes(module.id)).map(module=><option key={module.id} value={module.id}>{module.label}</option>)}
+            </select>
+            <span className="block text-xs text-muted-foreground">Al entrar a Home se enfoca esta sección. El orden general se conserva por separado.</span>
+          </label>
+          <Button type="button" variant="outline" onClick={onReset}>Restablecer Home</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
+}
+
+function HomeSection({id,children}:{id:HomeModuleId;children:ReactNode}) {
+  return <section id={'home-'+id} className="scroll-mt-24 space-y-3" data-home-module={id}>{children}</section>;
 }
 
 export default function SummaryTab() {
   const {
     getReportSnapshot,
+    getBudgetStatusDetails,
     loading,
     currentMonth,
     currentPeriod,
@@ -71,210 +112,186 @@ export default function SummaryTab() {
     confirmPlannedOccurrenceItem,
     skipPlannedOccurrenceItem,
     goals,
-    incomes,
-    expenses,
-    debtPayments,
-    goalContributions,
-    accountTransfers,
-  } = useFinances();
-  const { setActiveTab, setPlanningTab } = useTabs();
-  const getCategoryInfo = useCategoryResolver();
-  const [periodLabel, setPeriodLabel] = useState('');
-  const today = localDate();
-  const money = usePrivateCurrency();
+    investments,
+  }=useFinances();
+  const {activeTab,setActiveTab,setPlanningTab}=useTabs();
+  const money=usePrivateCurrency();
+  const today=localDate();
+  const preferences=useHomePreferences();
+  const previousActive=useRef<string|null>(null);
 
-  useEffect(() => {
-    setPeriodLabel(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
-  }, [currentMonth, currentPeriod, periodStartDay]);
+  const home=useMemo(()=>selectHomeReadModel({
+    report:getReportSnapshot(currentPeriod, today),
+    budgetDetails:getBudgetStatusDetails(currentMonth),
+    plannedOccurrences:plannedOccurrences||[],
+    recurringRules:recurringRules||[],
+    goals:goals||[],
+    investments:investments||[],
+    today,
+    periodStartDay,
+  }),[
+    getReportSnapshot,getBudgetStatusDetails,currentPeriod,currentMonth,plannedOccurrences,recurringRules,goals,investments,today,periodStartDay,
+  ]);
 
-  const position = getReportSnapshot(currentPeriod, today).netWorth;
-  const rulesById = useMemo(() => new Map((recurringRules || []).map(rule => [rule.id, rule])), [recurringRules]);
-  const upcoming = useMemo(() => {
-    const groups = groupUpcomingOccurrences(plannedOccurrences || [], today);
-    return [...groups.overdue, ...groups.today, ...groups.tomorrow, ...groups.next7].slice(0, 3);
-  }, [plannedOccurrences, today]);
+  useEffect(()=>{
+    const entering=activeTab==='summary' && previousActive.current!=='summary';
+    previousActive.current=activeTab;
+    if(!entering || !preferences.ready) return;
+    const id=preferences.preferences.defaultSection;
+    const timer=window.setTimeout(()=>document.getElementById('home-'+id)?.scrollIntoView({behavior:'smooth',block:'start'}),0);
+    return ()=>window.clearTimeout(timer);
+  },[activeTab,preferences.ready,preferences.preferences.defaultSection]);
 
-  const goalHighlights = useMemo(
-    () => [...(goals || [])]
-      .filter(goal => goal.status === 'active')
-      .sort((a, b) => (a.date || '9999-12-31').localeCompare(b.date || '9999-12-31') || a.name.localeCompare(b.name, 'es'))
-      .slice(0, 2),
-    [goals],
-  );
+  const goToAccounts=()=>{
+    setActiveTab('movements');
+    window.setTimeout(()=>document.getElementById('accounts-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
+  };
+  const goToInvestments=()=>{
+    setActiveTab('movements');
+    window.setTimeout(()=>document.getElementById('investments-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
+  };
 
-  const recent = useMemo(() => {
-    const rows = [
-      ...(incomes || []).map(row => ({ id:row.id, kind:'income' as const, title:row.description || 'Ingreso', amount:row.amount, date:row.date, categoryId:row.categoryId })),
-      ...(expenses || []).map(row => ({ id:row.id, kind:'expense' as const, title:row.concept || 'Gasto', amount:row.amount, date:row.date, categoryId:row.categoryId })),
-      ...(accountTransfers || []).map(row => ({ id:row.id, kind:'transfer' as const, title:row.note || 'Transferencia', amount:row.amount, date:row.date, categoryId:'' })),
-      ...(debtPayments || []).map(row => ({ id:row.id, kind:'payment' as const, title:'Pago de tarjeta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
-      ...(goalContributions || []).filter(row => row.kind !== 'legacy_balance').map(row => ({ id:row.id, kind:'saving' as const, title:'Aporte a meta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
-    ];
-    return rows.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, 5);
-  }, [incomes, expenses, accountTransfers, debtPayments, goalContributions]);
-
-  return (
-    <div className="space-y-7">
-      <PageHeader
-        title="Resumen"
-        description={periodStartDay === 1 ? `Situación actual y actividad de ${periodLabel}.` : `Situación actual · ${periodLabel}.`}
-      />
-
-      <section className="space-y-3" aria-labelledby="position-title">
+  const modules:Record<HomeModuleId,ReactNode>={
+    position:(
+      <HomeSection id="position">
         <SectionHeader
-          title={<span id="position-title">Posición financiera</span>}
-          description="Lo que tienes disponible, lo que debes y tu patrimonio registrado."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => {
-            setActiveTab('movements');
-            setTimeout(() => document.getElementById('accounts-section')?.scrollIntoView({ behavior:'smooth', block:'start' }), 0);
-          }}>Ver cuentas</Button>}
+          title="Posición financiera"
+          description="¿Cuánto tienes y cuánto debes ahora?"
+          actions={<Button type="button" variant="outline" size="sm" onClick={goToAccounts}>Ver cuentas</Button>}
         />
-        {loading ? (
+        {loading ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map(i=><Skeleton key={i} className="h-24 w-full" />)}</div> : (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[0,1,2].map(index => <Skeleton key={index} className="h-24 w-full" />)}
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-3">
-            <MetricCard
-              label="Disponible líquido"
-              amount={position.liquidAssets}
-              tone={position.liquidAssets < 0 ? 'negative' : 'positive'}
-              supporting="Efectivo + bancos registrados. No incluye crédito disponible."
-            />
-            <MetricCard
-              label="Inversiones registradas"
-              amount={position.investments}
-              tone={position.investments > 0 ? 'positive' : 'neutral'}
-              supporting="Valor registrado actual. No incluye rendimientos futuros estimados."
-            />
-            <MetricCard
-              label="Deuda de tarjetas"
-              amount={position.creditCardLiabilities}
-              tone={position.creditCardLiabilities > 0 ? 'negative' : 'neutral'}
-              supporting="Saldo adeudado en tarjetas registradas."
-            />
-            <MetricCard
-              label="Patrimonio neto"
-              amount={position.netWorth}
-              tone={position.netWorth < 0 ? 'negative' : 'neutral'}
-              supporting="Liquidez + inversiones registradas + saldo a favor en tarjetas − deuda. Las proyecciones no se suman."
-            />
+            <MetricCard label="Disponible líquido" amount={home.position.liquidAssets} tone={home.position.liquidAssets<0?'negative':'positive'} supporting="Efectivo + bancos. No incluye crédito disponible." />
+            <MetricCard label="Inversiones" amount={home.position.investments} tone={home.position.investments>0?'positive':'neutral'} supporting="Valor registrado real; sin rendimiento estimado." />
+            <MetricCard label="Debes" amount={home.position.liabilities} tone={home.position.liabilities>0?'negative':'neutral'} supporting="Pasivo real de tarjetas registradas." />
+            <MetricCard label="Patrimonio neto" amount={home.position.netWorth} tone={home.position.netWorth<0?'negative':'neutral'} supporting="Misma fórmula compartida con Reportes." />
           </div>
         )}
-      </section>
-
-      <section className="space-y-3" aria-labelledby="budget-title">
+      </HomeSection>
+    ),
+    budget:(
+      <HomeSection id="budget">
         <SectionHeader
-          title={<span id="budget-title">Presupuesto disponible</span>}
-          description="Prioriza cuánto te queda, no un gráfico decorativo."
+          title="Presupuesto disponible"
+          description="¿Cuánto puedes gastar dentro de tus límites actuales?"
+          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos</Button>}
         />
-        <BudgetStatus />
-      </section>
-
-      <section className="space-y-3" aria-labelledby="upcoming-title">
+        {home.budget.configuredCount ? (
+          <Card><CardContent className="grid gap-4 pt-6 sm:grid-cols-3">
+            <MetricCard label="Restante" amount={home.budget.remaining} tone={home.budget.remaining<0?'negative':'neutral'} supporting={'de '+money(home.budget.limit)+' presupuestados'} />
+            <MetricCard label="Gastado" amount={home.budget.spent} tone={home.budget.overCount>0?'negative':'neutral'} supporting={home.budget.configuredCount+' categorías con límite'} />
+            <div className="rounded-xl border p-4">
+              <p className="text-xs text-muted-foreground">Estado</p>
+              <p className="mt-2 text-lg font-semibold">{home.budget.status==='over'?'Excedido':home.budget.status==='alert'?'Requiere atención':'En presupuesto'}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{home.budget.overCount>0?home.budget.overCount+' presupuestos excedidos':home.budget.alertCount>0?home.budget.alertCount+' cerca del límite':'Sin alertas de presupuesto'}</p>
+            </div>
+          </CardContent></Card>
+        ) : <EmptyState title="Aún no tienes presupuestos" description="Crea límites en Plan → Presupuestos para que Home pueda responder cuánto te queda." />}
+      </HomeSection>
+    ),
+    upcoming:(
+      <HomeSection id="upcoming">
         <SectionHeader
-          title={<span id="upcoming-title">Próximos pagos</span>}
-          description="Solo lo que viene pronto o ya requiere atención."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => { setPlanningTab('subscriptions'); setActiveTab('planning'); }}>Ver Plan</Button>}
+          title="Próximos pagos"
+          description="¿Qué viene y qué ya requiere atención?"
+          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan</Button>}
         />
-        {upcoming.length ? (
+        {home.upcoming.rows.length ? (
           <div className="grid gap-2">
-            {upcoming.map(occurrence => {
-              const rule = rulesById.get(occurrence.ruleId);
-              if (!rule) return null;
-              const status = occurrenceDisplayStatus(occurrence, today);
-              return (
-                <PlannedPaymentRow
-                  key={occurrence.id}
-                  title={rule.title}
-                  amount={rule.amount}
-                  dateLabel={dateLabel(occurrence.scheduledDate)}
-                  kindLabel={rule.direction === 'expense' ? 'Gasto' : 'Ingreso'}
-                  status={status}
-                  actions={{
-                    confirm: () => { void confirmPlannedOccurrenceItem(occurrence.id); },
-                    skip: () => { void skipPlannedOccurrenceItem(occurrence.id); },
-                  }}
-                />
-              );
-            })}
+            {home.upcoming.rows.map(({occurrence,rule})=>(
+              <PlannedPaymentRow
+                key={occurrence.id}
+                title={rule.title}
+                amount={rule.amount}
+                dateLabel={dateLabel(occurrence.scheduledDate)}
+                kindLabel={rule.direction==='expense'?'Gasto':'Ingreso'}
+                status={occurrenceDisplayStatus(occurrence,today)}
+                actions={{
+                  confirm:()=>{void confirmPlannedOccurrenceItem(occurrence.id);},
+                  skip:()=>{void skipPlannedOccurrenceItem(occurrence.id);},
+                }}
+              />
+            ))}
           </div>
-        ) : (
-          <EmptyState title="Nada próximo" description="No hay pagos o ingresos planificados pendientes que requieran atención en los próximos 7 días." />
-        )}
-      </section>
-
-      <section className="space-y-3" aria-labelledby="goals-title">
+        ) : <EmptyState title="Nada próximo" description="No hay pagos o ingresos planificados pendientes en los próximos 7 días." />}
+      </HomeSection>
+    ),
+    goals:(
+      <HomeSection id="goals">
         <SectionHeader
-          title={<span id="goals-title">Metas relevantes</span>}
-          description="Solo objetivos activos que pueden requerir una acción."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => { setPlanningTab('goals'); setActiveTab('planning'); }}>Ver metas</Button>}
+          title="Metas relevantes"
+          description="Objetivos activos que pueden requerir una acción."
+          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas</Button>}
         />
-        {goalHighlights.length ? (
+        {home.goals.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
-            {goalHighlights.map(goal => (
-              <div key={goal.id} className="rounded-xl border p-4">
+            {home.goals.map(({goal,remaining,schedule})=>(
+              <Card key={goal.id}><CardContent className="pt-6">
                 <ProgressMetric
                   label={goal.name}
                   current={goal.saved}
                   total={goal.target}
                   currentLabel="Ahorrado"
-                  supporting={goal.date ? `Aporte mensual requerido: ${money(goalFundingSchedule(Math.max(0, goal.target-goal.saved), goal.date, today, {periodStartDay}).requiredMonthly!)}` : 'Define una fecha límite en Plan para calcular el aporte mensual.'}
-                  remaining={Math.max(0, goal.target - goal.saved)}
-                  status={goal.saved >= goal.target ? 'success' : 'neutral'}
-                  statusLabel={goal.date ? `Para ${dateLabel(goal.date)}` : 'Sin fecha límite'}
+                  remaining={remaining}
+                  supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporte mensual requerido: '+money(schedule.requiredMonthly)}
+                  status={schedule.overdue?'danger':'neutral'}
+                  statusLabel={goal.date?'Para '+dateLabel(goal.date):'Sin fecha límite'}
                 />
-              </div>
+              </CardContent></Card>
             ))}
           </div>
-        ) : (
-          <EmptyState title="Aún no tienes metas activas" description="Crea una meta en Plan → Metas para calcular y seguir tu progreso." />
-        )}
-      </section>
-
-      <section className="space-y-3" aria-labelledby="recent-title">
+        ) : <EmptyState title="Aún no tienes metas activas" description="Crea una meta en Plan → Metas para seguirla desde Home." />}
+      </HomeSection>
+    ),
+    investments:(
+      <HomeSection id="investments">
         <SectionHeader
-          title={<span id="recent-title">Movimientos recientes</span>}
-          description="Un vistazo rápido a la actividad real más reciente."
-          actions={<Button type="button" variant="outline" size="sm" onClick={() => setActiveTab('movements')}>Ver todos</Button>}
+          title="Inversiones"
+          description="Activos no líquidos y próximos vencimientos."
+          actions={<Button type="button" variant="outline" size="sm" onClick={goToInvestments}>Ver inversiones</Button>}
         />
-        {recent.length ? (
-          <div className="space-y-2">
-            {recent.map(item => {
-              const category = item.categoryId ? getCategoryInfo(item.categoryId) : undefined;
-              const Icon = category?.icon;
-              const tone = item.kind === 'income' ? 'positive' : item.kind === 'expense' ? 'negative' : 'neutral';
-              const meta = category?.name || (item.kind === 'transfer' ? 'Transferencia entre cuentas' : item.kind === 'payment' ? 'Reduce deuda; no repite el gasto' : item.kind === 'saving' ? 'Seguimiento de meta' : undefined);
-              return (
-                <TransactionRow
-                  key={`${item.kind}-${item.id}`}
-                  title={item.title}
-                  meta={meta}
-                  amount={item.amount}
-                  tone={tone}
-                  dateLabel={dateLabel(item.date)}
-                  icon={Icon ? <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg', item.kind === 'income' ? 'bg-good/10 text-good' : item.kind === 'expense' ? 'bg-bad/10 text-bad' : 'bg-muted/20 text-muted-foreground')}><Icon className="h-4 w-4" /></div> : undefined}
-                  onClick={() => setActiveTab('movements')}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState title="Aún no hay movimientos" description="El botón + está disponible desde cualquier área para registrar tu primera operación." />
-        )}
-      </section>
+        {home.investments.activeCount ? (
+          <Card><CardContent className="space-y-4 pt-6">
+            <MetricCard label="Valor registrado" amount={home.investments.totalRegistered} tone="neutral" supporting={home.investments.activeCount+' inversiones activas · sin proyecciones futuras'} />
+            <div className="space-y-2 border-t pt-4">
+              {home.investments.rows.map(({investment,projection})=>(
+                <div key={investment.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
+                  <div>
+                    <p className="font-medium">{investment.name}</p>
+                    <p className="text-xs text-muted-foreground">{investment.maturityDate ? 'Vence '+dateLabel(investment.maturityDate) : 'Sin vencimiento registrado'}</p>
+                  </div>
+                  <p className={projection.maturityReached?'font-medium text-warning':'text-muted-foreground'}>{projection.maturityReached?'Revisar vencimiento':projection.daysRemaining===null?'Sin fecha':projection.daysRemaining+' días'}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent></Card>
+        ) : <EmptyState title="Aún no hay inversiones" description="Registra certificados o depósitos a plazo desde Movimientos → Inversiones." />}
+      </HomeSection>
+    ),
+  };
 
-      <section className="space-y-3 border-t pt-6" aria-labelledby="saving-title">
-        <SectionHeader
-          title={<span id="saving-title">Preferencia de ahorro sugerido</span>}
-          description="Una referencia de planificación; cambiarla no mueve dinero."
-        />
-        <SaveStrategy />
-      </section>
+  return (
+    <div className="space-y-7 pb-24 md:pb-8">
+      <PageHeader
+        title="Resumen"
+        description={<>
+          <span>Lo importante ahora · {formatPeriodRange(currentPeriod)}.</span>
+          <span className="ml-2">{home.attentionCount>0 ? home.attentionCount+' elementos requieren atención.' : 'Sin alertas críticas.'}</span>
+        </>}
+        actions={<HomePreferencesDialog
+          visibleOrder={preferences.visibleOrder}
+          hidden={preferences.preferences.hidden}
+          defaultSection={preferences.preferences.defaultSection}
+          onHiddenChange={preferences.setHidden}
+          onMove={preferences.move}
+          onDefaultChange={preferences.setDefaultSection}
+          onReset={preferences.reset}
+        />}
+      />
 
-      <p className="text-xs text-muted-foreground">
-        El análisis histórico y por categoría vive en Reportes.
-      </p>
+      {preferences.visibleOrder.map(id=><div key={id}>{modules[id]}</div>)}
+
+      <p className="text-xs text-muted-foreground">Home es un read model: análisis histórico y por categoría vive en Reportes; edición detallada vive en Plan y Movimientos.</p>
     </div>
   );
 }

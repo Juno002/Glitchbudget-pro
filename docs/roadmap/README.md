@@ -1,5 +1,17 @@
 # Roadmap: documentación vigente
 
+## Fase 14 — Home 2.0 completada
+
+Fase 14 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-14.md](phase-14.md).
+
+Home utiliza un read model explícito en `src/domain/home.ts` y consume los selectors financieros ya estabilizados. La superficie principal queda limitada a **Posición, Presupuesto, Próximos, Metas e Inversiones**. Movimientos recientes sale de Home y la preferencia de ahorro se traslada a Ajustes → Finanzas.
+
+La personalización **show/hide + reorder + default opening section** vive únicamente en `localStorage`; no altera Dexie ni backups. Fase 14 no cambia persistencia: se mantiene **Dexie v14 / JSON v10**.
+
+El gate `Quality checks` run `36468191021` verificó **292/292 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 14 cerrada. **Fase 15 — Transaction Metadata + filtros no se ha iniciado** y no queda autorizada por continuidad implícita.
+
 ## Fase 13 — Reports 2.0 completada
 
 Fase 13 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-13.md](phase-13.md).
@@ -10,7 +22,7 @@ Rangos implementados: **7D, 30D, 3M, 6M, 1Y y Custom**. El previous comparable p
 
 Fase 13 no cambia persistencia: se mantiene **Dexie v14 / JSON v10**. El gate `Quality checks` run `36458493360` verificó **286/286 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 13 cerrada. **Fase 14 — Home 2.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+Fase 13 queda como fundamento analítico vigente del read model de Home 2.0.
 
 ## Fase 12 — Investments 1.0 completada
 

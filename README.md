@@ -2,15 +2,15 @@
 
 ## Estado del roadmap
 
-**Fase 13 — Reports 2.0 completada técnicamente el 2026-09-28.** Reportes ofrece rangos 7D/30D/3M/6M/1Y/Custom, Spending, Cash Flow, Net Worth y comparación contra un período inmediatamente anterior de igual duración. Resumen y Reportes consumen los mismos selectors de dominio. Persistencia permanece en Dexie v14 / JSON v10 y el gate verificó **286/286 pruebas**. **Fase 14 — Home 2.0 no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 13](docs/roadmap/phase-13.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 14 — Home 2.0 completada técnicamente el 2026-09-28.** Home es ahora un read model de cinco módulos —Posición, Presupuesto, Próximos, Metas e Inversiones— construido sobre selectors existentes, con personalización local de visibilidad, orden y sección inicial. Persistencia financiera permanece en Dexie v14 / JSON v10 y el gate verificó **292/292 pruebas**. **Fase 15 — Transaction Metadata + filtros no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 14](docs/roadmap/phase-14.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
 ## ✨ Características Principales
 
-- **Resumen:** Posición financiera, presupuesto restante, próximos pagos, metas y movimientos recientes. El análisis por categoría se consulta en Reportes.
+- **Home 2.0:** Read model compacto con Posición financiera, Presupuesto disponible, Próximos pagos, Metas relevantes e Inversiones. Puede mostrar/ocultar, reordenar y elegir una sección inicial sin alterar cálculos financieros.
 - **Modo Minimalista ("Serious Mode"):** Una interfaz ultra-limpia, en escala de grises y sin distracciones para quienes prefieren un enfoque profesional y sobrio en sus finanzas.
-- **Estrategias de Ahorro Rápidas:** Alterna el objetivo de ahorro general entre un 0% (sin forzar), 5%, 10% o 20% con un solo toque desde tu resumen mensual.
+- **Ahorro sugerido:** Configura 0%, 5%, 10% o 20% desde Ajustes → Finanzas como referencia de planificación; no mueve dinero.
 - **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
 - **Planificación Inteligente:**
     - **Presupuestos por Categoría:** Asigna límites semanales, mensuales, anuales o de rango único. Cada presupuesto muestra límite, gastado, restante, porcentaje y estado sobre el mismo Period Engine.
@@ -34,7 +34,7 @@
 El diseño de la aplicación sigue un ciclo financiero lógico:
 
 1. **Registra operaciones:** El botón global Nuevo movimiento abre el mismo compositor para ingresos, gastos y transferencias.
-2. **Consulta Resumen:** Revisa tu posición financiera y las acciones pendientes.
+2. **Consulta Resumen:** Responde rápido cuánto tienes, cuánto debes, cuánto puedes gastar, qué viene y qué requiere atención.
 3. **Consulta Movimientos:** Busca y filtra el historial real; cuentas y tarjetas quedan como gestión secundaria.
 4. **Organiza Plan:** Presupuestos, Metas y Planificados.
 5. **Analiza en Reportes:** Elige un rango y revisa Spending, Cash Flow, Net Worth, categorías, transacciones mayores y comparación con el rango anterior. Gestiona categorías y preferencias desde Ajustes.
