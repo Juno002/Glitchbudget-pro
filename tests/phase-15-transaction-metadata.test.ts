@@ -49,6 +49,7 @@ test('labels are trimmed, deduplicated case-insensitively and capped without inv
 
 test('expense necessity and labels plus income labels persist through transaction services',async()=>{
   const cash=await ensureCashAccount(today);
+  await db.accounts.update(cash.id,{openingBalance:100_000});
   await saveExpense({
     id:'e',accountId:cash.id,nature:'Variable',concept:'Compra',amount:12.34,date:today,
     categoryId:'food',paymentMethod:'cash',necessity:'need',labels:[' casa ','Casa','semana'],
@@ -112,6 +113,7 @@ test('quick-add templates preserve selective metadata without adding automation'
 
 test('JSON v11 round-trips metadata and legacy v10 imports without inventing it',async()=>{
   const cash=await ensureCashAccount(today);
+  await db.accounts.update(cash.id,{openingBalance:100_000});
   await saveExpense({
     id:'e',accountId:cash.id,nature:'Ocasional',concept:'Cena',amount:15,date:today,
     categoryId:'food',paymentMethod:'cash',necessity:'want',labels:['salida','amigos'],
@@ -144,6 +146,7 @@ test('JSON v11 round-trips metadata and legacy v10 imports without inventing it'
 
 test('CSV exports and restores necessity and labels while legacy columns remain optional',async()=>{
   const cash=await ensureCashAccount(today);
+  await db.accounts.update(cash.id,{openingBalance:100_000});
   await saveExpense({
     id:'e',accountId:cash.id,nature:'Fijo',concept:'Internet',amount:20,date:today,
     categoryId:'other',paymentMethod:'cash',necessity:'must',labels:['casa','internet'],
