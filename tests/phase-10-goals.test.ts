@@ -128,15 +128,16 @@ async function legacyDatabase(name:string, saved:number) {
   old.close();
 }
 
-test('Dexie v11 upgrades to v12 with canonical goal contributions and unchanged real accounts', async () => {
+test('Dexie v11 upgrades through v13 with canonical goal contributions and currency-normalized real accounts', async () => {
   const name = 'phase10-migration-'+crypto.randomUUID();
   await legacyDatabase(name,500);
   const current = new GlitchBudgetDB(name);
   try {
-    await current.open(); assert.equal(current.verno,12);
+    await current.open(); assert.equal(current.verno,13);
     assert.deepEqual(await current.goals.get(goal.id),goal);
     assert.equal(goalSaved(goal.id,await current.goal_contributions.toArray()),500);
     assert.equal((await current.accounts.get('cash'))?.openingBalance,12345);
+    assert.equal((await current.accounts.get('cash'))?.currency,'DOP');
     current.close(); await current.open();
     assert.equal(await current.goal_contributions.count(),2);
   } finally { await current.delete(); }
