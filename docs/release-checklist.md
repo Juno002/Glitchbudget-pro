@@ -14,7 +14,7 @@ Usar Node.js 22 o superior, instalar con npm ci, ejecutar npm run check y npm ru
 - En una base limpia, cambiar la moneda base y confirmar que Efectivo/cuentas nuevas adoptan el nuevo código sin modificar importes.
 - Con cualquier importe financiero ya registrado, intentar cambiar la moneda base: debe rechazarse sin alterar ajustes, cuentas ni movimientos.
 - Confirmar que una transferencia entre cuentas de monedas distintas es rechazada mientras no exista tasa manual; no debe aparecer ingreso, gasto ni transferencia parcial.
-- Exportar JSON v9, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
+- Exportar JSON v10, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
 - Importar un backup legacy v8 y comprobar que cuentas/movimientos adoptan la moneda base, fxRate 1 y amountBase equivalente al importe histórico.
 - Importar CSV de ingreso/gasto con metadatos de otra moneda y una cuenta base válida: el registro final debe normalizarse a la moneda de la cuenta, no conservar una tasa inyectada.
 - Instalar app, cerrar/abrir sin conexión, registrar movimiento y volver a conectar. Publicar una actualización de prueba y verificar datos y tema conservados.
@@ -31,3 +31,11 @@ Elegir Android/iOS/escritorio soportados, canal y dirección definitiva, precio/
 ## Criterio de salida
 
 Completar la matriz de quality-review.md, no dejar incidencias críticas de pérdida de datos, probar recuperación y documentar limitaciones conocidas. La aplicación seguirá necesitando mantenimiento tras la venta.
+
+- Registrar una inversión que ya existía: comprobar que su valor actual aparece como activo inicial, sin ingreso ni transferencia.
+- Registrar una inversión nueva desde un banco: comprobar Banco − principal, Inversión + principal, gasto = 0, ingreso = 0 y patrimonio neto sin cambio.
+- Intentar abrir una inversión nueva sin fondos en modo protegido: no debe quedar cuenta, inversión ni transferencia parcial.
+- Confirmar que una cuenta de inversión no aparece en selectores de ingreso/gasto/pago y que la transferencia genérica no permite retirar ni añadir capital.
+- Para una inversión con tasa y vencimiento, verificar Principal, Tasa, Apertura, Vencimiento, Tiempo transcurrido, Días restantes, Valor al vencimiento e Interés estimado.
+- Confirmar que el valor e interés futuros están etiquetados como ESTIMADOS y que no cambian el patrimonio real.
+- Importar un JSON v9 sin inversiones: debe restaurar con cero inversiones. Importar un JSON v10 con cuenta de inversión huérfana: debe fallar antes de reemplazar datos.

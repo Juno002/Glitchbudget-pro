@@ -13,7 +13,7 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 ## Qué significa cada cifra
 
-Mi dinero hoy usa saldos iniciales más cobros reales menos pagos reales y transferencias, hasta la fecha actual. Suma efectivo y bancos y muestra la deuda y el saldo neto de las cuentas y tarjetas registradas. No incluye otras propiedades u obligaciones no registradas.
+Mi dinero hoy usa saldos iniciales más cobros reales menos pagos reales y transferencias, hasta la fecha actual. **Disponible líquido** suma efectivo y bancos. **Inversiones registradas** se muestran aparte como activos no líquidos. El patrimonio neto suma ambos activos y los saldos a favor, y resta la deuda registrada. No incluye otras propiedades u obligaciones no registradas ni rendimientos futuros estimados.
 
 El resumen muestra Dinero en cuentas hoy (efectivo más bancos), ingresos registrados y gastos registrados del mes. Las compras con tarjeta cuentan como gasto; pagarlas reduce cuenta y deuda sin repetir el gasto. Reportes distingue resultado (ingresos menos compras) de flujo de efectivo (cobros menos gastos pagados directamente y pagos de tarjeta). El sueldo configurado no deposita dinero ni se suma a los ingresos reales. Un gasto fijo registrado afecta a la cuenta una vez; no se repite automáticamente en el historial ni en gráficos de meses posteriores. Registrar el pago real de cada período es necesario para mantener el saldo de la cuenta. Para pagos repetitivos conviene usar Suscripciones y registrar cada pago.
 
@@ -27,9 +27,9 @@ En modo estricto, un gasto con cuenta comprueba el saldo de esa cuenta. Los movi
 
 Cambiar la moneda base solo está permitido mientras no existan importes financieros registrados. Una vez hay saldos, movimientos, presupuestos, metas, deudas o reglas monetarias, GlitchBudget rechaza el cambio para evitar reinterpretar valores. No se consultan tasas FX en internet.
 
-El esquema Dexie actual es **v13**. Históricamente, v8 introdujo `accounts` y `account_transfers`; Fase 10 llevó el esquema a v12 para normalizar metas y Fase 11 añade el contrato monetario explícito en v13 sin reescribir los valores de los saldos.
+El esquema Dexie actual es **v14**. Históricamente, v8 introdujo `accounts` y `account_transfers`; Fase 10 llevó el esquema a v12, Fase 11 a v13 para moneda explícita y Fase 12 añade el store `investments` en v14 sin reescribir saldos existentes.
 
-El respaldo JSON canónico actual es **v9** y mantiene lectura de v3–v8. JSON v9 conserva moneda base, moneda por cuenta y metadatos monetarios de ingresos, gastos y pagos. Los backups anteriores se normalizan a la moneda base al importarse. Un backup v9 con una cuenta en otra moneda se rechaza mientras no exista conversión manual.
+El respaldo JSON canónico actual es **v10** y mantiene lectura de v3–v9. JSON v10 conserva el contrato de moneda de Fase 11 y añade las cuentas de inversión y sus metadatos. Los backups v9 y anteriores restauran sin inventar inversiones.
 
 CSV de ingresos/gastos conserva `accountId`, `currency`, `fxRate` y `amountBase`; al importar, la moneda se normaliza a la cuenta/base y no puede inyectarse una moneda distinta. Para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
 
@@ -46,3 +46,16 @@ Resumen y Mi dinero hoy comparten el cálculo de saldos. Historial y reportes us
 Validación: 59 pruebas, incluida reconciliación entre saldos, totales, categorías y respaldo. Prueba de interfaz en origen separado: ingreso ficticio de RD$1,000 reflejado en Resumen, Efectivo, historial, gráfico y reportes. Reportes revisados a 360 × 740.
 
 Movimientos muestra una franja compacta con efectivo y bancos. Ver cuentas y deuda despliega el detalle. Gestionar bancos solo crea cuentas bancarias; Efectivo es automático. Su saldo inicial puede corregirse por separado desde el detalle de Efectivo. El KPI del Dashboard suma efectivo y bancos y muestra su desglose en la información del indicador.
+
+
+## Inversiones — Fase 12
+
+Una inversión se representa mediante una cuenta de tipo `investment` y una entidad `Investment`.
+
+**Si ya existía cuando comenzaste a seguirla:** introduce el valor que estás siguiendo hoy. Ese valor se convierte en saldo inicial del activo y no en ingreso.
+
+**Si acabas de abrirla con dinero registrado:** selecciona la cuenta líquida que entrega el principal. GlitchBudget registra una transferencia Banco/Efectivo → Inversión. La liquidez baja y el activo de inversión sube por el mismo monto; el patrimonio no cambia por la apertura.
+
+Las cuentas de inversión no aparecen como fuente/destino de ingresos, gastos o pagos de tarjeta. Tampoco se pueden retirar o mover desde la transferencia genérica en Investments 1.0; retiro, vencimiento, renovación e interés realmente acreditado pertenecen a Investments 1.1.
+
+La ficha muestra principal, tasa, apertura, vencimiento, tiempo transcurrido, días restantes, valor estimado al vencimiento e interés estimado. Los dos últimos se calculan localmente y siempre se presentan como **estimados**. No se suman al saldo ni al patrimonio real.
