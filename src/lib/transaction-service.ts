@@ -9,6 +9,7 @@ import { isValidDate } from './finance-calculations';
 import { budgetPlansForDate } from '../domain/budgets';
 import { prepareBudgetPeriodsForDate } from './budget-rollover';
 import { recordGoalContribution } from './goal-service';
+import { normalizeCurrencyCode } from '../domain/currency';
 
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
@@ -41,7 +42,14 @@ export async function saveIncome(input: Omit<Income, 'month'>, editing = false, 
     // Efectivo es el destino predeterminado, no una obligación: respeta una cuenta elegida explícitamente.
     if (!editing) row.accountId = row.accountId || (await ensureCashAccount(row.date)).id;
     else row.accountId = row.accountId || existing?.accountId;
-    if (row.accountId) await requireAccount(row.accountId, row.date);
+    if (row.accountId) {
+      const account = await requireAccount(row.accountId, row.date);
+      const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+      if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar movimientos.');
+      row.currency = account.currency;
+      row.fxRate = 1;
+      row.amountBase = row.amount;
+    }
     if (editing && (await readFinancialPolicies()).preventNegativeAccountBalance) {
       const before = await readAccountSnapshot();
       requirePreservedAccountFunds(await db.accounts.toArray(), before, { ...before, incomes: [...before.incomes.filter(i => i.id !== row.id), row] });
@@ -92,11 +100,20 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
       if (!card || card.status !== 'active' || card.type !== 'credit_card') {
         throw new Error('Selecciona una tarjeta de crédito activa.');
       }
+      const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+      row.currency = baseCurrency;
+      row.fxRate = 1;
+      row.amountBase = row.amount;
     } else {
 
       if (!row.accountId && (!editing || existing?.accountId || existing?.paymentMethod === 'credit')) row.accountId = existing?.accountId || (await ensureCashAccount(row.date)).id;
       if (row.accountId) {
-        await requireAccount(row.accountId, row.date);
+        const account = await requireAccount(row.accountId, row.date);
+        const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+        if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar movimientos.');
+        row.currency = account.currency;
+        row.fxRate = 1;
+        row.amountBase = row.amount;
         const snapshot = await readAccountSnapshot();
         const projected = { ...snapshot, expenses: [...snapshot.expenses.filter(e => e.id !== row.id), row] };
         if (policies.preventNegativeAccountBalance) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
@@ -130,7 +147,10 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
     if (!debt || debt.status !== 'active') throw new Error('Selecciona una tarjeta activa.');
     payment = { ...payment, accountId: payment.accountId || (await ensureCashAccount(payment.date)).id };
     if (payment.accountId) {
-      await requireAccount(payment.accountId, payment.date);
+      const account = await requireAccount(payment.accountId, payment.date);
+      const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
+      if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar pagos.');
+      payment = { ...payment, currency: account.currency, fxRate: 1, amountBase: payment.amount };
 
       if ((await readFinancialPolicies()).preventNegativeAccountBalance) {
         const before = await readAccountSnapshot();
