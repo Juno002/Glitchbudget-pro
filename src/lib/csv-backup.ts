@@ -2,16 +2,17 @@ import { preserveImportedCategories } from './category-service';
 import { requireAccount } from './accounts';
 import { db } from './db';
 import { z } from 'zod';
-import { IncomeV6, ExpenseCSV, PlanV7, GoalV3, GoalContribV8 } from './backup-json';
+import { IncomeV6, ExpenseCSV, IncomeV11, ExpenseV11, PlanV7, GoalV3, GoalContribV8 } from './backup-json';
 import { migrateGoalRecords, goalSaved } from '../domain/goals';
 import { validateBudgetPlans } from '../domain/budgets';
 import { parseCSV, encodeCSV, decodeCSVField } from './csv';
 import { localDate } from './finance-calculations';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 
 const columns = {
-  incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId'],
-  expenses: ['id', 'month', 'date', 'categoryId', 'amount', 'concept', 'nature', 'paymentMethod', 'debtId', 'currency', 'fxRate', 'amountBase', 'recurringRuleId', 'accountId'],
+  incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId', 'labels'],
+  expenses: ['id', 'month', 'date', 'categoryId', 'amount', 'concept', 'nature', 'paymentMethod', 'debtId', 'currency', 'fxRate', 'amountBase', 'recurringRuleId', 'accountId', 'necessity', 'labels'],
   plans: ['month', 'categoryId', 'limit', 'periodType', 'periodStart', 'periodEnd'],
   goals: ['id', 'name', 'target', 'date', 'quota', 'startDate'],
   goal_contributions: ['id', 'goalId', 'amount', 'date', 'kind'],
@@ -22,7 +23,7 @@ const numeric = new Set(['amount', 'fxRate', 'amountBase', 'limit', 'target', 's
 export async function serializeTableCSV(name: ExportTable) {
   const rows = await db.table(name).toArray();
   const fields = columns[name];
-  return encodeCSV([fields, ...rows.map(row => fields.map(key => row[key]))]);
+  return encodeCSV([fields, ...rows.map(row => fields.map(key => key === 'labels' && Array.isArray(row[key]) ? JSON.stringify(row[key]) : row[key]))]);
 }
 
 async function exportTable(name: ExportTable) {
@@ -43,7 +44,16 @@ async function readRows<T>(file: File, name: ExportTable, schema: z.ZodType<T, z
     if (line.length !== header.length) throw new Error(`Fila ${index + 2}: número de columnas incorrecto.`);
     const record = Object.fromEntries(header.map((key, i) => {
       const value = decodeCSVField(line[i]);
-      return [key, value === '' ? undefined : numeric.has(key) ? Number(value) : value];
+      if (value === '') return [key, undefined];
+      if (key === 'labels') {
+        try {
+          const parsed = JSON.parse(value);
+          return [key, Array.isArray(parsed) ? parsed : undefined];
+        } catch {
+          throw new Error(`Fila ${index + 2}: labels — usa una lista JSON, por ejemplo ["casa","trabajo"]`);
+        }
+      }
+      return [key, numeric.has(key) ? Number(value) : value];
     }));
     const result = schema.safeParse(record);
     if (!result.success) throw new Error(`Fila ${index + 2}: ${result.error.issues[0].path.join('.')} — ${result.error.issues[0].message}`);
@@ -58,7 +68,7 @@ export const exportGoalsCSV = () => exportTable('goals');
 export const exportGoalContribCSV = () => exportTable('goal_contributions');
 
 export async function importIncomesCSV(file: File) {
-  const rows = await readRows(file, 'incomes', IncomeV6);
+  const rows = await readRows(file, 'incomes', z.union([IncomeV11, IncomeV6]));
   await db.transaction('rw', db.incomes, db.accounts, db.categories, db.settings, async () => {
     const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
     const normalized = [];
@@ -67,15 +77,15 @@ export async function importIncomesCSV(file: File) {
       if (account && account.currency !== baseCurrency) {
         throw new Error('El CSV contiene una cuenta en otra moneda. Usa una conversión manual antes de importar.');
       }
-      normalized.push({ ...row, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
+      normalized.push({ ...row, labels:'labels' in row && row.labels ? normalizeTransactionLabels(row.labels) : undefined, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(normalized,'income');
+    await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'income');
     await db.incomes.clear();
     await db.incomes.bulkAdd(normalized);
   });
 }
 export async function importExpensesCSV(file: File) {
-  const rows = await readRows(file, 'expenses', ExpenseCSV);
+  const rows = await readRows(file, 'expenses', z.union([ExpenseV11, ExpenseCSV]));
   await db.transaction('rw', [db.expenses, db.debts, db.accounts, db.categories, db.settings], async () => {
     const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
     const normalized = [];
@@ -87,9 +97,9 @@ export async function importExpensesCSV(file: File) {
       if (row.paymentMethod === 'credit' && (!row.debtId || !await db.debts.get(row.debtId))) {
         throw new Error('El CSV contiene una tarjeta desconocida. Restaura el respaldo JSON completo.');
       }
-      normalized.push({ ...row, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
+      normalized.push({ ...row, labels:'labels' in row && row.labels ? normalizeTransactionLabels(row.labels) : undefined, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(rows as Array<{ categoryId:string }>,'expense');
+    await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'expense');
     await db.expenses.clear();
     await db.expenses.bulkAdd(normalized);
   });

@@ -2,13 +2,14 @@
 
 ## Estado del roadmap
 
-**Fase 14 — Home 2.0 completada técnicamente el 2026-09-28.** Home es ahora un read model de cinco módulos —Posición, Presupuesto, Próximos, Metas e Inversiones— construido sobre selectors existentes, con personalización local de visibilidad, orden y sección inicial. Persistencia financiera permanece en Dexie v14 / JSON v10 y el gate verificó **292/292 pruebas**. **Fase 15 — Transaction Metadata + filtros no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 14](docs/roadmap/phase-14.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 15 — Transaction Metadata + filtros completada técnicamente el 2026-09-28.** Gastos admiten Must/Need/Want y etiquetas; ingresos admiten etiquetas. Movimientos filtra por cuenta, categoría, fecha, monto, necesidad, etiqueta y tipo, con filtros guardados localmente. Dexie permanece en v14 y el backup canónico pasa a JSON v11. El gate verificó **300/300 pruebas**. **Fase 16 — Automatización local no se ha iniciado.** Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 15](docs/roadmap/phase-15.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
 ## ✨ Características Principales
 
 - **Home 2.0:** Read model compacto con Posición financiera, Presupuesto disponible, Próximos pagos, Metas relevantes e Inversiones. Puede mostrar/ocultar, reordenar y elegir una sección inicial sin alterar cálculos financieros.
+- **Transaction Metadata + filtros:** Gastos pueden clasificarse como Must/Need/Want y usar etiquetas. El historial admite filtros combinables por tipo, cuenta, categoría, fecha, monto, necesidad y etiqueta, además de presets locales guardados.
 - **Modo Minimalista ("Serious Mode"):** Una interfaz ultra-limpia, en escala de grises y sin distracciones para quienes prefieren un enfoque profesional y sobrio en sus finanzas.
 - **Ahorro sugerido:** Configura 0%, 5%, 10% o 20% desde Ajustes → Finanzas como referencia de planificación; no mueve dinero.
 - **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
@@ -35,7 +36,7 @@ El diseño de la aplicación sigue un ciclo financiero lógico:
 
 1. **Registra operaciones:** El botón global Nuevo movimiento abre el mismo compositor para ingresos, gastos y transferencias.
 2. **Consulta Resumen:** Responde rápido cuánto tienes, cuánto debes, cuánto puedes gastar, qué viene y qué requiere atención.
-3. **Consulta Movimientos:** Busca y filtra el historial real; cuentas y tarjetas quedan como gestión secundaria.
+3. **Consulta Movimientos:** Busca el historial real, combina filtros avanzados o reutiliza filtros guardados; cuentas y tarjetas quedan como gestión secundaria.
 4. **Organiza Plan:** Presupuestos, Metas y Planificados.
 5. **Analiza en Reportes:** Elige un rango y revisa Spending, Cash Flow, Net Worth, categorías, transacciones mayores y comparación con el rango anterior. Gestiona categorías y preferencias desde Ajustes.
 

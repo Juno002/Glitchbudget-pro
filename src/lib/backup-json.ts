@@ -8,6 +8,7 @@ import { normalizeFinancialPolicies } from '../policies/settings';
 import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchema } from './accounts';
 import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
@@ -21,6 +22,7 @@ const MonthID = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/,'Mes inválido');
 const Id = z.string().min(1);
 const MoneyCents = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const CurrencyCode = z.string().regex(/^[A-Z]{3}$/, 'Moneda inválida');
+const TransactionLabels = z.array(z.string().trim().min(1).max(40)).max(12);
 
 const SettingsV3 = z.object({
   id: z.literal('general').default('general'),
@@ -179,9 +181,20 @@ const DumpV10 = DumpV9.extend({
   accounts:z.array(accountSchema),
   investments:z.array(investmentSchema),
 });
-type DumpV10T = z.infer<typeof DumpV10>;
+export const IncomeV11 = IncomeV9.extend({ labels:TransactionLabels.optional() });
+export const ExpenseV11 = ExpenseV9.extend({
+  necessity:z.enum(['must','need','want']).optional(),
+  labels:TransactionLabels.optional(),
+});
+const DumpV11 = DumpV10.extend({
+  v:z.literal(11),
+  incomes:z.array(IncomeV11),
+  expenses:z.array(ExpenseV11),
+});
+type DumpV11T = z.infer<typeof DumpV11>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===11) return DumpV11.parse(raw);
  if (version===10) return DumpV10.parse(raw);
  if (version===9) return {...DumpV9.parse(raw), investments:[]};
  if (version===8) return {...DumpV8.parse(raw), investments:[]};
@@ -221,9 +234,9 @@ export async function exportDataJSON(): Promise<string> {
   const goalData = migrateGoalRecords(goals, goalContributions);
   const baseCurrency = normalizeCurrencyCode(settings.currency);
   const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
-  // Current v10 contract adds Investments 1.0 while preserving the Phase 11 currency contract.
-  const dump: DumpV10T = {
-    v: 10,
+  // Current v11 contract adds optional transaction metadata while preserving Phase 12 persistence.
+  const dump: DumpV11T = {
+    v: 11,
     categories,
     accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
     investments,
@@ -252,6 +265,7 @@ export async function exportDataJSON(): Promise<string> {
       id: i.id, month: i.month, date: i.date, categoryId: i.categoryId,
       amount: toCents(i.amount), description: i.description, recurringRuleId:i.recurringRuleId,
       accountId: i.accountId,
+      labels: i.labels?.length ? i.labels : undefined,
       currency: accountCurrencies.get(i.accountId || '') || baseCurrency,
       fxRate: 1,
       amountBase: toCents(i.amount),
@@ -265,6 +279,8 @@ export async function exportDataJSON(): Promise<string> {
       fxRate: 1,
       amountBase: toCents(e.amount),
       paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
+      necessity: e.necessity,
+      labels: e.labels?.length ? e.labels : undefined,
     })),
     plans: plans.map(p => ({
       month: p.month, categoryId: p.categoryId,
@@ -300,7 +316,7 @@ export async function exportDataJSON(): Promise<string> {
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV10.parse(dump);
+  DumpV11.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -418,6 +434,7 @@ export async function importDataJSON(text: string): Promise<{
     currency: i.accountId ? accountMap.get(i.accountId)!.currency : baseCurrency,
     fxRate: 1,
     amountBase: i.amount,
+    labels: 'labels' in i && i.labels ? normalizeTransactionLabels(i.labels) : undefined,
   }));
 
   const expenses = d.expenses.map(e => ({
@@ -428,6 +445,8 @@ export async function importDataJSON(text: string): Promise<{
     fxRate: 1,
     amountBase: e.amount,
     paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
+    necessity: 'necessity' in e ? e.necessity : undefined,
+    labels: 'labels' in e && e.labels ? normalizeTransactionLabels(e.labels) : undefined,
   }));
 
   const plans = d.plans.map(p => ({

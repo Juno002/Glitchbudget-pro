@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras y de jerarquía posteriores quedan supersedidas por Fases 9–14. Fase 14 convierte Resumen en un read model de cinco módulos sobre selectors existentes y añade personalización exclusivamente local. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md), [phase-13.md](roadmap/phase-13.md) y [phase-14.md](roadmap/phase-14.md).
+> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras, de jerarquía y metadata posteriores quedan supersedidas por Fases 9–15. Fase 15 añade necessity/labels y filtros locales guardados sin cambiar fórmulas financieras ni el esquema Dexie. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md), [phase-13.md](roadmap/phase-13.md), [phase-14.md](roadmap/phase-14.md) y [phase-15.md](roadmap/phase-15.md).
 
 ## Correcciones de esta revisión
 
@@ -91,4 +91,8 @@ Los diálogos normales y de confirmación se dimensionan con visualViewport (alt
 - **Personalización Home:** show/hide, reorder y sección inicial se guardan solo en `localStorage`, se reparan si están corruptas y no entran en backup.
 - **Persistencia tras Fase 14:** sin cambios; Dexie **v14**, JSON **v10**.
 - **Gate Fase 14:** `Quality checks` run `36468191021` verificó **292/292 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+- **Transaction Metadata:** necessity es opcional solo en gastos; labels son opcionales en ingresos/gastos y se normalizan/deduplican.
+- **Filtros Movimientos:** motor puro por account/category/date/amount/necessity/label/type; presets nombrados viven solo en localStorage.
+- **Persistencia tras Fase 15:** Dexie **v14** sin migración; backup canónico **JSON v11**, lectura v3–v10.
+- **Gate Fase 15:** `Quality checks` run `36471585078` verificó **300/300 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 - La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.

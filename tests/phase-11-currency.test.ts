@@ -101,7 +101,7 @@ test('Dexie v12 upgrades direct account balances and movements to the configured
   }
 });
 
-test('legacy v8 backups import as base currency and re-export with the current v10 contract', async () => {
+test('legacy v8 backups import as base currency and re-export with the current v11 contract', async () => {
   const cash = await ensureCashAccount(today);
   await saveIncome({ id:'income', type:'extra', description:'Cobro', amount:10, date:today, categoryId:'salary', accountId:cash.id });
   const legacy = JSON.parse(await exportDataJSON());
@@ -114,7 +114,7 @@ test('legacy v8 backups import as base currency and re-export with the current v
   await importDataJSON(JSON.stringify(legacy));
   assert.equal((await db.accounts.get(cash.id))?.currency, 'DOP');
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v, 10);
+  assert.equal(exported.v,11);
   assert.equal(exported.accounts[0].currency, 'DOP');
   assert.deepEqual(
     {currency:exported.incomes[0].currency,fxRate:exported.incomes[0].fxRate,amountBase:exported.incomes[0].amountBase},

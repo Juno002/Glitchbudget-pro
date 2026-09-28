@@ -14,7 +14,7 @@ Usar Node.js 22 o superior, instalar con npm ci, ejecutar npm run check y npm ru
 - En una base limpia, cambiar la moneda base y confirmar que Efectivo/cuentas nuevas adoptan el nuevo código sin modificar importes.
 - Con cualquier importe financiero ya registrado, intentar cambiar la moneda base: debe rechazarse sin alterar ajustes, cuentas ni movimientos.
 - Confirmar que una transferencia entre cuentas de monedas distintas es rechazada mientras no exista tasa manual; no debe aparecer ingreso, gasto ni transferencia parcial.
-- Exportar JSON v10, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
+- Exportar JSON v11, registrar un dato ficticio adicional, restaurar con confirmación y comparar los registros esperados. Repetir con archivo dañado: no debe alterar nada.
 - Importar un backup legacy v8 y comprobar que cuentas/movimientos adoptan la moneda base, fxRate 1 y amountBase equivalente al importe histórico.
 - Importar CSV de ingreso/gasto con metadatos de otra moneda y una cuenta base válida: el registro final debe normalizarse a la moneda de la cuenta, no conservar una tasa inyectada.
 - Instalar app, cerrar/abrir sin conexión, registrar movimiento y volver a conectar. Publicar una actualización de prueba y verificar datos y tema conservados.
@@ -70,3 +70,19 @@ Completar la matriz de quality-review.md, no dejar incidencias críticas de pér
 - Ejecutar Borrar todos los datos: la personalización de Home debe volver a valores por defecto.
 - Confirmar que Movimientos recientes ya no aparece en Home y que el historial completo sigue en Movimientos.
 - Confirmar que Ahorro sugerido sigue disponible en Ajustes → Finanzas y que modificarlo no mueve dinero.
+
+
+## Transaction Metadata + filtros — Fase 15
+
+- Crear gasto con Must/Need/Want y varias etiquetas; editarlo y confirmar que la metadata se conserva.
+- Crear ingreso con etiquetas y confirmar que no aparece selector de necessity.
+- Introducir etiquetas repetidas con mayúsculas/espacios: deben deduplicarse y normalizarse.
+- Verificar filtros individuales y combinados por cuenta, categoría, fecha, monto, necesidad, etiqueta y tipo.
+- Confirmar que una transferencia coincide con cualquiera de sus dos cuentas al filtrar por cuenta.
+- Guardar un filtro local, recargar y aplicarlo; la búsqueda textual libre no debe quedar aplicada silenciosamente.
+- Eliminar un filtro guardado y confirmar que no cambia movimientos ni backups.
+- Exportar JSON v11 con metadata y restaurarlo; importar un JSON v10 debe dejar metadata ausente, no inventarla.
+- Exportar/importar CSV actual con necessity/labels y comprobar round-trip; CSV legacy sin las columnas nuevas debe seguir importando.
+- Ejecutar “Borrar todos los datos” y confirmar que también desaparecen los filtros guardados locales.
+- Confirmar que no existen campos de ubicación, garantías, loyalty cards ni receipts en Quick Add o filtros.
+- Confirmar que no existe clasificación automática ni transmisión de descripciones; eso pertenece a Fase 16.

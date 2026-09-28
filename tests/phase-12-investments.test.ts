@@ -148,7 +148,7 @@ test('Dexie v13 upgrades to v14 by adding an empty investment store without rewr
   }
 });
 
-test('backup v10 round-trips investments and legacy v9 still imports with no invented investments', async () => {
+test('backup v11 preserves investments and legacy v9 still imports with no invented investments', async () => {
   await createInvestment({
     mode:'existing', type:'certificate', name:'Backup',
     openedAt:'2026-01-01', maturityDate:'2026-12-31',
@@ -156,7 +156,7 @@ test('backup v10 round-trips investments and legacy v9 still imports with no inv
   });
   const text=await exportDataJSON();
   const dump=JSON.parse(text);
-  assert.equal(dump.v,10);
+  assert.equal(dump.v,11);
   assert.equal(dump.investments.length,1);
   await importDataJSON(text);
   assert.equal(await db.investments.count(),1);
