@@ -1,9 +1,10 @@
-import type { QuickAddTransactionType } from '../lib/quick-add-templates';
 import type { RuleMatch } from './rule-engine';
+
+export type RuleSuggestionTransactionType = 'expense' | 'income' | 'transfer';
 
 export function quickAddRuleSuggestions(
   matches: readonly RuleMatch[],
-  transactionType: QuickAddTransactionType,
+  transactionType: RuleSuggestionTransactionType,
   allowedCategoryIds: readonly string[],
 ): RuleMatch[] {
   if (transactionType === 'transfer') return [];
