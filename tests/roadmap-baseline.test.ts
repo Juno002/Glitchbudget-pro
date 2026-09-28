@@ -25,7 +25,7 @@ for (const version of [6, 7]) {
     const current = new GlitchBudgetDB(name);
     try {
       await current.open();
-      assert.equal(current.verno, 13);
+      assert.equal(current.verno, 14);
       for (const [table, rows] of Object.entries(source.tables)) {
         let expected = structuredClone(rows) as any[];
         if (table === 'goals') expected=migrateGoalRecords(source.tables.goals,source.tables.goal_contributions).goals;
@@ -43,6 +43,7 @@ for (const version of [6, 7]) {
       assert.equal(await current.accounts.count(), 0);
       assert.equal(await current.account_transfers.count(), 0);
       assert.equal(await current.planned_occurrences.count(), 0);
+      assert.equal(await current.investments.count(), 0);
     } finally { await current.delete(); } // Only the isolated fake-indexeddb database.
   });
 }
@@ -60,9 +61,9 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables and f
   const source = fixture('backup-v4');
   await importDataJSON(JSON.stringify(source));
   const before = await snapshot();
-  assert.equal(Object.keys(before).length, 15);
+  assert.equal(Object.keys(before).length, 16);
   for (const [table, rows] of Object.entries(before)) {
-    if (table === 'planned_occurrences') assert.equal((rows as any[]).length, 0);
+    if (table === 'planned_occurrences' || table === 'investments') assert.equal((rows as any[]).length, 0);
     else assert.ok((rows as any[]).length > 0, table);
   }
   const financial = await metrics();
