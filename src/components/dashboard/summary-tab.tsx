@@ -149,8 +149,8 @@ export default function SummaryTab() {
             />
             <MetricCard
               label="Deuda de tarjetas"
-              amount={position.liabilities}
-              tone={position.liabilities > 0 ? 'negative' : 'neutral'}
+              amount={position.creditCardLiabilities}
+              tone={position.creditCardLiabilities > 0 ? 'negative' : 'neutral'}
               supporting="Saldo adeudado en tarjetas registradas."
             />
             <MetricCard
