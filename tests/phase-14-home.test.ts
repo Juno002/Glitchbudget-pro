@@ -34,8 +34,8 @@ test('Home read model answers position, budget, upcoming, goals, investments and
       {id:'tomorrow',ruleId:'salary',scheduledDate:'2026-09-29',status:'pending'},
     ],
     recurringRules:[
-      {id:'rent',direction:'expense',title:'Rent',amount:30_000,categoryId:'housing',frequency:'monthly',startDate:'2026-01-01'},
-      {id:'salary',direction:'income',title:'Salary',amount:80_000,categoryId:'salary',frequency:'monthly',startDate:'2026-01-01'},
+      {id:'rent',direction:'expense',title:'Rent',amount:30_000,categoryId:'housing',cadence:'monthly',startDate:'2026-01-01',active:true},
+      {id:'salary',direction:'income',title:'Salary',amount:80_000,categoryId:'salary',cadence:'monthly',startDate:'2026-01-01',active:true},
     ],
     goals:[
       {id:'goal',name:'Emergency',target:100_000,quota:0,startDate:'2026-01-01',date:'2026-12-31',saved:40_000,status:'active'},
