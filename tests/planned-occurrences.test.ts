@@ -38,7 +38,7 @@ async function financialSnapshot() {
   };
 }
 
-test('v10 -> v11 adds an empty planned occurrence store without rewriting existing data', async () => {
+test('v10 upgrades through the current schema, adds planned occurrences, and only currency-normalizes money rows', async () => {
   const name = 'phase7a-v10-' + crypto.randomUUID();
   const schema = {
     expenses: 'id, date, month, categoryId, nature, accountId',
@@ -74,7 +74,7 @@ test('v10 -> v11 adds an empty planned occurrence store without rewriting existi
     assert.equal(current.verno, 13);
     assert.deepEqual(clean(await current.settings.toArray()), clean(before.settings));
     assert.deepEqual(clean(await current.recurrents.toArray()), clean(before.recurrents));
-    assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses));
+    assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses.map(row => ({ ...row, currency:'DOP', fxRate:1, amountBase:row.amount }))));
     assert.equal(await current.planned_occurrences.count(), 0);
   } finally {
     await current.delete();
