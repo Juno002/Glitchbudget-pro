@@ -1,7 +1,10 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { formatCurrency } from '@/lib/utils';
+import { db } from '@/lib/db';
+import { normalizeCurrencyCode } from '@/domain/currency';
 
 const STORAGE_KEY = 'glitchbudget_balances_hidden_v1';
 
@@ -54,5 +57,8 @@ export function useBalanceVisibility() {
 
 export function usePrivateCurrency() {
   const { balancesHidden } = useBalanceVisibility();
-  return useCallback((amount: number) => balancesHidden ? '••••••' : formatCurrency(amount), [balancesHidden]);
+  const settings = useLiveQuery(() => db.settings.get('general'));
+  const baseCurrency = normalizeCurrencyCode(settings?.currency);
+  const locale = settings?.locale || 'es-DO';
+  return useCallback((amount: number, currency = baseCurrency) => balancesHidden ? '••••••' : formatCurrency(amount, currency, locale), [balancesHidden, baseCurrency, locale]);
 }
