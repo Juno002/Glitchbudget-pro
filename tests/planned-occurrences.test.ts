@@ -71,7 +71,7 @@ test('v10 -> v11 adds an empty planned occurrence store without rewriting existi
   const current = new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno, 12);
+    assert.equal(current.verno, 13);
     assert.deepEqual(clean(await current.settings.toArray()), clean(before.settings));
     assert.deepEqual(clean(await current.recurrents.toArray()), clean(before.recurrents));
     assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses));
@@ -134,7 +134,7 @@ test('storing a pending occurrence does not change financial metrics or position
 test('backup v7 round-trips planned occurrences exactly', async () => {
   await addPendingOccurrence({ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15' });
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v, 8);
+  assert.equal(exported.v, 9);
   assert.deepEqual(exported.plannedOccurrences, [{ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15', status:'pending' }]);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
