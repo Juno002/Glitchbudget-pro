@@ -90,7 +90,7 @@ test('goal services reject invalid dates and overflow atomically and strip deriv
 
 test('goal deletion releases reservations without touching real accounts or movements', async () => {
   await saveGoal(goal);
-  await db.accounts.add({id:'cash',name:'Efectivo',type:'cash',openingBalance:10000,startDate:'2026-09-01'});
+  await db.accounts.add({id:'cash',name:'Efectivo',type:'cash', currency:'DOP', openingBalance:10000,startDate:'2026-09-01'});
   await db.incomes.add({id:'salary',type:'extra',description:'Cobro',amount:1000,date:'2026-09-25',categoryId:'salary',month:'2026-09',accountId:'cash'});
   const realBefore = {accounts:await db.accounts.toArray(),incomes:await db.incomes.toArray()};
   await recordGoalContribution(contribution);
@@ -124,7 +124,7 @@ async function legacyDatabase(name:string, saved:number) {
   old.version(11).stores(schema);
   await old.table('goals').put({...goal,saved,status:'active'});
   await old.table('goal_contributions').put(contribution);
-  await old.table('accounts').put({id:'cash',name:'Efectivo',type:'cash',openingBalance:12345,startDate:'2026-09-01'});
+  await old.table('accounts').put({id:'cash',name:'Efectivo',type:'cash', currency:'DOP', openingBalance:12345,startDate:'2026-09-01'});
   old.close();
 }
 
