@@ -318,8 +318,16 @@ export async function importDataJSON(text: string): Promise<{
   const categories=d.v>=5 ? d.categories! : reconstructCategories({settings:d.settings,incomes:d.incomes,expenses:d.expenses,plans:d.plans,recurrents:d.recurrents.map(r=>({categoryId:r.categoryId,type:r.direction}))});
   validateCategorySet(categories);
   validateCategoryReferences(d, categories);
-  const accountMap = new Map((d.accounts || []).map(a => [a.id, a]));
-  if ((d.accounts || []).filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
+  const baseCurrency = normalizeCurrencyCode(d.settings.currency);
+  const accounts = (d.accounts || []).map(account => ({
+    ...account,
+    currency: normalizeCurrencyCode('currency' in account ? account.currency : undefined, baseCurrency),
+  }));
+  if (accounts.some(account => account.currency !== baseCurrency)) {
+    throw new Error('Este respaldo contiene cuentas en otra moneda. Fase 11 requiere conversión manual antes de admitirlas.');
+  }
+  const accountMap = new Map(accounts.map(a => [a.id, a]));
+  if (accounts.filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
   }
@@ -331,6 +339,9 @@ export async function importDataJSON(text: string): Promise<{
   for (const transfer of d.accountTransfers || []) {
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
       if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
+    }
+    if (accountMap.get(transfer.fromAccountId)!.currency !== accountMap.get(transfer.toAccountId)!.currency) {
+      throw new Error('El respaldo contiene una transferencia entre monedas sin una conversión manual compatible.');
     }
   }
   const goalIds = new Set(d.goals.map(g => g.id));
@@ -360,7 +371,7 @@ export async function importDataJSON(text: string): Promise<{
   const settingsRow = {
     ...d.settings,
     id: 'general',
-    currency: d.settings.currency ?? 'DOP',
+    currency: baseCurrency,
     locale:   d.settings.locale   ?? 'es-DO',
     theme:    (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
     strictMode: d.settings.strictMode ?? false,
@@ -377,13 +388,19 @@ export async function importDataJSON(text: string): Promise<{
   const incomes = d.incomes.map(i => ({
     id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
     amount: i.amount, description: i.description, type: i.type, recurringRuleId: 'recurringRuleId' in i ? i.recurringRuleId : undefined,
-    accountId: i.accountId, currency: i.currency, fxRate: i.fxRate, amountBase: i.amountBase,
+    accountId: i.accountId,
+    currency: i.accountId ? accountMap.get(i.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: i.amount,
   }));
 
   const expenses = d.expenses.map(e => ({
     id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
     amount: e.amount, concept: e.concept ?? '', nature: e.nature,
-    accountId: e.accountId, currency: e.currency, fxRate: e.fxRate, amountBase: e.amountBase,
+    accountId: e.accountId,
+    currency: e.accountId ? accountMap.get(e.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: e.amount,
     paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
   }));
 
@@ -404,7 +421,12 @@ export async function importDataJSON(text: string): Promise<{
   const plannedOccurrences = d.plannedOccurrences ?? [];
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
   const debts = d.debts ?? [];
-  const debtPayments = d.debtPayments ?? [];
+  const debtPayments = (d.debtPayments ?? []).map(payment => ({
+    ...payment,
+    currency: payment.accountId ? accountMap.get(payment.accountId)!.currency : baseCurrency,
+    fxRate: 1,
+    amountBase: payment.amount,
+  }));
   const fxRates = d.fxRates ?? [];
 
 
@@ -431,7 +453,7 @@ export async function importDataJSON(text: string): Promise<{
       ]);
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
       if(categories.length) await db.categories.bulkAdd(categories);
-      if (d.accounts?.length) await db.accounts.bulkAdd(d.accounts);
+      if (accounts.length) await db.accounts.bulkAdd(accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
       if (incomes.length) await db.incomes.bulkAdd(incomes as any);
