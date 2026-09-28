@@ -130,7 +130,7 @@ export default function SummaryTab() {
           }}>Ver cuentas</Button>}
         />
         {loading ? (
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[0,1,2].map(index => <Skeleton key={index} className="h-24 w-full" />)}
           </div>
         ) : (
@@ -142,6 +142,12 @@ export default function SummaryTab() {
               supporting="Efectivo + bancos registrados. No incluye crédito disponible."
             />
             <MetricCard
+              label="Inversiones registradas"
+              amount={position.investmentAssets}
+              tone={position.investmentAssets > 0 ? 'positive' : 'neutral'}
+              supporting="Valor registrado actual. No incluye rendimientos futuros estimados."
+            />
+            <MetricCard
               label="Deuda de tarjetas"
               amount={position.liabilities}
               tone={position.liabilities > 0 ? 'negative' : 'neutral'}
@@ -151,7 +157,7 @@ export default function SummaryTab() {
               label="Patrimonio neto"
               amount={position.netWorth}
               tone={position.netWorth < 0 ? 'negative' : 'neutral'}
-              supporting="Disponible líquido + saldo a favor en tarjetas − deuda."
+              supporting="Liquidez + inversiones registradas + saldo a favor en tarjetas − deuda. Las proyecciones no se suman."
             />
           </div>
         )}

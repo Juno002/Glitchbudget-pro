@@ -5,7 +5,8 @@ import { plannedOccurrenceSchema, validateOccurrenceLedgerLinks, validatePlanned
 import { reconstructCategories, withoutLegacyCategories, appliesTo } from '../domain/categories';
 import { categorySchema, validateCategorySet } from './category-service';
 import { normalizeFinancialPolicies } from '../policies/settings';
-import { accountSchema, legacyAccountSchema, transferSchema } from './accounts';
+import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchema } from './accounts';
+import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 
 import { z } from 'zod';
@@ -168,20 +169,26 @@ const ExpenseV9 = ExpenseV6.extend({ currency:CurrencyCode, fxRate:z.number().fi
 const DumpV9 = DumpV8.extend({
   v:z.literal(9),
   settings:SettingsV9,
-  accounts:z.array(accountSchema),
+  accounts:z.array(phase11AccountSchema),
   incomes:z.array(IncomeV9),
   expenses:z.array(ExpenseV9),
   debtPayments:z.array(DebtPaymentV9),
 });
-type DumpV9T = z.infer<typeof DumpV9>;
+const DumpV10 = DumpV9.extend({
+  v:z.literal(10),
+  accounts:z.array(accountSchema),
+  investments:z.array(investmentSchema),
+});
+type DumpV10T = z.infer<typeof DumpV10>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
- if (version===9) return DumpV9.parse(raw);
- if (version===8) return DumpV8.parse(raw);
- if (version===7) return DumpV7.parse(raw);
- if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: []};
+ if (version===10) return DumpV10.parse(raw);
+ if (version===9) return {...DumpV9.parse(raw), investments:[]};
+ if (version===8) return {...DumpV8.parse(raw), investments:[]};
+ if (version===7) return {...DumpV7.parse(raw), investments:[]};
+ if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: [], investments:[]};
  const legacy=DumpV3.parse(raw);
- return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: []};
+ return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: [], investments:[]};
 }
 
 // ---------- Helpers ----------
@@ -192,7 +199,7 @@ function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 
 export async function exportDataJSON(): Promise<string> {
   // Lee todo de Dexie
-  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, plannedOccurrences, debts, debtPayments, fxRates, accounts, accountTransfers, categories] = await db.transaction('r', db.tables, () => Promise.all([
+  const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, plannedOccurrences, debts, debtPayments, fxRates, accounts, accountTransfers, categories, investments] = await db.transaction('r', db.tables, () => Promise.all([
     db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', periodStartDay: 1, expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
     db.periods.toArray(),
     db.incomes.toArray(),
@@ -208,16 +215,18 @@ export async function exportDataJSON(): Promise<string> {
     db.accounts.toArray(),
     db.account_transfers.toArray(),
     db.categories.toArray(),
+    db.investments.toArray(),
   ]));
 
   const goalData = migrateGoalRecords(goals, goalContributions);
   const baseCurrency = normalizeCurrencyCode(settings.currency);
   const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
-  // Current v9 contract: account currency is explicit and direct ledger amounts are base-currency normalized.
-  const dump: DumpV9T = {
-    v: 9,
+  // Current v10 contract adds Investments 1.0 while preserving the Phase 11 currency contract.
+  const dump: DumpV10T = {
+    v: 10,
     categories,
     accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
+    investments,
     exportedAt: nowIsoZ(),
     settings: {
       ...settings,
@@ -291,7 +300,7 @@ export async function exportDataJSON(): Promise<string> {
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV9.parse(dump);
+  DumpV10.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -327,9 +336,21 @@ export async function importDataJSON(text: string): Promise<{
     throw new Error('Este respaldo contiene cuentas en otra moneda. Fase 11 requiere conversión manual antes de admitirlas.');
   }
   const accountMap = new Map(accounts.map(a => [a.id, a]));
+  const investments = d.investments ?? [];
+  const investmentAccountIds = new Set<string>();
+  for (const investment of investments) {
+    const account = accountMap.get(investment.accountId);
+    if (!account || account.type !== 'investment') throw new Error('El respaldo contiene una inversión sin su cuenta de inversión.');
+    if (investmentAccountIds.has(investment.accountId)) throw new Error('El respaldo contiene varias inversiones para la misma cuenta.');
+    investmentAccountIds.add(investment.accountId);
+  }
+  if (accounts.some(account => account.type === 'investment' && !investmentAccountIds.has(account.id))) {
+    throw new Error('El respaldo contiene una cuenta de inversión sin metadatos de inversión.');
+  }
   if (accounts.filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
     if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
+    if (row.accountId && accountMap.get(row.accountId)!.type === 'investment') throw new Error('El respaldo usa una inversión como cuenta operativa.');
   }
   for (const rule of d.recurrents || []) {
     if (rule.defaultAccountId && !accountMap.has(rule.defaultAccountId)) {
@@ -340,8 +361,13 @@ export async function importDataJSON(text: string): Promise<{
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
       if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
     }
-    if (accountMap.get(transfer.fromAccountId)!.currency !== accountMap.get(transfer.toAccountId)!.currency) {
+    const fromAccount = accountMap.get(transfer.fromAccountId)!;
+    const toAccount = accountMap.get(transfer.toAccountId)!;
+    if (fromAccount.currency !== toAccount.currency) {
       throw new Error('El respaldo contiene una transferencia entre monedas sin una conversión manual compatible.');
+    }
+    if (fromAccount.type === 'investment') {
+      throw new Error('El respaldo contiene un retiro de inversión que no pertenece a Investments 1.0.');
     }
   }
   const goalIds = new Set(d.goals.map(g => g.id));
@@ -450,11 +476,13 @@ export async function importDataJSON(text: string): Promise<{
         db.fxRates.clear(),
         db.accounts.clear(),
         db.account_transfers.clear(),
+        db.investments.clear(),
       ]);
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
       if(categories.length) await db.categories.bulkAdd(categories);
       if (accounts.length) await db.accounts.bulkAdd(accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
+      if (investments.length) await db.investments.bulkAdd(investments);
       if (periodsEnsured.length) await db.periods.bulkAdd(periodsEnsured as any);
       if (incomes.length) await db.incomes.bulkAdd(incomes as any);
       if (expenses.length) await db.expenses.bulkAdd(expenses as any);
@@ -470,15 +498,15 @@ export async function importDataJSON(text: string): Promise<{
   );
 
   // 5) Conteo post-import (para logs o toasts)
-  const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr] = await Promise.all([
+  const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr, cinv] = await Promise.all([
     db.settings.count(), db.periods.count(), db.incomes.count(), db.expenses.count(),
     db.plans.count(), db.goals.count(), db.goal_contributions.count(),
-    db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(),
+    db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(), db.investments.count(),
   ]);
 
   return { counts: {
     settings: cs, periods: cp, incomes: ci, expenses: ce, plans: cpl, goals: cg, goal_contributions: cgc,
-    recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr,
+    recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr, investments:cinv,
   }};
 }
 

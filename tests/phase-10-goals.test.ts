@@ -110,7 +110,7 @@ test('v7 backup migrates goal progress once into the current contract without cr
   const metrics = selectPeriodMetrics({settings:(await db.settings.get('general'))!,incomes:[],expenses:[],debtPayments:[],budgets:[],goalContributions:contributions},periodForId('2026-09'));
   assert.equal(metrics.goalContributions,200); assert.equal(metrics.monthlyPlanningMargin,-200);
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v,9); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
+  assert.equal(exported.v,10); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
   assert.deepEqual(await snapshot(),before);
@@ -118,7 +118,7 @@ test('v7 backup migrates goal progress once into the current contract without cr
 });
 
 async function legacyDatabase(name:string, saved:number) {
-  const schema = Object.fromEntries(db.tables.map(table => [table.name,[table.schema.primKey.src,...table.schema.indexes.map(index=>index.src)].join(',')]));
+  const schema = Object.fromEntries(db.tables.filter(table => table.name !== 'investments').map(table => [table.name,[table.schema.primKey.src,...table.schema.indexes.map(index=>index.src)].join(',')]));
   schema.goals = 'id, status';
   const old = new Dexie(name);
   old.version(11).stores(schema);
@@ -128,12 +128,12 @@ async function legacyDatabase(name:string, saved:number) {
   old.close();
 }
 
-test('Dexie v11 upgrades through v13 with canonical goal contributions and currency-normalized real accounts', async () => {
+test('Dexie v11 upgrades through v14 with canonical goal contributions and currency-normalized real accounts', async () => {
   const name = 'phase10-migration-'+crypto.randomUUID();
   await legacyDatabase(name,500);
   const current = new GlitchBudgetDB(name);
   try {
-    await current.open(); assert.equal(current.verno,13);
+    await current.open(); assert.equal(current.verno,14);
     assert.deepEqual(await current.goals.get(goal.id),goal);
     assert.equal(goalSaved(goal.id,await current.goal_contributions.toArray()),500);
     assert.equal((await current.accounts.get('cash'))?.openingBalance,12345);

@@ -79,9 +79,10 @@ No contiene Tarjetas como cuarto subtab.
 - Resumen solo muestra highlights accionables.
 
 **Inversiones**
-- futuras; no serán una pestaña primaria;
-- acceso secundario desde la posición financiera/activos en Resumen;
-- detalle con patrón común de entidad.
+- implementadas en Fase 12; no son una pestaña primaria;
+- acceso secundario desde Movimientos, después de Cuentas y tarjetas, y representadas en la posición financiera de Resumen;
+- el valor registrado entra en patrimonio como activo no líquido;
+- rendimientos futuros se muestran únicamente como proyección estimada.
 
 **Ajustes**
 - accesibles desde el engranaje del header;
@@ -125,9 +126,10 @@ Filtros
 Lista de actividad real
 Detalle / edición
 Acceso secundario a cuentas/tarjetas
+Acceso secundario a inversiones
 ```
 
-Los movimientos planificados pendientes no se mezclan con el ledger real.
+Los movimientos planificados pendientes no se mezclan con el ledger real. Inversiones conserva el mismo principio: la apertura financiada aparece como transferencia patrimonial, no como gasto.
 
 ## 5. Jerarquía de Plan
 
@@ -398,7 +400,7 @@ Si una decisión UX requiere alterar esas reglas, se detiene y se trata como cam
 - Fase 8 Quick Add usa un único compositor global.
 - Fase 9 Budgets 2.0 vive dentro de Plan → Presupuestos.
 - Fase 10 Goals 2.0 vive dentro de Plan → Metas.
-- Fase 12 Investments no crea pestaña primaria.
+- Fase 12 Investments está implementada sin crear pestaña primaria; vive como activo secundario dentro de Movimientos y en la posición financiera de Resumen.
 - Fase 13 Reports 2.0 recibe análisis retirado de Resumen.
 - Fase 14 Home 2.0 refina la jerarquía definida aquí sin volver a decidirla.
 - Fase 17 añade app lock/auto-lock y seguridad adicional; balancesHidden ya existe como preferencia visual local.

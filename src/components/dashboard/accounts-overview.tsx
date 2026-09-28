@@ -50,9 +50,10 @@ export default function AccountsOverview() {
   if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
   const cards = data.debts.filter(d => d.type === 'credit_card');
-  const { cash, bank, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
+  const liquidAccounts = data.accounts.filter(a => a.type !== 'investment');
+  const { cash, bank, investmentAssets, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
   const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
-  const account = data.accounts.find(a => a.id === selected);
+  const account = liquidAccounts.find(a => a.id === selected);
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
@@ -60,6 +61,7 @@ export default function AccountsOverview() {
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <p className="whitespace-nowrap"><span className="text-muted-foreground">Efectivo</span> {money(cash)}</p>
           <p className="whitespace-nowrap"><span className="text-muted-foreground">Bancos</span> {money(bank)}</p>
+          {investmentAssets > 0 && <p className="whitespace-nowrap"><span className="text-muted-foreground">Inversiones</span> {money(investmentAssets)}</p>}
           <p className="whitespace-nowrap"><span className="text-muted-foreground">Deuda</span> {money(owed)}</p>
         </div>
       </div>
@@ -88,7 +90,7 @@ export default function AccountsOverview() {
               <p className="text-xs text-muted-foreground">{editingAccount ? 'Corrige el saldo con el que comenzaste el seguimiento. Los movimientos registrados después se suman o restan a esta cifra.' : 'Incluye los movimientos ya realizados hoy. Registra con esta cuenta solo los que hagas después de crearla. Este saldo no es un ingreso mensual.'}</p>
               <Button type="submit">{editingAccount ? 'Guardar cuenta' : 'Crear cuenta'}</Button>{editingAccount && <Button type="button" variant="ghost" onClick={()=>{setEditingAccount('');setName('');setOpening('');}}>Cancelar edición</Button>}
             </form>
-            {data.accounts.length >= 2 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{ e.preventDefault(); void run(async()=>{ await saveTransfer({id:editingTransfer || crypto.randomUUID(),fromAccountId:from,toAccountId:to,amount:toCents(amount),date,note},!!editingTransfer);setAmount('');setNote('');setEditingTransfer(''); },editingTransfer ? 'Transferencia actualizada' : 'Transferencia registrada'); }}>
+            {liquidAccounts.length >= 2 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{ e.preventDefault(); void run(async()=>{ await saveTransfer({id:editingTransfer || crypto.randomUUID(),fromAccountId:from,toAccountId:to,amount:toCents(amount),date,note},!!editingTransfer);setAmount('');setNote('');setEditingTransfer(''); },editingTransfer ? 'Transferencia actualizada' : 'Transferencia registrada'); }}>
               <h3 className="font-semibold">Mover dinero entre mis cuentas</h3>
               <AccountSelect value={from} onChange={setFrom}/><AccountSelect value={to} onChange={setTo} label="Cuenta de destino"/>
               <label className="block text-sm">{`Monto (${data.accounts.find(a => a.id === from)?.currency || currency})`}<Input required type="number" min="0.01" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)}/></label>
@@ -118,11 +120,11 @@ export default function AccountsOverview() {
       </Dialog>
     </div>
     <details className="group"><summary className="cursor-pointer text-sm text-muted-foreground">Ver cuentas y deuda</summary><div className="space-y-3 pt-3">
-    {!data.accounts.length ? <p className="text-sm text-muted-foreground">Efectivo se prepara automáticamente. Puedes añadir bancos cuando lo necesites.</p> : <>
+    {!liquidAccounts.length ? <p className="text-sm text-muted-foreground">Efectivo se prepara automáticamente. Puedes añadir bancos cuando lo necesites.</p> : <>
       {unassigned > 0 && <details className="rounded-xl border p-3 text-sm"><summary className="cursor-pointer font-medium">{unassigned} movimientos anteriores sin cuenta</summary><p className="mt-2 text-muted-foreground">Se conservan en los reportes, pero no modifican tus saldos. Incluye el dinero que te quedaba al comenzar el seguimiento en el saldo inicial de Efectivo (Ver cuentas y deuda → Efectivo → Ajustar saldo inicial). Si un movimiento posterior a esa fecha no está incluido en el saldo inicial, puedes editarlo en el historial y asignarle Efectivo. No vuelvas a registrar el ingreso: se contaría dos veces.</p></details>}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{[['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{money(Number(value))}</p></div>)}</div>
-      <p className="text-xs text-muted-foreground">El saldo neto incluye solo las cuentas y tarjetas registradas. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {money(credit)}.</>}</p>
-      <div className="grid sm:grid-cols-2 gap-2">{data.accounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex min-h-12 flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · {a.currency} · Desde {a.startDate}</span></span><strong>{money(accountBalance(a,data), a.currency)}</strong></button>)}</div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{[['Inversiones registradas',investmentAssets],['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{money(Number(value))}</p></div>)}</div>
+      <p className="text-xs text-muted-foreground">El saldo neto incluye efectivo, bancos, inversiones al valor actualmente registrado y tarjetas. Las proyecciones futuras de rendimiento no se suman. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {money(credit)}.</>}</p>
+      <div className="grid sm:grid-cols-2 gap-2">{liquidAccounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex min-h-12 flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · {a.currency} · Desde {a.startDate}</span></span><strong>{money(accountBalance(a,data), a.currency)}</strong></button>)}</div>
       {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.signedBalance >= 0 ? 'deuda' : 'saldo a favor'} {money(Math.abs(d.signedBalance))}</p>)}
       {account && <div className="border-t pt-3 space-y-2"><DetailHeader
         title={account.name}

@@ -1,5 +1,15 @@
 # Roadmap: documentación vigente
 
+## Fase 12 — Investments 1.0 completada
+
+Fase 12 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-12.md](phase-12.md).
+
+Las inversiones pasan a ser activos no líquidos vinculados a cuentas `investment`. Una inversión nueva usa transferencia patrimonial desde una cuenta registrada; una inversión preexistente usa saldo inicial actual. Las proyecciones de vencimiento son locales y **no forman parte del patrimonio real**.
+
+Persistencia actual: **Dexie v14 / JSON v10**, con lectura de backups v3–v9. El gate `Quality checks` run `36454064247` verificó **278/278 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 12 cerrada. **Fase 13 — Reports 2.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+
 ## Fase 11 — Currency foundation completada
 
 Fase 11 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-11.md](phase-11.md).
@@ -8,7 +18,7 @@ El cierre define **moneda base + `Account.currency`**, migra el esquema a **Dexi
 
 El gate `Quality checks` run `36450157254` verificó **268/268 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 11 cerrada. **Fase 12 — Investments 1.0 no se ha iniciado** y no queda autorizada por continuidad implícita.
+Fase 11 queda como fundamento histórico vigente de moneda para Investments 1.0.
 
 ## Fases 9 y 10 — completadas
 

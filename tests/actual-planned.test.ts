@@ -40,12 +40,12 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   const before=metrics(data);const name='phase5-migration-'+crypto.randomUUID();const old=new Dexie(name);
   old.version(9).stores({...schema,accounts:'id, type',account_transfers:'id, fromAccountId, toAccountId, date',categories:'id, type'});
   for(const [table,rows] of Object.entries(data)) {
-    if (table === 'planned_occurrences') continue;
+    if (table === 'planned_occurrences' || table === 'investments') continue;
     await old.table(table).bulkAdd(rows);
   }
   old.close();const current=new GlitchBudgetDB(name);
   try{
-    await current.open();assert.equal(current.verno, 13);const migrated=await snapshot(current);
+    await current.open();assert.equal(current.verno, 14);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(row => {
       const migratedRow = migrateActualExpense(row);
@@ -120,7 +120,7 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
 
 test('v7 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
   const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
-  assert.equal(dump.v, 9);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
+  assert.equal(dump.v, 10);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
   await importDataJSON(JSON.stringify(dump));assert.deepEqual(clean(await snapshot()),clean(before));
   for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(clean(await snapshot()),clean(before));}
 });

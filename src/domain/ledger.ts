@@ -19,10 +19,11 @@ export function selectCardSignedBalance(debt: Debt, expenses: Expense[], payment
 export function selectPosition(accounts: Account[], debts: Debt[], data: AccountSnapshot, through: string) {
   const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
+  const investmentAssets = accounts.filter(a => a.type === 'investment').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const balances = debts.filter(d => d.type === 'credit_card').map(d => ({...d, signedBalance: selectCardSignedBalance(d,data.expenses,data.payments,through)}));
   const liabilities = balances.reduce((sum,d) => sum+Math.max(0,d.signedBalance),0);
   const cardPositiveBalance = balances.reduce((sum,d) => sum+Math.max(0,-d.signedBalance),0);
-  return { cash, bank, liquidAssets: cash+bank, liabilities, cardPositiveBalance, netWorth: cash+bank+cardPositiveBalance-liabilities, balances };
+  return { cash, bank, investmentAssets, liquidAssets: cash+bank, liabilities, cardPositiveBalance, netWorth: cash+bank+investmentAssets+cardPositiveBalance-liabilities, balances };
 }
 /** Borrowing headroom, never part of liquid assets or net worth. */
 export function selectCardAvailableLimit(limit: number, signedBalance: number) {
