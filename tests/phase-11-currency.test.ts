@@ -7,6 +7,7 @@ import { addAccount, ensureCashAccount, saveTransfer } from '../src/lib/accounts
 import { setBaseCurrency } from '../src/lib/currency-service';
 import { saveExpense, saveIncome } from '../src/lib/transaction-service';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
+import { importIncomesCSV } from '../src/lib/csv-backup';
 import { seedTestCategories } from './category-fixture';
 import { localDate } from '../src/lib/finance-calculations';
 
@@ -119,4 +120,50 @@ test('legacy v8 backups import as base currency and re-export with the v9 contra
     {currency:exported.incomes[0].currency,fxRate:exported.incomes[0].fxRate,amountBase:exported.incomes[0].amountBase},
     {currency:'DOP',fxRate:1,amountBase:1000},
   );
+});
+
+
+test('migration uses the configured base currency rather than hard-coding DOP', async () => {
+  const name = 'phase11-usd-migration-' + crypto.randomUUID();
+  const schema = Object.fromEntries(db.tables.map(table => [table.name, [table.schema.primKey.src, ...table.schema.indexes.map(index => index.src)].join(',')]));
+  const old = new Dexie(name);
+  old.version(12).stores(schema);
+  await old.table('settings').put({ ...settings, currency:'USD' });
+  await old.table('accounts').put({id:'legacy-bank',name:'Banco',type:'bank',openingBalance:5000,startDate:today});
+  await old.table('expenses').put({id:'legacy-expense',nature:'Variable',concept:'Compra',amount:250,date:today,month:today.slice(0,7),categoryId:'food',accountId:'legacy-bank'});
+  old.close();
+
+  const current = new GlitchBudgetDB(name);
+  try {
+    await current.open();
+    assert.equal((await current.accounts.get('legacy-bank'))?.currency, 'USD');
+    assert.deepEqual(
+      (({currency,fxRate,amountBase}) => ({currency,fxRate,amountBase}))((await current.expenses.get('legacy-expense'))!),
+      {currency:'USD',fxRate:1,amountBase:250},
+    );
+  } finally {
+    await current.delete();
+  }
+});
+
+test('CSV imports cannot smuggle a different currency into a base-currency account', async () => {
+  const cash = await ensureCashAccount(today);
+  const csv = [
+    'id,month,date,categoryId,amount,description,type,currency,fxRate,amountBase,accountId,recurringRuleId',
+    `csv-income,${today.slice(0,7)},${today},salary,1234,Cobro,extra,USD,60,74040,${cash.id},`,
+  ].join('\n');
+  await importIncomesCSV(new File([csv], 'income.csv'));
+  const row = await db.incomes.get('csv-income');
+  assert.deepEqual(
+    {currency:row?.currency,fxRate:row?.fxRate,amountBase:row?.amountBase},
+    {currency:'DOP',fxRate:1,amountBase:1234},
+  );
+});
+
+test('v9 restore rejects foreign-currency accounts until manual conversion exists', async () => {
+  const cash = await ensureCashAccount(today);
+  const backup = JSON.parse(await exportDataJSON());
+  backup.accounts = backup.accounts.map((account: any) => account.id === cash.id ? { ...account, currency:'USD' } : account);
+  await assert.rejects(importDataJSON(JSON.stringify(backup)), /conversión manual/);
+  assert.equal((await db.accounts.get(cash.id))?.currency, 'DOP');
 });
