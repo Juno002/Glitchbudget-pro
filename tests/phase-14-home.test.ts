@@ -109,4 +109,5 @@ test('Savings planning preference moved from Home to finance settings', () => {
   assert.doesNotMatch(home,/Ahorro sugerido/);
   assert.match(settings,/Ahorro sugerido/);
   assert.match(settings,/savePct/);
+  assert.match(settings,/localStorage\.removeItem\(HOME_PREFERENCES_KEY\)/);
 });
