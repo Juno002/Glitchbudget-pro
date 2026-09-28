@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import assert from 'node:assert/strict';
 import { after, beforeEach, test } from 'node:test';
+import { readFileSync } from 'node:fs';
 import Dexie from 'dexie';
 import { db, GlitchBudgetDB, type Investment } from '../src/lib/db';
 import { createInvestment } from '../src/lib/investments';
@@ -180,4 +181,17 @@ test('backup rejects an investment account without matching metadata atomically'
   const before=await db.accounts.toArray();
   await assert.rejects(importDataJSON(JSON.stringify(bad)),/sin metadatos/);
   assert.deepEqual(await db.accounts.toArray(),before);
+});
+
+
+test('Investments 1.0 UI exposes the roadmap fields and labels projections as estimated', () => {
+  const ui = readFileSync(new URL('../src/components/dashboard/investments-manager.tsx', import.meta.url), 'utf8');
+  for (const label of [
+    'Principal','Tasa','Fecha de apertura','Vencimiento','Tiempo transcurrido',
+    'Días restantes','Valor al vencimiento','Interés estimado',
+  ]) assert.ok(ui.includes(label), label);
+  assert.match(ui, /Estimado · no forma parte del patrimonio real/);
+  assert.match(ui, /Ya la tenía/);
+  assert.match(ui, /La acabo de abrir/);
+  assert.match(ui, /transferencia patrimonial/);
 });
