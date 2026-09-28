@@ -8,6 +8,7 @@ import { normalizeFinancialPolicies } from '../policies/settings';
 import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchema } from './accounts';
 import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
@@ -433,7 +434,7 @@ export async function importDataJSON(text: string): Promise<{
     currency: i.accountId ? accountMap.get(i.accountId)!.currency : baseCurrency,
     fxRate: 1,
     amountBase: i.amount,
-    labels: 'labels' in i ? i.labels : undefined,
+    labels: 'labels' in i && i.labels ? normalizeTransactionLabels(i.labels) : undefined,
   }));
 
   const expenses = d.expenses.map(e => ({
@@ -445,7 +446,7 @@ export async function importDataJSON(text: string): Promise<{
     amountBase: e.amount,
     paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
     necessity: 'necessity' in e ? e.necessity : undefined,
-    labels: 'labels' in e ? e.labels : undefined,
+    labels: 'labels' in e && e.labels ? normalizeTransactionLabels(e.labels) : undefined,
   }));
 
   const plans = d.plans.map(p => ({
