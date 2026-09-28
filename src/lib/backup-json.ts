@@ -482,7 +482,12 @@ export async function importDataJSON(text: string): Promise<{
   }};
 }
 
-function validateCategoryReferences(data: Pick<DumpV8T, 'incomes'|'expenses'|'plans'|'recurrents'>, categories: import('../domain/models').Category[]) {
+function validateCategoryReferences(data: {
+  incomes: Array<{ categoryId:string }>;
+  expenses: Array<{ categoryId:string }>;
+  plans: Array<{ categoryId:string }>;
+  recurrents?: Array<{ categoryId:string; direction:'income'|'expense' }>;
+}, categories: import('../domain/models').Category[]) {
  const map=new Map(categories.map(c=>[c.id,c]));
  const check=(id:string,type:'income'|'expense')=>{const row=map.get(id);if(!row || !appliesTo(row,type))throw new Error('El respaldo contiene una categoría inexistente o incompatible: '+id);};
  data.incomes.forEach(r=>check(r.categoryId,'income'));data.expenses.forEach(r=>check(r.categoryId,'expense'));data.plans.forEach(r=>check(r.categoryId,'expense'));data.recurrents?.forEach(r=>check(r.categoryId,r.direction));
