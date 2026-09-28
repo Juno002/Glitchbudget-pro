@@ -86,11 +86,9 @@ export interface Goal {
     id: string;
     name: string;
     target: number;
-    saved: number;
     date?: string; // YYYY-MM-DD (deadline)
     quota: number; // Monto de la cuota mensual planificada
     startDate: string; // YYYY-MM-DD
-    status: 'active' | 'completed';
 }
 
 export interface GoalContribution {
@@ -98,6 +96,8 @@ export interface GoalContribution {
   goalId: string;
   amount: number;
   date: string; // YYYY-MM-DD
+  /** Imported progress without a dated reservation; never reduces a period's planning margin. */
+  kind?: 'legacy_balance';
 }
 
 

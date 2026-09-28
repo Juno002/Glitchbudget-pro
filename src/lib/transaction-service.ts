@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
 import { isValidDate } from './finance-calculations';
 import { budgetPlansForDate } from '../domain/budgets';
+import { prepareBudgetPeriodsForDate } from './budget-rollover';
+import { recordGoalContribution } from './goal-service';
 
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
@@ -100,6 +102,7 @@ export async function saveExpense(input: Omit<Expense, 'month'>, editing = false
         if (policies.preventNegativeAccountBalance) requirePreservedAccountFunds(await db.accounts.toArray(), snapshot, projected);
       }
     }
+    await prepareBudgetPeriodsForDate(row.date);
     const settings = await db.settings.get('general');
     const activeBudgets = budgetPlansForDate(await db.plans.toArray(), row.categoryId, row.date, settings || {});
     const evaluation = evaluateBudgetOverspendingSet(await db.expenses.toArray(), row, activeBudgets, policies.budgetOverspendingBehavior);
@@ -138,17 +141,5 @@ export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   });
 }
 export async function saveGoalContribution(contribution: import('./db').GoalContribution) {
-  centsSchema.parse(contribution.amount);
-  fields.date.parse(contribution.date);
-  return db.transaction('rw', outgoingTables, async () => {
-    const goal = await db.goals.get(contribution.goalId);
-    if (!goal) throw new Error('Meta no encontrada.');
-
-    const saved = goal.saved + contribution.amount;
-    if (!Number.isSafeInteger(saved)) throw new Error('El total supera el monto admitido.');
-    const status = saved >= goal.target ? 'completed' : 'active';
-    await db.goals.update(goal.id, { saved, status });
-    await db.goal_contributions.add(contribution);
-    return status === 'completed' && goal.status !== 'completed';
-  });
+  return recordGoalContribution(contribution);
 }

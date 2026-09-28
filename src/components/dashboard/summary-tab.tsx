@@ -15,6 +15,8 @@ import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
 import { localDate } from '@/lib/finance-calculations';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { useTabs } from '@/contexts/tabs-context';
+import { goalFundingSchedule } from '@/domain/goals';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 
 function formatMonth(value: string) {
   return format(new Date(`${value}-02`), 'MMMM', { locale:es });
@@ -79,6 +81,7 @@ export default function SummaryTab() {
   const getCategoryInfo = useCategoryResolver();
   const [periodLabel, setPeriodLabel] = useState('');
   const today = localDate();
+  const money = usePrivateCurrency();
 
   useEffect(() => {
     setPeriodLabel(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
@@ -105,7 +108,7 @@ export default function SummaryTab() {
       ...(expenses || []).map(row => ({ id:row.id, kind:'expense' as const, title:row.concept || 'Gasto', amount:row.amount, date:row.date, categoryId:row.categoryId })),
       ...(accountTransfers || []).map(row => ({ id:row.id, kind:'transfer' as const, title:row.note || 'Transferencia', amount:row.amount, date:row.date, categoryId:'' })),
       ...(debtPayments || []).map(row => ({ id:row.id, kind:'payment' as const, title:'Pago de tarjeta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
-      ...(goalContributions || []).map(row => ({ id:row.id, kind:'saving' as const, title:'Aporte a meta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
+      ...(goalContributions || []).filter(row => row.kind !== 'legacy_balance').map(row => ({ id:row.id, kind:'saving' as const, title:'Aporte a meta', amount:row.amount, date:row.date.slice(0,10), categoryId:'' })),
     ];
     return rows.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0, 5);
   }, [incomes, expenses, accountTransfers, debtPayments, goalContributions]);
@@ -209,6 +212,8 @@ export default function SummaryTab() {
                   label={goal.name}
                   current={goal.saved}
                   total={goal.target}
+                  currentLabel="Ahorrado"
+                  supporting={goal.date ? `Aporte mensual requerido: ${money(goalFundingSchedule(Math.max(0, goal.target-goal.saved), goal.date, today, {periodStartDay}).requiredMonthly!)}` : 'Define una fecha límite en Plan para calcular el aporte mensual.'}
                   remaining={Math.max(0, goal.target - goal.saved)}
                   status={goal.saved >= goal.target ? 'success' : 'neutral'}
                   statusLabel={goal.date ? `Para ${dateLabel(goal.date)}` : 'Sin fecha límite'}

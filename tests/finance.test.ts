@@ -1,3 +1,4 @@
+import { goalSaved } from '../src/domain/goals';
 import { withoutLegacyCategories } from '../src/domain/categories';
 import { seedTestCategories } from './category-fixture';
 import { legacyProjectedTotals as calculateTotals, legacyProjectedExpenseForMonth as expenseForMonth } from './reference/phase2-finance';
@@ -123,7 +124,7 @@ test('concurrent writes cannot overspend a strict cash balance', async () => {
 });
 test('credit spending requires an active card and does not spend cash', async () => {
   await assert.rejects(saveExpense({ ...expense, paymentMethod: 'credit', amount: 1000 }), /tarjeta/);
-  await db.debts.add({ id: 'card', name: 'Visa', type: 'credit_card', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString(), status: 'active' });
+  await db.debts.add({ id: 'card', name: 'Visa', type: 'credit_card', status: 'active', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString() });
   await saveExpense({ ...expense, paymentMethod: 'credit', debtId: 'card', amount: 1000 });
   assert.equal((await db.expenses.get(expense.id))!.debtId, 'card');
   const data = snapshot(); data.expenses = await db.expenses.toArray();
@@ -143,7 +144,7 @@ test('legacy month-wide recurrence duplicate guard is retired', async () => {
 test('JSON round trip preserves expense nature, goal quotas and settings', async () => {
   await db.expenses.add({ ...expense, nature: 'Fijo' });
   await db.incomes.add({ id: 'i', date: '2026-09-01', month: '2026-09', amount: 125, categoryId: 'salary', type: 'gift', description: 'Regalo' });
-  await db.goals.add({ id: 'g', name: 'Viaje', target: 100_000, saved: 1000, quota: 5000, startDate: '2026-09-01', status: 'active' });
+  await db.goals.add({ id: 'g', name: 'Viaje', target: 100_000, quota: 5000, startDate: '2026-09-01' });
   const original = await exportDataJSON();
   await importDataJSON(original);
   assert.deepEqual(await db.settings.get('general'), { ...withoutLegacyCategories(settings), preventNegativeAccountBalance: true, budgetOverspendingBehavior: 'block' });
@@ -210,8 +211,8 @@ test('a failed restore rolls back every table', async () => {
 
 async function seedOutgoing() {
   await db.settings.update('general', { baseIncome: { freq: 'mensual', amount: 10_000 }, savePct: 0 });
-  await db.debts.add({ id: 'card', name: 'Prueba', type: 'credit_card', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString(), status: 'active' });
-  await db.goals.add({ id: 'goal', name: 'Meta', target: 20_000, saved: 0, quota: 0, startDate: '2026-09-01', status: 'active' });
+  await db.debts.add({ id: 'card', name: 'Prueba', type: 'credit_card', status: 'active', principal: 100_000, apr: 0, minPayment: 0, createdAt: new Date().toISOString() });
+  await db.goals.add({ id: 'goal', name: 'Meta', target: 20_000, quota: 0, startDate: '2026-09-01' });
 }
 test('concurrent card payments cannot spend the same actual cash', async () => {
   await seedOutgoing();
@@ -233,7 +234,7 @@ test('invalid outgoing dates and closed cards never create payments', async () =
 test('failed goal contribution leaves saved amount and history unchanged', async () => {
   await seedOutgoing();
   await assert.rejects(saveGoalContribution({ id: 'c', goalId: 'goal', amount: -1, date: '2026-09-17' }));
-  assert.equal((await db.goals.get('goal'))?.saved, 0);
+  assert.equal(goalSaved('goal', await db.goal_contributions.toArray()), 0);
   assert.equal(await db.goal_contributions.count(), 0);
 });
 test('non-strict mode allows a payment beyond available cash', async () => {

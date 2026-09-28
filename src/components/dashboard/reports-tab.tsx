@@ -17,6 +17,8 @@ import MonthlyResultChart from "./charts/monthly-result-chart";
 import { EmptyState, PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
 import { Button } from '../ui/button';
 import { useTabs } from '@/contexts/tabs-context';
+import { useBudgetPeriod } from '@/hooks/use-budget-period';
+import { BudgetPeriodControls } from './budget-period-controls';
 
 const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
   const money = usePrivateCurrency();
@@ -155,11 +157,12 @@ const ExpenseByTypeTable = () => {
 }
 
 const BudgetStatusReport = () => {
+  const selection = useBudgetPeriod();
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const { setActiveTab, setPlanningTab } = useTabs();
     const { getBudgetStatusDetails, currentMonth } = useFinances();
-    const budgetDetails = getBudgetStatusDetails(currentMonth).filter(b => b.limit > 0);
+    const budgetDetails = selection.range ? getBudgetStatusDetails(currentMonth, selection.range).filter(b => b.configured || b.spent > 0) : [];
 
     const statusFor = (status: 'ok' | 'alert' | 'over' | 'unbudgeted') => ({
         kind: status === 'over' ? 'danger' : status === 'alert' ? 'warning' : status === 'ok' ? 'success' : 'neutral',
@@ -185,7 +188,8 @@ const BudgetStatusReport = () => {
         <Card>
             <CardHeader>
                 <CardTitle>📝 Estado de Presupuestos</CardTitle>
-                <CardDescription>Un resumen detallado del rendimiento de tus presupuestos para el período seleccionado.</CardDescription>
+                <CardDescription>Consulta cada rango por separado. Un gasto puede afectar varios límites; no se suma varias veces a tus gastos reales.</CardDescription>
+                <BudgetPeriodControls selection={selection} />
             </CardHeader>
             <CardContent>
                 {/* MOBILE VIEW: Expandable Cards */}
@@ -204,7 +208,7 @@ const BudgetStatusReport = () => {
                                 </div>
                                 <div className="grid grid-cols-2 gap-2 text-sm mt-1 sm:grid-cols-4">
                                     <div className="flex flex-col">
-                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Planificado</span>
+                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Límite</span>
                                         <span className="font-mono">{money(b.limit)}</span>
                                     </div>
                                     <div className="flex flex-col">
@@ -217,7 +221,7 @@ const BudgetStatusReport = () => {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Porcentaje</span>
-                                        <span className="font-mono font-semibold">{b.percentage}%</span>
+                                        <span className="font-mono font-semibold">{b.limit > 0 ? b.percentage + '%' : '—'}</span>
                                     </div>
                                 </div>
                                 <Progress 
@@ -238,7 +242,7 @@ const BudgetStatusReport = () => {
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="py-4">Categoría</TableHead>
-                                <TableHead className="text-right py-4">Planificado</TableHead>
+                                <TableHead className="text-right py-4">Límite</TableHead>
                                 <TableHead className="text-right py-4">Gastado</TableHead>
                                 <TableHead className="text-right py-4">Restante</TableHead>
                                 <TableHead className="text-right py-4">Porcentaje</TableHead>
@@ -261,7 +265,7 @@ const BudgetStatusReport = () => {
                                         <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
                                             {money(b.remaining)}
                                         </TableCell>
-                                        <TableCell className="text-right py-5 font-mono">{b.percentage}%</TableCell>
+                                        <TableCell className="text-right py-5 font-mono">{b.limit > 0 ? b.percentage + '%' : '—'}</TableCell>
                                         <TableCell className="py-5">
                                             <Progress 
                                                 value={progress} 

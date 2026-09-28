@@ -49,6 +49,16 @@ test('production policy prohibits connections and diagnostic importer stays remo
   for (const weakened of ["default-src 'self'", "connect-src 'self'", "connect-src 'none' https://example.com", "connect-src *", "connect-src 'none'; connect-src 'self'"]) assert.equal(checkConnectPolicy(weakened), false);
 });
 
+test('mobile area changes stay in the app without a router fetch forbidden by the CSP', () => {
+  const bottom = readFileSync('src/components/layout/bottom-nav.tsx', 'utf8');
+  assert.doesNotMatch(bottom, /next\/link|<Link|href=/);
+  assert.match(bottom, /<button/);
+  assert.match(bottom, /onClick=\{\(\) => setActiveTab\(item.value\)\}/);
+  const header = readFileSync('src/components/layout/header.tsx', 'utf8');
+  assert.doesNotMatch(header, /next\/link/);
+  assert.match(header, /<a href="\/"/);
+});
+
 test('export guard rejects restored diagnostic route and weakened HTML policy', () => {
   const root = mkdtempSync(path.join(tmpdir(), 'glitch-static-test-'));
   try {

@@ -1,4 +1,4 @@
-import { budgetPlanForRange, budgetPlansForRange } from '../domain/budgets';
+import { budgetPlanForRange, budgetPlansForRange, validateBudgetRange } from '../domain/budgets';
 import { selectCategorySpendingForPeriod, selectRolloverLimit } from '../domain/metrics';
 import { budgetPeriodContaining, periodForId, previousBudgetPeriod, type BudgetPeriodRange } from '../domain/periods';
 import { db } from './db';
@@ -8,6 +8,7 @@ export async function rollBudgetsIntoPeriod(targetPeriod: BudgetPeriodRange): Pr
 
   return db.transaction('rw', db.settings, db.plans, db.expenses, db.categories, async () => {
     const settings = await db.settings.get('general');
+    validateBudgetRange(targetPeriod, settings || {});
     const strategy = settings?.rolloverStrategy;
     if (!strategy || strategy === 'reset' || budgetPlansForRange(await db.plans.toArray(), targetPeriod).length > 0) return false;
 
@@ -41,4 +42,11 @@ export async function rollBudgetsIntoMonth(periodId: string): Promise<boolean> {
 export async function rollBudgetsForDate(date: string, kind: Exclude<BudgetPeriodRange['kind'], 'one_time'>): Promise<boolean> {
   const settings = await db.settings.get('general');
   return rollBudgetsIntoPeriod(budgetPeriodContaining(date, kind, settings || {}));
+}
+
+/** Materialization is part of saving a real expense, independent of visiting Plan. */
+export async function prepareBudgetPeriodsForDate(date: string): Promise<void> {
+  await db.transaction('rw', db.settings, db.plans, db.expenses, db.categories, async () => {
+    for (const kind of ['monthly', 'weekly', 'yearly'] as const) await rollBudgetsForDate(date, kind);
+  });
 }

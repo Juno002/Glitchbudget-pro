@@ -4,7 +4,7 @@ import { confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOcc
 import { plannedOccurrenceWindow } from '@/domain/upcoming';
 import { BudgetWarning } from '@/policies/budget-overspending';
 import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
-import { createCategory, resetCategories, requireCategory, savePlans } from '@/lib/category-service';
+import { createCategory, resetCategories, requireCategory } from '@/lib/category-service';
 
 import { selectPeriodMetrics, recordedCategoriesForPeriod, recordedExpenseForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
@@ -13,9 +13,11 @@ import { readFinancialPolicies } from '@/lib/policy-settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
-import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod } from '@/lib/budget-rollover';
+import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod, prepareBudgetPeriodsForDate } from '@/lib/budget-rollover';
 import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '@/domain/budgets';
-import { reassignBudgetLimit } from '@/lib/budget-service';
+import { reassignBudgetLimit, saveBudgetLimits } from '@/lib/budget-service';
+import { goalView } from '@/domain/goals';
+import { saveGoal, removeGoal } from '@/lib/goal-service';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
@@ -114,7 +116,7 @@ interface FinanceContextType {
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
-  getBudgetStatusDetails: (month: string, budgetPeriod?: BudgetPeriodRange) => Array<Budget & { range: BudgetPeriodRange; spent: number; remaining: number; percentage: number; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
+  getBudgetStatusDetails: (month: string, budgetPeriod?: BudgetPeriodRange) => Array<Budget & { range: BudgetPeriodRange; spent: number; remaining: number; percentage: number; configured: boolean; status: 'ok' | 'alert' | 'over' | 'unbudgeted' }>;
 
   addIncomeCategory: (category: string, iconName?: string) => Promise<void>;
   resetIncomeCategories: () => Promise<void>;
@@ -161,7 +163,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   })), [dataVersion]);
   const expenses = financialData?.expenses;
   const incomes = financialData?.incomes;
-  const goals = financialData?.goals;
+  const goals = useMemo(() => financialData?.goals.map(goal => goalView(goal, financialData.goalContributions)), [financialData]);
   const goalContributions = financialData?.goalContributions;
   const budgets = financialData?.budgets;
   const debts = financialData?.debts;
@@ -204,6 +206,11 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories]);
   const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings]);
+
+  useEffect(() => {
+    if (loading) return;
+    void prepareBudgetPeriodsForDate(localDate()).catch(error => toast({ title:'No se pudieron preparar los presupuestos', description:friendlyError(error), variant:'destructive' }));
+  }, [loading, rawSettings, toast]);
 
   useEffect(() => {
     setCurrentMonthState(periodContaining(localDate(), settings).id);
@@ -396,17 +403,15 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addGoal = useCallback(async (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => {
     try {
-      const newGoal: Goal = {
+      const newGoal = {
           name: goal.name,
           date: goal.date || undefined,
           target: toCents(goal.target),
           quota: toCents(goal.quota),
           id: crypto.randomUUID(),
-          saved: 0,
           startDate: localDate(),
-          status: 'active'
       };
-      await db.goals.add(newGoal);
+      await saveGoal(newGoal);
       toast({ title: '¡Meta creada!', description: `Tu meta "${newGoal.name}" fue añadida.` });
       return true;
     } catch (error) {
@@ -417,7 +422,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateGoal = useCallback(async (goal: Goal) => {
     try {
-      await db.goals.put(goal);
+      await saveGoal(goal, 'update');
       return true;
     } catch (error) {
       toast({ title: 'Error al actualizar meta', description: friendlyError(error), variant: 'destructive' });
@@ -427,10 +432,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteGoal = useCallback(async (id: string) => {
     try {
-      await db.transaction('rw', db.goals, db.goal_contributions, async () => {
-        await db.goals.delete(id);
-        await db.goal_contributions.where('goalId').equals(id).delete();
-      });
+      await removeGoal(id);
       toast({ title: 'Meta eliminada' });
     } catch (error) {
       toast({ title: 'Error al eliminar meta', description: friendlyError(error), variant: 'destructive' });
@@ -448,7 +450,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       if (isCompletedNow) {
           playGoalComplete();
       }
-      toast({ title: '¡Contribución exitosa!', description: `Has añadido ${(amountInCents / 100).toFixed(2)}.` });
+      toast({ title: '¡Contribución exitosa!', description: 'La reserva de tu meta se ha actualizado.' });
       return true;
     } catch (error: any) {
       toast({ title: 'Error al aportar a la meta', description: friendlyError(error), variant: 'destructive' });
@@ -459,9 +461,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const updateAllBudgets = useCallback(async (month: string, allBudgets: Omit<Budget, 'month'>[], budgetPeriod?: BudgetPeriodRange) => {
     try {
       const range = budgetPeriod ?? { ...periodForId(month, activeSettings), kind: 'monthly' as const };
-      const budgetsToPut: Plan[] = allBudgets.map(b => budgetPlanForRange(range, b.categoryId, toCents(b.limit)));
-      if (budgetsToPut.some(b => !Number.isSafeInteger(b.limit) || b.limit < 0)) throw new Error('Los presupuestos deben ser montos positivos o cero.');
-      await savePlans(budgetsToPut);
+      await saveBudgetLimits(range, allBudgets.map(b => ({ categoryId:b.categoryId, limit:toCents(b.limit) })));
       toast({ title: '¡Presupuestos guardados!'});
       return true;
     } catch (error) {
@@ -506,7 +506,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
     return allRelevantCategoryIds.map(catId => {
       const budget = periodBudgets.find(b => b.categoryId === catId) || budgetPlanForRange(range, catId, 0);
-      return budgetStatusForRange(budget, expenses || [], range);
+      return budgetStatusForRange(budget, expenses || [], range, budgetedCategoryIds.has(catId));
     });
   }, [budgets, expenses, expenseCategories, activeSettings]);
 

@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { localDate } from '@/lib/finance-calculations';
 import { periodContaining } from '@/domain/periods';
 import { formatPeriodRange } from '@/lib/period-format';
@@ -24,12 +23,14 @@ export default function Header() {
     <>
       <header className="sticky top-0 z-10 border-b bg-background/80 px-4 py-2 backdrop-blur-sm md:px-6">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">
-          <Link href="/" className="flex min-w-0 items-center gap-2">
+          {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a href="/" className="flex min-w-0 items-center gap-2">
             <div className="flex min-w-0 items-center gap-2 rounded-full border border-primary/20 bg-[hsl(var(--primary)_/_0.08)] px-3 py-1.5 text-primary shadow-[0_0_15px_hsl(var(--primary)_/_0.1)] transition-all hover:bg-primary/10">
               <span className="text-lg" aria-hidden="true">💰</span>
               <span className="truncate font-syne font-bold tracking-wide">GlitchBudget Pro</span>
             </div>
-          </Link>
+          </a>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <BalanceVisibilityToggle />

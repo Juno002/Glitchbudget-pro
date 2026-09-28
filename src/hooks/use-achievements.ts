@@ -133,7 +133,7 @@ export function useAchievements() {
     if (allMonths.size >= 3) unlock('consistent_tracker');
 
     // saver_streak_3 / saver_streak_7
-    const contributionCount = goalContributions.length;
+    const contributionCount = goalContributions.filter(row => row.kind !== 'legacy_balance').length;
     if (contributionCount > streak) {
       const newStreak = contributionCount;
       setStreakState(newStreak);

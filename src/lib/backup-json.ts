@@ -1,3 +1,4 @@
+import { migrateGoalRecords } from '../domain/goals';
 import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-planned-migration';
 import { recurringRuleSchema } from './recurring-rule-service';
 import { plannedOccurrenceSchema, validateOccurrenceLedgerLinks, validatePlannedOccurrenceSet } from './planned-occurrence-service';
@@ -7,6 +8,7 @@ import { normalizeFinancialPolicies } from '../policies/settings';
 import { accountSchema, transferSchema } from './accounts';
 
 import { z } from 'zod';
+import { validateBudgetPlans } from '../domain/budgets';
 import { db } from '@/lib/db';
 import { isValidDate } from './finance-calculations';
 
@@ -29,9 +31,9 @@ const SettingsV3 = z.object({
   customCategoryIcons: z.record(z.string()).optional(),
   rolloverStrategy: z.enum(['reset','accumulate_surplus','accumulate_debt']).default('reset'),
   periodStartDay: z.number().int().min(1).max(31).optional(),
-  baseIncome: z.object({ 
+  baseIncome: z.object({
     freq: z.enum(['mensual','quincenal','semanal']).default('mensual'),
-    amount: MoneyCents 
+    amount: MoneyCents
   }).default({ freq: 'mensual', amount: 0 }),
   incomeCategories: z.array(z.string()).optional(),
   expenseCategories: z.array(z.string()).optional()
@@ -108,6 +110,9 @@ export const GoalContribV3 = z.object({
   date: ISODate
 });
 
+export const GoalV8 = GoalV3.omit({ saved:true, status:true }).extend({ target:MoneyCents });
+export const GoalContribV8 = GoalContribV3.extend({ amount:MoneyCents, kind:z.literal('legacy_balance').optional() });
+
 const RecurrentV3 = z.object({
   id: Id, type: z.enum(['income', 'expense']), title: z.string(), categoryId: Id,
   amount: MoneyCents, freq: z.enum(['weekly', 'biweekly', 'monthly']),
@@ -149,9 +154,11 @@ const DumpV3 = z.object({
 });
 const DumpV6 = DumpV3.extend({ v:z.literal(6), incomes:z.array(IncomeV6), expenses:z.array(ExpenseV6), recurrents:z.array(recurringRuleSchema) });
 const DumpV7 = DumpV6.extend({ v:z.literal(7), plans:z.array(PlanV7), plannedOccurrences:z.array(plannedOccurrenceSchema) });
-type DumpV7T = z.infer<typeof DumpV7>;
+const DumpV8 = DumpV7.extend({ v:z.literal(8), goals:z.array(GoalV8), goalContributions:z.array(GoalContribV8) });
+type DumpV8T = z.infer<typeof DumpV8>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===8) return DumpV8.parse(raw);
  if (version===7) return DumpV7.parse(raw);
  if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: []};
  const legacy=DumpV3.parse(raw);
@@ -184,9 +191,10 @@ export async function exportDataJSON(): Promise<string> {
     db.categories.toArray(),
   ]));
 
-  // Current v7 contract; amounts remain in cents.
-  const dump: DumpV7T = {
-    v: 7,
+  const goalData = migrateGoalRecords(goals, goalContributions);
+  // Current v8 contract; progress is represented only by contributions.
+  const dump: DumpV8T = {
+    v: 8,
     categories,
     accounts, accountTransfers,
     exportedAt: nowIsoZ(),
@@ -201,7 +209,7 @@ export async function exportDataJSON(): Promise<string> {
       ...normalizeFinancialPolicies(settings),
       rolloverStrategy: (settings.rolloverStrategy as ('reset' | 'accumulate_surplus' | 'accumulate_debt')) ?? 'reset',
       ...(settings.periodStartDay !== undefined ? { periodStartDay: settings.periodStartDay } : {}),
-      baseIncome: { 
+      baseIncome: {
         freq: (settings.baseIncome?.freq as ('mensual' | 'quincenal' | 'semanal')) ?? 'mensual',
         amount: Math.max(0, Number(settings.baseIncome?.amount ?? 0))
       },
@@ -229,14 +237,14 @@ export async function exportDataJSON(): Promise<string> {
       periodStart: p.periodStart,
       periodEnd: p.periodEnd,
     })),
-    goals: goals.map(g => ({
+    goals: goalData.goals.map(g => ({
       quota: g.quota ?? 0,
       id: g.id, name: g.name,
-      target: toCents(g.target), saved: toCents(g.saved ?? 0),
-      startDate: g.startDate, date: g.date || undefined, status: g.status ?? 'active'
+      target: toCents(g.target),
+      startDate: g.startDate, date: g.date || undefined,
     })),
-    goalContributions: goalContributions.map(gc => ({
-      id: gc.id, goalId: gc.goalId, amount: toCents(gc.amount), date: gc.date
+    goalContributions: goalData.contributions.map(gc => ({
+      id: gc.id, goalId: gc.goalId, amount: toCents(gc.amount), date: gc.date, kind:gc.kind,
     })),
     recurrents,
     plannedOccurrences,
@@ -249,8 +257,9 @@ export async function exportDataJSON(): Promise<string> {
   dump.settings = withoutLegacyCategories(dump.settings);
   validateCategorySet(categories);
   validateCategoryReferences(dump, categories);
+  validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV7.parse(dump);
+  DumpV8.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -270,6 +279,7 @@ export async function importDataJSON(text: string): Promise<{
   // 1) Parse + valida contrato v3
   const raw = JSON.parse(text);
   const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
+  validateBudgetPlans(d.plans);
 
   if (d.v >= 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
   if(d.v>=5 && !d.categories) throw new Error('El respaldo no contiene categorías.');
@@ -324,7 +334,7 @@ export async function importDataJSON(text: string): Promise<{
     strictMode: d.settings.strictMode ?? false,
     ...normalizeFinancialPolicies(d.settings),
     rolloverStrategy: d.settings.rolloverStrategy ?? 'reset',
-    baseIncome: { 
+    baseIncome: {
       amount: Math.max(0, Number(d.settings.baseIncome?.amount ?? 0)),
       freq: d.settings.baseIncome?.freq ?? 'mensual',
     },
@@ -354,16 +364,9 @@ export async function importDataJSON(text: string): Promise<{
     periodEnd: 'periodEnd' in p ? p.periodEnd : undefined,
   }));
 
-  const goals = d.goals.map(g => ({
-    id: g.id, name: g.name,
-    target: g.target, saved: g.saved,
-    startDate: g.startDate, date: g.date, status: g.status,
-    quota: g.quota
-  }));
-
-  const goal_contributions = d.goalContributions.map(gc => ({
-    id: gc.id, goalId: gc.goalId, amount: gc.amount, date: gc.date
-  }));
+  const goalData = migrateGoalRecords(d.goals, d.goalContributions);
+  const goals = goalData.goals;
+  const goal_contributions = goalData.contributions;
 
   const recurrents = d.recurrents ?? [];
   const plannedOccurrences = d.plannedOccurrences ?? [];
@@ -425,7 +428,7 @@ export async function importDataJSON(text: string): Promise<{
   }};
 }
 
-function validateCategoryReferences(data: Pick<DumpV7T, 'incomes'|'expenses'|'plans'|'recurrents'>, categories: import('../domain/models').Category[]) {
+function validateCategoryReferences(data: Pick<DumpV8T, 'incomes'|'expenses'|'plans'|'recurrents'>, categories: import('../domain/models').Category[]) {
  const map=new Map(categories.map(c=>[c.id,c]));
  const check=(id:string,type:'income'|'expense')=>{const row=map.get(id);if(!row || !appliesTo(row,type))throw new Error('El respaldo contiene una categoría inexistente o incompatible: '+id);};
  data.incomes.forEach(r=>check(r.categoryId,'income'));data.expenses.forEach(r=>check(r.categoryId,'expense'));data.plans.forEach(r=>check(r.categoryId,'expense'));data.recurrents?.forEach(r=>check(r.categoryId,r.direction));

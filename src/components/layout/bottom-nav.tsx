@@ -4,7 +4,6 @@ import { useTabs } from "@/contexts/tabs-context";
 import { PRIMARY_NAV_ITEMS, type PrimaryArea } from "@/components/layout/primary-navigation";
 import { cn } from "@/lib/utils";
 import { BarChart2, NotebookPen, FileText, ArrowLeftRight } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const icons = {
@@ -30,9 +29,9 @@ export default function BottomNav() {
           const isActive = activeTab === item.value;
           const Icon = icons[item.value];
           return (
-            <Link
+            <button
               key={item.value}
-              href={item.href}
+              type="button"
               onClick={() => setActiveTab(item.value)}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
@@ -44,7 +43,7 @@ export default function BottomNav() {
             >
               <Icon className="h-5 w-5" />
               <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
-            </Link>
+            </button>
           );
         })}
       </div>

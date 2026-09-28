@@ -1,465 +1,110 @@
 'use client';
 
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+import { PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
-import { Target, Trash2, PlusCircle, Brain, Calendar, Repeat } from 'lucide-react';
-import { formatDate } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { EmptyState } from '@/components/finance-ui';
-import { Progress } from '../ui/progress';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { playCoinDrop, playIncome } from '@/lib/sounds';
+import { EmptyState, ProgressMetric } from '@/components/finance-ui';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { goalFundingSchedule, goalMetrics, type GoalView } from '@/domain/goals';
+import { formatDate, toCents } from '@/lib/utils';
+import { isValidDate, localDate } from '@/lib/finance-calculations';
 import { triggerGoalCompletionConfetti } from '@/lib/confetti';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { SuggestionProfile } from '@/lib/goal-calculator';
-import { suggestMonthly, requiredMonthlyByDeadline } from '@/lib/goal-calculator';
-import type { Goal } from '@/lib/types';
 
+const monetaryInput = z.coerce.number().finite().nonnegative().refine(value => Number.isSafeInteger(toCents(value)), 'El monto supera el máximo admitido.');
 const goalSchema = z.object({
-  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  target: z.coerce.number().positive('El objetivo debe ser un número positivo'),
-  date: z.string().optional(),
-  quota: z.coerce.number().optional(),
+  name:z.string().trim().min(3, 'Escribe al menos 3 caracteres.'),
+  target:monetaryInput.refine(value => toCents(value) > 0, 'El objetivo mínimo es 0.01.'),
+  date:z.string().refine(value => !value || isValidDate(value), 'Elige una fecha válida.'),
+  quota:monetaryInput,
 });
+type GoalInput = z.infer<typeof goalSchema>;
+const contributionSchema = z.object({ amount:monetaryInput.refine(value => toCents(value) > 0, 'El aporte mínimo es 0.01.') });
 
-type GoalFormValues = z.infer<typeof goalSchema>;
-
-const contributionSchema = z.object({
-    amount: z.coerce.number().positive('El monto debe ser positivo'),
-});
-
-type ContributionFormValues = z.infer<typeof contributionSchema>;
-
-function ContributeToGoalDialog({ goal, onContribute }: { goal: Goal, onContribute: (amount: number) => Promise<boolean> }) {
-    const money = usePrivateCurrency();
-    const [open, setOpen] = useState(false);
-    const { getDisposable } = useFinances();
-    const { toast } = useToast();
-    const disposable = getDisposable();
-
-    const form = useForm<ContributionFormValues>({
-        resolver: zodResolver(contributionSchema),
-        defaultValues: { amount: (goal.quota || 0) / 100 },
-    });
-
-    const onSubmit = async (data: ContributionFormValues) => {
-        if ((data.amount * 100) > disposable) {
-            toast({
-                title: 'Saldo disponible superado',
-                description: `Estás intentando aportar más de tu disponible mensual de ${money(disposable)}.`,
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        const addedCents = data.amount * 100;
-        const willBeCompleted = (goal.saved + addedCents) >= goal.target;
-
-        if (!await onContribute(data.amount)) return;
-        if (willBeCompleted && goal.saved < goal.target) {
-             triggerGoalCompletionConfetti();
-             playIncome(); // Sonido más triunfal
-        } else {
-             playCoinDrop();
-        }
-
-
-        toast({
-            title: willBeCompleted ? '¡Meta Completada! 🎉' : '¡Aporte Exitoso!',
-            description: `Has sumado ${money(addedCents)} a "${goal.name}".`
-        });
-        form.reset();
-        setOpen(false);
-    };
-
-    return (
-        <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                <Button variant="ghost" className="min-h-11 sm:min-h-9 font-semibold hover:bg-primary/10 hover:text-primary transition-colors"><PlusCircle className="mr-2 h-4 w-4" /> Aportar</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[360px] p-0 overflow-hidden gap-0">
-                <DialogHeader className="p-6 pb-2">
-                    <DialogTitle>Aportar a &quot;{goal.name}&quot;</DialogTitle>
-                    <DialogDescription>
-                        Planificado: {money(goal.quota)}/mes<br/>
-                        Disponible general: {money(disposable)}
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="px-6 pb-6">
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
-                                control={form.control}
-                                name="amount"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <div className="relative mt-2">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-lg">RD$</span>
-                                                <Input 
-                                                    type="number" 
-                                                    step="100" 
-                                                    {...field} 
-                                                    className="h-16 pl-14 text-2xl font-bold bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
-                                                />
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button disabled={form.formState.isSubmitting} type="submit" className="w-full h-12 text-base font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition-all">
-                                Confirmar Aporte
-                            </Button>
-                        </form>
-                    </Form>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
+function ContributeDialog({ goal }: { goal:GoalView }) {
+  const { contributeToGoal } = useFinances();
+  const money = usePrivateCurrency();
+  const [open, setOpen] = useState(false);
+  const form = useForm<z.infer<typeof contributionSchema>>({ resolver:zodResolver(contributionSchema), defaultValues:{ amount:goal.quota / 100 } });
+  async function submit(values:z.infer<typeof contributionSchema>) {
+    if (!await contributeToGoal(goal.id, values.amount)) return;
+    if (goal.saved < goal.target && goal.saved + toCents(values.amount) >= goal.target) triggerGoalCompletionConfetti();
+    setOpen(false);
+  }
+  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (value) form.reset({ amount:Math.min(goal.quota, Math.max(0, goal.target-goal.saved))/100 }); }}>
+    <DialogTrigger asChild><Button variant="outline" size="sm"><PlusCircle className="mr-2 h-4 w-4" />Aportar</Button></DialogTrigger>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader><DialogTitle>Aportar a {goal.name}</DialogTitle><DialogDescription>Registrarás una reserva para esta meta. El efectivo y los saldos bancarios no cambian.</DialogDescription></DialogHeader>
+      <p className="text-sm text-muted-foreground">Ahorrado: {money(goal.saved)} · Restante: {money(Math.max(0, goal.target-goal.saved))}</p>
+      <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4">
+        <FormField control={form.control} name="amount" render={({field}) => <FormItem><FormLabel>Importe del aporte</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0.01" step="0.01" autoFocus /></FormControl><FormMessage /></FormItem>} />
+        <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">{form.formState.isSubmitting ? 'Guardando…' : 'Confirmar aporte'}</Button>
+      </form></Form>
+    </DialogContent>
+  </Dialog>;
 }
 
-// Removed GoalPlanner component as it's now integrated inside GoalsManager
-
-
 export default function GoalsManager() {
+  const { goals, goalContributions, addGoal, updateGoal, deleteGoal, periodStartDay } = useFinances();
   const money = usePrivateCurrency();
-  const { goals, addGoal, deleteGoal, contributeToGoal, getTotals, currentMonth, getDisposable } = useFinances();
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  
-  const form = useForm<GoalFormValues>({
-    resolver: zodResolver(goalSchema),
-    defaultValues: { name: '', target: 0, date: '', quota: 0 },
-  });
-
-  const disposable = getDisposable();
+  const today = localDate();
+  const [editing, setEditing] = useState<GoalView | null>(null);
+  const earliestDate = editing?.startDate || today;
+  const form = useForm<GoalInput>({ resolver:zodResolver(goalSchema.refine(value => !value.date || value.date >= earliestDate, {path:['date'], message:'La fecha límite no puede ser anterior al inicio de la meta.'})), defaultValues:{ name:'', target:0, date:'', quota:0 } });
   const target = form.watch('target');
   const deadline = form.watch('date');
-  
-  const suggestions = useMemo(() => {
-      const suggestionProfiles: SuggestionProfile[] = ['conservative', 'balanced', 'aggressive'];
-      if (!target || target <= 0) return [];
-      return suggestionProfiles.map(p => ({
-          profile: p,
-          ...suggestMonthly(target * 100, 0, disposable, p)
-      }))
-  }, [target, disposable]);
-
-  const requiredByDeadline = useMemo(() => {
-      if (!deadline || !target || target <= 0) return null;
-      return requiredMonthlyByDeadline(target * 100, 0, deadline, disposable);
-  }, [target, deadline, disposable]);
-
-  const isFormValid = !!(form.watch('name') && form.watch('target') > 0 && form.watch('quota'));
-
-  useEffect(() => {
-    if (!open) {
-      form.reset({ name: '', target: 0, date: '', quota: undefined });
-    }
-  }, [open, form]);
-
-  const onPlanSelect = (quota: number, date?: string) => {
-    form.setValue('quota', quota);
-    if (date) form.setValue('date', date);
-  };
-
-  const onSubmit = async (data: GoalFormValues) => {
-    if (!await addGoal({ ...data, date: data.date || undefined, quota: data.quota || 0 })) return;
-    playIncome();
-    toast({ title: '¡Meta creada!', description: 'Tu nueva meta de ahorro ha sido añadida.' });
+  const schedule = deadline && isValidDate(deadline) && target > 0 ? goalFundingSchedule(Math.max(0, toCents(target) - (editing?.saved || 0)), deadline, today, {periodStartDay}) : null;
+  async function submit(values:GoalInput) {
+    const saved = editing
+      ? await updateGoal({...editing, name:values.name, target:toCents(values.target), quota:toCents(values.quota), date:values.date || undefined})
+      : await addGoal({...values, date:values.date || undefined});
+    if (!saved) return;
     setOpen(false);
-    form.reset({ name: '', target: 0, date: '', quota: undefined });
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-        <div>
-            <h3 className="text-lg font-semibold flex items-center gap-2">Metas de Ahorro</h3>
-            <p className="text-sm text-muted-foreground">Crea y gestiona tus objetivos de ahorro a corto y largo plazo.</p>
+    form.reset();
+  }
+  return <section className="space-y-4" aria-labelledby="goals-heading">
+    <div><h3 id="goals-heading" className="text-lg font-semibold">Metas de ahorro</h3><p className="text-sm text-muted-foreground">Los aportes son reservas de planificación: no son gastos ni mueven dinero entre cuentas.</p></div>
+    {goals?.length ? <div className="grid gap-4">{goals.map(goal => {
+      const metrics = goalMetrics(goal, goalContributions || [], today, { periodStartDay });
+      const legacy = (goalContributions || []).filter(row => row.goalId === goal.id && row.kind === 'legacy_balance').reduce((sum,row) => sum+row.amount,0);
+      return <article key={goal.id} className="min-w-0 rounded-xl border p-4 space-y-3">
+        <ProgressMetric label={<span className="break-words">{goal.name}</span>} current={metrics.saved} total={goal.target} remaining={metrics.remaining} currentLabel="Ahorrado" totalLabel="Objetivo" status={metrics.status === 'completed' ? 'success' : metrics.overdue ? 'warning' : 'neutral'} statusLabel={metrics.status === 'completed' ? 'Completada' : metrics.overdue ? 'Plazo vencido' : 'En progreso'} />
+        <div className="grid gap-2 text-sm sm:grid-cols-2">
+          <p><span className="text-muted-foreground">Fecha límite: </span>{goal.date ? formatDate(goal.date) : 'Sin fecha límite'}</p>
+          <p><span className="text-muted-foreground">Aporte mensual requerido: </span><strong>{metrics.requiredMonthly === null ? 'Define una fecha límite' : money(metrics.requiredMonthly)}</strong></p>
         </div>
-      </div>
-
-      <div className="pt-2">
-            {(goals || []).length > 0 ? (
-                <div className="flex flex-col gap-3">
-                    <AnimatePresence mode="popLayout">
-                    {goals!.map(goal => {
-                        const progress = goal.target > 0 ? (goal.saved / goal.target) * 100 : 0;
-                        const remaining = goal.target - goal.saved;
-                        return (
-                            <motion.div 
-                                layout
-                                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                key={goal.id} 
-                                className={cn(
-                                    "flex flex-col sm:flex-row gap-4 p-4 border rounded-xl transition-colors items-start sm:items-center relative overflow-hidden group hover:border-black/20 dark:border-white/20",
-                                    goal.status === 'completed' ? "bg-primary/5 border-primary/30" : "bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
-                                )}
-                            >
-                                {/* Icon & Title */}
-                                <div className="flex items-center gap-3 w-full sm:w-auto sm:min-w-[200px]">
-                                    <div className={cn(
-                                        "shrink-0 flex items-center justify-center w-12 h-12 rounded-full",
-                                        goal.status === 'completed' ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary"
-                                    )}>
-                                        <Target className="h-6 w-6" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="font-bold truncate">{goal.name}</h4>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            {goal.date ? `Para ${formatDate(goal.date)}` : 'Sin fecha límite'}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Progress Section */}
-                                <div className="flex-1 w-full space-y-1.5">
-                                    <div className="flex justify-between text-sm">
-                                        <span className="font-medium text-foreground">{money(goal.saved)}</span>
-                                        <span className="text-muted-foreground text-xs">de {money(goal.target)} ({progress.toFixed(1)}%)</span>
-                                    </div>
-                                    <Progress 
-                                        value={progress} 
-                                        className={cn(
-                                            "h-2 bg-black/10 dark:bg-white/10", 
-                                            "[&>div]:bg-primary",
-                                            goal.status === 'completed' && "[&>div]:bg-primary"
-                                        )} 
-                                    />
-                                    <div className="flex justify-between text-xs text-muted-foreground !mt-1">
-                                        {goal.status === 'completed' ? (
-                                             <span className="font-semibold text-primary">¡Meta Completada! 🎉</span>
-                                        ) : (
-                                            <span>Restan {money(remaining)}</span>
-                                        )}
-                                        {goal.quota > 0 && goal.status === 'active' && (
-                                            <span className="flex items-center gap-1">
-                                                <Repeat className="h-3 w-3"/>
-                                                {money(goal.quota)}/mes
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                                    {goal.status === 'active' && (
-                                         <ContributeToGoalDialog goal={goal} onContribute={(amount) => contributeToGoal(goal.id, amount)} />
-                                    )}
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-11 w-11 sm:h-9 sm:w-9">
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>¿Eliminar meta?</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    Esta acción es permanente. Se eliminará la meta &quot;{goal.name}&quot;. Los fondos aportados no se devolverán automáticamente a tu balance.
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => deleteGoal(goal.id)} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            </motion.div>
-                        )
-                    })}
-                    </AnimatePresence>
-                </div>
-            ) : (
-                <EmptyState
-                    icon={<Target className="h-10 w-10" />}
-                    title="Aún no tienes metas"
-                    description="Crea una meta para calcular cuánto necesitas ahorrar y seguir tu progreso."
-                />
-            )}
-            
-            {/* New Goal Modal (Moved to bottom) */}
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <motion.button 
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="mt-4 flex items-center justify-center gap-2 text-sm font-medium w-full py-4 rounded-xl border border-dashed border-black/10 dark:border-white/10 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all font-bold group"
-                    >
-                        <PlusCircle className="h-5 w-5 group-hover:rotate-90 transition-transform duration-300"/> Nueva Meta
-                    </motion.button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden gap-0">
-                     <DialogHeader className="p-6 pb-4">
-                        <DialogTitle>Añadir Nueva Meta</DialogTitle>
-                        <DialogDescription>Define qué quieres lograr y cuánto necesitas.</DialogDescription>
-                    </DialogHeader>
-                    <div className="px-6 pb-6">
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                                {/* Hero Input for Amount */}
-                                <div className="space-y-2">
-                                    <label className="text-xs text-muted-foreground font-medium">1. ¿Cuánto necesitas?</label>
-                                    <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-semibold text-lg">RD$</span>
-                                        <Input 
-                                            type="number" 
-                                            placeholder="0.00"
-                                            value={form.watch('target') || ''} 
-                                            onChange={e => {
-                                                form.setValue('target', parseFloat(e.target.value) || 0);
-                                                form.setValue('quota', undefined); // Reset selection
-                                            }}
-                                            className="h-16 pl-14 pr-4 text-2xl font-bold bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                                     <FormField
-                                        control={form.control}
-                                        name="name"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel className="text-xs">Nombre</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Ej. Viaje..." {...field} className="h-10 border-black/10 dark:border-white/10 bg-transparent" />
-                                                </FormControl>
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="date"
-                                        render={({ field }) => {
-                                            return (
-                                            <FormItem>
-                                                <FormLabel className="text-xs">Fecha Límite</FormLabel>
-                                                <FormControl>
-                                                    <div className="relative">
-                                                        <Input 
-                                                            type="date" 
-                                                            {...field} 
-                                                            ref={inputRef}
-                                                            className="h-10 border-black/10 dark:border-white/10 bg-transparent"
-                                                            onChange={e => {
-                                                                field.onChange(e.target.value);
-                                                                form.setValue('quota', undefined); // Reset selection
-                                                            }} 
-                                                        />
-                                                        <div 
-                                                            className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-white"
-                                                            onClick={() => inputRef.current?.showPicker()}
-                                                        >
-                                                            <Calendar className="h-4 w-4" />
-                                                        </div>
-                                                    </div>
-                                                </FormControl>
-                                            </FormItem>
-                                            )
-                                        }}
-                                    />
-                                </div>
-
-                                {target > 0 && (
-                                    <div className="space-y-3 pt-2">
-                                        <div className="flex items-center justify-between">
-                                            <FormLabel className="text-xs">Plan Sugerido</FormLabel>
-                                            {disposable > 0 && (
-                                                <span className="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                                    Libre: {money(disposable)}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col gap-2">
-                                            {suggestions.map(({ profile, monthly, months, eta, viable }) => (
-                                                <button
-                                                    key={profile}
-                                                    type="button"
-                                                    disabled={!viable}
-                                                    onClick={() => onPlanSelect(monthly / 100, eta?.toISOString().slice(0,10))}
-                                                    className={cn(
-                                                        "text-left p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-colors",
-                                                        !viable && "opacity-50 cursor-not-allowed bg-muted/10 border-transparent",
-                                                        viable && form.watch('quota') === monthly / 100 
-                                                            ? "border-primary bg-primary/10 text-primary" 
-                                                            : "border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10",
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <Brain className="h-4 w-4 opacity-70" />
-                                                        <div>
-                                                            <h4 className="font-semibold text-sm capitalize leading-none mb-1">{profile}</h4>
-                                                            <div className="text-[10px] opacity-70 leading-none">
-                                                                {viable && eta ? `En ~${months} meses` : "Saldo insuficiente"}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {viable && (
-                                                        <div className="font-bold shrink-0">
-                                                            {money(monthly)}<span className="text-[10px] font-normal opacity-70">/m</span>
-                                                        </div>
-                                                    )}
-                                                </button>
-                                            ))}
-                                            
-                                            {/* Date-driven plan if applicable */}
-                                            {requiredByDeadline && requiredByDeadline.viable && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onPlanSelect(requiredByDeadline.monthlyRequired / 100, deadline)}
-                                                    className={cn(
-                                                        "text-left p-2.5 rounded-xl border flex items-center justify-between gap-2 transition-colors mt-2",
-                                                        form.watch('quota') === requiredByDeadline.monthlyRequired / 100 
-                                                            ? "border-primary bg-primary/10 text-primary" 
-                                                            : "border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10",
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <Calendar className="h-4 w-4 opacity-70" />
-                                                        <div>
-                                                            <h4 className="font-semibold text-sm leading-none mb-1">Tu fecha elegida</h4>
-                                                            <div className="text-[10px] opacity-70 leading-none">
-                                                                Requerido para el {formatDate(deadline!)}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="font-bold shrink-0">
-                                                        {money(requiredByDeadline.monthlyRequired)}<span className="text-[10px] font-normal opacity-70">/m</span>
-                                                    </div>
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-
-                                <Button disabled={form.formState.isSubmitting || !isFormValid} type="submit" className="w-full h-12 font-bold bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
-                                    Crear Meta
-                                </Button>
-                            </form>
-                        </Form>
-                    </div>
-                </DialogContent>
-            </Dialog>
-      </div>
-    </div>
-  );
+        {metrics.requiredMonthly !== null && metrics.remaining > 0 && <p className="text-xs text-muted-foreground">{metrics.overdue ? 'El plazo terminó; queda por reservar el importe restante.' : 'Repartido entre ' + metrics.periods + ' períodos financieros, incluido el actual.'}</p>}
+        {goal.quota > 0 && <p className="text-xs text-muted-foreground">Tu aporte planificado: {money(goal.quota)} por período. Es una referencia; no genera aportes automáticos.</p>}
+        {legacy > 0 && <p className="text-xs text-muted-foreground">Incluye {money(legacy)} de progreso anterior recuperado. No se cuenta como una nueva reserva mensual.</p>}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          {metrics.status === 'active' && <ContributeDialog goal={goal} />}
+          <Button variant="ghost" size="icon" aria-label={'Editar meta ' + goal.name} onClick={() => { setEditing(goal); form.reset({name:goal.name,target:goal.target/100,date:goal.date || '',quota:goal.quota/100}); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
+          <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" aria-label={'Eliminar meta ' + goal.name}><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Eliminar {goal.name}?</AlertDialogTitle><AlertDialogDescription>Se eliminarán la meta y sus reservas de planificación. El efectivo, las cuentas y los movimientos reales conservarán sus saldos.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => deleteGoal(goal.id)}>Eliminar meta</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </article>;
+    })}</div> : <EmptyState title="Todavía no tienes metas" description="Define un objetivo y registra tus reservas para seguir su progreso." />}
+    <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { form.reset(); setEditing(null); } }}><DialogTrigger asChild><Button variant="outline" className="w-full"><PlusCircle className="mr-2 h-4 w-4" />Nueva meta</Button></DialogTrigger>
+      <DialogContent className="sm:max-w-md"><DialogHeader><DialogTitle>{editing ? 'Editar meta' : 'Nueva meta'}</DialogTitle><DialogDescription>{editing ? 'Ajusta tu objetivo o plazo. Los aportes registrados se conservan.' : 'Define tu objetivo. Puedes empezar aunque todavía no tengas un aporte mensual planificado.'}</DialogDescription></DialogHeader>
+        <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4">
+          <FormField control={form.control} name="name" render={({field}) => <FormItem><FormLabel>Nombre de la meta</FormLabel><FormControl><Input {...field} placeholder="Ej. Fondo de emergencia" autoComplete="off" /></FormControl><FormMessage /></FormItem>} />
+          <FormField control={form.control} name="target" render={({field}) => <FormItem><FormLabel>Objetivo</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0.01" step="0.01" /></FormControl><FormMessage /></FormItem>} />
+          <FormField control={form.control} name="date" render={({field}) => <FormItem><FormLabel>Fecha límite (opcional)</FormLabel><FormControl><Input {...field} type="date" min={earliestDate} /></FormControl><FormMessage /></FormItem>} />
+          {schedule && <p className="rounded-lg bg-muted/30 p-3 text-sm">Para llegar a tiempo: <strong>{money(schedule.requiredMonthly!)}</strong> por período financiero, desde el actual. Esta sugerencia no mueve dinero.</p>}
+          <FormField control={form.control} name="quota" render={({field}) => <FormItem><FormLabel>Aporte planificado por período (opcional)</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0" step="0.01" /></FormControl><FormMessage /></FormItem>} />
+          {schedule && <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue('quota',schedule.requiredMonthly!/100)}>Usar aporte sugerido</Button>}
+          <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">{form.formState.isSubmitting ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear meta'}</Button>
+        </form></Form>
+      </DialogContent>
+    </Dialog>
+  </section>;
 }

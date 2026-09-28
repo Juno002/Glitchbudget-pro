@@ -1,3 +1,4 @@
+import { migrateGoalRecords } from '../src/domain/goals';
 import { migrateActualExpense, migrateRecurringRule } from '../src/domain/actual-planned-migration';
 import { withoutLegacyCategories } from '../src/domain/categories';
 import 'fake-indexeddb/auto';
@@ -24,9 +25,11 @@ for (const version of [6, 7]) {
     const current = new GlitchBudgetDB(name);
     try {
       await current.open();
-      assert.equal(current.verno, 11);
+      assert.equal(current.verno, 12);
       for (const [table, rows] of Object.entries(source.tables)) {
         let expected = structuredClone(rows) as any[];
+        if (table === 'goals') expected=migrateGoalRecords(source.tables.goals,source.tables.goal_contributions).goals;
+        if (table === 'goal_contributions') expected=migrateGoalRecords(source.tables.goals,source.tables.goal_contributions).contributions;
         if (table === 'expenses') expected=expected.map(migrateActualExpense);
         if (table === 'recurrents') expected=expected.map(migrateRecurringRule);
         if (table === 'settings') expected[0] = withoutLegacyCategories(expected[0]);

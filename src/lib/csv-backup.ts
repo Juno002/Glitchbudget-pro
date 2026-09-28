@@ -2,24 +2,30 @@ import { preserveImportedCategories } from './category-service';
 import { requireAccount } from './accounts';
 import { db } from './db';
 import { z } from 'zod';
-import { IncomeV6, ExpenseCSV, PlanV3, GoalV3, GoalContribV3 } from './backup-json';
+import { IncomeV6, ExpenseCSV, PlanV7, GoalV3, GoalContribV8 } from './backup-json';
+import { migrateGoalRecords, goalSaved } from '../domain/goals';
+import { validateBudgetPlans } from '../domain/budgets';
 import { parseCSV, encodeCSV, decodeCSVField } from './csv';
 import { localDate } from './finance-calculations';
 
 const columns = {
   incomes: ['id', 'month', 'date', 'categoryId', 'amount', 'description', 'type', 'currency', 'fxRate', 'amountBase', 'accountId', 'recurringRuleId'],
   expenses: ['id', 'month', 'date', 'categoryId', 'amount', 'concept', 'nature', 'paymentMethod', 'debtId', 'currency', 'fxRate', 'amountBase', 'recurringRuleId', 'accountId'],
-  plans: ['month', 'categoryId', 'limit'],
-  goals: ['id', 'name', 'target', 'saved', 'date', 'quota', 'startDate', 'status'],
-  goal_contributions: ['id', 'goalId', 'amount', 'date'],
+  plans: ['month', 'categoryId', 'limit', 'periodType', 'periodStart', 'periodEnd'],
+  goals: ['id', 'name', 'target', 'date', 'quota', 'startDate'],
+  goal_contributions: ['id', 'goalId', 'amount', 'date', 'kind'],
 };
 type ExportTable = keyof typeof columns;
 const numeric = new Set(['amount', 'fxRate', 'amountBase', 'limit', 'target', 'saved', 'quota']);
 
-async function exportTable(name: ExportTable) {
+export async function serializeTableCSV(name: ExportTable) {
   const rows = await db.table(name).toArray();
   const fields = columns[name];
-  const content = encodeCSV([fields, ...rows.map(row => fields.map(key => row[key]))]);
+  return encodeCSV([fields, ...rows.map(row => fields.map(key => row[key]))]);
+}
+
+async function exportTable(name: ExportTable) {
+  const content = await serializeTableCSV(name);
   const url = URL.createObjectURL(new Blob(['\uFEFF', content], { type: 'text/csv;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url; link.download = `${name}-${localDate()}.csv`;
@@ -28,7 +34,7 @@ async function exportTable(name: ExportTable) {
 
 async function readRows<T>(file: File, name: ExportTable, schema: z.ZodType<T, z.ZodTypeDef, unknown>): Promise<T[]> {
   const [header, ...lines] = parseCSV(await file.text());
-  const required = columns[name].slice(0, name === 'incomes' ? 7 : name === 'expenses' ? 6 : undefined);
+  const required = columns[name].slice(0, name === 'incomes' ? 7 : name === 'expenses' ? 6 : name === 'plans' ? 3 : name === 'goal_contributions' ? 4 : undefined);
   if (!header || new Set(header).size !== header.length || required.some(key => !header.includes(key))) {
     throw new Error('El CSV no tiene las columnas necesarias para esta tabla.');
   }
@@ -74,7 +80,8 @@ export async function importExpensesCSV(file: File) {
   });
 }
 export async function importPlansCSV(file: File) {
-  const rows = await readRows(file, 'plans', PlanV3);
+  const rows = await readRows(file, 'plans', PlanV7);
+  validateBudgetPlans(rows);
   await db.transaction('rw', db.plans, db.categories, async () => {
     await preserveImportedCategories(rows,'expense');
     await db.plans.clear(); await db.plans.bulkAdd(rows);
@@ -88,21 +95,26 @@ export async function importGoalsCSV(file: File) {
     if (contributions.some(c => !ids.has(c.goalId))) {
       throw new Error('Hay aportes vinculados a metas que no están en el CSV. Usa el respaldo JSON completo.');
     }
-    await db.goals.clear(); await db.goals.bulkAdd(rows);
+    if (rows.some(row => row.saved > goalSaved(row.id, contributions))) {
+      throw new Error('Este CSV antiguo contiene progreso sin sus aportes. Restaura el respaldo JSON completo para evitar duplicarlo al importar los aportes por separado.');
+    }
+    const migrated = migrateGoalRecords(rows, contributions);
+    await db.goals.clear(); await db.goals.bulkAdd(migrated.goals);
+    await db.goal_contributions.bulkPut(migrated.contributions);
   });
 }
 export async function importGoalContribCSV(file: File) {
-  const rows = await readRows(file, 'goal_contributions', GoalContribV3);
+  const rows = await readRows(file, 'goal_contributions', GoalContribV8);
+  const hasKind = parseCSV(await file.text())[0].includes('kind');
   await db.transaction('rw', db.goals, db.goal_contributions, async () => {
     const goals = await db.goals.toArray();
     if (rows.some(c => !goals.some(g => g.id === c.goalId))) throw new Error('El CSV contiene aportes a una meta desconocida.');
     const previous = await db.goal_contributions.toArray();
-    for (const goal of goals) {
-      const priorSum = previous.filter(c => c.goalId === goal.id).reduce((sum, c) => sum + c.amount, 0);
-      const nextSum = rows.filter(c => c.goalId === goal.id).reduce((sum, c) => sum + c.amount, 0);
-      const saved = Math.max(0, goal.saved - priorSum) + nextSum;
-      await db.goals.update(goal.id, { saved, status: saved >= goal.target ? 'completed' : 'active' });
-    }
-    await db.goal_contributions.clear(); await db.goal_contributions.bulkAdd(rows);
+    const migrated = migrateGoalRecords(goals, previous);
+    // Legacy CSVs omit the balance kind; preserve existing migration balances once.
+    const next = hasKind ? rows : [...rows, ...migrated.contributions.filter(row => row.kind === 'legacy_balance' && !rows.some(item => item.id === row.id))];
+    const validated = migrateGoalRecords(migrated.goals, next);
+    await db.goals.bulkPut(validated.goals);
+    await db.goal_contributions.clear(); await db.goal_contributions.bulkAdd(validated.contributions);
   });
 }
