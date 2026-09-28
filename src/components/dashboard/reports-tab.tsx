@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, MetricCard, PageHeader, SectionHeader } from '@/components/finance-ui';
 import { cn } from '@/lib/utils';
+import { useTabs } from '@/contexts/tabs-context';
 
 const presets: Array<{ value:ReportRangePreset; label:string }> = [
   { value:'7d', label:'7D' },
@@ -39,7 +40,8 @@ function ComparisonValue({ value }: { value:number|null }) {
 }
 
 export default function ReportsTab() {
-  const { getReportSnapshot, loading } = useFinances();
+  const { getReportSnapshot, getBudgetStatusDetails, currentMonth, loading } = useFinances();
+  const { setActiveTab, setPlanningTab } = useTabs();
   const money = usePrivateCurrency();
   const getCategoryInfo = useCategoryResolver();
   const today=localDate();
@@ -57,6 +59,7 @@ export default function ReportsTab() {
   }
 
   const report=getReportSnapshot(range,range.end);
+  const budgetDetails=getBudgetStatusDetails(currentMonth).filter(row=>row.configured);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
   const currentLabel=rangeLabel(range.start,range.end);
 
@@ -272,6 +275,40 @@ export default function ReportsTab() {
                     </TableBody>
                   </Table>
                 </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="space-y-4" aria-labelledby="budget-followup-title">
+            <SectionHeader
+              title={<span id="budget-followup-title">Presupuestos actuales</span>}
+              description="Seguimiento secundario de límites del período financiero actual; no altera el rango analítico de arriba."
+            />
+            <Card>
+              <CardContent className="pt-6">
+                {budgetDetails.length ? (
+                  <div className="space-y-3">
+                    {budgetDetails.slice(0,5).map(row=>(
+                      <div key={row.categoryId} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                        <span className="text-sm">{getCategoryInfo(row.categoryId)?.name || row.categoryId}</span>
+                        <span className="text-right text-sm font-mono">{money(row.spent)} / {money(row.limit)}</span>
+                      </div>
+                    ))}
+                    <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
+                      Gestionar presupuestos
+                    </Button>
+                  </div>
+                ) : (
+                  <EmptyState
+                    title="Aún no tienes presupuestos"
+                    description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
+                    action={(
+                      <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
+                        Crear presupuesto
+                      </Button>
+                    )}
+                  />
+                )}
               </CardContent>
             </Card>
           </section>
