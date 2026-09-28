@@ -21,11 +21,14 @@ import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 import { QUICK_ADD_TEMPLATES_KEY } from '@/lib/quick-add-templates';
 import { HOME_PREFERENCES_KEY } from '@/lib/home-preferences';
 import { SAVED_TRANSACTION_FILTERS_KEY } from '@/lib/saved-transaction-filters';
+import { TRANSACTION_RULES_KEY } from '@/lib/transaction-rules';
+import TransactionRuleManager from '@/components/settings/transaction-rule-manager';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
   ['finance', 'Finanzas'],
   ['categories', 'Categorías'],
+  ['automation', 'Automatización'],
   ['privacy', 'Privacidad y seguridad'],
   ['data', 'Datos y backups'],
   ['appearance', 'Apariencia'],
@@ -61,6 +64,7 @@ export function SettingsDialog() {
       localStorage.removeItem(QUICK_ADD_TEMPLATES_KEY);
       localStorage.removeItem(HOME_PREFERENCES_KEY);
       localStorage.removeItem(SAVED_TRANSACTION_FILTERS_KEY);
+      localStorage.removeItem(TRANSACTION_RULES_KEY);
       await resetSettings();
       toast({ title:'Datos eliminados', description:'Todos los datos han sido borrados. La página se recargará.' });
       setTimeout(() => window.location.reload(), 1500);
@@ -213,6 +217,14 @@ export function SettingsDialog() {
             <SectionHeader title="Categorías" description="Renombra, archiva y organiza sin romper el historial." />
             <ExpenseCategoryManager />
             <IncomeCategoryManager />
+          </TabsContent>
+
+          <TabsContent value="automation" className="space-y-6">
+            <SectionHeader
+              title="Automatización"
+              description="Reglas deterministas y locales para sugerir clasificación en Quick Add."
+            />
+            <TransactionRuleManager />
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-5">

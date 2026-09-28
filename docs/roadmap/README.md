@@ -2,13 +2,13 @@
 
 ## Fase 16 — Automatización local en progreso
 
-**Checkpoint 16.3 — Rule suggestions en Quick Add completado.** Está documentado en [phase-16-3.md](phase-16-3.md). El motor puro permanece documentado en [phase-16-2.md](phase-16-2.md) y el contrato en [phase-16-1.md](phase-16-1.md).
+**Checkpoint 16.4 — Gestión local de rules completado.** Está documentado en [phase-16-4.md](phase-16-4.md). Los checkpoints previos permanecen en [phase-16-3.md](phase-16-3.md), [phase-16-2.md](phase-16-2.md) y [phase-16-1.md](phase-16-1.md).
 
-16.3 permite que Quick Add reciba rules y muestre sugerencias explícitas de categoría/necessity con acciones **Aceptar sugerencia** e **Ignorar sugerencia**. Nada se modifica automáticamente. Como todavía no existe storage de rules, el componente usa `rules = []` por defecto.
+16.4 añade persistencia exclusiva en `localStorage` mediante `glitchbudget_transaction_rules_v1` y una superficie de Ajustes → Automatización para **crear, editar, activar/desactivar, ordenar y eliminar** rules. Quick Add consume esa fuente cuando no recibe rules inyectadas y mantiene **Aceptar sugerencia / Ignorar sugerencia**; nada se aplica automáticamente.
 
-El gate `Quality checks` run `36496216494` verificó **317/317 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+El gate `Quality checks` run `36497955697` verificó **322/322 pruebas**, typecheck, lint, guard local-only y build estático. No se añade tabla Dexie ni cambia la versión de backup.
 
-**Estado actual del roadmap:** Fase 16 en progreso. **16.4 — Gestión de rules no se ha iniciado.**
+**Estado actual del roadmap:** Fase 16 en progreso. **16.5 — Integración Templates → Saved Filters → Rules no se ha iniciado.**
 
 ## Fase 15 — Transaction Metadata + filtros completada
 
