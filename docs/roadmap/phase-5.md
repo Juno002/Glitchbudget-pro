@@ -1,5 +1,7 @@
 # Fase 5 — Separación Actual vs Planned
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 Fecha: 2026-09-26. Alcance: completar la Fase 5 iniciada por Codex y detenida a mitad de implementación. Base de trabajo: commit `942c881`; cierre continuado en la rama `phase-5-completion`. No se inicia Fase 6.
 
 ## 1. Modelo final

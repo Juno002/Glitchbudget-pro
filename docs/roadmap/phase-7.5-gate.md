@@ -1,5 +1,7 @@
 # Gate Fase 7.5 — Entregable de UX Architecture & Design System
 
+> **Gate histórico aprobado.** Las fases 8–10 ya fueron implementadas posteriormente. Consulta el [estado acumulado del roadmap](README.md).
+
 **Gate 7.5: APROBADO por el usuario el 2026-09-27.** Se aprueban navegación, Resumen, Plan, estados de planificados, compositor global, sistema visual, privacidad, responsive/accesibilidad y la frontera del dominio financiero. Fase 8 — Quick Add 2.0 puede comenzar sobre `TransactionModal`.
 
 Fuentes canónicas: [cierre de fase](phase-7.5.md), este entregable formal y [wireframes estructurales](../ux/wireframes-phase-7.5.md). Las iteraciones 7.5A–D y los antiguos archivos `phase-7-5-*` son antecedentes, no arquitecturas alternativas vigentes.

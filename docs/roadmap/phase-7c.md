@@ -1,5 +1,7 @@
 # Fase 7C — Lifecycle de Planned Occurrences
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 Fecha: 2026-09-27. Rama: `phase-7-planned-payments`. Base: 7B cerrada en `c56c7b2`. Alcance: lifecycle `pending → confirmed/skipped`, vínculo atómico con el ledger e integridad de respaldo. No se implementa Upcoming ni se sustituye todavía la UI legacy.
 
 ## Resultado

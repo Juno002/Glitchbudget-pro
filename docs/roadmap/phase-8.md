@@ -1,5 +1,7 @@
 # Fase 8 — Quick Add 2.0
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 **Fuente de verdad:** `Roadmap septiembre 2026.txt`.
 
 **Estado:** implementación completa en rama `phase-8-quick-add-2`; no se inicia Fase 9 desde este cierre.

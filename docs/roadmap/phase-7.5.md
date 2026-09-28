@@ -1,5 +1,7 @@
 # Fase 7.5 — UX Architecture & Design System
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 **Estado vigente: fase completa; Gate 7.5 revisado y aprobado por el usuario el 2026-09-27.** Fase 8 — Quick Add 2.0 queda habilitada. Esta actualización registra la aprobación; no implementa Fase 8.
 
 Fuentes canónicas: este cierre, el [entregable formal del Gate](phase-7.5-gate.md) y los [wireframes estructurales](../ux/wireframes-phase-7.5.md). El [índice del roadmap](README.md) distingue estos documentos de los registros históricos.

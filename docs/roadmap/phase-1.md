@@ -1,5 +1,7 @@
 # Fase 1 — Frontend estático sin IA remota
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 ## Resultado
 
 La distribución es `out/`: HTML, JavaScript, CSS, fuentes e iconos. No necesita un proceso Next en producción. `npm start -- --port 9012` sirve únicamente esos archivos en loopback para pruebas; no es un backend de aplicación. No se ha publicado ni cambiado el origen habitual del usuario.

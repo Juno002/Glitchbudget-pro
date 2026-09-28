@@ -1,5 +1,7 @@
 # Fase 7D — Integración mínima de Planned Payments
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 Fecha: 2026-09-27. Rama: `phase-7-planned-payments`. Base: 7C cerrada en `37214ab`. Alcance: integración local de Upcoming, confirm/skip y retirada del flujo legacy. No se realiza el rediseño visual de 7.5.
 
 ## Resultado

@@ -6,7 +6,7 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 1. Efectivo se crea automáticamente en cero; si ya existía una cuenta de efectivo, se conserva su saldo y se usa como predeterminada. En Movimientos, pulsa esa cuenta y Editar cuenta para indicar el dinero que tenías al iniciar el seguimiento. Crea cada banco desde Gestionar bancos con su saldo actual. No hacen falta números de cuenta ni credenciales.
 2. Incluye en el saldo inicial las operaciones que ya hiciste hoy. Los movimientos antiguos quedan sin cuenta para no contarlos dos veces.
-3. Todo ingreso nuevo se deposita en Efectivo. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar el ingreso al banco, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
+3. Efectivo es el destino predeterminado de un ingreso nuevo; desde Fase 5 puede seleccionarse explícitamente otra cuenta válida. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Si el dinero ya se registró en Efectivo, muévelo al banco mediante una transferencia, sin registrar otro ingreso. Las compras a crédito piden la tarjeta y no descuentan bancos.
 4. Para sacar efectivo del banco, usa Gestionar bancos → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. Una comisión se registra como gasto separado.
 5. Conciliar deuda actual permite introducir lo que debes en cada tarjeta, independientemente de sus movimientos anteriores. Un saldo negativo significa saldo a favor.
 6. Pulsa una cuenta para consultar sus 50 movimientos recientes y editar sus datos. Las transferencias se pueden editar desde ese historial.

@@ -1,5 +1,7 @@
 # Fase 7 — Recurrence / Planned Payments Engine
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 Fecha de cierre: 2026-09-27. Implementación dividida en 7A, 7B, 7C y 7D sobre `phase-7-planned-payments`. Base: Fase 6 cerrada. `main` permaneció congelado durante toda la implementación.
 
 ## 7A — Modelo

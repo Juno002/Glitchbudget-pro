@@ -1,5 +1,7 @@
 # Fase 2 — Inventario y revisión previa a extracción
 
+> **Antecedente histórico supersedido:** este inventario previo fue completado por [Fase 2](phase-2.md). Sus propuestas y estado detenido no describen el estado vigente. Consulta el [índice acumulado hasta Fase 10](README.md).
+
 Estado: **iniciada, detenida para revisión; no completada**. No se ha movido lógica ni cambiado comportamiento, esquema, UI, Strict Mode o contratos de respaldo.
 
 ## Mapa de cálculos y consumidores

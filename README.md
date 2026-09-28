@@ -1,94 +1,111 @@
-# 💰 GlitchBudget Pro
+# GlitchBudget Pro
 
-## Estado del roadmap
+Aplicación de finanzas personales en español, con datos locales y distribución estática. Registra movimientos, sigue efectivo, bancos y tarjetas, organiza presupuestos y metas y consulta reportes sin conectar cuentas bancarias ni enviar datos financieros a servicios remotos.
 
-**Fase 7.5 completada y Gate aprobado el 2026-09-27.** La siguiente fase habilitada es Quick Add 2.0. Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de fase](docs/roadmap/phase-7.5.md), el [Gate aprobado](docs/roadmap/phase-7.5-gate.md) y los [wireframes canónicos](docs/ux/wireframes-phase-7.5.md).
+## Estado del proyecto
 
-**GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
+**Fases 0–10 implementadas e integradas en main, incluida la fase 7.5.** Último cierre funcional: 28/09/2026, commit `60b50e9`, [PR #6](https://github.com/Juno002/Glitchbudget-pro/pull/6).
 
-## ✨ Características Principales
+Ese cierre aprobó **259 pruebas**, tipos, lint, controles local-only y compilación estática. [GitHub Actions #346](https://github.com/Juno002/Glitchbudget-pro/actions/runs/36432350509) confirmó las comprobaciones. Son resultados del cierre funcional, no una certificación comercial ni garantía de ausencia de errores.
 
-- **Resumen:** Posición financiera, presupuesto restante, próximos pagos, metas y movimientos recientes. El análisis por categoría se consulta en Reportes.
-- **Modo Minimalista ("Serious Mode"):** Una interfaz ultra-limpia, en escala de grises y sin distracciones para quienes prefieren un enfoque profesional y sobrio en sus finanzas.
-- **Estrategias de Ahorro Rápidas:** Alterna el objetivo de ahorro general entre un 0% (sin forzar), 5%, 10% o 20% con un solo toque desde tu resumen mensual.
-- **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
-- **Planificación Inteligente:**
-    - **Presupuestos por Categoría:** Asigna límites de gasto mensuales a diferentes categorías y observa tu progreso en tiempo real con iconos personalizados.
-    - **Metas de Ahorro con Calculadora Inteligente:** Crea objetivos de ahorro y recibe sugerencias realistas basadas en tu capacidad financiera.
-- **Registro Detallado de Gastos:** Clasifica tus gastos como fijos, variables u ocasionales. Incluye soporte para **Tarjetas de Crédito** con seguimiento de deudas.
-- **Reportes de Crédito Avanzados:** Visualiza el estado de tus tarjetas, días restantes para el corte y fechas de pago de forma automática.
-- **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
-- **Cierre de Mes Automatizado (Rollover):** Configura cómo se deben tratar los excedentes o déficits de tus presupuestos al pasar al siguiente mes.
-- **Transferencias Flexibles:** Mueve fondos entre tus presupuestos de diferentes categorías a mitad de mes.
-- **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
-- **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
-- **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.
-- **Glassmorphism UI:** Una experiencia visual premium con componentes translúcidos, sombras dinámicas y gradientes finamente trabajados.
-- **Interactividad Sonora (8-bit):** Respuestas auditivas retro (Web Audio API) al realizar registros financieros o completar metas.
-- **Persistencia de Datos Local-First:** Toda tu información se guarda de forma segura en **Dexie (IndexedDB)** directamente en tu navegador.
+- [Todas las fases, contratos, migraciones y evidencia](docs/roadmap/README.md).
+- [Fase 9: presupuestos](docs/roadmap/phase-9.md) y [Fase 10: metas](docs/roadmap/phase-10.md).
+- [QA pendiente para publicación](docs/release-checklist.md).
+- Siguiente fase prevista: **11 — Currency foundation**, todavía no iniciada.
 
-## 🚀 Flujo de Usuario Principal
+## Funcionalidad actual
 
-El diseño de la aplicación sigue un ciclo financiero lógico:
+| Área | Qué permite hacer |
+| --- | --- |
+| Resumen | Consultar posición financiera, presupuestos restantes, próximos pagos, metas activas y movimientos recientes. |
+| Movimientos | Buscar y filtrar el historial real; consultar y gestionar cuentas y tarjetas como actividad secundaria. |
+| Plan → Presupuestos | Crear límites semanales, mensuales, anuales y únicos; consultar gastado, restante, porcentaje y estado; reasignar límites y aplicar rollover. |
+| Plan → Metas | Crear y editar objetivos, plazos y cuotas; aportar; consultar progreso y aporte mensual requerido según el calendario financiero. |
+| Plan → Planificados | Reglas semanales, cada 14 días y mensuales; ocurrencias pendientes, confirmadas, omitidas y vencidas. Confirmar genera un único movimiento real. |
+| Reportes | Analizar actividad registrada, categorías, comparaciones por período y los cuatro tipos de presupuesto. |
+| Nuevo movimiento | Compositor único para ingreso, gasto o transferencia, detalles secundarios y plantillas locales. |
+| Ajustes | Temas claro, oscuro y minimalista; categorías estables, calendario financiero, políticas de cuenta y presupuesto, privacidad visual y respaldos. |
 
-1. **Registra operaciones:** El botón global Nuevo movimiento abre el mismo compositor para ingresos, gastos y transferencias.
-2. **Consulta Resumen:** Revisa tu posición financiera y las acciones pendientes.
-3. **Consulta Movimientos:** Busca y filtra el historial real; cuentas y tarjetas quedan como gestión secundaria.
-4. **Organiza Plan:** Presupuestos, Metas y Planificados.
-5. **Analiza en Reportes:** Revisa categorías y comparativas de períodos. Gestiona categorías y preferencias desde el panel de Ajustes.
+Efectivo es la cuenta predeterminada; puede elegirse explícitamente otra cuenta admitida por el flujo. Las transferencias entre cuentas no se registran como nuevos ingresos o gastos. El botón de nuevo movimiento está disponible desde las cuatro áreas.
 
-## 🛠️ Configuración y Opciones
+## Semántica financiera
 
-El menú de configuración (ícono de engranaje ⚙️) centraliza el control:
+Los importes persistidos son centavos enteros. El dinero real se distingue de la planificación:
 
-- **Cambiar Tema:** Alterna entre Claro, Oscuro y el modo **Serious**.
-- **Gestión de Categorías:** Crea categorías personalizadas eligiendo un icono del catálogo de Lucide (Cine, Café, Viajes, etc.).
-- **Modo Estricto:** Bloquea el registro de un gasto si excede tu saldo disponible.
-- **Estrategia de Rollover:** (Resetear, Acumular Sobrante o Acumular Deuda).
-- **Copia de Seguridad:** Exportar/Importar JSON sin cifrar y Backups locales vía **OPFS**.
+- **Disponible líquido:** efectivo más bancos registrados; excluye crédito disponible y sueldos previstos.
+- **Patrimonio registrado:** disponible líquido más saldo a favor de tarjetas menos deuda de tarjetas.
+- **Resultado del período:** ingresos registrados menos gastos/compras, incluidas las compras con tarjeta.
+- **Flujo de efectivo:** ingresos registrados menos gastos pagados desde cuentas y pagos de tarjeta; no equivale al saldo de cuentas.
+- **Presupuestos y metas:** límites y reservas de planificación. Reasignar límites o aportar a una meta no mueve dinero entre cuentas.
+- **Planificados:** no afectan saldos hasta confirmarse. Los saldos iniciales no son ingresos mensuales.
 
-## 💻 Tech Stack
+La protección contra saldos negativos y la política presupuestaria son independientes. El exceso de presupuesto puede permitirse, requerir confirmación o bloquearse. El antiguo `strictMode` se interpreta mediante un adaptador de compatibilidad.
 
-- **Framework:** Next.js (App Router)
-- **UI:** React, ShadCN UI, Tailwind CSS
-- **Persistencia:** **Dexie.js (IndexedDB)**
-- **Iconos:** Lucide React
-- **Gráficos:** Recharts + D3 logic para flujos
-- **Audio:** Web Audio API
+El mes financiero puede comenzar entre los días 1 y 31; los días inexistentes se ajustan al último día válido. Los límites semanales y anuales conservan su propio calendario.
 
-## 🧩 Instalación
+## Datos y respaldos
 
-1.  Instala las dependencias: `npm install`
-2.  Servidor de desarrollo: `npm run dev`
-3.  La aplicación estará disponible en `http://localhost:9002` (o el puerto asignado).
+- Persistencia financiera: IndexedDB mediante **Dexie v12**.
+- Respaldo financiero: **JSON v8**, con lectura compatible de v3–v7 y validación previa al reemplazo.
+- Las metas derivan su progreso de aportes. La migración conserva el avance heredado sin contarlo como una nueva reserva mensual.
+- CSV intercambia tablas; conserva rangos presupuestarios y tipos de aporte. Un CSV antiguo de metas con progreso ambiguo se rechaza indicando usar el JSON completo para evitar duplicación.
+- Las plantillas de Quick Add viven en localStorage y **no están incluidas en el JSON financiero**. El JSON tampoco copia íntegramente preferencias/logros de otros almacenamientos ni archivos OPFS.
+- Los respaldos no están cifrados. Ocultar importes es privacidad visual, no autenticación ni cifrado.
 
-## 🗂️ Estructura del Proyecto
+Los datos pertenecen al navegador y al origen (protocolo, dominio y puerto). No hay inicio de sesión ni sincronización en la nube. Borrar los datos del sitio puede eliminar también los respaldos locales: conserva un JSON descargado fuera del navegador. Cambiar de origen requiere exportar e importar.
+
+## Desarrollo y validación
+
+Requiere **Node.js 22 o superior** y npm.
+
+```sh
+npm ci
+npm run dev
 ```
+
+Desarrollo: http://localhost:9002. Para validar y previsualizar producción:
+
+```sh
+npm run check
+npm run build
+npm start -- --port 9011
+```
+
+`check` ejecuta guard local-only, TypeScript, ESLint y pruebas. `build` exporta a `out/`, genera el precaché y verifica la CSP y ausencia de rutas de diagnóstico. Las pruebas usan datos sintéticos y fake-indexeddb para comprobar migraciones, respaldos, cálculos, concurrencia y políticas.
+
+## Distribución y uso sin conexión
+
+Publica solo **out/** en hosting estático HTTPS desde la raíz del dominio. No requiere servidor Next, rutas API ni variables de entorno en producción. Publica toda la carpeta de forma atómica y sirve HTML, `sw.js` y `precache-manifest.js` con revalidación (`Cache-Control: no-cache`).
+
+La primera carga y las actualizaciones descargan recursos estáticos. Tras instalarse el service worker, la app funciona sin conexión. Una actualización se activa al cerrar las pestañas anteriores; no fuerza la recarga de formularios abiertos. Las fuentes se descargan durante el build y se sirven localmente al navegador.
+
+La CSP mantiene `connect-src 'none'`. El guard local-only detecta primitivas de red y servicios remotos conocidos; no sustituye una auditoría integral de dependencias o seguridad.
+
+## Estructura
+
+```text
 src/
+├── app/                 # App Router y exportación estática
 ├── components/
-│   ├── dashboard/    # Pestañas (Summary, Planning, Reports, Movements)
-│   ├── layout/       # BottomNav, Header (Settings), AppShell
-│   └── ui/           # Base de ShadCN + IconPicker
-├── contexts/         # FinanceContext (Lógica de negocio y Dexie sync)
-├── lib/              # types.ts, categories.ts, goal-calculator.ts
-└── app/              # PWA Wrapper
+│   ├── dashboard/       # Áreas financieras y compositor
+│   ├── finance-ui/      # Patrones financieros compartidos
+│   ├── layout/          # Navegación, cabecera y ajustes
+│   └── ui/              # Controles base
+├── contexts/            # Estado reactivo y coordinación
+├── domain/              # Ledger, métricas, períodos, categorías y metas
+├── policies/            # Protección de cuentas y exceso presupuestario
+├── lib/                 # Persistencia, servicios y respaldos
+└── hooks/               # Comportamientos reutilizables
+tests/                   # Regresiones y fixtures históricos
+scripts/                 # Servidor estático, precaché y verificadores
+docs/roadmap/            # Cierres por fase y estado vigente
+docs/ux/                 # Arquitectura y contrato visual
 ```
 
----
-*GlitchBudget Pro: Diseñado para el Monje Financiero moderno. Privacidad total con IndexedDB, cálculos en centavos y una interfaz que se siente viva.*
+Tecnologías principales: Next.js, React, TypeScript, Tailwind CSS, Radix/shadcn, Dexie, Recharts y Lucide.
 
-## Validación y datos locales
+## Qué falta
 
-Requiere Node.js 22 o superior. Ejecuta `npm ci`, `npm run check` y `npm run build`. La compilación genera los recursos de uso sin conexión; primero abre la versión de producción con conexión y espera a que se instale. Una actualización se activa al cerrar las pestañas anteriores.
+Las fases **11–19 siguen pendientes**, desde monedas e inversiones hasta reportes avanzados, automatización, seguridad, Backup 2.0 y cierre de deuda técnica. Sus objetivos están en el [roadmap original](Roadmap%20septiembre%202026.txt); no son funciones ya disponibles.
 
-Los datos pertenecen al navegador y a la dirección donde abres la aplicación. No hay cuentas ni sincronización. Borrar los datos del sitio elimina también los respaldos locales: descarga periódicamente un JSON externo. Los respaldos no están cifrados.
-
-La revisión de calidad y sus límites están documentados en `docs/quality-review.md`.
-
-## Distribución estática (roadmap, fase 1)
-
-Ejecuta `npm run build` y publica exclusivamente la carpeta `out/` en un hosting estático HTTPS, desde la raíz del dominio. No requiere Next en producción, rutas API ni variables de entorno. Para una vista previa local: `npm start -- --port 9011`. El servidor de vista previa solo escucha en este equipo.
-
-El manifiesto offline se genera dentro de `out/` después de exportar. Publica toda la carpeta de forma atómica y sirve `sw.js`, `precache-manifest.js` y HTML con revalidación (Cache-Control: no-cache). Las fuentes se descargan durante el build con next/font y se incluyen en los archivos locales; el navegador no contacta Google Fonts.
-
-`npm run check:local` forma parte del check de CI y rechaza primitivas de red, rutas de servidor y SDK remotos conocidos en el código de aplicación. No sustituye una auditoría de dependencias ni detecta código deliberadamente ofuscado.
+Para publicación comercial queda ejecutar la matriz física Android/iOS, teclado, accesibilidad y respaldo/restauración en los navegadores elegidos, además de definir distribución, soporte y condiciones del producto. Consulta el [checklist de publicación](docs/release-checklist.md).

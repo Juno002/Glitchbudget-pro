@@ -1,5 +1,7 @@
 # Fase 0 — Línea base de septiembre de 2026
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 ## Punto de recuperación
 
 Antes de modificar archivos para esta fase se creó el commit `9c530c9` y el tag anotado `pre-roadmap-2026-09`. El código previo estaba en `e43da20`; el commit de congelación incorpora el roadmap al control de versiones. Tag y commit son locales; no se ha hecho push.

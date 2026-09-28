@@ -1,5 +1,7 @@
 # Fase 9 — Budgets 2.0
 
+**Estado: implementación completada e integrada en main mediante el [PR #6](https://github.com/Juno002/Glitchbudget-pro/pull/6), commit 60b50e9, el 28/09/2026.** Consulta el [índice acumulado](README.md) para las demás fases.
+
 Fuente de verdad: `Roadmap septiembre 2026.txt`, Fase 9. Continuación autorizada el 2026-09-27.
 
 ## Comparación remoto/local

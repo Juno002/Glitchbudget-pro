@@ -1,5 +1,7 @@
 # Fase 7.5D — Estados, privacidad, responsive y accesibilidad
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 > **Checkpoint histórico, supersedido por el cierre de Fase 7.5.** Sus alcances, pendientes, instrucciones de parada y pruebas describen esta iteración. Consulta el [cierre canónico](phase-7.5.md), el [Gate aprobado](phase-7.5-gate.md) y los [wireframes vigentes](../ux/wireframes-phase-7.5.md).
 
 Fecha: 2026-09-27. Rama: `phase-7.5-ux-architecture`. Base: 7.5C cerrada en `9e7d4f7`.

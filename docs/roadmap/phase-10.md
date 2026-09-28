@@ -1,5 +1,7 @@
 # Fase 10 — Goals 2.0
 
+**Estado: implementación completada e integrada en main mediante el [PR #6](https://github.com/Juno002/Glitchbudget-pro/pull/6), commit 60b50e9, el 28/09/2026.** Consulta el [índice acumulado](README.md) para las demás fases.
+
 Fuente de verdad: `Roadmap septiembre 2026.txt`, Fase 10. Implementación autorizada durante el cierre de Fase 9; cierre técnico el 2026-09-28. No inicia Fase 11.
 
 ## Modelo y semántica

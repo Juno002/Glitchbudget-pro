@@ -1,5 +1,7 @@
 # Fase 4 — Categorías con identidad estable
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 Fecha: 2026-09-26. Alcance: exclusivamente Fase 4. No se inicia Fase 5 ni el rediseño visual de 7.5.
 
 ## 1. Esquema final

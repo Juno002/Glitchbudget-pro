@@ -1,5 +1,7 @@
 # Fase 2 — Dominio financiero canónico
 
+> **Registro histórico de fase.** Conserva versiones, resultados y restricciones del momento de su cierre. Para el estado acumulado hasta Fase 10, las continuaciones autorizadas y los pendientes vigentes, consulta el [índice del roadmap](README.md).
+
 ## Resultado y alcance
 
 Completada la extracción de métricas existentes sin cambios de cifras, interfaz funcional, aceptación/rechazo, categorías, períodos, recurrentes ni Quick Add. La separación de políticas legacy fue aprobada explícitamente después de la revisión inicial. No se inició Fase 3.

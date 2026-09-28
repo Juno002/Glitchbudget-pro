@@ -1,5 +1,7 @@
 # Revisión de preparación comercial — 17 de septiembre de 2026
 
+> **Informe histórico del 17/09.** Sus reglas de saldo, versiones y pendientes corresponden a esa revisión. Las fases posteriores sustituyeron el modo estricto único y el bloqueo de aportes por saldo mensual. Consulta el [estado vigente hasta Fase 10](roadmap/README.md) y el [checklist de publicación](release-checklist.md).
+
 Alcance: aplicación personal con datos locales, sin cuentas, sincronización ni IA. Estado: candidata a prueba piloto; no certificada para venta general.
 
 ## Correcciones de esta revisión
