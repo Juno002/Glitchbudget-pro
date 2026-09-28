@@ -79,7 +79,7 @@ test('cross-currency transfers are blocked before any balances are mutated', asy
 
 test('Dexie v12 upgrades direct account balances and movements to the configured base currency', async () => {
   const name = 'phase11-migration-' + crypto.randomUUID();
-  const schema = Object.fromEntries(db.tables.map(table => [table.name, [table.schema.primKey.src, ...table.schema.indexes.map(index => index.src)].join(',')]));
+  const schema = Object.fromEntries(db.tables.filter(table => table.name !== 'investments').map(table => [table.name, [table.schema.primKey.src, ...table.schema.indexes.map(index => index.src)].join(',')]));
   const old = new Dexie(name);
   old.version(12).stores(schema);
   await old.table('settings').put(settings);
@@ -90,7 +90,7 @@ test('Dexie v12 upgrades direct account balances and movements to the configured
   const current = new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno, 13);
+    assert.equal(current.verno, 14);
     assert.equal((await current.accounts.get('legacy-cash'))?.currency, 'DOP');
     assert.deepEqual(
       (({currency,fxRate,amountBase}) => ({currency,fxRate,amountBase}))((await current.incomes.get('legacy-income'))!),
@@ -101,7 +101,7 @@ test('Dexie v12 upgrades direct account balances and movements to the configured
   }
 });
 
-test('legacy v8 backups import as base currency and re-export with the v9 contract', async () => {
+test('legacy v8 backups import as base currency and re-export with the current v10 contract', async () => {
   const cash = await ensureCashAccount(today);
   await saveIncome({ id:'income', type:'extra', description:'Cobro', amount:10, date:today, categoryId:'salary', accountId:cash.id });
   const legacy = JSON.parse(await exportDataJSON());
@@ -114,7 +114,7 @@ test('legacy v8 backups import as base currency and re-export with the v9 contra
   await importDataJSON(JSON.stringify(legacy));
   assert.equal((await db.accounts.get(cash.id))?.currency, 'DOP');
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v, 9);
+  assert.equal(exported.v, 10);
   assert.equal(exported.accounts[0].currency, 'DOP');
   assert.deepEqual(
     {currency:exported.incomes[0].currency,fxRate:exported.incomes[0].fxRate,amountBase:exported.incomes[0].amountBase},
@@ -125,7 +125,7 @@ test('legacy v8 backups import as base currency and re-export with the v9 contra
 
 test('migration uses the configured base currency rather than hard-coding DOP', async () => {
   const name = 'phase11-usd-migration-' + crypto.randomUUID();
-  const schema = Object.fromEntries(db.tables.map(table => [table.name, [table.schema.primKey.src, ...table.schema.indexes.map(index => index.src)].join(',')]));
+  const schema = Object.fromEntries(db.tables.filter(table => table.name !== 'investments').map(table => [table.name, [table.schema.primKey.src, ...table.schema.indexes.map(index => index.src)].join(',')]));
   const old = new Dexie(name);
   old.version(12).stores(schema);
   await old.table('settings').put({ ...settings, currency:'USD' });
