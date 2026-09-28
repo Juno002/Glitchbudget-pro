@@ -7,7 +7,7 @@ export async function setBaseCurrency(input: string): Promise<string> {
   await db.transaction('rw', [
     db.settings, db.accounts, db.incomes, db.expenses, db.account_transfers,
     db.debt_payments, db.debts, db.plans, db.goals, db.goal_contributions,
-    db.recurrents,
+    db.recurrents, db.investments,
   ], async () => {
     const settings = await db.settings.get('general');
     if (!settings) throw new Error('No se encontraron los ajustes financieros.');
@@ -30,7 +30,8 @@ export async function setBaseCurrency(input: string): Promise<string> {
       await db.plans.count() > 0 ||
       await db.goals.count() > 0 ||
       await db.goal_contributions.count() > 0 ||
-      await db.recurrents.count() > 0;
+      await db.recurrents.count() > 0 ||
+      await db.investments.count() > 0;
 
     if (hasMoney) {
       throw new Error('No se puede cambiar la moneda base después de registrar importes. Fase 11 no convierte datos existentes automáticamente.');
