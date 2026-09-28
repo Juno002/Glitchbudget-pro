@@ -20,7 +20,11 @@ const fields = {
   amount: z.number().finite().positive('El monto debe ser mayor que cero.')
     .transform(value => Math.round(value * 100))
     .pipe(z.number().int().positive('El monto mínimo es 0.01.').max(Number.MAX_SAFE_INTEGER)),
-  labels: z.array(z.string()).optional().transform(value => normalizeTransactionLabels(value)),
+  labels: z.array(z.string()).optional().transform(value => {
+    if (value === undefined) return undefined;
+    const labels = normalizeTransactionLabels(value);
+    return labels.length ? labels : undefined;
+  }),
 };
 const incomeSchema = z.object({ ...fields, type: z.enum(['extra', 'gift']), description: z.string().trim() });
 
