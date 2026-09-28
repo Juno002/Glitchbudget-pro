@@ -80,7 +80,7 @@ test('16.1 contract contains no automatic-apply flag, network transport or AI de
   assert.doesNotMatch(source,/openai|gemini|anthropic|language model|\bAI\b/i);
 });
 
-test('16.1 does not modify Quick Add, saved filters or transaction persistence yet', () => {
+test('16.1 contract remains isolated from templates, saved filters and persistence after 16.3 consumes it', () => {
   const template=readFileSync(new URL('../src/lib/quick-add-templates.ts',import.meta.url),'utf8');
   const filters=readFileSync(new URL('../src/lib/saved-transaction-filters.ts',import.meta.url),'utf8');
   const modal=readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8');
@@ -88,6 +88,7 @@ test('16.1 does not modify Quick Add, saved filters or transaction persistence y
 
   assert.doesNotMatch(template,/TransactionRule|RuleCondition|RuleSuggestion/);
   assert.doesNotMatch(filters,/TransactionRule|RuleCondition|RuleSuggestion/);
-  assert.doesNotMatch(modal,/TransactionRule|RuleCondition|RuleSuggestion|Sugerencia de regla/);
+  assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
+  assert.doesNotMatch(modal,/applyAutomatically|autoApply/i);
   assert.doesNotMatch(db,/transaction_rules|rules!:/);
 });
