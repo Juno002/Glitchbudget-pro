@@ -78,7 +78,7 @@ export async function importIncomesCSV(file: File) {
       }
       normalized.push({ ...row, month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(normalized as Array<{ categoryId:string }>,'income');
+    await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'income');
     await db.incomes.clear();
     await db.incomes.bulkAdd(normalized);
   });
@@ -98,7 +98,7 @@ export async function importExpensesCSV(file: File) {
       }
       normalized.push({ ...row, concept:row.concept ?? '', month:row.date.slice(0,7), currency:account?.currency || baseCurrency, fxRate:1, amountBase:row.amount });
     }
-    await preserveImportedCategories(rows as Array<{ categoryId:string }>,'expense');
+    await preserveImportedCategories(normalized.map(row => ({ categoryId:row.categoryId })),'expense');
     await db.expenses.clear();
     await db.expenses.bulkAdd(normalized);
   });
