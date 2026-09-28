@@ -12,7 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, BookmarkPlus, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
-import { parseTransactionLabelsInput } from '@/domain/transaction-metadata';
+import { NECESSITY_LABELS, parseTransactionLabelsInput } from '@/domain/transaction-metadata';
+import { evaluateTransactionRules, type RuleMatch } from '@/domain/rule-engine';
+import { quickAddRuleSuggestions } from '@/domain/rule-suggestions';
+import type { TransactionRule } from '@/domain/rules';
 import { motion } from 'framer-motion';
 import { defaultCashAccount } from '@/lib/accounts';
 import {
@@ -29,11 +32,12 @@ interface TransactionModalProps {
   mode: 'new' | 'edit';
   editingExpense?: Expense;
   editingIncome?: Income;
+  rules?: readonly TransactionRule[];
 }
 
 type TransactionType = QuickAddTransactionType;
 
-export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome }: TransactionModalProps) {
+export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome, rules = [] }: TransactionModalProps) {
   const getCategoryInfo = useCategoryResolver();
   const {
     addExpense, updateExpense, deleteExpense,
@@ -63,6 +67,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [transferNote, setTransferNote] = useState('');
   const [necessity, setNecessity] = useState<'' | 'must' | 'need' | 'want'>('');
   const [labelsInput, setLabelsInput] = useState('');
+  const [dismissedRuleIds, setDismissedRuleIds] = useState<string[]>([]);
 
   const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -83,6 +88,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
     setSelectedTemplateId('');
     setTemplateName('');
+    setDismissedRuleIds([]);
 
     if (mode === 'edit' && editingExpense) {
       setTxType('expense');
@@ -143,6 +149,13 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
   }, [txType, incomeCategories, expenseCategories, getCategoryInfo]);
 
+  const ruleSuggestions = useMemo(() => {
+    if (isEditing || txType === 'transfer' || !concept.trim() || rules.length === 0) return [];
+    const matches = evaluateTransactionRules(concept, rules);
+    return quickAddRuleSuggestions(matches, txType, categories.map(category => category.id))
+      .filter(match => !dismissedRuleIds.includes(match.ruleId));
+  }, [isEditing, txType, concept, rules, categories, dismissedRuleIds]);
+
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
   const hasAccountForActual = !!accountId || isEditing;
   const canSave = txType === 'transfer'
@@ -160,6 +173,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     if (isEditing) return;
     setTxType(type);
     setCategoryId('');
+    setDismissedRuleIds([]);
     setSubmitError(null);
     if (type === 'transfer') {
       setPaymentMethod('cash');
@@ -192,6 +206,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setLabelsInput((template.labels || []).join(', '));
     setDate(localDate());
     setSelectedTemplateId(template.id);
+    setDismissedRuleIds([]);
     setSubmitError(null);
   };
 
@@ -231,6 +246,16 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     if (!selectedTemplateId || typeof window === 'undefined') return;
     setTemplates(removeQuickAddTemplate(window.localStorage, selectedTemplateId));
     setSelectedTemplateId('');
+  };
+
+  const dismissRuleSuggestion = (ruleId: string) => {
+    setDismissedRuleIds(current => current.includes(ruleId) ? current : [...current, ruleId]);
+  };
+
+  const acceptRuleSuggestion = (match: RuleMatch) => {
+    if (match.suggestion.categoryId) setCategoryId(match.suggestion.categoryId);
+    if (txType === 'expense' && match.suggestion.necessity) setNecessity(match.suggestion.necessity);
+    dismissRuleSuggestion(match.ruleId);
   };
 
   const handleSave = async () => {
@@ -468,6 +493,39 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                         maxLength={250}
                       />
                     </label>
+
+                    {!isEditing && ruleSuggestions.length > 0 && (
+                      <div className="space-y-2 rounded-lg border bg-muted/20 p-3" aria-label="Sugerencias de reglas">
+                        <div>
+                          <p className="text-sm font-medium">Sugerencias de reglas</p>
+                          <p className="text-xs text-muted-foreground">Nada cambia hasta que aceptes una sugerencia.</p>
+                        </div>
+                        {ruleSuggestions.map(match => {
+                          const suggestedCategory = match.suggestion.categoryId
+                            ? getCategoryInfo(match.suggestion.categoryId)?.name || match.suggestion.categoryId
+                            : null;
+                          const suggestedNecessity = match.suggestion.necessity
+                            ? NECESSITY_LABELS[match.suggestion.necessity]
+                            : null;
+                          return (
+                            <div key={match.ruleId} className="rounded-md border bg-background p-3">
+                              <p className="text-xs font-medium">{match.ruleName}</p>
+                              <p className="mt-1 text-xs text-muted-foreground">
+                                {[suggestedCategory && `Categoría: ${suggestedCategory}`, suggestedNecessity && `Necesidad: ${suggestedNecessity}`].filter(Boolean).join(' · ')}
+                              </p>
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <Button type="button" size="sm" variant="outline" aria-label={`Aceptar sugerencia ${match.ruleName}`} onClick={() => acceptRuleSuggestion(match)}>
+                                  Aceptar sugerencia
+                                </Button>
+                                <Button type="button" size="sm" variant="ghost" aria-label={`Ignorar sugerencia ${match.ruleName}`} onClick={() => dismissRuleSuggestion(match.ruleId)}>
+                                  Ignorar sugerencia
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
 
                     {txType === 'expense' && (
                       <label className="block space-y-1 text-sm">
