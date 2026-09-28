@@ -100,7 +100,7 @@ test('goal deletion releases reservations without touching real accounts or move
   for (const table of [db.expenses,db.account_transfers,db.debt_payments]) assert.equal(await table.count(),0);
 });
 
-test('v7 backup migrates progress to v8 once without creating a monthly reservation for the opening balance', async () => {
+test('v7 backup migrates goal progress once into the current contract without creating a monthly reservation for the opening balance', async () => {
   await saveGoal(goal); await recordGoalContribution(contribution);
   const legacy = JSON.parse(await exportDataJSON());
   legacy.v = 7; legacy.goals[0].saved = 500; legacy.goals[0].status = 'completed';
@@ -110,7 +110,7 @@ test('v7 backup migrates progress to v8 once without creating a monthly reservat
   const metrics = selectPeriodMetrics({settings:(await db.settings.get('general'))!,incomes:[],expenses:[],debtPayments:[],budgets:[],goalContributions:contributions},periodForId('2026-09'));
   assert.equal(metrics.goalContributions,200); assert.equal(metrics.monthlyPlanningMargin,-200);
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v,8); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
+  assert.equal(exported.v,9); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
   assert.deepEqual(await snapshot(),before);
