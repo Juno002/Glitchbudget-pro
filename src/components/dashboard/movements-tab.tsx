@@ -2,6 +2,7 @@
 
 import MovementsView from './MovementsView';
 import AccountsOverview from './accounts-overview';
+import InvestmentsManager from './investments-manager';
 import { PageHeader, SectionHeader } from '@/components/finance-ui';
 
 export default function MovementsTab() {
@@ -23,9 +24,17 @@ export default function MovementsTab() {
       <section id="accounts-section" className="scroll-mt-24 space-y-3 border-t pt-6" aria-labelledby="accounts-title">
         <SectionHeader
           title={<span id="accounts-title">Cuentas y tarjetas</span>}
-          description="Acceso secundario para consultar saldos, transferir, conciliar o administrar cuentas."
+          description="Acceso secundario para consultar saldos, transferir, conciliar o administrar cuentas líquidas."
         />
         <AccountsOverview />
+      </section>
+
+      <section id="investments-section" className="scroll-mt-24 space-y-3 border-t pt-6" aria-labelledby="investments-title">
+        <SectionHeader
+          title={<span id="investments-title">Inversiones</span>}
+          description="Activos no líquidos registrados por separado del efectivo y los bancos."
+        />
+        <InvestmentsManager />
       </section>
     </div>
   );
