@@ -11,7 +11,7 @@ beforeEach(async () => {
 after(() => db.close());
 
 test('goal reservations do not create or change real financial movements', async () => {
-  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', openingBalance:10000, startDate:'2026-09-01' });
+  await db.accounts.add({ id:'cash', name:'Efectivo', type:'cash', currency:'DOP', openingBalance:10000, startDate:'2026-09-01' });
   const accounts = await db.accounts.toArray();
   await saveGoalContribution({ id:'a', goalId:'goal', amount:1000, date:'2026-09-27' });
   assert.deepEqual(await db.accounts.toArray(), accounts);
