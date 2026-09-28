@@ -2,7 +2,7 @@
 
 Fuente de verdad: Roadmap septiembre 2026.txt, Fase 11.
 
-Estado: **completada técnicamente; pendiente únicamente de integración en main**.
+Estado: **completada técnicamente**.
 
 ## Objetivo
 
