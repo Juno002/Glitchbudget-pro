@@ -79,6 +79,10 @@ test('Home module order is locally reorderable without changing visibility or de
   assert.deepEqual(moved.order,['budget','position','upcoming','goals','investments']);
   assert.deepEqual(moved.hidden,[]);
   assert.equal(moved.defaultSection,'position');
+
+  const withHidden={...DEFAULT_HOME_PREFERENCES,hidden:['budget'] as const};
+  const visibleMove=moveHomeModule(withHidden,'upcoming',-1);
+  assert.deepEqual(visibleMove.order,['upcoming','budget','position','goals','investments']);
 });
 
 test('Home UI contains at most the five roadmap modules and removes old dashboard-only extras', () => {
