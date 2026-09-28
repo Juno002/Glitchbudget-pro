@@ -61,7 +61,7 @@ function SaveStrategy() {
 
 export default function SummaryTab() {
   const {
-    getPosition,
+    getReportSnapshot,
     loading,
     currentMonth,
     currentPeriod,
@@ -87,7 +87,7 @@ export default function SummaryTab() {
     setPeriodLabel(periodStartDay === 1 ? formatMonth(currentMonth) : formatPeriodRange(currentPeriod));
   }, [currentMonth, currentPeriod, periodStartDay]);
 
-  const position = getPosition();
+  const position = getReportSnapshot(currentPeriod, today).netWorth;
   const rulesById = useMemo(() => new Map((recurringRules || []).map(rule => [rule.id, rule])), [recurringRules]);
   const upcoming = useMemo(() => {
     const groups = groupUpcomingOccurrences(plannedOccurrences || [], today);
@@ -143,8 +143,8 @@ export default function SummaryTab() {
             />
             <MetricCard
               label="Inversiones registradas"
-              amount={position.investmentAssets}
-              tone={position.investmentAssets > 0 ? 'positive' : 'neutral'}
+              amount={position.investments}
+              tone={position.investments > 0 ? 'positive' : 'neutral'}
               supporting="Valor registrado actual. No incluye rendimientos futuros estimados."
             />
             <MetricCard
