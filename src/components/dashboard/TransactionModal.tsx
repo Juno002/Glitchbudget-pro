@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, BookmarkPlus, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
+import { parseTransactionLabelsInput } from '@/domain/transaction-metadata';
 import { motion } from 'framer-motion';
 import { defaultCashAccount } from '@/lib/accounts';
 import {
@@ -60,6 +61,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [accountId, setAccountId] = useState('');
   const [toAccountId, setToAccountId] = useState('');
   const [transferNote, setTransferNote] = useState('');
+  const [necessity, setNecessity] = useState<'' | 'must' | 'need' | 'want'>('');
+  const [labelsInput, setLabelsInput] = useState('');
 
   const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -93,6 +96,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAccountId(editingExpense.accountId || '');
       setToAccountId('');
       setTransferNote('');
+      setNecessity(editingExpense.necessity || '');
+      setLabelsInput((editingExpense.labels || []).join(', '));
     } else if (mode === 'edit' && editingIncome) {
       setTxType('income');
       setAmount(String(editingIncome.amount / 100));
@@ -105,6 +110,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAccountId(editingIncome.accountId || '');
       setToAccountId('');
       setTransferNote('');
+      setNecessity('');
+      setLabelsInput((editingIncome.labels || []).join(', '));
     } else {
       setTxType('expense');
       setAmount('');
@@ -118,6 +125,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAccountId('');
       setToAccountId('');
       setTransferNote('');
+      setNecessity('');
+      setLabelsInput('');
       if (typeof window !== 'undefined') setTemplates(loadQuickAddTemplates(window.localStorage));
     }
     setSaved(false);
@@ -179,6 +188,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setPaymentMethod(method);
     setDebtId(method === 'credit' ? activeDebt : '');
     setTransferNote(template.transferNote || '');
+    setNecessity(template.type === 'expense' ? (template.necessity || '') : '');
+    setLabelsInput((template.labels || []).join(', '));
     setDate(localDate());
     setSelectedTemplateId(template.id);
     setSubmitError(null);
@@ -208,6 +219,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       paymentMethod: txType === 'expense' ? paymentMethod : undefined,
       debtId: txType === 'expense' && paymentMethod === 'credit' ? debtId || undefined : undefined,
       transferNote: txType === 'transfer' ? transferNote || undefined : undefined,
+      necessity: txType === 'expense' ? necessity || undefined : undefined,
+      labels: txType === 'transfer' ? undefined : parseTransactionLabelsInput(labelsInput),
     });
     setTemplates(next);
     setSelectedTemplateId(existing?.id || next[0]?.id || '');
@@ -246,6 +259,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           nature: expenseSubtype,
           paymentMethod,
           debtId: paymentMethod === 'credit' ? debtId : undefined,
+          necessity: necessity || undefined,
+          labels: parseTransactionLabelsInput(labelsInput),
         };
         success = editingExpense
           ? await updateExpense({ ...editingExpense, ...fields })
@@ -258,6 +273,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
           categoryId,
           date,
           type: incomeSubtype,
+          labels: parseTransactionLabelsInput(labelsInput),
         };
         success = editingIncome
           ? await updateIncomeItem({ ...editingIncome, ...fields })
@@ -451,6 +467,35 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                         onChange={event => setConcept(event.target.value)}
                         maxLength={250}
                       />
+                    </label>
+
+                    {txType === 'expense' && (
+                      <label className="block space-y-1 text-sm">
+                        <span className="text-muted-foreground">Necesidad</span>
+                        <select
+                          aria-label="Necesidad"
+                          value={necessity}
+                          onChange={event => setNecessity(event.target.value as typeof necessity)}
+                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">Sin clasificar</option>
+                          <option value="must">Must · imprescindible</option>
+                          <option value="need">Need · necesario</option>
+                          <option value="want">Want · deseo</option>
+                        </select>
+                      </label>
+                    )}
+
+                    <label className="block space-y-1 text-sm">
+                      <span className="text-muted-foreground">Etiquetas</span>
+                      <Input
+                        aria-label="Etiquetas"
+                        placeholder="casa, trabajo, reembolso"
+                        value={labelsInput}
+                        onChange={event => setLabelsInput(event.target.value)}
+                        maxLength={500}
+                      />
+                      <span className="block text-xs text-muted-foreground">Separa con comas. Máximo 12 etiquetas de 40 caracteres.</span>
                     </label>
 
                     {txType === 'expense' ? (
