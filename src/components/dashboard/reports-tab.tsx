@@ -1,452 +1,288 @@
 'use client';
 
-import { selectCardSignedBalance, selectCardAvailableLimit } from '@/domain/ledger';
+import { useMemo, useState } from 'react';
+import { useFinances } from '@/contexts/finance-context';
+import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
 import { localDate } from '@/lib/finance-calculations';
-import { previousComparablePeriod } from '@/domain/periods';
-import { formatPeriodRange } from '@/lib/period-format';
-import { useFinances } from "@/contexts/finance-context";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
-import { cn } from "@/lib/utils";
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { Progress } from "../ui/progress";
-import { useMemo } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
-import MonthlyResultChart from "./charts/monthly-result-chart";
-import { EmptyState, PageHeader, SectionHeader, StatusBadge } from '@/components/finance-ui';
-import { Button } from '../ui/button';
-import { useTabs } from '@/contexts/tabs-context';
-import { useBudgetPeriod } from '@/hooks/use-budget-period';
-import { BudgetPeriodControls } from './budget-period-controls';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState, MetricCard, PageHeader, SectionHeader } from '@/components/finance-ui';
+import { cn } from '@/lib/utils';
 
-const BreakdownTable = ({ title, data }: { title: string, data: { name: string, value: number }[] }) => {
-  const money = usePrivateCurrency();
-  const getCategoryInfo = useCategoryResolver();
-    const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
-    return (
-        <Card>
-            <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
-            <CardContent>
-                {data.length > 0 ? (
-                  <div className="overflow-x-auto">
-                      <Table>
-                          <TableHeader>
-                              <TableRow>
-                                  <TableHead>Categoría</TableHead>
-                                  <TableHead className="text-right">Total</TableHead>
-                                  <TableHead className="text-right">%</TableHead>
-                              </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                              {data.map(item => (
-                                  <TableRow key={item.name}>
-                                      <TableCell>{getCategoryInfo(item.name)?.name || item.name}</TableCell>
-                                      <TableCell className="text-right">{money(item.value)}</TableCell>
-                                      <TableCell className="text-right">{((item.value / total) * 100).toFixed(1)}%</TableCell>
-                                  </TableRow>
-                              ))}
-                          </TableBody>
-                      </Table>
-                  </div>
-                ) : (
-                  <EmptyState title="Sin datos para este período" description="Registra movimientos para ver este desglose." />
-                )}
-            </CardContent>
-        </Card>
-    );
+const presets: Array<{ value:ReportRangePreset; label:string }> = [
+  { value:'7d', label:'7D' },
+  { value:'30d', label:'30D' },
+  { value:'3m', label:'3M' },
+  { value:'6m', label:'6M' },
+  { value:'1y', label:'1Y' },
+  { value:'custom', label:'Custom' },
+];
+
+function rangeLabel(start:string,end:string) {
+  const formatter=new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric'});
+  const format=(value:string)=>formatter.format(new Date(value+'T12:00:00'));
+  return start===end ? format(start) : format(start)+' – '+format(end);
 }
 
-const MonthlyComparisonTable = () => {
-    const money = usePrivateCurrency();
-    const { getTotals, currentMonth, currentPeriod, periodStartDay } = useFinances();
-
-    const { previousPeriod, currentTotals, prevTotals } = useMemo(() => {
-        const previousPeriod = previousComparablePeriod(currentPeriod, { periodStartDay });
-        const currentTotals = getTotals(currentMonth);
-        const prevTotals = getTotals(previousPeriod.id);
-        return { previousPeriod, currentTotals, prevTotals };
-    }, [currentMonth, currentPeriod, periodStartDay, getTotals]);
-
-
-    const rows = [
-        { label: 'Ingresos', prev: prevTotals.recordedIncome, curr: currentTotals.recordedIncome },
-        { label: 'Gastos', prev: prevTotals.spending, curr: currentTotals.spending },
-        { label: 'Resultado (ingresos − gastos)', prev: prevTotals.monthlyResult, curr: currentTotals.monthlyResult },
-        { label: 'Pagos de tarjeta', prev: prevTotals.cardPayments, curr: currentTotals.cardPayments },
-        { label: 'Flujo de efectivo del período', prev: prevTotals.cashFlow, curr: currentTotals.cashFlow }
-    ];
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>📊 Comparativa de períodos</CardTitle>
-                <CardDescription>Operaciones registradas. Las compras a crédito son gastos; sus pagos solo afectan al flujo de efectivo.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead></TableHead>
-                                <TableHead className="text-right">{formatPeriodRange(previousPeriod)}</TableHead>
-                                <TableHead className="text-right">{formatPeriodRange(currentPeriod)}</TableHead>
-                                <TableHead className="text-right">Diferencia</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {rows.map(row => {
-                                const diff = (row.curr || 0) - (row.prev || 0);
-                                const improves = row.label === 'Gastos' ? diff < 0 : diff > 0;
-                                const diffColor = diff === 0 ? 'text-muted-foreground' : improves ? 'text-green-600' : 'text-red-600';
-                                return (
-                                    <TableRow key={row.label}>
-                                        <TableCell>{row.label}</TableCell>
-                                        <TableCell className="text-right">{money(row.prev)}</TableCell>
-                                        <TableCell className="text-right">{money(row.curr)}</TableCell>
-                                        <TableCell className={cn("text-right font-semibold", diffColor)}>{diff >= 0 ? '+' : ''}{money(diff)}</TableCell>
-                                    </TableRow>
-                                )
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-            </CardContent>
-        </Card>
-    );
+function percentLabel(value:number|null) {
+  if (value === null) return 'Sin base comparable';
+  if (value === 0) return 'Sin cambio';
+  return (value > 0 ? '+' : '') + value.toLocaleString('es-DO',{maximumFractionDigits:2}) + '%';
 }
 
-const ExpenseByTypeTable = () => {
-    const money = usePrivateCurrency();
-    const { getExpensesByType, currentMonth } = useFinances();
-    const data = getExpensesByType(currentMonth);
-
-    return (
-        <Card>
-            <CardHeader><CardTitle>📊 Resumen por tipo de gasto</CardTitle></CardHeader>
-            <CardContent>
-                {data.length > 0 ? (
-                  <div className="overflow-x-auto">
-                      <Table>
-                          <TableHeader>
-                              <TableRow>
-                                  <TableHead>Tipo de gasto</TableHead>
-                                  <TableHead className="text-right">Total</TableHead>
-                                  <TableHead className="text-right">Promedio</TableHead>
-                                  <TableHead className="text-right">#</TableHead>
-                              </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                              {data.map(item => (
-                                  <TableRow key={item.name}>
-                                      <TableCell>{item.name}</TableCell>
-                                      <TableCell className="text-right">{money(item.total)}</TableCell>
-                                      <TableCell className="text-right">{money(item.avg)}</TableCell>
-                                      <TableCell className="text-right">{item.count}</TableCell>
-                                  </TableRow>
-                              ))}
-                          </TableBody>
-                      </Table>
-                  </div>
-                ) : (
-                  <EmptyState title="Sin gastos por clasificar" description="Cuando registres gastos, aquí aparecerá el resumen por naturaleza." />
-                )}
-            </CardContent>
-        </Card>
-    );
+function ComparisonValue({ value }: { value:number|null }) {
+  return <span className="text-xs text-muted-foreground">{percentLabel(value)}</span>;
 }
-
-const BudgetStatusReport = () => {
-  const selection = useBudgetPeriod();
-  const money = usePrivateCurrency();
-  const getCategoryInfo = useCategoryResolver();
-  const { setActiveTab, setPlanningTab } = useTabs();
-    const { getBudgetStatusDetails, currentMonth } = useFinances();
-    const budgetDetails = selection.range ? getBudgetStatusDetails(currentMonth, selection.range).filter(b => b.configured || b.spent > 0) : [];
-
-    const statusFor = (status: 'ok' | 'alert' | 'over' | 'unbudgeted') => ({
-        kind: status === 'over' ? 'danger' : status === 'alert' ? 'warning' : status === 'ok' ? 'success' : 'neutral',
-        label: status === 'over' ? 'Excedido' : status === 'alert' ? 'Cerca del límite' : status === 'ok' ? 'En presupuesto' : 'Sin presupuesto',
-    } as const);
-
-    const renderBudgetEmptyState = () => (
-      <EmptyState
-        title="Aún no tienes presupuestos"
-        description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
-        action={(
-          <Button type="button" variant="outline" onClick={() => {
-            setPlanningTab('budgets');
-            setActiveTab('planning');
-          }}>
-            Crear presupuesto
-          </Button>
-        )}
-      />
-    );
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>📝 Estado de Presupuestos</CardTitle>
-                <CardDescription>Consulta cada rango por separado. Un gasto puede afectar varios límites; no se suma varias veces a tus gastos reales.</CardDescription>
-                <BudgetPeriodControls selection={selection} />
-            </CardHeader>
-            <CardContent>
-                {/* MOBILE VIEW: Expandable Cards */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {budgetDetails.length > 0 ? budgetDetails.map(b => {
-                        const category = getCategoryInfo(b.categoryId);
-                        const progress = b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
-                        return (
-                            <div key={b.categoryId} className="bg-black/5 dark:bg-white/5 border border-[rgba(255,255,255,0.04)] dark:border-white/10 p-4 rounded-xl flex flex-col gap-3 relative overflow-hidden">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 font-semibold text-base">
-                                        {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
-                                        {category?.name}
-                                    </div>
-                                    <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-sm mt-1 sm:grid-cols-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Límite</span>
-                                        <span className="font-mono">{money(b.limit)}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Gastado</span>
-                                        <span className="font-mono">{money(b.spent)}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Restante</span>
-                                        <span className={cn("font-mono font-semibold", b.remaining < 0 ? "text-bad" : "")}>{money(b.remaining)}</span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-muted-foreground text-[10px] uppercase tracking-wider mb-0.5">Porcentaje</span>
-                                        <span className="font-mono font-semibold">{b.limit > 0 ? b.percentage + '%' : '—'}</span>
-                                    </div>
-                                </div>
-                                <Progress 
-                                    value={progress} 
-                                    className={cn('h-1.5 mt-2 transition-all', 
-                                        b.status === 'over' ? '[&>div]:bg-bad' :
-                                        b.status === 'alert' ? '[&>div]:bg-warning' : '[&>div]:bg-good'
-                                    )}
-                                />
-                            </div>
-                        )
-                    }) : renderBudgetEmptyState()}
-                </div>
-
-                {/* DESKTOP VIEW: Pro Table */}
-                <div className="hidden md:block overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="py-4">Categoría</TableHead>
-                                <TableHead className="text-right py-4">Límite</TableHead>
-                                <TableHead className="text-right py-4">Gastado</TableHead>
-                                <TableHead className="text-right py-4">Restante</TableHead>
-                                <TableHead className="text-right py-4">Porcentaje</TableHead>
-                                <TableHead className="py-4">Progreso</TableHead>
-                                <TableHead className="py-4">Estado</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {budgetDetails.length > 0 ? budgetDetails.map(b => {
-                                const category = getCategoryInfo(b.categoryId);
-                                const progress = b.limit > 0 ? Math.min((b.spent / b.limit) * 100, 100) : 0;
-                                return (
-                                    <TableRow key={b.categoryId}>
-                                        <TableCell className="py-5 font-medium flex items-center gap-3 text-base">
-                                            {category?.icon && <category.icon className="h-5 w-5 text-muted-foreground" />}
-                                            {category?.name}
-                                        </TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.limit)}</TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base">{money(b.spent)}</TableCell>
-                                        <TableCell className={cn("text-right py-5 font-semibold font-mono text-base", b.remaining < 0 ? "text-bad" : "text-muted-foreground")}>
-                                            {money(b.remaining)}
-                                        </TableCell>
-                                        <TableCell className="text-right py-5 font-mono">{b.limit > 0 ? b.percentage + '%' : '—'}</TableCell>
-                                        <TableCell className="py-5">
-                                            <Progress 
-                                                value={progress} 
-                                                className={cn('h-2', 
-                                                    b.status === 'over' ? '[&>div]:bg-bad' :
-                                                    b.status === 'alert' ? '[&>div]:bg-warning' : '[&>div]:bg-good'
-                                                )}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="py-5">
-                                            <StatusBadge status={statusFor(b.status).kind} label={statusFor(b.status).label} />
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            }) : (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="p-0">{renderBudgetEmptyState()}</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-const CreditCardStatusReport = () => {
-    const money = usePrivateCurrency();
-    const { debts, debtPayments, expenses } = useFinances();
-    const activeCards = (debts || []).filter(d => d.type === 'credit_card' && d.status === 'active');
-
-    const getDaysUntil = (targetDay?: number) => {
-        if (!targetDay) return null;
-        const today = new Date();
-        const currDay = today.getDate();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        if (currDay <= targetDay) return targetDay - currDay;
-        return (daysInMonth - currDay) + targetDay;
-    };
-
-    if (activeCards.length === 0) return null;
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>💳 Estado de Tarjetas</CardTitle>
-                <CardDescription>Seguimiento de saldos, límites y fechas clave para este periodo.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {/* MOBILE VIEW */}
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                    {activeCards.map(debt => {
-                        const currentDebt = selectCardSignedBalance(debt, expenses || [], debtPayments || [], localDate());
-                        const available = selectCardAvailableLimit(debt.principal, currentDebt);
-                        const daysToCut = getDaysUntil(debt.billingCycleDay);
-                        const daysToPay = getDaysUntil(debt.paymentDueDay);
-
-                        return (
-                            <div key={debt.id} className="bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 p-4 rounded-xl flex flex-col gap-3">
-                                <div className="flex justify-between items-start">
-                                    <h4 className="font-bold text-base leading-none">{debt.name}</h4>
-                                    <div className="flex flex-col items-end gap-1">
-                                        {daysToCut !== null && (
-                                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border leading-none font-medium", daysToCut <= 3 ? "border-bad/50 text-bad bg-bad/5" : "border-muted-foreground/30 text-muted-foreground")}>
-                                                Corte: {daysToCut}d
-                                            </span>
-                                        )}
-                                        {daysToPay !== null && (
-                                            <span className={cn("text-[10px] px-1.5 py-0.5 rounded border leading-none font-bold", daysToPay <= 3 ? "border-bad text-bad bg-bad/10" : "border-primary/40 text-primary bg-primary/5")}>
-                                                Pago: {daysToPay}d
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Deuda Actual</span>
-                                        <span className={cn("font-mono font-bold text-sm", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {money(currentDebt)}
-                                        </span>
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider mb-0.5">Crédito Disp.</span>
-                                        <span className="font-mono font-bold text-sm text-primary">
-                                            {money(available)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* DESKTOP VIEW */}
-                <div className="hidden md:block overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="py-4">Tarjeta</TableHead>
-                                <TableHead className="text-right py-4">Balance Actual</TableHead>
-                                <TableHead className="text-right py-4">Límite Disp.</TableHead>
-                                <TableHead className="text-center py-4">Corte (Día)</TableHead>
-                                <TableHead className="text-center py-4">Pago (Día)</TableHead>
-                                <TableHead className="text-right py-4">Vencimiento</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {activeCards.map(debt => {
-                                const currentDebt = selectCardSignedBalance(debt, expenses || [], debtPayments || [], localDate());
-                                const available = selectCardAvailableLimit(debt.principal, currentDebt);
-                                const daysToPay = getDaysUntil(debt.paymentDueDay);
-
-                                return (
-                                    <TableRow key={debt.id}>
-                                        <TableCell className="py-5 font-semibold text-base">{debt.name}</TableCell>
-                                        <TableCell className={cn("text-right py-5 font-mono text-base font-bold", currentDebt > 0 ? "text-bad" : "text-good")}>
-                                            {money(currentDebt)}
-                                        </TableCell>
-                                        <TableCell className="text-right py-5 font-mono text-base text-primary">
-                                            {money(available)}
-                                        </TableCell>
-                                        <TableCell className="text-center py-5 text-muted-foreground">{debt.billingCycleDay || '-'}</TableCell>
-                                        <TableCell className="text-center py-5 text-muted-foreground font-medium">{debt.paymentDueDay || '-'}</TableCell>
-                                        <TableCell className="text-right py-5">
-                                            {daysToPay !== null ? (
-                                                <span className={cn("text-xs font-bold px-2 py-1 rounded-md", daysToPay <= 3 ? "bg-bad/20 text-bad" : "bg-primary/10 text-primary")}>
-                                                    Faltan {daysToPay} días
-                                                </span>
-                                            ) : '-'}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-            </CardContent>
-        </Card>
-    );
-};
 
 export default function ReportsTab() {
-  const { getIncomesByCategory, getExpensesByCategory, currentMonth } = useFinances();
+  const { getReportSnapshot, loading } = useFinances();
+  const money = usePrivateCurrency();
+  const getCategoryInfo = useCategoryResolver();
+  const today=localDate();
+  const initial=resolveReportRange('30d',today);
+  const [preset,setPreset]=useState<ReportRangePreset>('30d');
+  const [customStart,setCustomStart]=useState(initial.start);
+  const [customEnd,setCustomEnd]=useState(initial.end);
 
-  const incomeData = getIncomesByCategory(currentMonth);
-  const expenseData = getExpensesByCategory(currentMonth);
+  const { range, rangeError } = useMemo(() => {
+    try {
+      return {
+        range:resolveReportRange(preset,today,preset==='custom'?{start:customStart,end:customEnd}:undefined),
+        rangeError:'',
+      };
+    } catch(error) {
+      return {
+        range:initial,
+        rangeError:error instanceof Error ? error.message : 'Rango inválido.',
+      };
+    }
+  },[preset,today,customStart,customEnd,initial.start,initial.end]);
+
+  const report=getReportSnapshot(range,range.end);
+  const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
+  const currentLabel=rangeLabel(range.start,range.end);
+
+  const comparisonRows=[
+    {label:'Gasto',data:report.comparison.spending},
+    {label:'Ingreso',data:report.comparison.income},
+    {label:'Flujo neto de efectivo',data:report.comparison.netCashFlow},
+    {label:'Patrimonio neto',data:report.comparison.netWorth},
+  ];
 
   return (
     <div className="space-y-8">
-        <PageHeader title="Reportes" description="Analiza resultados, tendencias, deuda y presupuestos sin mezclarlo con las tareas diarias." />
+      <PageHeader
+        title="Reportes"
+        description="Spending, cash flow y patrimonio calculados desde los mismos selectors que usa Resumen."
+      />
 
-        <section className="space-y-4" aria-labelledby="results-analysis-title">
-          <SectionHeader
-            title={<span id="results-analysis-title">Resultado y comparación</span>}
-            description="Qué ocurrió en el período y cómo se compara con el anterior."
-          />
-          <MonthlyResultChart />
-          <MonthlyComparisonTable />
-        </section>
-
-        <section className="space-y-4" aria-labelledby="commitments-analysis-title">
-          <SectionHeader
-            title={<span id="commitments-analysis-title">Deuda y presupuestos</span>}
-            description="Seguimiento de compromisos y límites registrados."
-          />
-          <CreditCardStatusReport />
-          <BudgetStatusReport />
-        </section>
-
-        <section className="space-y-4" aria-labelledby="breakdowns-title">
-          <SectionHeader
-            title={<span id="breakdowns-title">Desgloses</span>}
-            description="Dónde se concentraron tus ingresos y gastos."
-          />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <BreakdownTable title="💰 Desglose de ingresos" data={incomeData} />
-              <BreakdownTable title="💸 Desglose de gastos" data={expenseData} />
+      <section className="space-y-3" aria-labelledby="range-title">
+        <SectionHeader
+          title={<span id="range-title">Rango</span>}
+          description="El período anterior siempre usa una ventana inmediatamente anterior de duración comparable."
+        />
+        <div className="flex flex-wrap gap-2">
+          {presets.map(option=>(
+            <Button
+              key={option.value}
+              type="button"
+              size="sm"
+              variant={preset===option.value?'default':'outline'}
+              onClick={()=>setPreset(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </div>
+        {preset==='custom' && (
+          <div className="grid max-w-xl gap-3 sm:grid-cols-2">
+            <label className="text-sm">Desde
+              <Input type="date" max={customEnd || today} value={customStart} onChange={event=>setCustomStart(event.target.value)} />
+            </label>
+            <label className="text-sm">Hasta
+              <Input type="date" min={customStart} max={today} value={customEnd} onChange={event=>setCustomEnd(event.target.value)} />
+            </label>
           </div>
-          <ExpenseByTypeTable />
-        </section>
+        )}
+        <p className={cn('text-xs',rangeError?'text-bad':'text-muted-foreground')}>
+          {rangeError || 'Actual: '+currentLabel+' · Comparable: '+previousLabel}
+        </p>
+      </section>
+
+      {loading ? (
+        <div className="h-40 animate-pulse rounded-xl bg-muted/20" />
+      ) : (
+        <>
+          <section className="space-y-4" aria-labelledby="spending-title">
+            <SectionHeader
+              title={<span id="spending-title">Spending</span>}
+              description="Gasto real registrado dentro del rango. Una compra con tarjeta cuenta una vez como gasto."
+            />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard label="Total gastado" amount={report.spending.total} tone="negative" supporting={currentLabel} />
+              <MetricCard
+                label="Período comparable"
+                amount={report.spending.previousTotal}
+                tone="neutral"
+                supporting={previousLabel}
+              />
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Tendencia</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">{percentLabel(report.spending.percentChange)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Cambio del gasto frente al rango comparable.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Transacciones</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-semibold">{report.spending.transactionCount}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Gastos reales en el rango.</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categorías</CardTitle>
+                  <CardDescription>Una sola dimensión: categoría. La naturaleza del gasto se muestra aparte.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {report.spending.categories.length ? (
+                    <Table>
+                      <TableHeader><TableRow><TableHead>Categoría</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">%</TableHead></TableRow></TableHeader>
+                      <TableBody>
+                        {report.spending.categories.map(row=>{
+                          const category=getCategoryInfo(row.categoryId);
+                          const percentage=report.spending.total>0 ? row.value/report.spending.total*100 : 0;
+                          return <TableRow key={row.categoryId}>
+                            <TableCell>{category?.name || row.categoryId}</TableCell>
+                            <TableCell className="text-right font-mono">{money(row.value)}</TableCell>
+                            <TableCell className="text-right">{percentage.toFixed(1)}%</TableCell>
+                          </TableRow>;
+                        })}
+                      </TableBody>
+                    </Table>
+                  ) : <EmptyState title="Sin gastos" description="No hay gastos registrados dentro de este rango." />}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Fixed / Variable / Occasional</CardTitle>
+                  <CardDescription>Clasificación separada de las categorías.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Tipo</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">#</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {report.spending.byNature.map(row=>(
+                        <TableRow key={row.nature}>
+                          <TableCell>{row.nature}</TableCell>
+                          <TableCell className="text-right font-mono">{money(row.total)}</TableCell>
+                          <TableCell className="text-right">{row.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle>Largest transactions</CardTitle><CardDescription>Los gastos individuales más grandes del rango.</CardDescription></CardHeader>
+              <CardContent>
+                {report.spending.largestTransactions.length ? (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Movimiento</TableHead><TableHead>Categoría</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {report.spending.largestTransactions.map(row=>(
+                        <TableRow key={row.id}>
+                          <TableCell>{row.date}</TableCell>
+                          <TableCell>{row.title}<span className="ml-2 text-xs text-muted-foreground">{row.nature}</span></TableCell>
+                          <TableCell>{getCategoryInfo(row.categoryId)?.name || row.categoryId}</TableCell>
+                          <TableCell className="text-right font-mono">{money(row.amount)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : <EmptyState title="Sin transacciones" description="No hay gastos para ordenar en este rango." />}
+              </CardContent>
+            </Card>
+          </section>
+
+          <section className="space-y-4" aria-labelledby="cashflow-title">
+            <SectionHeader
+              title={<span id="cashflow-title">Cash Flow</span>}
+              description="Entradas y salidas reales de efectivo; una compra a crédito no sale de caja hasta que pagas la tarjeta."
+            />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard label="Income" amount={report.cashFlow.income} tone="positive" />
+              <MetricCard label="Cash expenses" amount={report.cashFlow.cashExpenses} tone="negative" />
+              <MetricCard label="Debt payments" amount={report.cashFlow.debtPayments} tone="negative" />
+              <MetricCard label="Net cash flow" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
+            </div>
+          </section>
+
+          <section className="space-y-4" aria-labelledby="networth-title">
+            <SectionHeader
+              title={<span id="networth-title">Net Worth</span>}
+              description={'Posición registrada al '+range.end+'. Las proyecciones futuras de inversiones no se incluyen.'}
+            />
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <MetricCard label="Cash" amount={report.netWorth.cash} tone="neutral" />
+              <MetricCard label="Banks" amount={report.netWorth.banks} tone="neutral" />
+              <MetricCard label="Investments" amount={report.netWorth.investments} tone="neutral" />
+              <MetricCard label="Credit-card liabilities" amount={report.netWorth.creditCardLiabilities} tone={report.netWorth.creditCardLiabilities>0?'negative':'neutral'} />
+              <MetricCard label="Net worth" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
+            </div>
+            {report.netWorth.cardPositiveBalance>0 && (
+              <p className="text-xs text-muted-foreground">El patrimonio también incluye {money(report.netWorth.cardPositiveBalance)} de saldo a favor real en tarjetas; el crédito disponible nunca se trata como activo.</p>
+            )}
+          </section>
+
+          <section className="space-y-4" aria-labelledby="comparison-title">
+            <SectionHeader
+              title={<span id="comparison-title">Comparison</span>}
+              description="Rango actual frente al período inmediatamente anterior de duración comparable."
+            />
+            <Card>
+              <CardContent className="pt-6">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Métrica</TableHead>
+                        <TableHead className="text-right">{previousLabel}</TableHead>
+                        <TableHead className="text-right">{currentLabel}</TableHead>
+                        <TableHead className="text-right">Cambio</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {comparisonRows.map(row=>(
+                        <TableRow key={row.label}>
+                          <TableCell>{row.label}</TableCell>
+                          <TableCell className="text-right font-mono">{money(row.data.previous)}</TableCell>
+                          <TableCell className="text-right font-mono">{money(row.data.current)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="font-mono">{row.data.difference>=0?'+':''}{money(row.data.difference)}</div>
+                            <ComparisonValue value={row.data.percentChange} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </>
+      )}
     </div>
   );
 }
