@@ -2,7 +2,7 @@
 
 ## Estado del roadmap
 
-**Fase 16 — Automatización local en progreso.** El checkpoint **16.1 — Contrato de Rules** está completado: solo define reglas deterministas `description contains` que podrán sugerir categoría y/o Must/Need/Want. Aún no existe motor, UI, almacenamiento de rules ni aplicación automática. El gate verificó **306/306 pruebas**. Consulta el [checkpoint 16.1](docs/roadmap/phase-16-1.md), el [índice de documentación vigente](docs/roadmap/README.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+**Fase 16 — Automatización local en progreso.** Los checkpoints **16.1 Contrato de Rules** y **16.2 Motor determinista** están completados. El motor evalúa localmente `description contains` y devuelve sugerencias de categoría/necessity sin modificar movimientos ni resolver conflictos. Quick Add, storage/UI de rules y aplicación automática todavía no están implementados. El gate verificó **313/313 pruebas**. Consulta [16.2](docs/roadmap/phase-16-2.md), el [índice de documentación vigente](docs/roadmap/README.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
