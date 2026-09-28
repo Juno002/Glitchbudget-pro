@@ -10,6 +10,7 @@ import { budgetPlansForDate } from '../domain/budgets';
 import { prepareBudgetPeriodsForDate } from './budget-rollover';
 import { recordGoalContribution } from './goal-service';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
@@ -19,6 +20,7 @@ const fields = {
   amount: z.number().finite().positive('El monto debe ser mayor que cero.')
     .transform(value => Math.round(value * 100))
     .pipe(z.number().int().positive('El monto mínimo es 0.01.').max(Number.MAX_SAFE_INTEGER)),
+  labels: z.array(z.string()).optional().transform(value => normalizeTransactionLabels(value)),
 };
 const incomeSchema = z.object({ ...fields, type: z.enum(['extra', 'gift']), description: z.string().trim() });
 
@@ -28,6 +30,7 @@ export interface ActualSaveOptions {
 }
 const expenseSchema = z.object({
   ...fields, nature: z.enum(['Fijo', 'Variable', 'Ocasional']), concept: z.string().trim(),
+  necessity: z.enum(['must','need','want']).optional(),
   paymentMethod: z.enum(['cash', 'credit']).default('cash'), debtId: z.string().optional(), recurringRuleId: z.string().optional(),
 });
 
