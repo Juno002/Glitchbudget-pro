@@ -151,16 +151,37 @@ Planificados
 
 ## 6. Jerarquía de Reportes
 
+Fase 13 fija Reports 2.0:
+
 ```text
-Resultado / cash flow
-Comparación de períodos
-Patrimonio / deuda
-Presupuestos
-Desgloses
-Tendencias
+Page header
+Rango: 7D | 30D | 3M | 6M | 1Y | Custom
+Spending
+  Total
+  Trend
+  Categories
+  Largest transactions
+  Fixed / Variable / Occasional
+Cash Flow
+  Income
+  Cash expenses
+  Debt payments
+  Net cash flow
+Net Worth
+  Cash
+  Banks
+  Investments
+  Credit-card liabilities
+  Net worth
+Comparison
+Presupuestos actuales (seguimiento secundario)
 ```
 
+El previous comparable period siempre es la ventana inmediatamente anterior con igual cantidad de días.
+
 Los reportes explican y comparan. No son el lugar para ejecutar tareas operativas cotidianas.
+
+**Contrato de selectors:** Resumen y Reportes consumen `selectReportsSnapshot`; no se permite duplicar fórmulas financieras entre componentes.
 
 ## 7. Header y acción global
 
@@ -401,6 +422,6 @@ Si una decisión UX requiere alterar esas reglas, se detiene y se trata como cam
 - Fase 9 Budgets 2.0 vive dentro de Plan → Presupuestos.
 - Fase 10 Goals 2.0 vive dentro de Plan → Metas.
 - Fase 12 Investments está implementada sin crear pestaña primaria; vive como activo secundario dentro de Movimientos y en la posición financiera de Resumen.
-- Fase 13 Reports 2.0 recibe análisis retirado de Resumen.
-- Fase 14 Home 2.0 refina la jerarquía definida aquí sin volver a decidirla.
+- Fase 13 Reports 2.0 está implementada con rangos y selectors compartidos con Resumen.
+- Fase 14 Home 2.0 refina la jerarquía definida aquí sin volver a decidir fórmulas de Reports.
 - Fase 17 añade app lock/auto-lock y seguridad adicional; balancesHidden ya existe como preferencia visual local.

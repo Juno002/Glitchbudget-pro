@@ -13,6 +13,8 @@ import { readFinancialPolicies } from '@/lib/policy-settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
+import { selectReportsSnapshot } from '@/domain/reports';
+import type { DateRange } from '@/domain/periods';
 import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod, prepareBudgetPeriodsForDate } from '@/lib/budget-rollover';
 import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '@/domain/budgets';
 import { reassignBudgetLimit, saveBudgetLimits } from '@/lib/budget-service';
@@ -115,6 +117,7 @@ interface FinanceContextType {
   getDisposable: (safetyPct?: number) => number;
   getTotals: (periodId: string) => ReturnType<typeof selectPeriodMetrics>;
   getPosition: () => ReturnType<typeof selectPosition>;
+  getReportSnapshot: (range: DateRange, through?: string) => ReturnType<typeof selectReportsSnapshot>;
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
@@ -524,7 +527,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings]);
   const getIncomesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(incomes || [], periodForId(periodId, activeSettings)), [incomes, activeSettings]);
-  const getPosition = useCallback(() => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()), [accounts, debts, incomes, expenses, debtPayments, transfers]);
+  const getReportSnapshot = useCallback((range: DateRange, through = range.end) => selectReportsSnapshot({
+    accounts: accounts || [],
+    debts: debts || [],
+    incomes: incomes || [],
+    expenses: expenses || [],
+    debtPayments: debtPayments || [],
+    transfers: transfers || [],
+  }, range, through), [accounts, debts, incomes, expenses, debtPayments, transfers]);
+  const getPosition = useCallback(
+    () => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()),
+    [accounts, debts, incomes, expenses, debtPayments, transfers],
+  );
 
   const getExpensesByType = useCallback((periodId: string) => {
       const period = periodForId(periodId, activeSettings);
@@ -848,6 +862,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getDisposable,
     getTotals,
     getPosition,
+    getReportSnapshot,
     getSpentAmount,
     getExpensesByCategory,
     getIncomesByCategory,
@@ -877,7 +892,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
     addDebt, updateDebt, deleteDebt, addDebtPayment,
     addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
-    getMonthlyAverages, getDisposable, getTotals, getPosition, getSpentAmount,
+    getMonthlyAverages, getDisposable, getTotals, getPosition, getReportSnapshot, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,

@@ -39,3 +39,18 @@ Completar la matriz de quality-review.md, no dejar incidencias críticas de pér
 - Para una inversión con tasa y vencimiento, verificar Principal, Tasa, Apertura, Vencimiento, Tiempo transcurrido, Días restantes, Valor al vencimiento e Interés estimado.
 - Confirmar que el valor e interés futuros están etiquetados como ESTIMADOS y que no cambian el patrimonio real.
 - Importar un JSON v9 sin inversiones: debe restaurar con cero inversiones. Importar un JSON v10 con cuenta de inversión huérfana: debe fallar antes de reemplazar datos.
+
+
+## Reports 2.0 — Fase 13
+
+- Verificar 7D, 30D, 3M, 6M y 1Y contra fechas conocidas; el final debe ser hoy y los límites inclusivos.
+- Probar Custom con inicio/final válidos y confirmar que una fecha futura es rechazada.
+- Para cada rango, comprobar que el previous comparable period termina el día anterior y contiene exactamente la misma cantidad de días.
+- Registrar un gasto cash y una compra con tarjeta: ambos deben aparecer una vez en Spending; solo el cash debe salir de Cash expenses.
+- Registrar un pago de tarjeta: debe aparecer en Debt payments y reducir Net cash flow sin añadir un segundo gasto.
+- Comprobar Categories y Fixed / Variable / Occasional como dimensiones separadas.
+- Confirmar que Largest transactions ordena por importe real del rango.
+- En Net Worth, comprobar Cash + Banks + Investments + saldo a favor real − Credit-card liabilities. El crédito disponible y el rendimiento estimado de inversiones no entran.
+- Seleccionar un rango que empiece después de un movimiento histórico: el movimiento no aparece en Spending del rango, pero sí sigue afectando Net Worth a la fecha final.
+- Comparar Resumen y Reportes en la misma fecha: Disponible líquido, Investments, liabilities y Net Worth deben provenir del mismo selector compartido.
+- Activar ocultar importes y confirmar que los montos de Reports 2.0 quedan protegidos mientras los porcentajes no sensibles pueden seguir visibles.
