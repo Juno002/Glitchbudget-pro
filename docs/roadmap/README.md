@@ -2,13 +2,13 @@
 
 ## Fase 16 — Automatización local en progreso
 
-**Checkpoint 16.1 — Contrato de Rules completado.** El contrato está documentado en [phase-16-1.md](phase-16-1.md).
+**Checkpoint 16.2 — Motor determinista completado.** Está documentado en [phase-16-2.md](phase-16-2.md). El contrato base de 16.1 permanece en [phase-16-1.md](phase-16-1.md).
 
-16.1 define exclusivamente reglas deterministas con la forma `description contains <texto> → categoryId?/necessity?`. No existe todavía motor de evaluación, integración con Quick Add, almacenamiento, UI de reglas ni `Apply automatically`.
+16.2 evalúa localmente reglas `description contains <texto>` y devuelve todas las sugerencias coincidentes en orden, sin resolver conflictos ni escribir datos. No existe todavía integración con Quick Add, almacenamiento/UI de rules ni `Apply automatically`.
 
-El gate `Quality checks` run `36492690727` verificó **306/306 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+El gate `Quality checks` run `36494425297` verificó **313/313 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 16 en progreso. **16.2 — Motor determinista no se ha iniciado.**
+**Estado actual del roadmap:** Fase 16 en progreso. **16.3 — Rule suggestions en Quick Add no se ha iniciado.**
 
 ## Fase 15 — Transaction Metadata + filtros completada
 
