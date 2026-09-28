@@ -35,17 +35,15 @@ test('Movements prioritizes real activity before secondary account management', 
 
 test('Summary preserves status/action hierarchy while Phase 14 replaces the historical recent-movements block', () => {
   const source = read('src/components/dashboard/summary-tab.tsx');
-  const headings = [
-    'Posición financiera',
-    'Presupuesto disponible',
-    'Próximos pagos',
-    'Metas relevantes',
-    'Inversiones',
-  ];
+  const preferences = read('src/lib/home-preferences.ts');
+  for (const heading of ['Posición financiera','Presupuesto disponible','Próximos pagos','Metas relevantes','Inversiones']) {
+    assert.ok(source.includes(heading), `Falta módulo Home: ${heading}`);
+  }
+  const defaultIds = ["'position'","'budget'","'upcoming'","'goals'","'investments'"];
   let last = -1;
-  for (const heading of headings) {
-    const index = source.indexOf(heading);
-    assert.ok(index > last, `Orden incorrecto o faltante: ${heading}`);
+  for (const id of defaultIds) {
+    const index = preferences.indexOf(id);
+    assert.ok(index > last, `Orden por defecto incorrecto o faltante: ${id}`);
     last = index;
   }
   assert.doesNotMatch(source, /Movimientos recientes/);
