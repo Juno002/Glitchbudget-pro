@@ -79,13 +79,14 @@ test('Cash Flow excludes credit purchases until the card payment leaves cash', (
 
 test('Net Worth uses the same ledger selector and includes investments without treating them as liquidity', () => {
   const report=selectNetWorthReport(input,'2026-09-30');
-  assert.equal(report.cash,65_000);
-  assert.equal(report.banks,255_000);
+  // Net worth is cumulative through the range end, so August activity still affects balances.
+  assert.equal(report.cash,25_000);
+  assert.equal(report.banks,315_000);
   assert.equal(report.investments,60_000);
-  assert.equal(report.liquidAssets,320_000);
+  assert.equal(report.liquidAssets,340_000);
   // Card opening debt 10k + purchase 20k - payment 15k = 15k liability.
   assert.equal(report.creditCardLiabilities,15_000);
-  assert.equal(report.netWorth,365_000);
+  assert.equal(report.netWorth,385_000);
 });
 
 test('shared report snapshot compares current versus immediately previous comparable range', () => {
