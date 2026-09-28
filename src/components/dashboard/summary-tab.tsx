@@ -121,7 +121,7 @@ export default function SummaryTab() {
   const previousActive=useRef<string|null>(null);
 
   const home=useMemo(()=>selectHomeReadModel({
-    report:getReportSnapshot(currentPeriod,today),
+    report:getReportSnapshot(currentPeriod, today),
     budgetDetails:getBudgetStatusDetails(currentMonth),
     plannedOccurrences:plannedOccurrences||[],
     recurringRules:recurringRules||[],
@@ -155,7 +155,7 @@ export default function SummaryTab() {
     position:(
       <HomeSection id="position">
         <SectionHeader
-          title="Posición"
+          title="Posición financiera"
           description="¿Cuánto tienes y cuánto debes ahora?"
           actions={<Button type="button" variant="outline" size="sm" onClick={goToAccounts}>Ver cuentas</Button>}
         />
@@ -172,7 +172,7 @@ export default function SummaryTab() {
     budget:(
       <HomeSection id="budget">
         <SectionHeader
-          title="Presupuesto"
+          title="Presupuesto disponible"
           description="¿Cuánto puedes gastar dentro de tus límites actuales?"
           actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos</Button>}
         />
@@ -192,7 +192,7 @@ export default function SummaryTab() {
     upcoming:(
       <HomeSection id="upcoming">
         <SectionHeader
-          title="Próximos"
+          title="Próximos pagos"
           description="¿Qué viene y qué ya requiere atención?"
           actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan</Button>}
         />
@@ -219,7 +219,7 @@ export default function SummaryTab() {
     goals:(
       <HomeSection id="goals">
         <SectionHeader
-          title="Metas"
+          title="Metas relevantes"
           description="Objetivos activos que pueden requerir una acción."
           actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas</Button>}
         />
