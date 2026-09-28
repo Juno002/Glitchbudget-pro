@@ -45,7 +45,7 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   }
   old.close();const current=new GlitchBudgetDB(name);
   try{
-    await current.open();assert.equal(current.verno, 12);const migrated=await snapshot(current);
+    await current.open();assert.equal(current.verno, 13);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
@@ -110,14 +110,14 @@ for(const version of [3,4,5])test('backup v'+version+' preserves actual nature a
   if(version===5)old.categories=reconstructCategories(old);
   if(version===3){delete old.accounts;delete old.accountTransfers;for(const row of [...old.incomes,...old.expenses,...old.debtPayments])delete row.accountId;}
   await importDataJSON(JSON.stringify(old));const actual=(await db.expenses.get(old.expenses[0].id))!;
-  assert.deepEqual(clean(actual),clean(migrateActualExpense(old.expenses[0])));
+  assert.deepEqual(clean(actual),clean({ ...migrateActualExpense(old.expenses[0]), currency:'DOP', fxRate:1, amountBase:old.expenses[0].amount }));
   assert.deepEqual(clean(await db.recurrents.toArray()),clean(old.recurrents.map(migrateRecurringRule)));
   assert.equal(metrics(await snapshot()).october.spending,0);
 });
 
 test('v7 exact round trip includes rules/provenance; rejects legacy active expense fields atomically',async()=>{
   const currentRule=rule();await saveRecurringRule(currentRule);await saveExpense({...expense,recurringRuleId:currentRule.id});const dump=JSON.parse(await exportDataJSON());const before=await snapshot();
-  assert.equal(dump.v, 8);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
+  assert.equal(dump.v, 9);assert.deepEqual(dump.plannedOccurrences,[]);assert.ok(dump.expenses.every((e:any)=>e.nature&&!('type'in e)&&!('frequency'in e)&&!('recurringId'in e)));
   await importDataJSON(JSON.stringify(dump));assert.deepEqual(clean(await snapshot()),clean(before));
   for(const patch of [{frequency:'mensual'},{type:'Fijo'},{nature:'Invalid'}]){const bad=structuredClone(dump);Object.assign(bad.expenses[0],patch);await assert.rejects(importDataJSON(JSON.stringify(bad)));assert.deepEqual(clean(await snapshot()),clean(before));}
 });
