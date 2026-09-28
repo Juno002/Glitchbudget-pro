@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SectionHeader } from '@/components/finance-ui';
 import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 import { QUICK_ADD_TEMPLATES_KEY } from '@/lib/quick-add-templates';
+import { HOME_PREFERENCES_KEY } from '@/lib/home-preferences';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
@@ -57,6 +58,7 @@ export function SettingsDialog() {
       localStorage.removeItem('glitchbudget_achievements');
       localStorage.removeItem('glitchbudget_contribution_streak');
       localStorage.removeItem(QUICK_ADD_TEMPLATES_KEY);
+      localStorage.removeItem(HOME_PREFERENCES_KEY);
       await resetSettings();
       toast({ title:'Datos eliminados', description:'Todos los datos han sido borrados. La página se recargará.' });
       setTimeout(() => window.location.reload(), 1500);
