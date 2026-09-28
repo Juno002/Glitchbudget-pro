@@ -47,7 +47,10 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   try{
     await current.open();assert.equal(current.verno, 13);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
-    assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(migrateActualExpense)));
+    assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(row => {
+      const migratedRow = migrateActualExpense(row);
+      return { ...migratedRow, currency:'DOP', fxRate:1, amountBase:migratedRow.amount };
+    })));
     assert.deepEqual(clean(migrated.recurrents),clean(data.recurrents.map(migrateRecurringRule)));
     for(const table of Object.keys(data).filter(t=>!['expenses','recurrents','planned_occurrences'].includes(t))) assert.deepEqual(migrated[table],data[table],table);
     assert.deepEqual(migrated.planned_occurrences,[]);
