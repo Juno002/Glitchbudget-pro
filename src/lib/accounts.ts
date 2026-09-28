@@ -4,21 +4,38 @@ import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, se
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
+import { normalizeCurrencyCode, requireCurrencyCode } from '../domain/currency';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
-export const accountSchema = z.object({ id: z.string().min(1), name: z.string().trim().min(1).max(80), type: z.enum(['cash', 'bank']), openingBalance: cents, startDate: date, isDefaultCash: z.boolean().optional() }).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+const accountFields = z.object({
+  id: z.string().min(1),
+  name: z.string().trim().min(1).max(80),
+  type: z.enum(['cash', 'bank']),
+  openingBalance: cents,
+  startDate: date,
+  isDefaultCash: z.boolean().optional(),
+});
+export const legacyAccountSchema = accountFields.refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
+export const accountSchema = accountFields.extend({
+  currency: z.string().transform(requireCurrencyCode),
+}).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
 export function defaultCashAccount(accounts: Account[]) {
   return accounts.find(a => a.isDefaultCash && a.type === 'cash') || accounts.filter(a => a.type === 'cash').sort((a,b) => a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id))[0];
 }
 export async function ensureCashAccount(startDate = localDate()): Promise<Account> {
-  return db.transaction('rw', db.accounts, async () => {
+  return db.transaction('rw', db.accounts, db.settings, async () => {
+    const settings = await db.settings.get('general');
+    const baseCurrency = normalizeCurrencyCode(settings?.currency);
     const accounts = await db.accounts.toArray();
     const existing = defaultCashAccount(accounts);
     if (existing) {
-      if (!existing.isDefaultCash) await db.accounts.update(existing.id, { isDefaultCash: true });
-      return { ...existing, isDefaultCash: true };
+      const currency = normalizeCurrencyCode(existing.currency, baseCurrency);
+      if (!existing.isDefaultCash || existing.currency !== currency) {
+        await db.accounts.update(existing.id, { isDefaultCash: true, currency });
+      }
+      return { ...existing, currency, isDefaultCash: true };
     }
-    const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', openingBalance: 0, startDate, isDefaultCash: true };
+    const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', currency: baseCurrency, openingBalance: 0, startDate, isDefaultCash: true };
     await db.accounts.add(account);
     return account;
   });
@@ -50,10 +67,16 @@ export async function addAccount(input: Account, editing = false) {
   const account = accountSchema.parse(input);
   if (!editing && account.startDate !== localDate()) throw new Error('Introduce el saldo actual para comenzar el seguimiento hoy.');
   await db.transaction('rw', [...accountTables, db.settings], async () => {
+    const settings = await db.settings.get('general');
+    const baseCurrency = normalizeCurrencyCode(settings?.currency);
+    if (account.currency !== baseCurrency) {
+      throw new Error('Las cuentas en otra moneda necesitan conversión manual, que todavía no forma parte de Fase 11.');
+    }
     if (editing) {
       const existing = await db.accounts.get(account.id);
       if (!existing || existing.startDate !== account.startDate) throw new Error('No se puede cambiar la fecha inicial de la cuenta.');
       if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
+      if (normalizeCurrencyCode(existing.currency, baseCurrency) !== account.currency) throw new Error('La moneda de una cuenta con historial no se puede reinterpretar.');
       account.isDefaultCash = existing.isDefaultCash;
       if ((await readFinancialPolicies()).preventNegativeAccountBalance && account.openingBalance < existing.openingBalance) {
         const snapshot = await readAccountSnapshot();
@@ -72,8 +95,11 @@ export async function saveTransfer(input: AccountTransfer, editing = false) {
   const transfer = transferSchema.parse(input);
   if (transfer.date > localDate()) throw new Error('Registra las transferencias cuando se hayan realizado.');
   await db.transaction('rw', [...accountTables, db.settings], async () => {
-    await requireAccount(transfer.fromAccountId, transfer.date);
-    await requireAccount(transfer.toAccountId, transfer.date);
+    const fromAccount = await requireAccount(transfer.fromAccountId, transfer.date);
+    const toAccount = await requireAccount(transfer.toAccountId, transfer.date);
+    if (fromAccount.currency !== toAccount.currency) {
+      throw new Error('Las transferencias entre monedas requieren una tasa manual y todavía no están habilitadas.');
+    }
     const snapshot = await readAccountSnapshot();
     const before = { ...snapshot };
     if (editing) {
