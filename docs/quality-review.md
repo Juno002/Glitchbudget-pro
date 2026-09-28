@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras posteriores quedan supersedidas por Fases 9–13. Fase 13 centraliza analytics en selectors compartidos por Resumen y Reportes sin cambiar persistencia. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md) y [phase-13.md](roadmap/phase-13.md).
+> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras y de jerarquía posteriores quedan supersedidas por Fases 9–14. Fase 14 convierte Resumen en un read model de cinco módulos sobre selectors existentes y añade personalización exclusivamente local. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md), [phase-13.md](roadmap/phase-13.md) y [phase-14.md](roadmap/phase-14.md).
 
 ## Correcciones de esta revisión
 
@@ -87,4 +87,8 @@ Los diálogos normales y de confirmación se dimensionan con visualViewport (alt
 - **Reports 2.0:** Spending, Cash Flow, Net Worth y Comparison usan selectors puros comunes. Net Worth es acumulativo a la fecha final; el rango limita actividad analítica, no borra movimientos históricos que aún afectan saldos.
 - **Persistencia tras Fase 13:** sin cambios; Dexie **v14**, JSON **v10**.
 - **Gate Fase 13:** `Quality checks` run `36458493360` verificó **286/286 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+- **Home 2.0:** Resumen usa `selectHomeReadModel` para componer Posición, Presupuesto, Próximos, Metas e Inversiones desde contratos existentes; no replica fórmulas del ledger ni analytics de Reports.
+- **Personalización Home:** show/hide, reorder y sección inicial se guardan solo en `localStorage`, se reparan si están corruptas y no entran en backup.
+- **Persistencia tras Fase 14:** sin cambios; Dexie **v14**, JSON **v10**.
+- **Gate Fase 14:** `Quality checks` run `36468191021` verificó **292/292 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 - La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.
