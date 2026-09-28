@@ -54,3 +54,19 @@ Completar la matriz de quality-review.md, no dejar incidencias críticas de pér
 - Seleccionar un rango que empiece después de un movimiento histórico: el movimiento no aparece en Spending del rango, pero sí sigue afectando Net Worth a la fecha final.
 - Comparar Resumen y Reportes en la misma fecha: Disponible líquido, Investments, liabilities y Net Worth deben provenir del mismo selector compartido.
 - Activar ocultar importes y confirmar que los montos de Reports 2.0 quedan protegidos mientras los porcentajes no sensibles pueden seguir visibles.
+
+
+## Home 2.0 — Fase 14
+
+- Confirmar que Home muestra como máximo los cinco módulos principales: Posición financiera, Presupuesto disponible, Próximos pagos, Metas relevantes e Inversiones.
+- Comparar Posición financiera con Reportes en la misma fecha: disponible líquido, inversiones, liabilities y patrimonio neto deben provenir del selector compartido.
+- Crear/exceder presupuestos y comprobar que Home refleja restante/estado sin permitir edición directa; la administración sigue en Plan → Presupuestos.
+- Crear ocurrencias vencidas y próximas: Home debe ordenar vencido → hoy → mañana → próximos 7 días y mantener Confirmar/Omitir.
+- Crear meta activa con fecha límite: Home debe reutilizar progreso y aporte mensual requerido ya derivados por Goals 2.0.
+- Registrar inversión con vencimiento: Home debe mostrar valor real registrado y días restantes sin sumar rendimiento futuro estimado.
+- Probar Personalizar Home: ocultar/mostrar, subir/bajar módulos, elegir sección inicial y restablecer.
+- Intentar ocultar todos los módulos: debe permanecer al menos uno visible.
+- Corromper manualmente `glitchbudget_home_preferences_v1`: Home debe recuperar un contrato válido sin afectar datos financieros.
+- Ejecutar Borrar todos los datos: la personalización de Home debe volver a valores por defecto.
+- Confirmar que Movimientos recientes ya no aparece en Home y que el historial completo sigue en Movimientos.
+- Confirmar que Ahorro sugerido sigue disponible en Ajustes → Finanzas y que modificarlo no mueve dinero.
