@@ -1,8 +1,8 @@
 # **App Name**: Glitchbudget
 
-> Documento de origen conservado como referencia histórica. El contrato vigente hasta Fase 14 se rige por [Roadmap: documentación vigente](roadmap/README.md), [arquitectura UX](ux/architecture.md) y [sistema de diseño](ux/design-system.md). Las reglas visuales originales del final de este archivo no sustituyen el sistema de diseño actual.
+> Documento de origen conservado como referencia histórica. El contrato vigente hasta Fase 15 se rige por [Roadmap: documentación vigente](roadmap/README.md), [arquitectura UX](ux/architecture.md) y [sistema de diseño](ux/design-system.md). Las reglas visuales originales del final de este archivo no sustituyen el sistema de diseño actual.
 
-## Core Features (current through Phase 14):
+## Core Features (current through Phase 15):
 
 - Income Recording: Record income transactions with descriptions and amounts.
 - Expense Recording: Record expense transactions with descriptions, amounts, and categories.
@@ -15,6 +15,7 @@
 - Investments 1.0: Certificates, term deposits and known-yield products are non-liquid assets backed by investment accounts. Funding is an internal asset transfer, existing holdings use an opening value, and projected interest never enters actual net worth.
 - Reports 2.0: Shared pure selectors provide Spending, Cash Flow, Net Worth and comparable-period analysis over 7D, 30D, 3M, 6M, 1Y and custom ranges. Home and Reports consume the same financial selector contract.
 - Home 2.0: A five-module read model composes Position, Budget, Upcoming, Goals and Investments from existing selectors. Local show/hide, reorder and default-section preferences never change financial calculations or backups.
+- Transaction Metadata + Filters: Expenses may carry Must/Need/Want plus labels; incomes may carry labels. Movements can filter by account, category, date, amount, necessity, label and type, with saved filters stored only in localStorage.
 - Transaction History: View and filter past transactions.
 - Summary Dashboard: Compact status-and-action read model; historical exploration remains in Reports and real history remains in Movements.
 
