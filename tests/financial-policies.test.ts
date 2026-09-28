@@ -14,7 +14,7 @@ import { readFinancialPolicies } from '../src/lib/policy-settings';
 import { withBudgetConfirmation } from '../src/lib/expense-confirmation';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 const date='2026-09-20', month='2026-09';
-const cash={id:'cash',name:'Efectivo',type:'cash' as const,openingBalance:1_000_000,startDate:'2026-09-01',isDefaultCash:true};
+const cash={id:'cash',name:'Efectivo',type:'cash' as const,currency:'DOP',openingBalance:1_000_000,startDate:'2026-09-01',isDefaultCash:true};
 const expense={id:'new',date,categoryId:'food',amount:1000,concept:'Prueba',nature:'Variable' as const,accountId:'cash'};
 const old: Expense={...expense,id:'old',month,amount:450_000};
 beforeEach(async()=>{
