@@ -1,5 +1,15 @@
 # Roadmap: documentación vigente
 
+## Fase 16 — Automatización local en progreso
+
+**Checkpoint 16.1 — Contrato de Rules completado.** El contrato está documentado en [phase-16-1.md](phase-16-1.md).
+
+16.1 define exclusivamente reglas deterministas con la forma `description contains <texto> → categoryId?/necessity?`. No existe todavía motor de evaluación, integración con Quick Add, almacenamiento, UI de reglas ni `Apply automatically`.
+
+El gate `Quality checks` run `36492690727` verificó **306/306 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 16 en progreso. **16.2 — Motor determinista no se ha iniciado.**
+
 ## Fase 15 — Transaction Metadata + filtros completada
 
 Fase 15 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-15.md](phase-15.md).
@@ -10,7 +20,7 @@ No hay migración Dexie: el esquema permanece en **v14** porque la metadata es o
 
 El gate `Quality checks` run `36471585078` verificó **300/300 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 15 cerrada. **Fase 16 — Automatización local no se ha iniciado** y no queda autorizada por continuidad implícita.
+Fase 15 queda como fundamento vigente de Templates + Saved Filters antes de Rules.
 
 ## Fase 14 — Home 2.0 completada
 
