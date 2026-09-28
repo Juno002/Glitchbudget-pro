@@ -1,14 +1,16 @@
 # Roadmap: documentación vigente
 
-## Fase 16 — Automatización local en progreso
+## Fase 16 — Automatización local completada
 
-**Checkpoint 16.4 — Gestión local de rules completado.** Está documentado en [phase-16-4.md](phase-16-4.md). Los checkpoints previos permanecen en [phase-16-3.md](phase-16-3.md), [phase-16-2.md](phase-16-2.md) y [phase-16-1.md](phase-16-1.md).
+Fase 16 quedó cerrada contra `Roadmap septiembre 2026.txt` con **16.5 — Integración del stack de automatización local**, documentada en [phase-16-5.md](phase-16-5.md). Los checkpoints de contrato, motor, sugerencias y gestión permanecen en [phase-16-1.md](phase-16-1.md), [phase-16-2.md](phase-16-2.md), [phase-16-3.md](phase-16-3.md) y [phase-16-4.md](phase-16-4.md).
 
-16.4 añade persistencia exclusiva en `localStorage` mediante `glitchbudget_transaction_rules_v1` y una superficie de Ajustes → Automatización para **crear, editar, activar/desactivar, ordenar y eliminar** rules. Quick Add consume esa fuente cuando no recibe rules inyectadas y mantiene **Aceptar sugerencia / Ignorar sugerencia**; nada se aplica automáticamente.
+El orden canónico **Templates → Saved filters → Rules** queda visible y separado: Templates se gestionan en Quick Add, Saved filters en Movimientos y Rules en Ajustes → Automatización. `src/lib/local-automation.ts` coordina únicamente el resumen y la limpieza de sus tres storages; no fusiona formatos ni responsabilidades.
 
-El gate `Quality checks` run `36497955697` verificó **322/322 pruebas**, typecheck, lint, guard local-only y build estático. No se añade tabla Dexie ni cambia la versión de backup.
+Rules permanecen deterministas y **suggestion-only** con **Aceptar sugerencia / Ignorar sugerencia**. No se implementa `Apply automatically`: el roadmap lo deja como posibilidad posterior, no como requisito de esta primera versión. No hay IA, red, transmisión de descripciones, tabla Dexie nueva ni cambio de backup.
 
-**Estado actual del roadmap:** Fase 16 en progreso. **16.5 — Integración Templates → Saved Filters → Rules no se ha iniciado.**
+El gate `Quality checks` run `36500337917` verificó **327/327 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 16 completada. La siguiente fase canónica es **Fase 17 — Seguridad y privacidad local**, todavía no iniciada.
 
 ## Fase 15 — Transaction Metadata + filtros completada
 
