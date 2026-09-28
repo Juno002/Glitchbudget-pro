@@ -52,8 +52,10 @@ test('Phase 8 templates are local presets and do not add a Dexie table', () => {
 });
 
 
-test('full local-data reset also removes Phase 8 templates', () => {
+test('full local-data reset also removes Phase 8 templates after Phase 16 centralizes automation cleanup', () => {
   const settings = read('src/components/layout/settings-dialog.tsx');
-  assert.match(settings, /QUICK_ADD_TEMPLATES_KEY/);
-  assert.match(settings, /localStorage\.removeItem\(QUICK_ADD_TEMPLATES_KEY\)/);
+  const automation = read('src/lib/local-automation.ts');
+  assert.match(settings, /clearLocalAutomation\(localStorage\)/);
+  assert.match(automation, /QUICK_ADD_TEMPLATES_KEY/);
+  assert.match(automation, /storage\.removeItem\(QUICK_ADD_TEMPLATES_KEY\)/);
 });

@@ -90,6 +90,7 @@ test('16.4 exposes explicit local rule management and Quick Add consumes persist
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
   const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const automation = readFileSync(new URL('../src/lib/local-automation.ts', import.meta.url), 'utf8');
   const db = readFileSync(new URL('../src/lib/db.ts', import.meta.url), 'utf8');
 
   for (const text of ['Crear regla', 'Editar regla', 'Reglas locales', 'Descripción contiene', 'Eliminar']) {
@@ -98,7 +99,8 @@ test('16.4 exposes explicit local rule management and Quick Add consumes persist
   assert.match(manager, /moveTransactionRule/);
   assert.match(manager, /setTransactionRuleEnabled/);
   assert.match(settings, /TransactionRuleManager/);
-  assert.match(settings, /TRANSACTION_RULES_KEY/);
+  assert.match(settings, /clearLocalAutomation/);
+  assert.match(automation, /TRANSACTION_RULES_KEY/);
   assert.match(modal, /loadTransactionRules/);
   assert.match(modal, /effectiveRules = rules \?\? storedRules/);
   assert.doesNotMatch(db, /transaction_rules|rules!:/);

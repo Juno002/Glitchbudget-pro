@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Info } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
@@ -18,10 +18,13 @@ import { db } from '@/lib/db';
 import { useToast } from '@/hooks/use-toast';
 import { SectionHeader } from '@/components/finance-ui';
 import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
-import { QUICK_ADD_TEMPLATES_KEY } from '@/lib/quick-add-templates';
 import { HOME_PREFERENCES_KEY } from '@/lib/home-preferences';
-import { SAVED_TRANSACTION_FILTERS_KEY } from '@/lib/saved-transaction-filters';
-import { TRANSACTION_RULES_KEY } from '@/lib/transaction-rules';
+import {
+  LOCAL_AUTOMATION_LAYERS,
+  clearLocalAutomation,
+  loadLocalAutomationSummary,
+  type LocalAutomationSummary,
+} from '@/lib/local-automation';
 import TransactionRuleManager from '@/components/settings/transaction-rule-manager';
 
 const SETTINGS_SECTIONS = [
@@ -52,7 +55,16 @@ export function SettingsDialog() {
   const [baseFreq, setBaseFreq] = useState(baseIncome?.freq || 'mensual');
   const [baseAmount, setBaseAmount] = useState(String((baseIncome?.amount || 0) / 100));
   const [baseCurrencyDraft, setBaseCurrencyDraft] = useState(currency);
+  const [automationSummary, setAutomationSummary] = useState<LocalAutomationSummary>({ templates:0, savedFilters:0, rules:0 });
   useEffect(() => setBaseCurrencyDraft(currency), [currency]);
+
+  const refreshAutomationSummary = useCallback(() => {
+    if (typeof window !== 'undefined') setAutomationSummary(loadLocalAutomationSummary(window.localStorage));
+  }, []);
+
+  const handleRuleCountChange = useCallback((count:number) => {
+    setAutomationSummary(previous => ({ ...previous, rules:count }));
+  }, []);
 
   const handleClearData = async () => {
     try {
@@ -61,10 +73,8 @@ export function SettingsDialog() {
       });
       localStorage.removeItem('glitchbudget_achievements');
       localStorage.removeItem('glitchbudget_contribution_streak');
-      localStorage.removeItem(QUICK_ADD_TEMPLATES_KEY);
+      clearLocalAutomation(localStorage);
       localStorage.removeItem(HOME_PREFERENCES_KEY);
-      localStorage.removeItem(SAVED_TRANSACTION_FILTERS_KEY);
-      localStorage.removeItem(TRANSACTION_RULES_KEY);
       await resetSettings();
       toast({ title:'Datos eliminados', description:'Todos los datos han sido borrados. La página se recargará.' });
       setTimeout(() => window.location.reload(), 1500);
@@ -86,7 +96,7 @@ export function SettingsDialog() {
           <DialogDescription>Preferencias, categorías, privacidad y datos en un solo lugar.</DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="general" className="space-y-5">
+        <Tabs defaultValue="general" className="space-y-5" onValueChange={value => { if (value === 'automation') refreshAutomationSummary(); }}>
           <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 p-1">
             {SETTINGS_SECTIONS.map(([value, label]) => (
               <TabsTrigger key={value} value={value} className="text-xs sm:text-sm">{label}</TabsTrigger>
@@ -222,9 +232,37 @@ export function SettingsDialog() {
           <TabsContent value="automation" className="space-y-6">
             <SectionHeader
               title="Automatización"
-              description="Reglas deterministas y locales para sugerir clasificación en Quick Add."
+              description="Flujo local del roadmap: Templates → Saved filters → Rules. Cada capa conserva una responsabilidad distinta."
             />
-            <TransactionRuleManager />
+
+            <div className="grid gap-3 md:grid-cols-3" data-local-automation-order="templates-saved-filters-rules">
+              {LOCAL_AUTOMATION_LAYERS.map(layer => {
+                const count = layer.id === 'templates'
+                  ? automationSummary.templates
+                  : layer.id === 'saved_filters'
+                    ? automationSummary.savedFilters
+                    : automationSummary.rules;
+                return (
+                  <div key={layer.id} className="rounded-xl border p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{layer.location}</p>
+                    <div className="mt-1 flex items-baseline justify-between gap-3">
+                      <h3 className="font-semibold">{layer.title}</h3>
+                      <span className="text-sm tabular-nums text-muted-foreground">{count}</span>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">{layer.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="rounded-xl border bg-muted/20 p-4 text-sm">
+              <p className="font-medium">Responsabilidades separadas</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Templates se gestionan dentro de Quick Add; Saved filters, en Movimientos; Rules se gestionan aquí y solo sugieren clasificación.
+              </p>
+            </div>
+
+            <TransactionRuleManager onRuleCountChange={handleRuleCountChange} />
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-5">
