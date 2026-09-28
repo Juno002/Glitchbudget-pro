@@ -25,15 +25,19 @@ function cleanCents(value:unknown) {
 
 export function normalizeTransactionFilters(value:unknown):TransactionFilters {
   const raw=(value && typeof value==='object' ? value : {}) as Partial<TransactionFilters>;
-  const dateStart=cleanDate(raw.dateStart);
-  const dateEnd=cleanDate(raw.dateEnd);
+  let dateStart=cleanDate(raw.dateStart);
+  let dateEnd=cleanDate(raw.dateEnd);
+  if(dateStart && dateEnd && dateStart>dateEnd) [dateStart,dateEnd]=[dateEnd,dateStart];
+  let amountMin=cleanCents(raw.amountMin);
+  let amountMax=cleanCents(raw.amountMax);
+  if(amountMin!==undefined && amountMax!==undefined && amountMin>amountMax) [amountMin,amountMax]=[amountMax,amountMin];
   return {
     accountId:cleanText(raw.accountId) || undefined,
     categoryId:cleanText(raw.categoryId) || undefined,
     dateStart,
     dateEnd,
-    amountMin:cleanCents(raw.amountMin),
-    amountMax:cleanCents(raw.amountMax),
+    amountMin,
+    amountMax,
     necessity:normalizeNecessity(raw.necessity),
     label:cleanText(raw.label,40) || undefined,
     type:types.includes(raw.type as MovementFilterType) ? raw.type : undefined,
