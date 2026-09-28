@@ -1,8 +1,8 @@
 # Fase 9 — Budgets 2.0
 
-Fuente de verdad: `Roadmap septiembre 2026.txt`, Fase 9. Continuación autorizada el 2026-09-27.
+Fuente de verdad: `Roadmap septiembre 2026.txt`, Fase 9. Continuación autorizada el 2026-09-27. Implementación completada e integrada en `main` el 2026-09-28 mediante el PR #6.
 
-## Comparación remoto/local
+## Estado al iniciar el cierre (histórico)
 
 Al comenzar, `main` local y `origin/main` coincidían en `487ccc2` (Fase 8 integrada). GitHub contenía además `phase-9-budgets-2` en `307b0cd`, con 17 commits adicionales y el PR #6 abierto. Se continuó esa implementación, conservando su historial.
 
@@ -47,13 +47,13 @@ Fase 9 no necesita una nueva tabla ni una reescritura del ledger. JSON v7 conser
 ## Validación
 
 - La rama remota original pasó 229/229 pruebas.
-- Tras las correcciones de dominio y UI, 241/241 pruebas, typecheck, lint y guard local-only pasaron. El build estático produjo 44 recursos de precaché y mantuvo `connect-src 'none'`.
+- Tras las correcciones de dominio y UI, 241/241 pruebas, typecheck, lint y guard local-only pasaron. Ese checkpoint intermedio también validó el build estático y mantuvo `connect-src 'none'`.
 - Las regresiones añadidas cubren calendario cambiado, overflow atómico, respaldo inválido sin pérdida de datos, límites inválidos, consentimiento obsoleto, rollover idempotente, round-trip de los cuatro tipos y legacy, límites inclusivos, no duplicación de reservas, fechas de año/bisiesto y presupuesto cero.
 - QA con datos sintéticos en un origen separado: ingreso 1,200; gasto inicial 300; límite semanal editado de 500 a 600; reasignación de 50 a Transporte; gasto adicional de 30. Plan y Reportes mostraron límite semanal 550, gastado 330, restante 220 y 60%. La liquidez permaneció en 870.
 - Aviso simultáneo de dos presupuestos, cancelación sin movimiento, privacidad visual, rango único guardado, tema claro y ancho móvil de 360 px sin desbordamiento horizontal verificados.
 - Con el servidor de pruebas apagado, la app recargó y permitió consultar los presupuestos persistidos desde la caché.
 
-La validación final integrada, incluida la navegación móvil corregida y CSV, se registra con el cierre de Fase 10. No se utilizaron datos financieros del navegador habitual del usuario.
+La validación final integrada, incluida la navegación móvil corregida y CSV, se registra con el cierre de Fase 10: **259/259 pruebas** y build estático correctos en GitHub Actions, con **42 recursos** en el manifiesto offline final y `connect-src 'none'` en cada HTML. No se utilizaron datos financieros del navegador habitual del usuario.
 
 ## Definition of Done y límites
 
@@ -61,4 +61,4 @@ Archivos afectados: motor de períodos/presupuestos, servicios de límites/rollo
 
 Los cambios de calendario, solapamiento, reasignación y restauración conservan las invariantes financieras. No se implementan cuatro motores independientes. Semanas y años son calendario; la configuración del día inicial aplica al mes financiero. La validación física en Android/iOS sigue perteneciendo al QA de release.
 
-El usuario autorizó explícitamente continuar con Fase 10 durante este cierre. Fase 11 no está autorizada por esa instrucción.
+Fase 9 queda completada e integrada junto con Fase 10. Fase 11 no se ha iniciado ni queda autorizada por continuidad implícita.

@@ -31,7 +31,7 @@ CSV actual conserva la columna `kind` de los aportes y permite restaurar metas y
 
 Dos pruebas de caracterización se ejecutaron antes de cambiar el modelo. Diez pruebas de Fase 10 cubren migración idempotente, conservación del historial, concurrencia, fechas, calendario financiero, overflow, eliminación neutral, JSON v7→v8, actualización Dexie v11→v12 y rollback de una actualización inválida. Las pruebas históricas conservan sus fixtures y verifican la representación migrada.
 
-La suite integrada y el build estático se registran al final de este documento. Incluyen regresiones CSV, rollover independiente de visitar Plan, navegación móvil local y accesibilidad de las barras. La CSP conserva `connect-src 'none'` y el precaché contiene 44 recursos.
+La suite integrada y el build estático se registran al final de este documento. Incluyen regresiones CSV, rollover independiente de visitar Plan, navegación móvil local y accesibilidad de las barras. La CSP conserva `connect-src 'none'` y el precaché contiene 42 recursos.
 
 ## Límites
 
@@ -39,8 +39,10 @@ No vincula metas a cuentas ni introduce pagos automáticos, monedas nuevas o inv
 
 ## Gate técnico integrado de Fases 9 y 10
 
+Gate verificado en GitHub Actions `Quality checks` run `36432612515` sobre el merge commit `60b50e964d34d441fb6e236a55ec5d8a3aa2ce29`.
+
 - `npm run check`: 259/259 pruebas, typecheck, lint y guard local-only aprobados.
-- `npm run build`: exportación estática correcta, 44 recursos de precaché, sin importador de diagnóstico y con `connect-src 'none'` en cada HTML.
+- `npm run build`: exportación estática correcta, 42 recursos de precaché, sin importador de diagnóstico y con `connect-src 'none'` en cada HTML.
 - QA de producción con datos sintéticos en un origen separado: crear meta de RD$ 1,000, editar su plazo al 31/12/2026 y aportar RD$ 100. Plan y Resumen muestran ahorrado 100, restante 900, progreso 10% y aporte requerido 225 para cuatro períodos. La liquidez y patrimonio permanecen en RD$ 870.
 - Navegación móvil entre Resumen/Movimientos/Plan/Reportes, sin 404 ni errores de consola. Viewport de 360 px, documento de 354 px útiles sin desbordamiento horizontal.
 - Corregida una pista de progreso que parecía llena por usar el color secundario saturado: ahora es neutra, y el control expone `aria-valuenow` con el porcentaje real. Regresión de accesibilidad para 0/10/100%.

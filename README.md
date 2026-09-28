@@ -2,7 +2,7 @@
 
 ## Estado del roadmap
 
-**Fase 7.5 completada y Gate aprobado el 2026-09-27.** La siguiente fase habilitada es Quick Add 2.0. Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de fase](docs/roadmap/phase-7.5.md), el [Gate aprobado](docs/roadmap/phase-7.5-gate.md) y los [wireframes canónicos](docs/ux/wireframes-phase-7.5.md).
+**Fases 9 y 10 completadas e integradas en `main` el 2026-09-28.** Budgets 2.0 y Goals 2.0 están cerradas contra `Roadmap septiembre 2026.txt`; **Fase 11 aún no se ha iniciado**. Consulta el [índice de documentación vigente](docs/roadmap/README.md), el [cierre de Fase 9](docs/roadmap/phase-9.md), el [cierre de Fase 10](docs/roadmap/phase-10.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
 
 **GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
 
@@ -13,13 +13,13 @@
 - **Estrategias de Ahorro Rápidas:** Alterna el objetivo de ahorro general entre un 0% (sin forzar), 5%, 10% o 20% con un solo toque desde tu resumen mensual.
 - **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
 - **Planificación Inteligente:**
-    - **Presupuestos por Categoría:** Asigna límites de gasto mensuales a diferentes categorías y observa tu progreso en tiempo real con iconos personalizados.
-    - **Metas de Ahorro con Calculadora Inteligente:** Crea objetivos de ahorro y recibe sugerencias realistas basadas en tu capacidad financiera.
+    - **Presupuestos por Categoría:** Asigna límites semanales, mensuales, anuales o de rango único. Cada presupuesto muestra límite, gastado, restante, porcentaje y estado sobre el mismo Period Engine.
+    - **Metas de Ahorro:** Crea objetivos con plazo y aportes. El progreso se deriva del historial de aportes y el aporte mensual requerido se calcula con el restante, la fecha límite y el Period Engine.
 - **Registro Detallado de Gastos:** Clasifica tus gastos como fijos, variables u ocasionales. Incluye soporte para **Tarjetas de Crédito** con seguimiento de deudas.
 - **Reportes de Crédito Avanzados:** Visualiza el estado de tus tarjetas, días restantes para el corte y fechas de pago de forma automática.
 - **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
-- **Cierre de Mes Automatizado (Rollover):** Configura cómo se deben tratar los excedentes o déficits de tus presupuestos al pasar al siguiente mes.
-- **Transferencias Flexibles:** Mueve fondos entre tus presupuestos de diferentes categorías a mitad de mes.
+- **Rollover de Presupuestos:** Aplica la estrategia configurada a presupuestos semanales, mensuales y anuales; los rangos únicos no se repiten automáticamente.
+- **Reasignación de Límites:** Redistribuye límite planificado entre categorías del mismo rango sin mover dinero real, saldos de cuentas ni movimientos del ledger.
 - **Reportes Visuales:** Gráficos Sankey, Donas y barras comparativas con bordes dinámicos que se adaptan automáticamente a cualquier tema visual.
 - **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
 - **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.

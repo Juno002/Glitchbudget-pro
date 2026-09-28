@@ -1,8 +1,12 @@
 # Roadmap: documentación vigente
 
-## Fases 9 y 10 — cierre de implementación
+## Fases 9 y 10 — completadas
 
-La continuación de **Fase 9 — Budgets 2.0** y **Fase 10 — Goals 2.0** fue autorizada por el usuario el 2026-09-27. Los contratos, migraciones, comprobaciones y límites están en [phase-9.md](phase-9.md) y [phase-10.md](phase-10.md). Fase 11 no se inicia automáticamente.
+**Fase 9 — Budgets 2.0** y **Fase 10 — Goals 2.0** están completadas e integradas en `main` desde el **2026-09-28** mediante el PR #6, con merge commit `60b50e964d34d441fb6e236a55ec5d8a3aa2ce29`. La continuación de ambas fases había sido autorizada el 2026-09-27.
+
+Los contratos, migraciones, comprobaciones, invariantes financieras y límites quedan registrados en [phase-9.md](phase-9.md) y [phase-10.md](phase-10.md). El gate técnico integrado verificó **259/259 pruebas**, typecheck, lint, guard local-only y build estático; el manifiesto offline final contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 10 cerrada. **Fase 11 no se ha iniciado** y no se considera autorizada por continuidad implícita. La fuente de verdad sigue siendo [`Roadmap septiembre 2026.txt`](../../Roadmap%20septiembre%202026.txt).
 
 ## Fase 8 — completada
 
