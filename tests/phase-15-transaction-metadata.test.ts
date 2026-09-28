@@ -146,7 +146,7 @@ test('CSV exports and restores necessity and labels while legacy columns remain 
   const cash=await ensureCashAccount(today);
   await saveExpense({
     id:'e',accountId:cash.id,nature:'Fijo',concept:'Internet',amount:20,date:today,
-    categoryId:'utilities',paymentMethod:'cash',necessity:'must',labels:['casa','internet'],
+    categoryId:'other',paymentMethod:'cash',necessity:'must',labels:['casa','internet'],
   });
   const csv=await serializeTableCSV('expenses');
   assert.match(csv,/necessity/);
