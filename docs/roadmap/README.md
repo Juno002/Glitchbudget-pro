@@ -1,5 +1,17 @@
 # Roadmap: documentación vigente
 
+## Fase 15 — Transaction Metadata + filtros completada
+
+Fase 15 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-15.md](phase-15.md).
+
+Los gastos admiten `necessity: must | need | want` y labels; ingresos admiten labels. Movimientos implementa filtros por **account, category, date, amount, necessity, label y type**, con presets guardados exclusivamente en `localStorage`.
+
+No hay migración Dexie: el esquema permanece en **v14** porque la metadata es opcional y no indexada. El backup canónico sube a **JSON v11**, con lectura de v3–v10 y soporte CSV para los nuevos campos.
+
+El gate `Quality checks` run `36471585078` verificó **300/300 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+
+**Estado actual del roadmap:** Fase 15 cerrada. **Fase 16 — Automatización local no se ha iniciado** y no queda autorizada por continuidad implícita.
+
 ## Fase 14 — Home 2.0 completada
 
 Fase 14 quedó cerrada técnicamente el **2026-09-28** contra `Roadmap septiembre 2026.txt`. El contrato completo está en [phase-14.md](phase-14.md).
@@ -10,7 +22,7 @@ La personalización **show/hide + reorder + default opening section** vive únic
 
 El gate `Quality checks` run `36468191021` verificó **292/292 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 
-**Estado actual del roadmap:** Fase 14 cerrada. **Fase 15 — Transaction Metadata + filtros no se ha iniciado** y no queda autorizada por continuidad implícita.
+Fase 14 queda como fundamento vigente del Home sobre el que Fase 15 no introduce nuevas fórmulas financieras.
 
 ## Fase 13 — Reports 2.0 completada
 
