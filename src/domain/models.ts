@@ -169,12 +169,30 @@ export interface Account {
   isDefaultCash?: boolean;
   id: string;
   name: string;
-  type: 'cash' | 'bank';
+  type: 'cash' | 'bank' | 'investment';
   /** Native currency of this account. Phase 11 creates accounts only in the base currency. */
   currency: string;
   openingBalance: number;
   startDate: string;
 }
+export type InvestmentType = 'certificate' | 'term_deposit' | 'known_yield';
+export type InvestmentCompoundingMethod = 'simple' | 'monthly' | 'quarterly' | 'annually';
+
+export interface Investment {
+  id: string;
+  accountId: string;
+  type: InvestmentType;
+  name: string;
+  institution?: string;
+  openedAt: string;            // YYYY-MM-DD
+  maturityDate?: string;       // YYYY-MM-DD
+  principal: number;           // centavos; contractual/original principal
+  annualRate?: number;         // decimal fraction, e.g. 0.08 = 8%
+  compoundingMethod?: InvestmentCompoundingMethod;
+  notes?: string;
+  status: 'active' | 'closed';
+}
+
 export interface AccountTransfer {
   id: string;
   fromAccountId: string;
