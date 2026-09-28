@@ -24,7 +24,7 @@ import { saveGoal, removeGoal } from '@/lib/goal-service';
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer, type Account } from '@/lib/db';
+import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer, type Account, type Investment } from '@/lib/db';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
@@ -77,6 +77,7 @@ interface FinanceContextType {
   plannedOccurrences: PlannedOccurrence[] | undefined;
   accountTransfers: AccountTransfer[] | undefined;
   accounts: Account[] | undefined;
+  investments: Investment[] | undefined;
 
   setTheme: (theme: 'light' | 'dark' | 'serious') => void;
   setBaseCurrency: (currency: string) => Promise<boolean>;
@@ -165,6 +166,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debtPayments: await db.debt_payments.toArray(),
     transfers: await db.account_transfers.toArray(),
     accounts: await db.accounts.toArray(),
+    investments: await db.investments.toArray(),
   })), [dataVersion]);
   const expenses = financialData?.expenses;
   const incomes = financialData?.incomes;
@@ -175,6 +177,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const debtPayments = financialData?.debtPayments;
   const transfers = financialData?.transfers;
   const accounts = financialData?.accounts;
+  const investments = financialData?.investments;
   const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
   const categories = useLiveQuery(() => db.categories.toArray(), [dataVersion]);
   const expenseCategories = useMemo(() => activeCategories(categories || [], 'expense').map(c => c.id), [categories]);
@@ -209,7 +212,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     };
   }, [rawSettings]);
 
-  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, categories]);
+  const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, investments, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, investments, categories]);
   const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings]);
 
   useEffect(() => {
@@ -827,6 +830,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     plannedOccurrences,
     accountTransfers: transfers,
     accounts,
+    investments,
     setTheme,
     setBaseCurrency,
     setPreventNegativeAccountBalance, setBudgetOverspendingBehavior,
@@ -885,7 +889,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts,
+    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts, investments,
     setTheme, setBaseCurrency, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
