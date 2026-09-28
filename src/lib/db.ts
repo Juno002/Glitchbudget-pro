@@ -5,13 +5,14 @@ import { reconstructCategories, withoutLegacyCategories } from '../domain/catego
 import { migrateGoalRecords } from '../domain/goals';
 import { normalizeCurrencyCode } from '../domain/currency';
 
-import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category } from '../domain/models';
-export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer } from '../domain/models';
+import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category, Investment } from '../domain/models';
+export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Investment } from '../domain/models';
 
 export class GlitchBudgetDB extends Dexie {
   categories!: Table<Category, string>;
   accounts!: Table<Account, string>;
   account_transfers!: Table<AccountTransfer, string>;
+  investments!: Table<Investment, string>;
   expenses!: Table<Expense, string>;
   incomes!: Table<Income, string>;
   goals!: Table<Goal, string>;
@@ -27,6 +28,10 @@ export class GlitchBudgetDB extends Dexie {
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
+    this.version(14).stores({
+      accounts: 'id, type',
+      investments: 'id, &accountId, type, status, maturityDate',
+    });
     this.version(13).stores({ accounts: 'id, type' }).upgrade(async tx => {
       const settings = await tx.table('settings').get('general');
       const baseCurrency = normalizeCurrencyCode(settings?.currency);
