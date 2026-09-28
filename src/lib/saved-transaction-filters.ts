@@ -1,5 +1,5 @@
 import type { MovementFilterType, TransactionFilters } from '../domain/transaction-filters';
-import { TRANSACTION_NECESSITIES } from '../domain/transaction-metadata';
+import { normalizeNecessity } from '../domain/transaction-metadata';
 
 export const SAVED_TRANSACTION_FILTERS_KEY='glitchbudget_saved_transaction_filters_v1';
 
@@ -34,7 +34,7 @@ export function normalizeTransactionFilters(value:unknown):TransactionFilters {
     dateEnd,
     amountMin:cleanCents(raw.amountMin),
     amountMax:cleanCents(raw.amountMax),
-    necessity:TRANSACTION_NECESSITIES.includes(raw.necessity as any) ? raw.necessity : undefined,
+    necessity:normalizeNecessity(raw.necessity),
     label:cleanText(raw.label,40) || undefined,
     type:types.includes(raw.type as MovementFilterType) ? raw.type : undefined,
   };
