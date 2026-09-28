@@ -16,6 +16,7 @@ import { NECESSITY_LABELS, parseTransactionLabelsInput } from '@/domain/transact
 import { evaluateTransactionRules, type RuleMatch } from '@/domain/rule-engine';
 import { quickAddRuleSuggestions } from '@/domain/rule-suggestions';
 import type { TransactionRule } from '@/domain/rules';
+import { loadTransactionRules } from '@/lib/transaction-rules';
 import { motion } from 'framer-motion';
 import { defaultCashAccount } from '@/lib/accounts';
 import {
@@ -37,7 +38,7 @@ interface TransactionModalProps {
 
 type TransactionType = QuickAddTransactionType;
 
-export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome, rules = [] }: TransactionModalProps) {
+export default function TransactionModal({ open, onClose, mode, editingExpense, editingIncome, rules }: TransactionModalProps) {
   const getCategoryInfo = useCategoryResolver();
   const {
     addExpense, updateExpense, deleteExpense,
@@ -68,6 +69,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [necessity, setNecessity] = useState<'' | 'must' | 'need' | 'want'>('');
   const [labelsInput, setLabelsInput] = useState('');
   const [dismissedRuleIds, setDismissedRuleIds] = useState<string[]>([]);
+  const [storedRules, setStoredRules] = useState<TransactionRule[]>([]);
 
   const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -133,7 +135,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setTransferNote('');
       setNecessity('');
       setLabelsInput('');
-      if (typeof window !== 'undefined') setTemplates(loadQuickAddTemplates(window.localStorage));
+      if (typeof window !== 'undefined') {
+        setTemplates(loadQuickAddTemplates(window.localStorage));
+        setStoredRules(loadTransactionRules(window.localStorage));
+      }
     }
     setSaved(false);
     setSubmitError(null);
@@ -149,12 +154,14 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     return ids.map(id => getCategoryInfo(id)).filter(Boolean) as NonNullable<ReturnType<typeof getCategoryInfo>>[];
   }, [txType, incomeCategories, expenseCategories, getCategoryInfo]);
 
+  const effectiveRules = rules ?? storedRules;
+
   const ruleSuggestions = useMemo(() => {
-    if (isEditing || txType === 'transfer' || !concept.trim() || rules.length === 0) return [];
-    const matches = evaluateTransactionRules(concept, rules);
+    if (isEditing || txType === 'transfer' || !concept.trim() || effectiveRules.length === 0) return [];
+    const matches = evaluateTransactionRules(concept, effectiveRules);
     return quickAddRuleSuggestions(matches, txType, categories.map(category => category.id))
       .filter(match => !dismissedRuleIds.includes(match.ruleId));
-  }, [isEditing, txType, concept, rules, categories, dismissedRuleIds]);
+  }, [isEditing, txType, concept, effectiveRules, categories, dismissedRuleIds]);
 
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
   const hasAccountForActual = !!accountId || isEditing;
