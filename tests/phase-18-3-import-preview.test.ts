@@ -137,9 +137,9 @@ test('18.3 encrypted UI is explicitly two-step: review then confirm', () => {
 
 test('18.3 preview remains a prerequisite after 18.4 layers the pre-import safety copy', () => {
   const dialog = readFileSync(new URL('../src/components/backup/opfs-backup-dialog.tsx', import.meta.url), 'utf8');
-  const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
+  const backupHook = readFileSync(new URL('../src/hooks/use-backup-management.ts', import.meta.url), 'utf8');
 
   assert.match(dialog, /previewDataJSON\(await file\.text\(\)\)/);
   assert.match(dialog, /pendingPreview/);
-  assert.match(context, /beforeWrite: backupBeforeDestructiveImport/);
+  assert.match(backupHook, /beforeWrite: backupBeforeDestructiveImport/);
 });
