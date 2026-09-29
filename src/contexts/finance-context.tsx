@@ -6,7 +6,7 @@ import { BudgetWarning } from '@/policies/budget-overspending';
 import { activeCategories } from '@/domain/categories';
 import { createCategory, resetCategories, requireCategory } from '@/lib/category-service';
 
-import { selectPeriodMetrics, recordedCategoriesForPeriod, recordedExpenseForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
+import { selectDisposable, selectExpensesByNature, selectPeriodAverages, selectPeriodMetrics, recordedCategoriesForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
@@ -15,7 +15,7 @@ import { selectPosition } from '@/domain/ledger';
 import { selectReportsSnapshot } from '@/domain/reports';
 import type { DateRange } from '@/domain/periods';
 import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod, prepareBudgetPeriodsForDate } from '@/lib/budget-rollover';
-import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '@/domain/budgets';
+import { selectBudgetStatusDetails } from '@/domain/budgets';
 import { reassignBudgetLimit, saveBudgetLimits } from '@/lib/budget-service';
 import { goalView } from '@/domain/goals';
 import { saveGoal, removeGoal } from '@/lib/goal-service';
@@ -23,7 +23,6 @@ import { saveGoal, removeGoal } from '@/lib/goal-service';
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import type { Settings, Income, Expense, Plan, Debt, DebtPayment, RecurringRule, PlannedOccurrence, AccountTransfer, Account, Investment } from '@/domain/models';
-import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
@@ -265,20 +264,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     budgets: budgets || [], goalContributions: goalContributions || [], debtPayments: debtPayments || [],
   }, periodForId(periodId, activeSettings)), [activeSettings, incomes, expenses, budgets, goalContributions, debtPayments]);
 
-  const getMonthlyAverages = useCallback((numMonths = 3) => {
-    const periodIds = Array.from(new Set([
-      currentMonth,
-      ...[...(incomes || []), ...(expenses || [])].map(t => periodContaining(t.date, activeSettings).id),
-    ])).filter(id => id <= currentMonth).sort().slice(-numMonths);
-    const totalIncome = periodIds.reduce((sum, id) => sum + getTotals(id).recordedIncome, 0);
-    const totalExpenses = periodIds.reduce((sum, id) => sum + getTotals(id).spending, 0);
-    return { incomeAvgMonthly: totalIncome / Math.max(1, periodIds.length), expenseAvgMonthly: totalExpenses / Math.max(1, periodIds.length) };
-  }, [incomes, expenses, currentMonth, getTotals, activeSettings]);
+  const getMonthlyAverages = useCallback((numMonths = 3) => selectPeriodAverages({
+    settings: activeSettings,
+    incomes: incomes || [],
+    expenses: expenses || [],
+    budgets: budgets || [],
+    goalContributions: goalContributions || [],
+    debtPayments: debtPayments || [],
+  }, currentMonth, activeSettings, numMonths), [
+    activeSettings, incomes, expenses, budgets, goalContributions, debtPayments, currentMonth,
+  ]);
 
-  const getDisposable = useCallback((safetyPct = 0.05) => {
-      const averages = getMonthlyAverages();
-      return computeDisposable(averages, safetyPct);
-  }, [getMonthlyAverages]);
+  const getDisposable = useCallback(
+    (safetyPct = 0.05) => selectDisposable(getMonthlyAverages(), safetyPct),
+    [getMonthlyAverages],
+  );
 
   const updateSetting = useCallback(async (key: keyof Settings, value: any) => {
     try {
@@ -515,14 +515,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const getBudgetStatusDetails = useCallback((periodId: string, budgetPeriod?: BudgetPeriodRange) => {
     const range = budgetPeriod ?? { ...periodForId(periodId, activeSettings), kind: 'monthly' as const };
-    const periodBudgets = budgetPlansForRange(budgets || [], range);
-    const budgetedCategoryIds = new Set(periodBudgets.map(b => b.categoryId));
-    const allRelevantCategoryIds = Array.from(new Set([...expenseCategories, ...budgetedCategoryIds, ...(expenses || []).filter(e => recordedExpenseForPeriod(e, range) > 0).map(e => e.categoryId)]));
-
-    return allRelevantCategoryIds.map(catId => {
-      const budget = periodBudgets.find(b => b.categoryId === catId) || budgetPlanForRange(range, catId, 0);
-      return budgetStatusForRange(budget, expenses || [], range, budgetedCategoryIds.has(catId));
-    });
+    return selectBudgetStatusDetails(budgets || [], expenses || [], expenseCategories, range);
   }, [budgets, expenses, expenseCategories, activeSettings]);
 
   const getExpensesByCategory = useCallback((periodId: string) => recordedCategoriesForPeriod(expenses || [], periodForId(periodId, activeSettings)), [expenses, activeSettings]);
@@ -540,22 +533,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     [accounts, debts, incomes, expenses, debtPayments, transfers],
   );
 
-  const getExpensesByType = useCallback((periodId: string) => {
-      const period = periodForId(periodId, activeSettings);
-      const exps = (expenses || []).filter(e => recordedExpenseForPeriod(e, period) > 0);
-      const groupT = exps.reduce((acc, e) => {
-          const k = e.nature;
-          const val = recordedExpenseForPeriod(e, period);
-          if (!acc[k]) acc[k] = { total: 0, count: 0 };
-          acc[k].total += val;
-          acc[k].count += 1;
-          return acc;
-      }, {} as { [key: string]: { total: number, count: number } });
-
-      return Object.entries(groupT).map(([key, v]) => ({
-          name: key, total: v.total, count: v.count, avg: v.total / Math.max(1, v.count),
-      }));
-  }, [expenses, activeSettings]);
+  const getExpensesByType = useCallback(
+    (periodId: string) => selectExpensesByNature(expenses || [], periodForId(periodId, activeSettings)),
+    [expenses, activeSettings],
+  );
 
   const addIncomeCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'income',iconName); }, []);
   const addExpenseCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'expense',iconName); }, []);
