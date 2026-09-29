@@ -1,40 +1,54 @@
 'use client';
 
-import Header from "@/components/layout/header";
-import { ReactNode, useState } from "react";
-import { Plus } from "lucide-react";
-import TransactionModal from "@/components/dashboard/TransactionModal";
+import { ReactNode, useState } from 'react';
+import { Plus } from 'lucide-react';
+import Header from '@/components/layout/header';
+import BottomNav from '@/components/layout/bottom-nav';
+import DesktopSidebar from '@/components/layout/desktop-sidebar';
+import TransactionModal from '@/components/dashboard/TransactionModal';
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const [fabOpen, setFabOpen] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
+    <div className="min-h-screen w-full bg-background text-foreground md:flex" data-app-shell="prisma">
       <a
         href="#main-content"
         className="sr-only z-[100] rounded-md bg-background px-3 py-2 text-sm font-medium focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:ring-2 focus:ring-primary"
       >
         Saltar al contenido
       </a>
-      <Header />
-      <main id="main-content" tabIndex={-1} data-private-surface="true" className="flex-1 p-4 sm:p-6 lg:p-8 pb-[100px] md:pb-8">
-        <div className="mx-auto w-full max-w-6xl">
-          {children}
-        </div>
-      </main>
 
-      {/* Floating Action Button */}
+      <DesktopSidebar onNewMovement={() => setComposerOpen(true)} />
+
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+        <Header />
+        <main
+          id="main-content"
+          tabIndex={-1}
+          data-private-surface="true"
+          className="flex-1 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+7rem)] pt-5 sm:px-6 sm:pt-7 md:pb-8 lg:px-10 lg:py-9"
+        >
+          <div className="mx-auto w-full max-w-[1280px]">
+            {children}
+          </div>
+        </main>
+      </div>
+
+      <BottomNav />
+
       <button
-        onClick={() => setFabOpen(true)}
-        className="fixed right-4 z-40 flex bottom-[calc(env(safe-area-inset-bottom,0px)+5.25rem)] md:bottom-8 items-center justify-center w-14 h-14 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 bg-[hsl(var(--primary)_/_0.15)] border border-primary/40 text-primary shadow-[0_0_20px_hsl(var(--primary)_/_0.15)] hover:bg-[hsl(var(--primary)_/_0.25)] hover:shadow-[0_0_30px_hsl(var(--primary)_/_0.25)] active:scale-95 transition-all"
+        type="button"
+        onClick={() => setComposerOpen(true)}
         aria-label="Nuevo movimiento"
+        className="fixed right-4 z-40 grid h-12 w-12 place-items-center rounded-full bg-[hsl(var(--brand-coral))] text-white shadow-[var(--shadow-floating)] transition-[transform,box-shadow] duration-[var(--motion-standard)] bottom-[calc(env(safe-area-inset-bottom,0px)+5.4rem)] hover:shadow-[var(--shadow-floating-strong)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
       >
-        <Plus className="h-6 w-6" />
+        <Plus className="h-5 w-5" />
       </button>
 
       <TransactionModal
-        open={fabOpen}
-        onClose={() => setFabOpen(false)}
+        open={composerOpen}
+        onClose={() => setComposerOpen(false)}
         mode="new"
       />
     </div>
