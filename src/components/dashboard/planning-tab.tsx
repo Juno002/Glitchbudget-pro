@@ -23,6 +23,7 @@ import { useTabs } from '@/contexts/tabs-context';
 import TransferDialog from './transfer-dialog';
 import GoalsManager from './goals-manager';
 import SubscriptionsManager from './subscriptions-manager';
+import { selectBudgetCategoryGroups } from '@/domain/budgets';
 
 
 const STATUS_LABELS = {
@@ -197,16 +198,10 @@ export default function PlanningTab() {
     return updateAllBudgets(currentMonth, [{ categoryId, limit: limitValue }], budgetPeriod);
   };
 
-  const { active, inactive } = useMemo(() => {
-    const activeIds = new Set<string>();
-    const inactiveIds = new Set<string>();
-    for (const categoryId of new Set([...expenseCategories, ...budgetDetails.map(detail => detail.categoryId)])) {
-      const detail = budgetDetails.find(item => item.categoryId === categoryId);
-      if (detail?.configured || (detail?.spent ?? 0) > 0) activeIds.add(categoryId);
-      else inactiveIds.add(categoryId);
-    }
-    return { active: Array.from(activeIds), inactive: Array.from(inactiveIds) };
-  }, [expenseCategories, budgetDetails]);
+  const { active, inactive } = useMemo(
+    () => selectBudgetCategoryGroups(expenseCategories, budgetDetails),
+    [expenseCategories, budgetDetails],
+  );
 
   const displayedCategories = showAll ? [...active, ...inactive] : active;
   const monthlyTotals = getTotals(currentMonth);
