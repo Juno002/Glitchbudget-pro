@@ -1,10 +1,9 @@
 'use client';
-import { saveRecurringRule, removeRecurringRule } from '@/lib/recurring-rule-service';
 import { confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOccurrence, type ConfirmPlannedOccurrenceOptions } from '@/lib/planned-occurrence-service';
 import { plannedOccurrenceWindow } from '@/domain/upcoming';
 import { BudgetWarning } from '@/policies/budget-overspending';
 import { activeCategories } from '@/domain/categories';
-import { createCategory, resetCategories, requireCategory } from '@/lib/category-service';
+import { createCategory, resetCategories } from '@/lib/category-service';
 
 
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
@@ -12,18 +11,14 @@ import { type BudgetOverspendingBehavior } from '@/policies/settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod, prepareBudgetPeriodsForDate } from '@/lib/budget-rollover';
-import { reassignBudgetLimit, saveBudgetLimits } from '@/lib/budget-service';
-import { saveGoal, removeGoal } from '@/lib/goal-service';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import type { Settings, Income, Expense, Plan, Debt, DebtPayment, RecurringRule, PlannedOccurrence, AccountTransfer, Account, Investment } from '@/domain/models';
 import { useToast } from "@/hooks/use-toast";
-import { localDate, monthlyAmount } from '@/lib/finance-calculations';
-import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
-import { ensureCashAccount, saveTransfer } from '@/lib/accounts';
+import { localDate } from '@/lib/finance-calculations';
+import { ensureCashAccount } from '@/lib/accounts';
 import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
-import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { useFinanceContextData } from '@/hooks/use-finance-context-data';
 import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-management';
