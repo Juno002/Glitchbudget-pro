@@ -182,7 +182,7 @@ async function createMovement(client, type, amount) {
   await client.evaluate(setControlExpression('[aria-label="Monto"]', String(amount)));
   await waitFor(
     client,
-    `Boolean(document.querySelector('[aria-label="Categoría"] option[value]:not([value=""]))`,
+    `Boolean(document.querySelector('[aria-label="Categoría"] option:not([value=""])'))`,
     'categorías de ' + type,
   );
   await client.evaluate(selectFirstOptionExpression('[aria-label="Categoría"]'));
