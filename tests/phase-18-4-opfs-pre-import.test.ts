@@ -211,11 +211,11 @@ test('18.4 all destructive full-backup routes use the automatic pre-import safet
   assert.match(backupHook, /createPreImportSafetyBackup\(\)/);
   assert.match(
     backupHook,
-    /importDataJSON\(fileContent, undefined, \{ beforeWrite: backupBeforeDestructiveImport \}\)/,
+    /importDataJSON\(fileContent, undefined, \{[\s\S]*?beforeWrite: backupBeforeDestructiveImport[\s\S]*?\}\)/,
   );
   assert.match(
     backupHook,
-    /importDataJSON\(text, undefined, \{ beforeWrite: backupBeforeDestructiveImport \}\)/,
+    /importDataJSON\(text, undefined, \{[\s\S]*?beforeWrite: backupBeforeDestructiveImport[\s\S]*?\}\)/,
   );
   assert.match(
     backupHook,
