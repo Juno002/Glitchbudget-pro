@@ -28,7 +28,7 @@ test('Phase 8 keeps transfer in the same composer without a consumption category
 
 test('Phase 8 preselects the real default cash account instead of a visual-only default', () => {
   const source = read('src/components/dashboard/TransactionModal.tsx');
-  assert.match(source, /defaultCashAccount\(accounts \|\| \[\]\)/);
+  assert.match(source, /selectDefaultCashAccount\(accounts \|\| \[\]\)/);
   assert.match(source, /if \(open && !isEditing && !accountId && defaultCashId\) setAccountId\(defaultCashId\)/);
 
   const context = read('src/contexts/finance-context.tsx');
