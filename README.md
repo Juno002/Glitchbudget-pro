@@ -98,14 +98,14 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente tras el preflight de Fase 20.1:
+Baseline vigente al cerrar Fase 20.1:
 
-- **463/463 tests**;
+- **467/467 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
 - E2E: crear ingreso → crear gasto → verificar Movimientos → recargar offline desde service worker;
-- Quality checks run **36617612176** verde.
+- Quality checks run **36640064226** verde.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
