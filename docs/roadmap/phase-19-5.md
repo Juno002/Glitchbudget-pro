@@ -52,7 +52,7 @@ Durante toda Fase 19.5:
 ## Estado de checkpoints
 
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa: **completado**;
-- 19.5.2 — persistencia fuera de React: pendiente;
+- [19.5.2](phase-19-5-2.md) — persistencia fuera de React: **completado**;
 - 19.5.3 — cálculos/read models: pendiente;
 - 19.5.4 — `finance-context` + hardening: pendiente;
 - 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
