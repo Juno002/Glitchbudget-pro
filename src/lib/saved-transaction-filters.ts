@@ -2,6 +2,7 @@ import type { MovementFilterType, TransactionFilters } from '../domain/transacti
 import { normalizeNecessity } from '../domain/transaction-metadata';
 
 export const SAVED_TRANSACTION_FILTERS_KEY='glitchbudget_saved_transaction_filters_v1';
+export const SAVED_TRANSACTION_FILTERS_MAX=20;
 
 export type SavedTransactionFilter = {
   id:string;
@@ -57,7 +58,7 @@ export function loadSavedTransactionFilters(storage:FilterStorage):SavedTransact
   try {
     const parsed=JSON.parse(storage.getItem(SAVED_TRANSACTION_FILTERS_KEY)||'[]');
     if(!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeSavedTransactionFilter).filter((row):row is SavedTransactionFilter=>Boolean(row)).slice(0,20);
+    return parsed.map(normalizeSavedTransactionFilter).filter((row):row is SavedTransactionFilter=>Boolean(row)).slice(0,SAVED_TRANSACTION_FILTERS_MAX);
   } catch {
     return [];
   }
@@ -71,7 +72,7 @@ export function writeSavedTransactionFilters(storage:FilterStorage,rows:readonly
     if(!row || ids.has(row.id)) continue;
     ids.add(row.id);
     normalized.push(row);
-    if(normalized.length>=20) break;
+    if(normalized.length>=SAVED_TRANSACTION_FILTERS_MAX) break;
   }
   storage.setItem(SAVED_TRANSACTION_FILTERS_KEY,JSON.stringify(normalized));
   return normalized;
@@ -80,7 +81,7 @@ export function writeSavedTransactionFilters(storage:FilterStorage,rows:readonly
 export function upsertSavedTransactionFilter(storage:FilterStorage,row:SavedTransactionFilter) {
   const normalized=normalizeSavedTransactionFilter(row);
   if(!normalized) throw new Error('El filtro guardado necesita un nombre válido.');
-  const next=[normalized,...loadSavedTransactionFilters(storage).filter(item=>item.id!==normalized.id)].slice(0,20);
+  const next=[normalized,...loadSavedTransactionFilters(storage).filter(item=>item.id!==normalized.id)].slice(0,SAVED_TRANSACTION_FILTERS_MAX);
   writeSavedTransactionFilters(storage,next);
   return next;
 }
