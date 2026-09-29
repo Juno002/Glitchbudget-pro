@@ -42,14 +42,12 @@ Este documento fija la división de ejecución acordada para completar Fase 16. 
    - múltiples coincidencias automáticas caen a decisión manual, sin precedencia implícita;
    - motor determinista y local.
 
-7. **16.7 — Hardening + gate**
-   - conflictos entre reglas;
-   - precedencia;
-   - datos legacy;
-   - backup/export si aplica;
-   - pruebas;
-   - documentación;
-   - cierre formal de Fase 16.
+7. **16.7 — Hardening + gate** ✅
+   - conflictos y precedencia formalizados;
+   - legacy endurecido;
+   - backup JSON v12 incluye Templates, Saved Filters y Rules;
+   - regresiones completas;
+   - documentación y cierre formal.
 
 ## Invariantes de toda la fase
 
@@ -69,6 +67,6 @@ Durante 16.1–16.7:
 - 16.4 ✅
 - 16.5 ✅
 - 16.6 ✅
-- 16.7 ⏳ pendiente
+- 16.7 ✅
 
-Por tanto, **Fase 16 permanece en progreso**.
+Por tanto, **Fase 16 queda completada**.
