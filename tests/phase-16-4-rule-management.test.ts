@@ -106,13 +106,14 @@ test('16.4 exposes explicit local rule management and Quick Add consumes persist
   assert.doesNotMatch(db, /transaction_rules|rules!:/);
 });
 
-test('16.4 remains suggestion-only, local, deterministic and without AI/network transport', () => {
+test('16.4 management remains local and deterministic while legacy rules stay manual by default', () => {
   const storage = readFileSync(new URL('../src/lib/transaction-rules.ts', import.meta.url), 'utf8');
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
   const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
   const combined = [storage, manager, modal].join('\n');
 
-  assert.doesNotMatch(combined, /applyAutomatically|autoApply/i);
+  const legacy = loadTransactionRules(memoryStorage(JSON.stringify([spotifyRule])))[0];
+  assert.equal(legacy?.applyAutomatically, undefined);
   assert.doesNotMatch(combined, /fetch\s*\(|axios|XMLHttpRequest|https?:\/\//i);
   assert.doesNotMatch(combined, /openai|gemini|anthropic|language model|\bAI\b/i);
   assert.match(modal, /Aceptar sugerencia/);
