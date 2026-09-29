@@ -6,6 +6,8 @@
     {
       "files": [
         "src/components/**/*.{ts,tsx}",
+        "src/hooks/**/*.{ts,tsx}",
+        "src/contexts/**/*.{ts,tsx}",
         "src/app/**/*.{ts,tsx}"
       ],
       "rules": {
@@ -15,11 +17,11 @@
             "paths": [
               {
                 "name": "@/lib/db",
-                "message": "UI must consume queries/services instead of importing the Dexie database directly."
+                "message": "React surfaces must consume repositories/queries/services instead of importing the Dexie database directly."
               },
               {
                 "name": "dexie-react-hooks",
-                "message": "Reactive Dexie subscriptions belong behind application query hooks, not in UI components."
+                "message": "Dexie reactivity belongs in the dedicated adapter, not components/hooks/contexts/app."
               }
             ]
           }
