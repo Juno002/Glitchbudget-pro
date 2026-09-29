@@ -1,14 +1,18 @@
 # Roadmap: documentación vigente
 
-## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate en ejecución
+## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 
-La auditoría canónica está documentada en [phase-19-5.md](phase-19-5.md). Se están eliminando residuos entre React, dominio y persistencia y añadiendo el Prisma Engine Gate permanente.
+La auditoría y el cierre canónico están documentados en [phase-19-5.md](phase-19-5.md).
 
-Persistencia permanece en **Dexie v14 / JSON v13 / encrypted envelope v1**; no hay migración ni feature nueva.
+19.5 eliminó Dexie directo de todas las superficies React, extrajo queries a repositories, commands a application, read models a dominio y añadió un gate permanente contra regresiones de frontera.
 
-**Estado actual:** Fase 19 completada; Fase 19.5 en ejecución y pendiente de gate final.
+El gate de código `36596762307` verificó **434/434 pruebas**, typecheck, lint y build estático; `connect-src 'none'` continúa presente en cada HTML.
+
+Persistencia permanece en **Dexie v14 / JSON v13 / encrypted envelope v1**; no hubo migration ni feature nueva.
+
+**Estado actual:** Fases 0–19.5 cerradas. El núcleo financiero cumple el Prisma Engine Gate y queda preparado para ser consumido por una interfaz distinta sin copiar fórmulas ni acceder a Dexie desde UI.
 
 ## Fase 19 — Technical-debt closure completada
 
