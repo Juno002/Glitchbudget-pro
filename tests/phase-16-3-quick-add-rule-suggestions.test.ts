@@ -50,7 +50,7 @@ test('16.3 preserves input order and never mutates rule matches',()=>{
   assert.deepEqual(matches,original);
 });
 
-test('16.3 Quick Add wiring remains suggestion-only after 16.4 adds a persistent rule source',()=>{
+test('16.3 manual-rule path remains explicit after 16.6 adds optional per-rule automation',()=>{
   const modal=readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8');
 
   assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
@@ -61,7 +61,8 @@ test('16.3 Quick Add wiring remains suggestion-only after 16.4 adds a persistent
   assert.match(modal,/Ignorar sugerencia/);
   assert.match(modal,/setCategoryId/);
   assert.match(modal,/setNecessity/);
-  assert.doesNotMatch(modal,/applyAutomatically|autoApply/i);
+  assert.match(modal,/Aceptar sugerencia/);
+  assert.match(modal,/Ignorar sugerencia/);
 });
 
 test('16.3 suggestion behavior stays outside financial persistence when 16.4 adds management',()=>{

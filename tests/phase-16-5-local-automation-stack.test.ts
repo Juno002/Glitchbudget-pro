@@ -123,13 +123,13 @@ test('16.5 exposes the ordered stack in Settings while each layer keeps its nati
   assert.doesNotMatch(manager, /quick-add-templates|saved-transaction-filters/);
 });
 
-test('16.5 remains local and suggestion-only; integration adds no auto-apply, network or AI', () => {
+test('16.5 integration remains local and does not turn automation into a global setting', () => {
   const automation = readFileSync(new URL('../src/lib/local-automation.ts', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
   const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
   const combined = [automation, settings, modal].join('\n');
 
-  assert.doesNotMatch(combined, /applyAutomatically|autoApply/i);
+  assert.doesNotMatch(automation, /applyAutomatically|autoApply/i);
   assert.doesNotMatch(combined, /fetch\s*\(|axios|XMLHttpRequest|https?:\/\//i);
   assert.doesNotMatch(combined, /openai|gemini|anthropic|language model|\bAI\b/i);
   assert.match(modal, /Aceptar sugerencia/);

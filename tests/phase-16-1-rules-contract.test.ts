@@ -73,9 +73,16 @@ test('16.1 rejects incomplete or future-scope rule shapes', () => {
   assert.throws(()=>requireTransactionRule({}),/contrato determinista/);
 });
 
-test('16.1 contract contains no automatic-apply flag, network transport or AI dependency', () => {
+test('16.1 legacy contract remains backward-compatible when 16.6 adds explicit auto-apply opt-in', () => {
   const source=readFileSync(new URL('../src/domain/rules.ts',import.meta.url),'utf8');
-  assert.doesNotMatch(source,/applyAutomatically|autoApply|automatic/i);
+  const legacy=normalizeTransactionRule({
+    id:'legacy',name:'Legacy',enabled:true,
+    condition:{field:'description',operator:'contains',value:'Spotify'},
+    suggestion:{categoryId:'entertainment'},
+  });
+  assert.ok(legacy);
+  assert.equal(legacy.applyAutomatically,undefined);
+  assert.match(source,/applyAutomatically\?: boolean/);
   assert.doesNotMatch(source,/fetch\s*\(|axios|XMLHttpRequest|https?:\/\//i);
   assert.doesNotMatch(source,/openai|gemini|anthropic|language model|\bAI\b/i);
 });
@@ -89,6 +96,6 @@ test('16.1 contract remains isolated from templates, saved filters and persisten
   assert.doesNotMatch(template,/TransactionRule|RuleCondition|RuleSuggestion/);
   assert.doesNotMatch(filters,/TransactionRule|RuleCondition|RuleSuggestion/);
   assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
-  assert.doesNotMatch(modal,/applyAutomatically|autoApply/i);
+  assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
   assert.doesNotMatch(db,/transaction_rules|rules!:/);
 });

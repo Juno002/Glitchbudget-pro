@@ -14,7 +14,7 @@ import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft,
 import { localDate, isValidDate } from '@/lib/finance-calculations';
 import { NECESSITY_LABELS, parseTransactionLabelsInput } from '@/domain/transaction-metadata';
 import { evaluateTransactionRules, type RuleMatch } from '@/domain/rule-engine';
-import { quickAddRuleSuggestions } from '@/domain/rule-suggestions';
+import { quickAddRuleSuggestions, resolveAutomaticRuleSuggestion } from '@/domain/rule-suggestions';
 import type { TransactionRule } from '@/domain/rules';
 import { loadTransactionRules } from '@/lib/transaction-rules';
 import { motion } from 'framer-motion';
@@ -70,6 +70,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [labelsInput, setLabelsInput] = useState('');
   const [dismissedRuleIds, setDismissedRuleIds] = useState<string[]>([]);
   const [storedRules, setStoredRules] = useState<TransactionRule[]>([]);
+  const [automaticRuleId, setAutomaticRuleId] = useState<string | null>(null);
 
   const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -91,6 +92,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setSelectedTemplateId('');
     setTemplateName('');
     setDismissedRuleIds([]);
+    setAutomaticRuleId(null);
 
     if (mode === 'edit' && editingExpense) {
       setTxType('expense');
@@ -156,12 +158,33 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   const effectiveRules = rules ?? storedRules;
 
-  const ruleSuggestions = useMemo(() => {
+  const compatibleRuleSuggestions = useMemo(() => {
     if (isEditing || txType === 'transfer' || !concept.trim() || effectiveRules.length === 0) return [];
     const matches = evaluateTransactionRules(concept, effectiveRules);
     return quickAddRuleSuggestions(matches, txType, categories.map(category => category.id))
       .filter(match => !dismissedRuleIds.includes(match.ruleId));
   }, [isEditing, txType, concept, effectiveRules, categories, dismissedRuleIds]);
+
+  const ruleResolution = useMemo(
+    () => resolveAutomaticRuleSuggestion(compatibleRuleSuggestions),
+    [compatibleRuleSuggestions],
+  );
+  const automaticRuleSuggestion = ruleResolution.automatic;
+  const ruleSuggestions = ruleResolution.manual;
+
+  useEffect(() => {
+    if (!automaticRuleSuggestion) {
+      setAutomaticRuleId(null);
+      return;
+    }
+    if (automaticRuleSuggestion.suggestion.categoryId) {
+      setCategoryId(automaticRuleSuggestion.suggestion.categoryId);
+    }
+    if (txType === 'expense' && automaticRuleSuggestion.suggestion.necessity) {
+      setNecessity(automaticRuleSuggestion.suggestion.necessity);
+    }
+    setAutomaticRuleId(automaticRuleSuggestion.ruleId);
+  }, [automaticRuleSuggestion, txType]);
 
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
   const hasAccountForActual = !!accountId || isEditing;
@@ -181,6 +204,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setTxType(type);
     setCategoryId('');
     setDismissedRuleIds([]);
+    setAutomaticRuleId(null);
     setSubmitError(null);
     if (type === 'transfer') {
       setPaymentMethod('cash');
@@ -214,6 +238,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setDate(localDate());
     setSelectedTemplateId(template.id);
     setDismissedRuleIds([]);
+    setAutomaticRuleId(null);
     setSubmitError(null);
   };
 
@@ -500,6 +525,24 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                         maxLength={250}
                       />
                     </label>
+
+                    {!isEditing && automaticRuleId && automaticRuleSuggestion && (
+                      <div className="rounded-lg border bg-muted/20 p-3 text-xs" aria-label="Regla aplicada automáticamente">
+                        <p className="font-medium">Aplicado automáticamente · {automaticRuleSuggestion.ruleName}</p>
+                        <p className="mt-1 text-muted-foreground">
+                          Solo rellenó la clasificación de Quick Add. Puedes cambiar estos campos antes de guardar.
+                        </p>
+                      </div>
+                    )}
+
+                    {!isEditing && ruleResolution.hasAutomaticConflict && (
+                      <div className="rounded-lg border bg-muted/20 p-3 text-xs" role="status">
+                        <p className="font-medium">Varias reglas automáticas coinciden</p>
+                        <p className="mt-1 text-muted-foreground">
+                          No se aplicó ninguna automáticamente. Elige una sugerencia manualmente.
+                        </p>
+                      </div>
+                    )}
 
                     {!isEditing && ruleSuggestions.length > 0 && (
                       <div className="space-y-2 rounded-lg border bg-muted/20 p-3" aria-label="Sugerencias de reglas">
