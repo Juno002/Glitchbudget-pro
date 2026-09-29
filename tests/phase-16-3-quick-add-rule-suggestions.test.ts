@@ -51,7 +51,7 @@ test('16.3 preserves input order and never mutates rule matches',()=>{
 });
 
 test('16.3 manual-rule path remains explicit after 16.6 adds optional per-rule automation',()=>{
-  const modal=readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8');
+  const modal=[readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx',import.meta.url),'utf8'),readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx',import.meta.url),'utf8')].join('\n');
 
   assert.match(modal,/rules\?: readonly TransactionRule\[\]/);
   assert.match(modal,/loadTransactionRules/);
