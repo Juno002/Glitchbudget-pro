@@ -102,7 +102,7 @@ test('16.5 clears the three automation layers together but preserves unrelated l
 
 test('16.5 exposes the ordered stack in Settings while each layer keeps its native surface', () => {
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
-  const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const modal = [readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8'), readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx', import.meta.url), 'utf8')].join('\n');
   const movements = readFileSync(new URL('../src/components/dashboard/MovementsView.tsx', import.meta.url), 'utf8');
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
 
@@ -126,7 +126,7 @@ test('16.5 exposes the ordered stack in Settings while each layer keeps its nati
 test('16.5 integration remains local and does not turn automation into a global setting', () => {
   const automation = readFileSync(new URL('../src/lib/local-automation.ts', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
-  const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const modal = [readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8'), readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx', import.meta.url), 'utf8')].join('\n');
   const combined = [automation, settings, modal].join('\n');
 
   assert.doesNotMatch(automation, /applyAutomatically|autoApply/i);
