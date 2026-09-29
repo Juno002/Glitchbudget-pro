@@ -18,7 +18,7 @@ import { quickAddRuleSuggestions, resolveAutomaticRuleSuggestion } from '@/domai
 import type { TransactionRule } from '@/domain/rules';
 import { loadTransactionRules } from '@/lib/transaction-rules';
 import { motion } from 'framer-motion';
-import { defaultCashAccount } from '@/lib/accounts';
+import { selectDefaultCashAccount } from '@/domain/ledger';
 import {
   loadQuickAddTemplates,
   removeQuickAddTemplate,
@@ -51,7 +51,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   } = useFinances();
 
   const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card') || [];
-  const defaultCashId = useMemo(() => defaultCashAccount(accounts || [])?.id || '', [accounts]);
+  const defaultCashId = useMemo(() => selectDefaultCashAccount(accounts || [])?.id || '', [accounts]);
   const [isSaving, setIsSaving] = useState(false);
   const savingRef = useRef(false);
 
