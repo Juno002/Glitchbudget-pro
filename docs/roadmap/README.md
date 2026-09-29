@@ -28,7 +28,7 @@ Sonidos, animaciones y gráficos forman parte de la paridad protegida. Modo Pris
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 
-La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](phase-19-5.md). El primero ya está cerrado:
+La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](phase-19-5.md). Los cinco están cerrados:
 
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa de UI/hooks/contexts/app: **completado**;
 - [19.5.2](phase-19-5-2.md) — persistencia financiera fuera de React: **completado**;
