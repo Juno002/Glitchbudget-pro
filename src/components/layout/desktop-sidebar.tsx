@@ -18,6 +18,8 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
+      {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a href="/" className="flex items-center gap-3 px-2" aria-label="GlitchBudget Pro">
         <BrandMark />
         <span className="min-w-0">
