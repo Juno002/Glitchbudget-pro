@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { LockKeyhole, LockOpen, RotateCcwKey } from 'lucide-react';
+import { LockKeyhole, LockOpen, RotateCcw } from 'lucide-react';
 import { useAppLock } from '@/contexts/app-lock-context';
 import {
   APP_LOCK_PIN_MAX_LENGTH,
@@ -166,7 +166,7 @@ export default function AppLockSettings() {
       </div>
 
       <form onSubmit={replacePin} className="space-y-3 border-t pt-4">
-        <div className="flex items-center gap-2 text-sm font-medium"><RotateCcwKey className="h-4 w-4" /> Cambiar PIN</div>
+        <div className="flex items-center gap-2 text-sm font-medium"><RotateCcw className="h-4 w-4" /> Cambiar PIN</div>
         <div className="grid gap-3 md:grid-cols-3">
           <PinInput label="PIN actual" value={currentPin} onChange={setCurrentPin} autoComplete="current-password" />
           <PinInput label="Nuevo PIN" value={replacementPin} onChange={setReplacementPin} autoComplete="new-password" />
