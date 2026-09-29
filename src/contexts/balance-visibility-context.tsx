@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { useFinances } from '@/contexts/finance-context';
-import { BALANCE_VISIBILITY_BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
+import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
 
 type BalanceVisibilityContextValue = {
   balancesHidden: boolean;
