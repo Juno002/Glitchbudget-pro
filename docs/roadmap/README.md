@@ -1,18 +1,26 @@
 # Roadmap: documentación vigente
 
-## Fase 17 — Seguridad y privacidad local en progreso
+## Fase 17 — Seguridad y privacidad local completada
 
-La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 está dividida en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md).
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 17 quedó cerrada en cinco iteraciones: [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock, [17.3](phase-17-3.md) Auto-lock, [17.4](phase-17-4.md) backup cifrado opcional y [17.5](phase-17-5.md) restore cifrado + hardening + gate final.
 
-**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock, [17.3](phase-17-3.md) Auto-lock y [17.4](phase-17-4.md) backup cifrado opcional.
+Estado final:
 
-17.4 añade una exportación cifrada separada del JSON normal. El sobre `GlitchBudget encrypted backup` **v1** usa PBKDF2-SHA-256 (310,000 iteraciones), salt aleatorio de 16 bytes y AES-256-GCM autenticado con nonce aleatorio de 12 bytes. El payload interno sigue siendo el backup JSON canónico **v12**.
+- **Hide amounts** = privacidad visual, no cifrado.
+- **App lock** = barrera local de UI con PIN verificado mediante PBKDF2; no cifra Dexie.
+- **Auto-lock** = bloqueo de sesión por inactividad/foreground y depende de App lock.
+- **Backup cifrado** = sobre `GlitchBudget encrypted backup` v1 con PBKDF2-SHA-256 y AES-256-GCM autenticado.
+- **Restore cifrado** = valida/autentica/descifra antes de invocar el importador JSON canónico.
+- Contraseña incorrecta, corrupción o envelope inválido no producen restore parcial.
+- El backup JSON normal continúa disponible y el importador mantiene contratos **v3–v12**.
+- Dexie permanece en **v14** y JSON normal en **v12**.
+- PIN/contraseñas no se transmiten; el flujo continúa local-only.
 
-La contraseña no se transmite ni se persiste. El JSON normal, sus imports legacy y las copias OPFS actuales permanecen disponibles sin cambios. El restore de `.gbenc` todavía no existe y queda reservado para 17.5.
+El gate funcional final de 17.5 (`36533876517`) verificó **379/379 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-Dexie sigue en **v14**. El gate de 17.4 (`36531177196`) verificó **370/370 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+La Definition of Done, formatos y limitaciones quedan registradas en [phase-17-5.md](phase-17-5.md).
 
-**Estado actual:** Fase 17 en progreso. **17.5 — Restore cifrado + hardening + gate final es el siguiente y último checkpoint.** No avanzar a Fase 18 antes de completar 17.5 y su gate.
+**Estado actual:** Fase 17 completada. **Fase 18 es la siguiente fase del roadmap, pero no está iniciada.** No entrar en Fase 18 sin autorización explícita del usuario.
 
 ## Fase 16 — Automatización local completada
 
