@@ -41,6 +41,7 @@ export function ImportConfirmation({
           <AlertDialogDescription>
             Se reemplazarán {scope} con los datos de <span className="font-medium break-all">{file?.name}</span>.
             {preview ? ' Revisa el contenido validado antes de continuar.' : ' Esta acción reemplaza los registros actuales del alcance indicado.'}
+            {' '}Antes de escribir, GlitchBudget intentará crear una copia local automática cuando OPFS esté disponible.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
