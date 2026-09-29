@@ -1,97 +1,170 @@
-# 💰 GlitchBudget Pro
+# GlitchBudget Pro
 
-## Estado del roadmap
+[![Quality checks](https://github.com/Juno002/Glitchbudget-pro/actions/workflows/checks.yml/badge.svg)](https://github.com/Juno002/Glitchbudget-pro/actions/workflows/checks.yml)
 
-**Fase 16 — Automatización local en progreso.** Los checkpoints **16.1 Contrato**, **16.2 Motor determinista** y **16.3 Rule suggestions en Quick Add** están completados. Quick Add puede recibir rules y mostrar sugerencias aceptables/ignorables sin aplicar nada automáticamente; todavía no existe almacenamiento ni gestión de rules. El gate verificó **317/317 pruebas**. Consulta [16.3](docs/roadmap/phase-16-3.md), el [índice de documentación vigente](docs/roadmap/README.md) y la [fuente de verdad del roadmap](Roadmap%20septiembre%202026.txt).
+Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-**GlitchBudget Pro** es una aplicación de finanzas personales moderna y potente, diseñada para ofrecer un control total sobre tu dinero. Construida con Next.js, React, ShadCN UI y Tailwind CSS, esta herramienta te permite planificar, registrar y analizar tus finanzas de una manera intuitiva y visual.
+> **Estado del proyecto — 29 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. El preflight técnico de 20.1 está cerrado; el contrato visual y el inventario de paridad de 20.1 son el siguiente trabajo.
+>
+> Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
-## ✨ Características Principales
+## Producto
 
-- **Home 2.0:** Read model compacto con Posición financiera, Presupuesto disponible, Próximos pagos, Metas relevantes e Inversiones. Puede mostrar/ocultar, reordenar y elegir una sección inicial sin alterar cálculos financieros.
-- **Transaction Metadata + filtros:** Gastos pueden clasificarse como Must/Need/Want y usar etiquetas. El historial admite filtros combinables por tipo, cuenta, categoría, fecha, monto, necesidad y etiqueta, además de presets locales guardados.
-- **Modo Minimalista ("Serious Mode"):** Una interfaz ultra-limpia, en escala de grises y sin distracciones para quienes prefieren un enfoque profesional y sobrio en sus finanzas.
-- **Ahorro sugerido:** Configura 0%, 5%, 10% o 20% desde Ajustes → Finanzas como referencia de planificación; no mueve dinero.
-- **Gestión de Ingresos:** Define tu ingreso base (sueldo) y registra fácilmente ingresos adicionales o regalos.
-- **Planificación Inteligente:**
-    - **Presupuestos por Categoría:** Asigna límites semanales, mensuales, anuales o de rango único. Cada presupuesto muestra límite, gastado, restante, porcentaje y estado sobre el mismo Period Engine.
-    - **Metas de Ahorro:** Crea objetivos con plazo y aportes. El progreso se deriva del historial de aportes y el aporte mensual requerido se calcula con el restante, la fecha límite y el Period Engine.
-- **Registro Detallado de Gastos:** Clasifica tus gastos como fijos, variables u ocasionales. Incluye soporte para **Tarjetas de Crédito** con seguimiento de deudas.
-- **Tarjetas de Crédito:** Registra compras y pagos sin duplicar gasto; deuda y patrimonio usan el mismo ledger que Reportes.
-- **Logros:** Reconocimientos consultables como capa secundaria, sin banners persistentes sobre la información financiera.
-- **Rollover de Presupuestos:** Aplica la estrategia configurada a presupuestos semanales, mensuales y anuales; los rangos únicos no se repiten automáticamente.
-- **Reasignación de Límites:** Redistribuye límite planificado entre categorías del mismo rango sin mover dinero real, saldos de cuentas ni movimientos del ledger.
-- **Fundación de Moneda:** Moneda base explícita y moneda por cuenta. Fase 11 conserva todos los saldos existentes, no consulta FX remoto y bloquea operaciones que requerirían una conversión no definida.
-- **Investments 1.0:** Certificados, depósitos a plazo e inversiones de rendimiento conocido se registran como activos no líquidos. El valor futuro se calcula localmente y se etiqueta como estimado; nunca se suma silenciosamente al patrimonio real.
-- **Reports 2.0:** Analiza gasto, cash flow y patrimonio en 7D, 30D, 3M, 6M, 1Y o un rango personalizado. Incluye categorías, transacciones mayores, naturaleza del gasto y comparación con una ventana anterior comparable.
-- **Personalización Extrema:** Elige entre más de **35 iconos financieros** para tus categorías personalizadas, con persistencia total en base de datos.
-- **Interfaz Mobile-First:** Diseño optimizado para controles táctiles con **Tarjetas Expandibles** en lugar de tablas pesadas, eliminando el scroll horizontal innecesario.
-- **Glassmorphism UI:** Una experiencia visual premium con componentes translúcidos, sombras dinámicas y gradientes finamente trabajados.
-- **Interactividad Sonora (8-bit):** Respuestas auditivas retro (Web Audio API) al realizar registros financieros o completar metas.
-- **Persistencia de Datos Local-First:** Toda tu información se guarda de forma segura en **Dexie (IndexedDB)** directamente en tu navegador.
+GlitchBudget registra y analiza dinero real sin confundirlo con planificación futura.
 
-## 🚀 Flujo de Usuario Principal
+Las cuatro áreas principales son:
 
-El diseño de la aplicación sigue un ciclo financiero lógico:
+- **Resumen** — posición actual, presupuesto, próximos movimientos, metas e inversiones.
+- **Movimientos** — ingresos, gastos, transferencias, cuentas, tarjetas, filtros y metadata.
+- **Plan** — presupuestos, metas y pagos planificados.
+- **Reportes** — Spending, Cash Flow, Net Worth, categorías, naturaleza del gasto y comparaciones por período.
 
-1. **Registra operaciones:** El botón global Nuevo movimiento abre el mismo compositor para ingresos, gastos y transferencias.
-2. **Consulta Resumen:** Responde rápido cuánto tienes, cuánto debes, cuánto puedes gastar, qué viene y qué requiere atención.
-3. **Consulta Movimientos:** Busca el historial real, combina filtros avanzados o reutiliza filtros guardados; cuentas y tarjetas quedan como gestión secundaria.
-4. **Organiza Plan:** Presupuestos, Metas y Planificados.
-5. **Analiza en Reportes:** Elige un rango y revisa Spending, Cash Flow, Net Worth, categorías, transacciones mayores y comparación con el rango anterior. Gestiona categorías y preferencias desde Ajustes.
+También incluye Quick Add, Templates, Saved Filters, Rules locales, recurrencias, tarjetas/deuda, inversiones, múltiples rangos de reporte, backups, App Lock, Auto-lock, ocultación de importes, sonidos y animaciones.
 
-## 🛠️ Configuración y Opciones
+## Invariantes financieras
 
-El menú de configuración (ícono de engranaje ⚙️) centraliza el control:
+El núcleo financiero mantiene reglas explícitas y testeadas:
 
-- **Cambiar Tema:** Alterna entre Claro, Oscuro y el modo **Serious**.
-- **Gestión de Categorías:** Crea categorías personalizadas eligiendo un icono del catálogo de Lucide (Cine, Café, Viajes, etc.).
-- **Modo Estricto:** Bloquea el registro de un gasto si excede tu saldo disponible.
-- **Estrategia de Rollover:** (Resetear, Acumular Sobrante o Acumular Deuda).
-- **Copia de Seguridad:** Exportar/Importar JSON sin cifrar y Backups locales vía **OPFS**.
+- los importes persistidos se almacenan como **enteros en centavos**;
+- una compra con tarjeta cuenta como gasto y aumenta el pasivo, sin reducir efectivo;
+- pagar una tarjeta reduce efectivo y pasivo, sin volver a crear gasto;
+- una transferencia entre cuentas no es ingreso ni gasto;
+- un presupuesto no mueve dinero;
+- un pago planificado no mueve dinero hasta confirmarse;
+- una meta no altera patrimonio por sí sola;
+- financiar una inversión mueve patrimonio líquido a invertido, no crea gasto;
+- una proyección de inversión no se suma automáticamente al patrimonio real.
 
-## 💻 Tech Stack
+## Arquitectura
 
-- **Framework:** Next.js (App Router)
-- **UI:** React, ShadCN UI, Tailwind CSS
-- **Persistencia:** **Dexie.js (IndexedDB)**
-- **Iconos:** Lucide React
-- **Gráficos:** Recharts + D3 logic para flujos
-- **Audio:** Web Audio API
-
-## 🧩 Instalación
-
-1.  Instala las dependencias: `npm install`
-2.  Servidor de desarrollo: `npm run dev`
-3.  La aplicación estará disponible en `http://localhost:9002` (o el puerto asignado).
-
-## 🗂️ Estructura del Proyecto
+```text
+React UI
+  ↓
+facades / adapters
+  ↓
+commands · services · queries
+  ↓
+domain selectors · policies
+  ↓
+Dexie / local persistence
 ```
+
+Fronteras protegidas:
+
+- **UI ≠ reglas financieras**
+- **UI ≠ acceso financiero directo a Dexie**
+- **React ≠ requisito del dominio**
+- **persistencia ≠ cálculo financiero**
+- los cálculos canónicos tienen una única fuente de dominio;
+- las mutaciones financieras pasan por commands/services;
+- las pantallas consumen queries/selectors/read models.
+
+El Prisma Engine Gate de Fase 19.5 cerró específicamente estas fronteras antes de comenzar la transformación visual.
+
+## Privacidad, almacenamiento y backups
+
+La build de producción es estática y funciona offline.
+
+- `connect-src 'none'` se verifica en cada HTML generado.
+- `npm run check:local` bloquea primitivas de red, rutas de servidor y SDKs remotos conocidos en el código de aplicación.
+- El service worker no reenvía operaciones, queries ni requests desconocidos a la red.
+- **App Lock protege la interfaz; no cifra IndexedDB ni los archivos del dispositivo.**
+- Hide amounts es privacidad visual, no cifrado.
+- Ajustes → Datos y backups muestra si el navegador concedió **persistent storage** y permite solicitarlo cuando está disponible.
+- Aun con persistent storage, se recomienda conservar un backup externo.
+
+Contratos actuales:
+
+```text
+Dexie schema        v14
+Backup JSON         v13
+Encrypted envelope  v1
+```
+
+El backup cifrado usa PBKDF2-SHA-256 con 310 000 iteraciones y AES-256-GCM autenticado. El import cifrado autentica y descifra antes de entrar al importador JSON canónico. Una contraseña incorrecta o un archivo alterado no deben producir un restore parcial.
+
+Templates, Saved Filters y Rules locales forman parte del backup canónico y del round-trip de restore.
+
+## Calidad
+
+El gate actual del repositorio es:
+
+```bash
+npm ci
+npm run check
+npm run build
+npm run test:e2e
+```
+
+`npm run check` incluye el guard local-only, typecheck, lint y tests.
+
+Baseline vigente tras el preflight de Fase 20.1:
+
+- **463/463 tests**;
+- suite determinista de propiedades del ledger con **1 200 escenarios generados**;
+- build estática + manifest offline;
+- browser E2E sobre Chrome/Chromium real;
+- E2E: crear ingreso → crear gasto → verificar Movimientos → recargar offline desde service worker;
+- Quality checks run **36617612176** verde.
+
+La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
+
+## Desarrollo local
+
+Requiere **Node.js 22+**.
+
+```bash
+npm ci
+npm run dev
+```
+
+Desarrollo: `http://localhost:9002`.
+
+Para verificar la salida de producción:
+
+```bash
+npm run check
+npm run build
+npm run test:e2e
+npm start -- --port 9011
+```
+
+El contenido desplegable es `out/`. No requiere un runtime Next de servidor en producción.
+
+## Estructura
+
+```text
 src/
-├── components/
-│   ├── dashboard/    # Pestañas (Summary, Planning, Reports, Movements)
-│   ├── layout/       # BottomNav, Header (Settings), AppShell
-│   └── ui/           # Base de ShadCN + IconPicker
-├── contexts/         # FinanceContext (Lógica de negocio y Dexie sync)
-├── lib/              # types.ts, categories.ts, goal-calculator.ts
-└── app/              # PWA Wrapper
+├── app/            # entrada PWA / composición
+├── components/     # UI, dashboard, settings, backup, security
+├── contexts/       # fachadas y estado React
+├── domain/         # modelos, selectors y cálculos puros
+├── hooks/          # adapters React / queries
+├── lib/            # services, queries, persistence helpers, backup
+└── policies/       # invariantes y políticas financieras
+
+tests/              # dominio, integración, migración, seguridad, arquitectura
+scripts/            # guards, build/offline, preview y browser E2E
+docs/               # contratos, UX y cierres de fases
 ```
 
----
-*GlitchBudget Pro: Diseñado para el Monje Financiero moderno. Privacidad total con IndexedDB, cálculos en centavos y una interfaz que se siente viva.*
+## Roadmap
 
-## Validación y datos locales
+La fuente funcional única es:
 
-Requiere Node.js 22 o superior. Ejecuta `npm ci`, `npm run check` y `npm run build`. La compilación genera los recursos de uso sin conexión; primero abre la versión de producción con conexión y espera a que se instale. Una actualización se activa al cerrar las pestañas anteriores.
+- [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt)
 
-Los datos pertenecen al navegador y a la dirección donde abres la aplicación. No hay cuentas ni sincronización. Borrar los datos del sitio elimina también los respaldos locales: descarga periódicamente un JSON externo. Los respaldos no están cifrados.
+Documentación de ejecución:
 
-La revisión de calidad y sus límites están documentados en `docs/quality-review.md`.
+- [Índice vigente](docs/roadmap/README.md)
+- [Fase 20 — Modo Prisma](docs/roadmap/phase-20.md)
+- [Prisma UI System](docs/ux/prisma-mode.md)
+- [Preflight técnico 20.1](docs/roadmap/phase-20-1-preflight.md)
 
-## Distribución estática (roadmap, fase 1)
+Fase 20 mantiene **GlitchBudget Engine** como único motor financiero y utiliza el repositorio Prisma únicamente como referencia visual. El producto visible pasará a llamarse **Prisma** al aprobar el Gate 20.7. Ese cambio es branding: identificadores persistentes como `GlitchBudgetDB` no se renombran solo por estética.
 
-Ejecuta `npm run build` y publica exclusivamente la carpeta `out/` en un hosting estático HTTPS, desde la raíz del dominio. No requiere Next en producción, rutas API ni variables de entorno. Para una vista previa local: `npm start -- --port 9011`. El servidor de vista previa solo escucha en este equipo.
+## Principio de evolución
 
-El manifiesto offline se genera dentro de `out/` después de exportar. Publica toda la carpeta de forma atómica y sirve `sw.js`, `precache-manifest.js` y HTML con revalidación (Cache-Control: no-cache). Las fuentes se descargan durante el build con next/font y se incluyen en los archivos locales; el navegador no contacta Google Fonts.
+No hay rewrite total.
 
-`npm run check:local` forma parte del check de CI y rechaza primitivas de red, rutas de servidor y SDK remotos conocidos en el código de aplicación. No sustituye una auditoría de dependencias ni detecta código deliberadamente ofuscado.
+Cada cambio debe preservar datos e invariantes, pasar su gate y mantener backup, migraciones, offline y privacidad. Una superficie visual no sustituye a la anterior hasta demostrar paridad funcional.
