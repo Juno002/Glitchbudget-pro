@@ -3,6 +3,7 @@ import type { RuleSuggestion, TransactionRule } from './rules';
 export type RuleMatch = {
   ruleId: string;
   ruleName: string;
+  applyAutomatically?: boolean;
   suggestion: RuleSuggestion;
 };
 
@@ -28,6 +29,7 @@ export function evaluateTransactionRule(
   return {
     ruleId: rule.id,
     ruleName: rule.name,
+    ...(rule.applyAutomatically === true ? { applyAutomatically: true } : {}),
     suggestion: {
       categoryId: rule.suggestion.categoryId,
       necessity: rule.suggestion.necessity,
