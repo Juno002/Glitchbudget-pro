@@ -121,7 +121,8 @@ test('18.3 JSON and OPFS restore UI require a validated preview before confirmat
   assert.match(dialog, /<ImportConfirmation[\s\S]*preview=\{pendingPreview\}/);
   assert.match(confirmation, /BackupPreviewSummary/);
   assert.match(confirmation, /Confirmar y restaurar/);
-  assert.match(confirmation, /open=\{!!file && !!preview\}/);
+  assert.match(confirmation, /const ready = !!file && \(!requirePreview \|\| !!preview\)/);
+  assert.match(dialog, /requirePreview/);
 });
 
 test('18.3 encrypted UI is explicitly two-step: review then confirm', () => {
