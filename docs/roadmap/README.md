@@ -1,20 +1,22 @@
 # Roadmap: documentación vigente
 
-## Fase 18 — Backup 2.0 y migraciones permanentes en progreso
+## Fase 18 — Backup 2.0 y migraciones permanentes completada
 
-La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecuta en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecutó en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md):
 
-**Completadas:** [18.1](phase-18-1.md) contrato/versionado, [18.2](phase-18-2.md) cobertura automática de tablas, [18.3](phase-18-3.md) preview + confirmación de import y [18.4](phase-18-4.md) backup OPFS automático pre-import.
+- [18.1](phase-18-1.md) — contrato/versionado;
+- [18.2](phase-18-2.md) — cobertura automática de tablas;
+- [18.3](phase-18-3.md) — preview + confirmación de import;
+- [18.4](phase-18-4.md) — backup OPFS automático pre-import;
+- [18.5](phase-18-5.md) — migraciones permanentes + hardening + gate final.
 
-18.4 añade una red de seguridad previa a cualquier import destructivo. El archivo entrante se valida primero; después, si OPFS está disponible, GlitchBudget exporta el estado actual a un JSON v13 `glitchbudget-pre-import-...` y solo cuando esa escritura termina correctamente permite el reemplazo de datos. Si OPFS está disponible pero la copia falla, el import se cancela antes de tocar Dexie.
+El contrato final permanece en **Dexie v14 / JSON v13 / app 0.1.0 / encrypted envelope v1**.
 
-Cuando OPFS no está disponible, la aplicación **no finge que existe una copia**: informa `Sin copia automática previa` y puede continuar el restore. La protección cubre JSON externo, restore desde una copia OPFS existente, backup cifrado y también los imports CSV que reemplazan tablas completas.
+El cierre 18.5 fija un gate permanente contra estrategias destructivas de migración, exige una historia Dexie incremental sin huecos, preserva los fixtures históricos v6/v7, mantiene fail-closed la cobertura de las 16 tablas, conserva compatibilidad JSON v3–v12 y vuelve a verificar preview, restore JSON/cifrado y copia OPFS previa.
 
-Versiones sin cambios: **Dexie v14 / JSON v13 / app 0.1.0 / encrypted envelope v1**.
+No hay schema change ni migración nueva en 18.5. `db.clear()` o recrear la DB continúan prohibidos como estrategia de migración; el clear transaccional del restore sigue siendo una operación explícita de importación validada, no una migración.
 
-El gate funcional de 18.4 (`36581303597`) verificó **412/412 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
-
-**Estado actual:** Fase 18 en progreso. **18.5 — Migraciones permanentes + hardening + gate final es el siguiente y último checkpoint.** No avanzar a Fase 19 antes de completar 18.5 y su gate.
+**Estado actual:** Fase 18 completada. La siguiente fase canónica es **Fase 19 — Technical-debt closure**, todavía no iniciada. No entrar en Fase 19 sin autorización explícita del usuario.
 
 ## Fase 17 — Seguridad y privacidad local completada
 
