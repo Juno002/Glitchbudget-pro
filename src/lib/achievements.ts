@@ -255,3 +255,75 @@ export function getLevel(xp: number): { level: number; title: string; nextXP: nu
     currentXP: xp,
   };
 }
+
+
+import type { Expense, GoalContribution, Income, Plan } from '@/domain/models';
+import type { GoalView } from '@/domain/goals';
+
+export type AchievementBudgetStatus = {
+  limit: number;
+  remaining: number;
+  status: 'ok' | 'alert' | 'over' | 'unbudgeted';
+};
+
+export function evaluateFinancialAchievements(input: {
+  expenses: Expense[];
+  incomes: Income[];
+  goals: GoalView[];
+  goalContributions: GoalContribution[];
+  budgets: Plan[];
+  currentMonth: string;
+  budgetDetails: AchievementBudgetStatus[];
+  streak: number;
+}) {
+  const eligible = new Set<AchievementId>();
+
+  if (input.expenses.length >= 1) eligible.add('first_expense');
+  if (input.incomes.length >= 1) eligible.add('first_income');
+  if (input.goals.length >= 1) eligible.add('first_goal');
+
+  const transactionCount = input.expenses.length + input.incomes.length;
+  if (transactionCount >= 5) eligible.add('five_transactions');
+  if (transactionCount >= 20) eligible.add('twenty_transactions');
+
+  if (input.goals.some(goal => goal.status === 'completed')) eligible.add('goal_complete');
+
+  const totalSaved = input.goals.reduce((sum, goal) => sum + goal.saved, 0);
+  if (totalSaved >= 1_000_000) eligible.add('big_saver');
+
+  const monthBudgets = input.budgets.filter(budget => budget.month === input.currentMonth && budget.limit > 0);
+  if (monthBudgets.length >= 5) eligible.add('budget_master');
+
+  const budgetedCategories = input.budgetDetails.filter(budget => budget.limit > 0);
+  const allWithinLimit = budgetedCategories.length > 0
+    && budgetedCategories.every(budget => budget.status !== 'over');
+  if (allWithinLimit) eligible.add('budget_under_control');
+
+  if (new Set(input.incomes.map(income => income.categoryId)).size >= 3) {
+    eligible.add('diversified_income');
+  }
+
+  if (
+    allWithinLimit
+    && budgetedCategories.every(budget => budget.remaining >= 0 && budget.remaining <= budget.limit * 0.1)
+  ) {
+    eligible.add('zero_waste');
+  }
+
+  const recordedMonths = new Set([
+    ...input.expenses.map(expense => expense.month),
+    ...input.incomes.map(income => income.month),
+  ]);
+  if (recordedMonths.size >= 3) eligible.add('consistent_tracker');
+
+  const contributionCount = input.goalContributions.filter(row => row.kind !== 'legacy_balance').length;
+  const nextStreak = Math.max(input.streak, contributionCount);
+  if (nextStreak >= 3) eligible.add('saver_streak_3');
+  if (nextStreak >= 7) eligible.add('saver_streak_7');
+
+  return {
+    eligible: Array.from(eligible),
+    contributionCount,
+    nextStreak,
+  };
+}
