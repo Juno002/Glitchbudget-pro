@@ -1,5 +1,19 @@
 # Roadmap: documentación vigente
 
+## Fase 17 — Seguridad y privacidad local planificada
+
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 se acordó en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md), sin redefinir el alcance del roadmap:
+
+1. **17.1 — Contrato de seguridad local**
+2. **17.2 — App lock**
+3. **17.3 — Auto-lock**
+4. **17.4 — Backup cifrado**
+5. **17.5 — Restore cifrado + hardening + gate final**
+
+`Hide amounts` ya existe y sirve como base. App lock y Auto-lock todavía no están implementados. El roadmap exige distinguir bloqueo de UI de cifrado de Dexie, mantener el backup JSON normal disponible y añadir backup cifrado opcional con Web Crypto, autenticación criptográfica y formato versionado.
+
+**Estado actual:** Fase 17 todavía no iniciada. **17.1 es el siguiente checkpoint.** No avanzar a Fase 18 antes de completar 17.5 y su gate.
+
 ## Fase 16 — Automatización local completada
 
 Fase 16 quedó cerrada mediante **siete iteraciones**, documentadas en [phase-16.md](phase-16.md): [16.1](phase-16-1.md) contrato, [16.2](phase-16-2.md) motor determinista, [16.3](phase-16-3.md) suggestions, [16.4](phase-16-4.md) gestión local, [16.5](phase-16-5.md) integración **Templates → Saved filters → Rules**, [16.6](phase-16-6.md) auto-apply opcional por Rule y [16.7](phase-16-7.md) hardening + gate final.
