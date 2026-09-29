@@ -5,13 +5,12 @@ import { EmptyState, MetricCard, MoneyValue, ProgressMetric } from '@/components
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Skeleton } from '../ui/skeleton';
-import { budgetRangeForPlan, budgetStatusForRange } from '@/domain/budgets';
-import { contains } from '@/domain/periods';
 import { localDate } from '@/lib/finance-calculations';
 import { formatPeriodRange } from '@/lib/period-format';
 import { BUDGET_PERIOD_LABELS } from './budget-period-controls';
 import { useTabs } from '@/contexts/tabs-context';
 import { Button } from '../ui/button';
+import { selectBudgetStatusCardModel } from '@/domain/dashboard-read-models';
 
 export default function BudgetStatus() {
   const getCategoryInfo = useCategoryResolver();
@@ -40,16 +39,21 @@ export default function BudgetStatus() {
     );
   }
 
-  const trackedBudgets = getBudgetStatusDetails(currentMonth).filter(b => b.configured);
-  const totalLimit = trackedBudgets.reduce((sum, budget) => sum + budget.limit, 0);
-  const totalSpent = trackedBudgets.reduce((sum, budget) => sum + budget.spent, 0);
-  const totalRemaining = totalLimit - totalSpent;
-  const anchor = contains(currentPeriod, localDate()) ? localDate() : currentPeriod.end;
-  const otherBudgets = (budgets || [])
-    .filter(plan => plan.periodType && plan.periodType !== 'monthly')
-    .map(plan => budgetStatusForRange(plan, expenses || [], budgetRangeForPlan(plan, { periodStartDay })))
-    .filter(detail => contains(detail.range, anchor))
-    .sort((a, b) => b.percentage - a.percentage);
+  const {
+    trackedBudgets,
+    totalLimit,
+    totalSpent,
+    totalRemaining,
+    anchor,
+    otherBudgets,
+  } = selectBudgetStatusCardModel(
+    getBudgetStatusDetails(currentMonth),
+    budgets || [],
+    expenses || [],
+    currentPeriod,
+    periodStartDay,
+    localDate(),
+  );
 
   return (
     <Card>
@@ -81,7 +85,7 @@ export default function BudgetStatus() {
                   total={budget.limit}
                   currentLabel="Gastado"
                   totalLabel="Límite"
-                  remaining={budget.limit - budget.spent}
+                  remaining={budget.remaining}
                   status={status}
                   statusLabel={statusLabel}
                 />
