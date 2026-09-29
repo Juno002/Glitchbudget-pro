@@ -10,7 +10,7 @@ La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](pha
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa de UI/hooks/contexts/app: **completado**;
 - [19.5.2](phase-19-5-2.md) — persistencia financiera fuera de React: **completado**;
 - [19.5.3](phase-19-5-3.md) — cálculos financieros + read models reutilizables: **completado**;
-- 19.5.4 — `finance-context` + hardening: pendiente;
+- [19.5.4](phase-19-5-4.md) — `finance-context` + hardening: **completado**;
 - 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
 
 19.5.1 auditó 120 archivos TS/TSX de las superficies exigidas. Confirmó cero Dexie directo en `src/components/**` y `src/app/**`, pero identificó persistencia financiera aún alojada en hooks React y residuos de cálculo/read-model en `finance-context`, presupuestos, metas, deuda, transferencias, cuentas y achievements.
@@ -19,7 +19,9 @@ La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](pha
 
 19.5.3 extrajo los residuos financieros/read-model detectados en presupuestos, metas, deuda, cuentas, Plan, achievements y `finance-context`. Las superficies React consumen ahora selectores puros de dominio y conservan únicamente presentación/coordinación.
 
-**Estado actual:** 19.5.3 completada. El Prisma Engine Gate sigue abierto; la siguiente ejecución es **19.5.4 — finance-context + hardening**. No iniciar sin autorización explícita del usuario.
+19.5.4 retiró las validaciones/configuración financiera residual de `finance-context`, extrajo `resolveSettings()` a un read model no-React y añadió guards permanentes para mantener dominio, policies y services financieros independientes de React.
+
+**Estado actual:** 19.5.4 completada. El Prisma Engine Gate sigue abierto; la siguiente ejecución es **19.5.5 — barrido final + Prisma Engine Gate**. No iniciar sin autorización explícita del usuario.
 
 ## Fase 19 — Technical-debt closure completada
 

@@ -52,6 +52,39 @@
           }
         ]
       }
+    },
+    {
+      "files": [
+        "src/domain/**/*.{ts,tsx}",
+        "src/policies/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "react",
+                "message": "Domain and policy modules must remain React-free."
+              },
+              {
+                "name": "react-dom",
+                "message": "Domain and policy modules must remain React-free."
+              },
+              {
+                "name": "dexie-react-hooks",
+                "message": "Domain and policy modules must remain React-free."
+              }
+            ],
+            "patterns": [
+              "@/components/*",
+              "@/hooks/*",
+              "@/contexts/*",
+              "@/app/*"
+            ]
+          }
+        ]
+      }
     }
   ]
 }
