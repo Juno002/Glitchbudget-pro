@@ -166,7 +166,12 @@ const selectFirstOptionExpression = selector => `(() => {
 })()`;
 
 async function createMovement(client, type, amount) {
-  if (!await client.evaluate(clickButtonExpression('Nuevo movimiento'))) {
+  if (!await client.evaluate(`(() => {
+    const button = document.querySelector('[aria-label="Nuevo movimiento"]');
+    if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+    button.click();
+    return true;
+  })()`)) {
     throw new Error('No se encontró la acción global Nuevo movimiento.');
   }
   await waitFor(client, `Boolean(document.querySelector('[aria-label="Monto"]'))`, 'Quick Add');
