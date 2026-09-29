@@ -34,6 +34,7 @@ import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
+import { decryptEncryptedBackupText } from '@/lib/encrypted-backup';
 import { opfsWrite, opfsRead, hasOPFS, opfsList, opfsDelete } from "@/lib/opfs";
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
@@ -139,6 +140,7 @@ interface FinanceContextType {
   deleteBackup: (name: string) => Promise<void>;
   getBackupFile: (name: string) => Promise<File | null>;
   importData: (file: File) => Promise<boolean>;
+  importEncryptedData: (file: File, password: string) => Promise<boolean>;
   exportData: () => Promise<void>;
   setDataVersion: React.Dispatch<React.SetStateAction<number>>;
 
@@ -687,6 +689,30 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
+  const importEncryptedData = useCallback(async (file: File, password: string) => {
+    setIsWorking(true);
+    try {
+      const encryptedText = await file.text();
+      const json = await decryptEncryptedBackupText(encryptedText, password);
+      await importDataJSON(json);
+      setDataVersion(v => v + 1);
+      toast({
+        title: 'Backup cifrado restaurado',
+        description: 'El archivo se autenticó, descifró e importó localmente.',
+      });
+      return true;
+    } catch (error) {
+      toast({
+        title: 'No se pudo restaurar el backup cifrado',
+        description: friendlyError(error),
+        variant: 'destructive',
+      });
+      return false;
+    } finally {
+      setIsWorking(false);
+    }
+  }, [toast]);
+
   const addDebt = useCallback(async (debt: Omit<Debt, "id" | "createdAt">) => {
     try {
       const newDebt: Debt = { ...debt, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
@@ -884,6 +910,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     deleteBackup,
     getBackupFile,
     importData,
+    importEncryptedData,
     exportData,
     setDataVersion,
     loading,
@@ -900,7 +927,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,
-    importData, exportData, setDataVersion, loading, isWorking
+    importData, importEncryptedData, exportData, setDataVersion, loading, isWorking
   ]);
 
   return (
