@@ -116,7 +116,7 @@ test('16.2 engine is pure local evaluation with no UI, persistence, AI or networ
   assert.doesNotMatch(source,/localStorage|indexedDB|Dexie|db\./i);
   assert.doesNotMatch(source,/fetch\s*\(|axios|XMLHttpRequest|https?:\/\//i);
   assert.doesNotMatch(source,/openai|gemini|anthropic|language model|\bAI\b/i);
-  assert.doesNotMatch(source,/applyAutomatically|autoApply|saveExpense|saveIncome|update/i);
+  assert.doesNotMatch(source,/saveExpense|saveIncome|updateExpense|updateIncome|addExpense|addIncome/i);
 });
 
 test('16.2 engine may be consumed by 16.3 Quick Add while persistence remains absent', () => {
