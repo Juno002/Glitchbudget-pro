@@ -1,5 +1,5 @@
 import type { Settings } from '@/domain/models';
-import { normalizeFinancialPolicies } from '@/policies/settings';
+import { normalizeFinancialPolicies, type FinancialPolicies } from '@/policies/settings';
 
 export const DEFAULT_SETTINGS: Settings = {
   id: 'general',
@@ -14,7 +14,9 @@ export const DEFAULT_SETTINGS: Settings = {
   savePct: 0,
 };
 
-export function resolveSettings(raw: Partial<Settings> | null | undefined): Settings {
+export type ResolvedSettings = Settings & FinancialPolicies;
+
+export function resolveSettings(raw: Partial<Settings> | null | undefined): ResolvedSettings {
   const settings = raw ?? {};
   return {
     ...DEFAULT_SETTINGS,
