@@ -142,6 +142,7 @@ interface FinanceContextType {
   getBackupFile: (name: string) => Promise<File | null>;
   importData: (file: File) => Promise<boolean>;
   importEncryptedData: (file: File, password: string) => Promise<boolean>;
+  backupBeforeDestructiveImport: () => Promise<void>;
   exportData: () => Promise<void>;
   setDataVersion: React.Dispatch<React.SetStateAction<number>>;
 
@@ -931,6 +932,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getBackupFile,
     importData,
     importEncryptedData,
+    backupBeforeDestructiveImport,
     exportData,
     setDataVersion,
     loading,
@@ -947,7 +949,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,
-    importData, importEncryptedData, exportData, setDataVersion, loading, isWorking
+    importData, importEncryptedData, backupBeforeDestructiveImport, exportData, setDataVersion, loading, isWorking
   ]);
 
   return (
