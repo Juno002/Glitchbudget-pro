@@ -2,6 +2,7 @@ import { withoutLegacyCategories } from '@/domain/categories';
 import type { Settings } from '@/domain/models';
 import { db } from '@/lib/db';
 import { readFinancialPolicies } from '@/lib/policy-settings';
+import { toCents } from '@/lib/utils';
 
 export async function initializeSettings(
   defaults: Settings,
@@ -34,4 +35,20 @@ export async function resetPersistedSettings(defaults: Settings): Promise<void> 
     await db.settings.clear();
     await db.settings.put(defaults);
   });
+}
+
+
+export async function savePeriodStartDay(day: number): Promise<void> {
+  if (!Number.isInteger(day) || day < 1 || day > 31) {
+    throw new Error('El inicio del período debe estar entre 1 y 31.');
+  }
+  await updatePersistedSetting('periodStartDay', day);
+}
+
+export async function saveBaseIncomeInput(input: Settings['baseIncome']): Promise<void> {
+  const amount = toCents(input.amount);
+  if (!Number.isSafeInteger(amount) || amount < 0) {
+    throw new Error('Introduce un ingreso positivo o cero.');
+  }
+  await updatePersistedSetting('baseIncome', { freq: input.freq, amount });
 }
