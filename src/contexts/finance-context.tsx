@@ -34,7 +34,7 @@ import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
-import { decryptEncryptedBackupText } from '@/lib/encrypted-backup';
+import { restoreEncryptedBackupText } from '@/lib/encrypted-backup-restore';
 import { opfsWrite, opfsRead, hasOPFS, opfsList, opfsDelete } from "@/lib/opfs";
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
@@ -693,8 +693,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setIsWorking(true);
     try {
       const encryptedText = await file.text();
-      const json = await decryptEncryptedBackupText(encryptedText, password);
-      await importDataJSON(json);
+      await restoreEncryptedBackupText(encryptedText, password);
       setDataVersion(v => v + 1);
       toast({
         title: 'Backup cifrado restaurado',
