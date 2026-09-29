@@ -103,7 +103,7 @@ Debe quedar documentado qué ocurre cuando OPFS no está disponible y cómo se i
 
 ---
 
-## 18.5 — Migraciones permanentes + hardening + gate final
+## 18.5 — Migraciones permanentes + hardening + gate final ✅
 
 Objetivo: cerrar Fase 18 con garantías permanentes de preservación.
 
@@ -150,8 +150,8 @@ Durante 18.1–18.5:
 18.2 — Cobertura automática de tablas    ✅ completado
 18.3 — Preview + confirmación             ✅ completado
 18.4 — Backup OPFS pre-import            ✅ completado
-18.5 — Migraciones + hardening + gate    ⏳ siguiente
+18.5 — Migraciones + hardening + gate    ✅ completado
 ```
 
 
-**Fase 18 está en progreso. 18.1–18.4 quedaron completados; 18.5 — Migraciones permanentes + hardening + gate final es el siguiente y último checkpoint.**
+**Fase 18 queda completada con 18.1–18.5. El cierre y la evidencia del gate final están documentados en [phase-18-5.md](phase-18-5.md). No iniciar Fase 19 sin autorización explícita.**
