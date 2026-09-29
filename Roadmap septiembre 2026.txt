@@ -2514,6 +2514,250 @@ No debe existir un atajo desde UI a Dexie ni una fórmula financiera exclusiva d
 
 Documentar cualquier excepción deliberada. Si una excepción contiene semántica financiera, **no cerrar la fase**.
 
+# FASE 20 — Modo Prisma / transformación visual y branding
+
+## Objetivo
+
+Transformar la interfaz de GlitchBudget en el producto visual **Prisma** sin sustituir, duplicar ni reinterpretar el motor financiero cerrado en Fase 19.5.
+
+La referencia visual inicial queda congelada en:
+
+```text
+Juno002/Prisma
+main @ dc4310040f42cefd74cf41bad75152902e549c24
+```
+
+El repositorio Prisma funciona únicamente como referencia de apariencia. No son fuente canónica:
+
+- su dominio;
+- sus commands;
+- su Dexie DB;
+- su backup;
+- su servidor;
+- sus cálculos financieros;
+- sus cifras demo;
+- su roadmap técnico.
+
+La dirección obligatoria es:
+
+```text
+Prisma visual language
+→ GlitchBudget UI
+→ existing queries/read models/commands
+→ GlitchBudget Engine
+→ Dexie/local persistence
+```
+
+## Invariantes de Fase 20
+
+Durante toda la fase:
+
+- GlitchBudget Engine sigue siendo la única fuente de verdad financiera;
+- no se fusionan los motores de ambos repositorios;
+- no se cambia semántica financiera para adaptar una pantalla;
+- no se introduce Dexie directo en UI;
+- no se eliminan funciones existentes por razones estéticas;
+- sonidos y animaciones se conservan;
+- los gráficos se conservan y pueden rediseñarse/recolocarse, no desaparecer por defecto;
+- Modo Prisma es el tema claro principal;
+- Modo Neón se conserva como tema oscuro principal;
+- ambos temas usan los mismos datos, commands, queries y métricas;
+- el cambio de nombre visible a Prisma ocurre al final, en 20.7;
+- branding no implica renombrar automáticamente `GlitchBudgetDB`, claves persistentes, IDs o formatos de backup.
+
+La persistencia prevista permanece:
+
+```text
+Dexie v14
+Backup JSON v13
+Encrypted envelope v1
+```
+
+Si una etapa puramente visual parece requerir una migración financiera o cambio de schema, detenerse y revisar antes de implementar.
+
+## 20.1 — Contrato visual + inventario de paridad
+
+Crear la matriz completa:
+
+```text
+superficie GlitchBudget
+→ destino visual Prisma
+→ read model / command existente
+→ funciones protegidas
+```
+
+Inventariar explícitamente:
+
+- sonidos;
+- animaciones;
+- gráficos;
+- microinteracciones;
+- estados loading/empty/error;
+- capacidades mobile/desktop;
+- texto que puede reducirse sin ocultar significado.
+
+Marcar como prohibido portar desde Prisma:
+
+```text
+domain/**
+application/**
+persistence/**
+server/**
+cálculos financieros de Home.tsx
+datos financieros hardcoded
+```
+
+**Gate 20.1:** ninguna capacidad existente queda sin destino o marcada para eliminación implícita.
+
+## 20.2 — Design system + temas + shell
+
+Construir:
+
+- tokens;
+- tipografía;
+- spacing;
+- cards;
+- iconografía;
+- sidebar;
+- navegación móvil;
+- header;
+- FAB/global action;
+- Modo Prisma claro;
+- Modo Neón oscuro.
+
+Preservar hide amounts, App Lock, Auto-lock, reduced motion, sonidos y microanimaciones.
+
+**Gate 20.2:** cambiar tema o shell no altera ningún dato ni comportamiento financiero.
+
+## 20.3 — Resumen / Home Prisma
+
+Migrar Resumen sobre los read models existentes.
+
+Conservar:
+
+- posición financiera;
+- presupuesto;
+- próximos;
+- metas;
+- inversiones;
+- señales de atención;
+- personalización de Home;
+- visualizaciones útiles.
+
+**Gate 20.3:** paridad funcional completa y cero fórmulas financieras nuevas en UI.
+
+## 20.4 — Movimientos + compositor global
+
+Migrar:
+
+- historial;
+- búsqueda;
+- filtros;
+- saved filters;
+- metadata;
+- cuentas/tarjetas como gestión secundaria;
+- Quick Add;
+- Templates;
+- Rules;
+- gasto/ingreso/transferencia;
+- dialogs y confirmaciones.
+
+Conservar sonidos de movimiento, animaciones, budget warning y rutas command/service existentes.
+
+**Gate 20.4:** crear/editar/eliminar movimientos sigue atravesando el mismo motor financiero.
+
+## 20.5 — Plan Prisma
+
+Migrar:
+
+- Presupuestos;
+- Metas;
+- Planificados;
+- períodos;
+- recurrencias;
+- aportes;
+- estados pending/confirmed/skipped/overdue.
+
+La UI no reconstruye remaining, status, required contribution, overdue ni semántica equivalente.
+
+**Gate 20.5:** Plan conserva paridad y consume selectors/read models canónicos.
+
+## 20.6 — Reportes + sistema de gráficos
+
+Rediseñar Reportes conservando:
+
+- Spending;
+- Cash Flow;
+- Net Worth;
+- comparación de períodos;
+- distribución por categoría;
+- naturaleza del gasto;
+- 7D / 30D / 3M / 6M / 1Y / Custom;
+- gráficos reales existentes.
+
+Regla:
+
+```text
+minimalismo ≠ menos información financiera
+```
+
+Los componentes gráficos pueden transformar métricas en representación visual, pero no recalcular significado financiero.
+
+**Gate 20.6:** paridad analítica completa; ninguna cifra real proviene de hardcodes Prisma.
+
+## 20.7 — Superficies secundarias + branding Prisma + gate final
+
+Completar:
+
+- cuentas;
+- tarjetas/deuda;
+- inversiones;
+- categorías;
+- Ajustes;
+- seguridad;
+- backup/restore;
+- logros;
+- dialogs/utilidades;
+- estados vacíos/error/loading;
+- mobile/detail views.
+
+Después ejecutar el cambio de branding visible:
+
+```text
+GlitchBudget → Prisma
+```
+
+Cambiar nombre visible, logo, títulos, metadata, PWA labels, copy y documentación de producto donde sea seguro.
+
+No renombrar por branding identificadores persistentes si existe riesgo de pérdida o duplicación de datos.
+
+### Gate 20.7 — Prisma Visual/Branding Gate
+
+Debe demostrarse:
+
+```text
+Prisma = producto visible
+GlitchBudget Engine = único motor financiero
+Modo Prisma = tema claro principal
+Modo Neón = tema oscuro principal
+```
+
+Y además:
+
+- paridad funcional completa;
+- sonidos conservados;
+- animaciones conservadas;
+- gráficos conservados/rediseñados;
+- cero cálculos financieros nuevos en UI;
+- cero Dexie directo en UI;
+- backup/migraciones intactos;
+- offline intacto;
+- cero tráfico financiero de red;
+- mobile y desktop revisados;
+- ningún dato hardcoded de la maqueta Prisma presentado como dato real.
+
+Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostrar paridad.
+
 # Definition of Done obligatoria para CADA fase
 
 Codex **no debe pasar automáticamente a la fase siguiente**.
@@ -2600,6 +2844,10 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 18 Backup/migration polish
 ↓
 19 Technical-debt closure
+↓
+19.5 Prisma Engine Gate
+↓
+20 Modo Prisma / visual transformation + branding
 ```
 
 

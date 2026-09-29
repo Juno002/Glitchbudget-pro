@@ -1,11 +1,34 @@
 # Roadmap: documentación vigente
 
+## Fase 20 — Modo Prisma / transformación visual y branding
+
+La fuente funcional única es `Roadmap septiembre 2026.txt`, ahora extendido con Fase 20.
+
+Plan canónico de ejecución: [phase-20.md](phase-20.md). Contrato visual: [Prisma UI System](../ux/prisma-mode.md).
+
+Estado: **planificado / no iniciado**.
+
+La fase se ejecutará en siete etapas:
+
+- **20.1** — contrato visual + inventario de paridad;
+- **20.2** — design system, Modo Prisma, Modo Neón y shell;
+- **20.3** — Resumen / Home Prisma;
+- **20.4** — Movimientos + compositor global;
+- **20.5** — Plan Prisma;
+- **20.6** — Reportes + sistema de gráficos;
+- **20.7** — superficies secundarias + branding Prisma + gate final.
+
+Regla central: **Prisma aporta el lenguaje visual; GlitchBudget Engine sigue siendo el único motor financiero.** No se adopta el dominio, Dexie, backup, servidor ni cálculos demo del repositorio Prisma.
+
+Sonidos, animaciones y gráficos forman parte de la paridad protegida. Modo Prisma será el tema claro principal y Modo Neón el tema oscuro principal. El nombre visible del producto cambia de GlitchBudget a **Prisma** solo al aprobar 20.7; identificadores persistentes como `GlitchBudgetDB` no se renombran por branding.
+
+
 
 ## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 
-La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](phase-19-5.md). El primero ya está cerrado:
+La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](phase-19-5.md). Los cinco están cerrados:
 
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa de UI/hooks/contexts/app: **completado**;
 - [19.5.2](phase-19-5-2.md) — persistencia financiera fuera de React: **completado**;
@@ -23,7 +46,7 @@ La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](pha
 
 19.5.5 repitió el barrido desde cero y encontró los últimos residuos en Investments, Planificados y selección de deudas/tarjetas. Se extrajeron a read models/selectors no-React y los tres flujos obligatorios —crear gasto, consultar Resumen y consultar Reportes— quedaron codificados como regresión estructural.
 
-**Estado actual:** Fase 19.5 completada. **Prisma Engine Gate aprobado.** GlitchBudget puede servir como núcleo reutilizable para una UI distinta sin copiar fórmulas ni importar componentes React. `Roadmap septiembre 2026.txt` no define una fase posterior; cualquier continuación requiere una nueva decisión de roadmap.
+**Estado actual:** Fase 19.5 completada. **Prisma Engine Gate aprobado.** La continuación autorizada es **Fase 20 — Modo Prisma**, que transforma la capa visual sin sustituir el motor.
 
 ## Fase 19 — Technical-debt closure completada
 
@@ -45,7 +68,7 @@ El gate final de código `36592149312` verificó **426/426 pruebas**, typecheck,
 
 Persistencia e invariantes permanecen sin cambios: **Dexie v14 / JSON v13 / encrypted envelope v1** y ninguna fórmula financiera nueva.
 
-**Estado actual:** Fase 19 completada. La siguiente fase canónica es **Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate**, todavía no iniciada.
+**Estado histórico de Fase 19:** completada. Su continuación fue Fase 19.5, actualmente también completada.
 
 
 ## Fase 18 — Backup 2.0 y migraciones permanentes completada

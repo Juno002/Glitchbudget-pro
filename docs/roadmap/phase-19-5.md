@@ -62,4 +62,4 @@ Durante toda Fase 19.5:
 
 Fase 19.5 queda **completada** con el Prisma Engine Gate aprobado en [19.5.5](phase-19-5-5.md).
 
-No existe una fase posterior definida en `Roadmap septiembre 2026.txt`; cualquier trabajo nuevo debe partir de una nueva decisión de roadmap, no de una continuación implícita.
+Al cerrar 19.5 no existía una fase posterior definida. La decisión posterior de incorporar la interfaz Prisma quedó formalizada como [Fase 20](phase-20.md), sin reabrir ni alterar el Prisma Engine Gate.
