@@ -9,6 +9,13 @@ import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchem
 import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
+import {
+  exportLocalAutomation,
+  normalizeLocalAutomationBackup,
+  replaceLocalAutomation,
+  type LocalAutomationBackup,
+  type LocalAutomationStorage,
+} from './local-automation';
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
@@ -191,9 +198,19 @@ const DumpV11 = DumpV10.extend({
   incomes:z.array(IncomeV11),
   expenses:z.array(ExpenseV11),
 });
-type DumpV11T = z.infer<typeof DumpV11>;
+const LocalAutomationV12 = z.object({
+  templates:z.array(z.unknown()).max(30),
+  savedFilters:z.array(z.unknown()).max(20),
+  rules:z.array(z.unknown()).max(50),
+});
+const DumpV12 = DumpV11.extend({
+  v:z.literal(12),
+  localAutomation:LocalAutomationV12,
+});
+type DumpV12T = z.infer<typeof DumpV12>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===12) return DumpV12.parse(raw);
  if (version===11) return DumpV11.parse(raw);
  if (version===10) return DumpV10.parse(raw);
  if (version===9) return {...DumpV9.parse(raw), investments:[]};
@@ -210,7 +227,19 @@ const nowIsoZ = () => new Date().toISOString();
 
 function uniq<T>(arr: T[]) { return Array.from(new Set(arr)); }
 
-export async function exportDataJSON(): Promise<string> {
+function browserAutomationStorage(): LocalAutomationStorage | undefined {
+  return typeof window !== 'undefined' ? window.localStorage : undefined;
+}
+
+const EMPTY_LOCAL_AUTOMATION: LocalAutomationBackup = {
+  templates: [],
+  savedFilters: [],
+  rules: [],
+};
+
+export async function exportDataJSON(
+  storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
+): Promise<string> {
   // Lee todo de Dexie
   const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, plannedOccurrences, debts, debtPayments, fxRates, accounts, accountTransfers, categories, investments] = await db.transaction('r', db.tables, () => Promise.all([
     db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', periodStartDay: 1, expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
@@ -234,9 +263,10 @@ export async function exportDataJSON(): Promise<string> {
   const goalData = migrateGoalRecords(goals, goalContributions);
   const baseCurrency = normalizeCurrencyCode(settings.currency);
   const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
-  // Current v11 contract adds optional transaction metadata while preserving Phase 12 persistence.
-  const dump: DumpV11T = {
-    v: 11,
+  // Current v12 contract includes the three local automation layers without moving them into Dexie.
+  const dump: DumpV12T = {
+    v: 12,
+    localAutomation: storage ? exportLocalAutomation(storage) : EMPTY_LOCAL_AUTOMATION,
     categories,
     accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
     investments,
@@ -316,7 +346,7 @@ export async function exportDataJSON(): Promise<string> {
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV11.parse(dump);
+  DumpV12.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -330,12 +360,25 @@ export async function downloadExportJSON() {
   URL.revokeObjectURL(a.href);
 }
 
-export async function importDataJSON(text: string): Promise<{
+export async function importDataJSON(
+  text: string,
+  storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
+): Promise<{
   counts: Record<string, number>
 }> {
   // 1) Parse + valida contrato v3
   const raw = JSON.parse(text);
   const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
+  const importedAutomation = d.v === 12 && 'localAutomation' in d
+    ? normalizeLocalAutomationBackup(d.localAutomation)
+    : null;
+  if (importedAutomation && !storage && (
+    importedAutomation.templates.length ||
+    importedAutomation.savedFilters.length ||
+    importedAutomation.rules.length
+  )) {
+    throw new Error('Este respaldo incluye automatización local, pero el almacenamiento local no está disponible.');
+  }
   validateBudgetPlans(d.plans);
 
   if (d.v >= 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
@@ -475,10 +518,15 @@ export async function importDataJSON(text: string): Promise<{
   const fxRates = d.fxRates ?? [];
 
 
-  // 4) Transacción: clear + bulkAdd
-  await db.transaction('rw',
-    db.tables,
-    async () => {
+  // 4) Restore local automation + Dexie as one logical operation.
+  // Older backups did not contain these local layers, so they preserve the current local automation.
+  const previousAutomation = importedAutomation && storage ? exportLocalAutomation(storage) : null;
+  if (importedAutomation && storage) replaceLocalAutomation(storage, importedAutomation);
+
+  try {
+    await db.transaction('rw',
+      db.tables,
+      async () => {
       await Promise.all([
         db.categories.clear(),
         db.settings.clear(),
@@ -513,8 +561,12 @@ export async function importDataJSON(text: string): Promise<{
       if (debts.length) await db.debts.bulkAdd(debts as any);
       if (debtPayments.length) await db.debt_payments.bulkAdd(debtPayments as any);
       if (fxRates.length) await db.fxRates.bulkAdd(fxRates as any);
-    }
-  );
+      }
+    );
+  } catch (error) {
+    if (previousAutomation && storage) replaceLocalAutomation(storage, previousAutomation);
+    throw error;
+  }
 
   // 5) Conteo post-import (para logs o toasts)
   const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr, cinv] = await Promise.all([
@@ -523,9 +575,16 @@ export async function importDataJSON(text: string): Promise<{
     db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(), db.investments.count(),
   ]);
 
+  const automationCounts = storage
+    ? exportLocalAutomation(storage)
+    : EMPTY_LOCAL_AUTOMATION;
+
   return { counts: {
     settings: cs, periods: cp, incomes: ci, expenses: ce, plans: cpl, goals: cg, goal_contributions: cgc,
     recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr, investments:cinv,
+    templates: automationCounts.templates.length,
+    savedFilters: automationCounts.savedFilters.length,
+    rules: automationCounts.rules.length,
   }};
 }
 

@@ -2,6 +2,8 @@ import type { RuleMatch } from './rule-engine';
 
 export type RuleSuggestionTransactionType = 'expense' | 'income' | 'transfer';
 
+export const RULE_PRECEDENCE_POLICY = 'stored-order-manual-on-automatic-conflict' as const;
+
 export function quickAddRuleSuggestions(
   matches: readonly RuleMatch[],
   transactionType: RuleSuggestionTransactionType,

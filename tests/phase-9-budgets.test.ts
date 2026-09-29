@@ -153,7 +153,7 @@ test('current backup round-trips Phase 9 metadata and still imports v7', async (
 
   const text = await exportDataJSON();
   const backup = JSON.parse(text);
-  assert.equal(backup.v, 11);
+  assert.equal(backup.v, 12);
   await importDataJSON(JSON.stringify({...backup, v:7}));
   assert.equal(backup.plans[0].periodType, 'weekly');
   assert.equal(backup.plans[0].periodStart, '2026-09-21');

@@ -22,12 +22,13 @@ export type QuickAddTemplate = {
 type TemplateStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 export const QUICK_ADD_TEMPLATES_KEY = 'glitchbudget_quick_add_templates_v1';
+export const QUICK_ADD_TEMPLATES_MAX = 30;
 
 function cleanString(value: unknown, max = 250) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
 }
 
-function normalizeTemplate(value: unknown): QuickAddTemplate | null {
+export function normalizeQuickAddTemplate(value: unknown): QuickAddTemplate | null {
   if (!value || typeof value !== 'object') return null;
   const raw = value as Partial<QuickAddTemplate>;
   if (!raw.id || !raw.name || !['expense','income','transfer'].includes(String(raw.type))) return null;
@@ -60,20 +61,30 @@ export function loadQuickAddTemplates(storage: TemplateStorage): QuickAddTemplat
   try {
     const parsed = JSON.parse(storage.getItem(QUICK_ADD_TEMPLATES_KEY) || '[]');
     if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeTemplate).filter((item): item is QuickAddTemplate => !!item).slice(0, 30);
+    return parsed.map(normalizeQuickAddTemplate).filter((item): item is QuickAddTemplate => !!item).slice(0, QUICK_ADD_TEMPLATES_MAX);
   } catch {
     return [];
   }
 }
 
-export function writeQuickAddTemplates(storage: TemplateStorage, templates: QuickAddTemplate[]) {
-  storage.setItem(QUICK_ADD_TEMPLATES_KEY, JSON.stringify(templates.slice(0, 30)));
+export function writeQuickAddTemplates(storage: TemplateStorage, templates: readonly QuickAddTemplate[]) {
+  const ids = new Set<string>();
+  const normalized: QuickAddTemplate[] = [];
+  for (const candidate of templates) {
+    const template = normalizeQuickAddTemplate(candidate);
+    if (!template || ids.has(template.id)) continue;
+    ids.add(template.id);
+    normalized.push(template);
+    if (normalized.length >= QUICK_ADD_TEMPLATES_MAX) break;
+  }
+  storage.setItem(QUICK_ADD_TEMPLATES_KEY, JSON.stringify(normalized));
+  return normalized;
 }
 
 export function upsertQuickAddTemplate(storage: TemplateStorage, template: QuickAddTemplate): QuickAddTemplate[] {
-  const normalized = normalizeTemplate(template);
+  const normalized = normalizeQuickAddTemplate(template);
   if (!normalized) throw new Error('La plantilla no contiene un monto o nombre válido.');
-  const next = [normalized, ...loadQuickAddTemplates(storage).filter(item => item.id !== normalized.id)].slice(0, 30);
+  const next = [normalized, ...loadQuickAddTemplates(storage).filter(item => item.id !== normalized.id)].slice(0, QUICK_ADD_TEMPLATES_MAX);
   writeQuickAddTemplates(storage, next);
   return next;
 }

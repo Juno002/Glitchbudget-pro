@@ -3,9 +3,9 @@ import { normalizeTransactionRule, type TransactionRule } from '../domain/rules'
 type RuleStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 export const TRANSACTION_RULES_KEY = 'glitchbudget_transaction_rules_v1';
-const MAX_RULES = 50;
+export const TRANSACTION_RULES_MAX = 50;
 
-function normalizeRules(value: unknown): TransactionRule[] {
+export function normalizeTransactionRules(value: unknown): TransactionRule[] {
   if (!Array.isArray(value)) return [];
 
   const ids = new Set<string>();
@@ -16,7 +16,7 @@ function normalizeRules(value: unknown): TransactionRule[] {
     if (!rule || ids.has(rule.id)) continue;
     ids.add(rule.id);
     rules.push(rule);
-    if (rules.length >= MAX_RULES) break;
+    if (rules.length >= TRANSACTION_RULES_MAX) break;
   }
 
   return rules;
@@ -24,14 +24,14 @@ function normalizeRules(value: unknown): TransactionRule[] {
 
 export function loadTransactionRules(storage: RuleStorage): TransactionRule[] {
   try {
-    return normalizeRules(JSON.parse(storage.getItem(TRANSACTION_RULES_KEY) || '[]'));
+    return normalizeTransactionRules(JSON.parse(storage.getItem(TRANSACTION_RULES_KEY) || '[]'));
   } catch {
     return [];
   }
 }
 
 export function writeTransactionRules(storage: RuleStorage, rules: readonly TransactionRule[]): TransactionRule[] {
-  const normalized = normalizeRules(rules);
+  const normalized = normalizeTransactionRules(rules);
   storage.setItem(TRANSACTION_RULES_KEY, JSON.stringify(normalized));
   return normalized;
 }
