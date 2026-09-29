@@ -3,13 +3,12 @@ import { saveRecurringRule, removeRecurringRule } from '@/lib/recurring-rule-ser
 import { confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOccurrence, type ConfirmPlannedOccurrenceOptions } from '@/lib/planned-occurrence-service';
 import { plannedOccurrenceWindow } from '@/domain/upcoming';
 import { BudgetWarning } from '@/policies/budget-overspending';
-import { activeCategories, withoutLegacyCategories } from '@/domain/categories';
+import { activeCategories } from '@/domain/categories';
 import { createCategory, resetCategories, requireCategory } from '@/lib/category-service';
 
 import { selectPeriodMetrics, recordedCategoriesForPeriod, recordedExpenseForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
-import { readFinancialPolicies } from '@/lib/policy-settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
@@ -23,8 +22,7 @@ import { saveGoal, removeGoal } from '@/lib/goal-service';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Settings, type Income, type Expense, type Plan, type Debt, type DebtPayment, type RecurringRule, type PlannedOccurrence, type AccountTransfer, type Account, type Investment } from '@/lib/db';
+import type { Settings, Income, Expense, Plan, Debt, DebtPayment, RecurringRule, PlannedOccurrence, AccountTransfer, Account, Investment } from '@/domain/models';
 import { computeDisposable } from "@/lib/goal-calculator";
 import { useToast } from "@/hooks/use-toast";
 import { localDate, monthlyAmount } from '@/lib/finance-calculations';
@@ -33,10 +31,10 @@ import { ensureCashAccount, saveTransfer } from '@/lib/accounts';
 import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
 import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
-import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
-import { restoreEncryptedBackupText } from '@/lib/encrypted-backup-restore';
-import { opfsWrite, opfsRead, hasOPFS, opfsList, opfsDelete } from "@/lib/opfs";
-import { createPreImportSafetyBackup } from '@/lib/pre-import-backup';
+import { useFinanceContextData } from '@/hooks/use-finance-context-data';
+import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-management';
+import { initializeSettings, resetPersistedSettings, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
+import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -53,7 +51,7 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
-export type BackupFile = { name: string; lastModified: number };
+export type { BackupFile } from '@/hooks/use-backup-management';
 
 interface FinanceContextType {
   theme: 'light' | 'dark' | 'serious';
@@ -158,20 +156,25 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [currentMonth, setCurrentMonthState] = useState(localDate().slice(0, 7));
   const { toast } = useToast();
   const [dataVersion, setDataVersion] = useState(0);
-  const [isWorking, setIsWorking] = useState(false);
-
-  const financialData = useLiveQuery(() => db.transaction('r', db.tables, async () => ({
-    expenses: await db.expenses.toArray(),
-    incomes: await db.incomes.toArray(),
-    goals: await db.goals.toArray(),
-    goalContributions: await db.goal_contributions.toArray(),
-    budgets: await db.plans.toArray(),
-    debts: await db.debts.toArray(),
-    debtPayments: await db.debt_payments.toArray(),
-    transfers: await db.account_transfers.toArray(),
-    accounts: await db.accounts.toArray(),
-    investments: await db.investments.toArray(),
-  })), [dataVersion]);
+  const {
+    isWorking,
+    backupBeforeDestructiveImport,
+    createBackup,
+    listBackups,
+    restoreBackup,
+    deleteBackup,
+    getBackupFile,
+    exportData,
+    importData,
+    importEncryptedData,
+  } = useBackupManagement(setDataVersion);
+  const {
+    financialData,
+    rawSettings,
+    categories,
+    recurringRules,
+    plannedOccurrences,
+  } = useFinanceContextData(dataVersion);
   const expenses = financialData?.expenses;
   const incomes = financialData?.incomes;
   const goals = useMemo(() => financialData?.goals.map(goal => goalView(goal, financialData.goalContributions)), [financialData]);
@@ -182,12 +185,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const transfers = financialData?.transfers;
   const accounts = financialData?.accounts;
   const investments = financialData?.investments;
-  const rawSettings = useLiveQuery(() => db.settings.get('general').then(s => s ?? null), [dataVersion]);
-  const categories = useLiveQuery(() => db.categories.toArray(), [dataVersion]);
   const expenseCategories = useMemo(() => activeCategories(categories || [], 'expense').map(c => c.id), [categories]);
   const incomeCategories = useMemo(() => activeCategories(categories || [], 'income').map(c => c.id), [categories]);
-  const recurringRules = useLiveQuery(() => db.recurrents.toArray(), [dataVersion]);
-  const plannedOccurrences = useLiveQuery(() => db.planned_occurrences.toArray(), [dataVersion]);
   useEffect(() => {
     if (accounts && !accounts.some(a => a.isDefaultCash)) {
       void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
@@ -230,20 +229,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function initializeDB() {
-        if (rawSettings === undefined) return; // Dexie query still pending
-        if (rawSettings !== null) {
-          await db.transaction('rw', db.settings, readFinancialPolicies);
-          return;
-        }
-        // rawSettings is null => no record in DB, seed defaults
-        console.log("No settings found, initializing database with default settings.");
-        try {
-            await db.settings.put(DEFAULT_SETTINGS);
-            setDataVersion(v => v + 1);
-        } catch (error) {
-            console.error("Failed to initialize default settings:", error);
-            toast({ title: "Error de inicialización", description: friendlyError(error), variant: 'destructive' });
-        }
+      if (rawSettings === undefined) return;
+      try {
+        const result = await initializeSettings(DEFAULT_SETTINGS, rawSettings);
+        if (result === 'seeded') setDataVersion(version => version + 1);
+      } catch (error) {
+        console.error('Failed to initialize default settings:', error);
+        toast({ title: 'Error de inicialización', description: friendlyError(error), variant: 'destructive' });
+      }
     }
     initializeDB().catch(()=>{});
   }, [rawSettings, toast]);
@@ -289,7 +282,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateSetting = useCallback(async (key: keyof Settings, value: any) => {
     try {
-      await db.settings.update('general', { [key]: value });
+      await updatePersistedSetting(key, value);
       return true;
     } catch (error) {
       console.error(`Failed to update setting ${key}:`, error);
@@ -300,7 +293,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
       try {
-          await db.settings.update('general', withoutLegacyCategories(newSettings));
+          await updatePersistedSettings(newSettings);
       } catch (error) {
           toast({ title: 'Error al actualizar', description: friendlyError(error), variant: 'destructive' });
       }
@@ -570,9 +563,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const resetExpenseCategories = useCallback(async () => { await resetCategories('expense'); }, []);
 
   const resetSettings = useCallback(async () => {
-    await db.settings.clear();
-    await db.settings.put(DEFAULT_SETTINGS);
-    setDataVersion(v => v + 1);
+    await resetPersistedSettings(DEFAULT_SETTINGS);
+    setDataVersion(version => version + 1);
   }, []);
 
   const setCurrentMonth = useCallback(async (month: string) => {
@@ -586,158 +578,9 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  // OPFS Backup Management
-  const backupBeforeDestructiveImport = useCallback(async () => {
-    const result = await createPreImportSafetyBackup();
-    if (result.status === 'created') {
-      toast({
-        title: 'Copia de seguridad automática creada',
-        description: result.name,
-      });
-    } else {
-      toast({
-        title: 'Sin copia automática previa',
-        description: 'OPFS no está disponible en este navegador. La restauración continuará sin una copia local previa.',
-      });
-    }
-  }, [toast]);
-
-  const createBackup = useCallback(async (): Promise<BackupFile | undefined> => {
-    if (!(await hasOPFS())) {
-      toast({ title: "Función no soportada", description: "Tu navegador no soporta el sistema de archivos privados (OPFS).", variant: "destructive" });
-      return;
-    }
-    setIsWorking(true);
-    try {
-        const jsonString = await exportDataJSON();
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const name = `glitchbudget-backup-${timestamp}.json`;
-        await opfsWrite(name, jsonString);
-        toast({ title: "Copia de seguridad creada", description: name });
-        const backups = await opfsList();
-        return backups.find(b => b.name === name);
-    } catch (error) {
-        toast({ title: 'Error al crear copia de seguridad', description: friendlyError(error), variant: 'destructive' });
-        throw error;
-    } finally {
-        setIsWorking(false);
-    }
-  }, [toast]);
-
-  const listBackups = useCallback(async (): Promise<BackupFile[]> => {
-      if (!await hasOPFS()) return [];
-      return opfsList();
-  }, []);
-
-  const restoreBackup = useCallback(async (name: string) => {
-    setIsWorking(true);
-    try {
-        const fileContent = await opfsRead(name);
-        if (!fileContent) throw new Error("El archivo de copia de seguridad está vacío o no se pudo leer.");
-        await importDataJSON(fileContent, undefined, { beforeWrite: backupBeforeDestructiveImport });
-        setDataVersion(v => v + 1);
-        toast({ title: 'Restauración completada', description: `Datos restaurados desde ${name}` });
-      return true;
-    } catch (error) {
-        toast({ title: 'Error al restaurar', description: friendlyError(error), variant: 'destructive' });
-      return false;
-    } finally {
-        setIsWorking(false);
-    }
-  }, [toast, backupBeforeDestructiveImport]);
-
-  const deleteBackup = useCallback(async (name: string) => {
-    setIsWorking(true);
-    try {
-        await opfsDelete(name);
-        toast({ title: 'Copia de seguridad eliminada', description: name });
-    } catch (error) {
-        toast({ title: 'Error al eliminar', description: friendlyError(error), variant: 'destructive' });
-        throw error;
-    } finally {
-        setIsWorking(false);
-    }
-  }, [toast]);
-
-  const getBackupFile = useCallback(async (name: string): Promise<File | null> => {
-      try {
-        const fileContent = await opfsRead(name);
-        if (fileContent) {
-            return new File([fileContent], name, { type: 'application/json' });
-        }
-        return null;
-      } catch (error) {
-        toast({ title: 'Error al descargar', description: friendlyError(error), variant: 'destructive' });
-        return null;
-      }
-  }, [toast]);
-
-  const exportData = useCallback(async () => {
-    setIsWorking(true);
-    try {
-        const json = await exportDataJSON();
-        const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `glitchbudget-backup-${localDate()}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-        toast({ title: 'Exportación completada' });
-    } catch(error) {
-        toast({ title: 'Error al exportar', description: friendlyError(error), variant: 'destructive' });
-    } finally {
-        setIsWorking(false);
-    }
-  }, [toast]);
-
-  const importData = useCallback(async (file: File) => {
-    setIsWorking(true);
-    try {
-        const text = await file.text();
-        await importDataJSON(text, undefined, { beforeWrite: backupBeforeDestructiveImport });
-        setDataVersion(v => v + 1);
-        toast({ title: 'Datos restaurados', description: 'El dashboard se actualizará automáticamente.' });
-      return true;
-    } catch (e: any) {
-        toast({ title: 'Error al importar', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    } finally {
-        setIsWorking(false);
-    }
-  }, [toast, backupBeforeDestructiveImport]);
-
-  const importEncryptedData = useCallback(async (file: File, password: string) => {
-    setIsWorking(true);
-    try {
-      const encryptedText = await file.text();
-      await restoreEncryptedBackupText(
-        encryptedText,
-        password,
-        undefined,
-        { beforeWrite: backupBeforeDestructiveImport },
-      );
-      setDataVersion(v => v + 1);
-      toast({
-        title: 'Backup cifrado restaurado',
-        description: 'El archivo se autenticó, descifró e importó localmente.',
-      });
-      return true;
-    } catch (error) {
-      toast({
-        title: 'No se pudo restaurar el backup cifrado',
-        description: friendlyError(error),
-        variant: 'destructive',
-      });
-      return false;
-    } finally {
-      setIsWorking(false);
-    }
-  }, [toast, backupBeforeDestructiveImport]);
-
   const addDebt = useCallback(async (debt: Omit<Debt, "id" | "createdAt">) => {
     try {
-      const newDebt: Debt = { ...debt, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
-      await db.debts.add(newDebt);
+      await createDebt(debt);
       toast({ title: 'Deuda registrada' });
       return true;
     } catch (e: any) {
@@ -748,7 +591,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateDebt = useCallback(async (debt: Debt) => {
     try {
-      await db.debts.put(debt);
+      await persistDebt(debt);
       toast({ title: 'Deuda actualizada' });
       return true;
     } catch (e: any) {
@@ -759,12 +602,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteDebt = useCallback(async (id: string) => {
     try {
-      await db.transaction('rw', db.debts, db.expenses, db.debt_payments, async () => {
-        const linkedExpense = await db.expenses.filter(e => e.debtId === id).count();
-        const linkedPayment = await db.debt_payments.where('debtId').equals(id).count();
-        if (linkedExpense || linkedPayment) throw new Error('Esta tarjeta tiene movimientos. Conserva su historial; no se puede eliminar.');
-        await db.debts.delete(id);
-      });
+      await removeDebt(id);
       toast({ title: 'Deuda eliminada' });
       return true;
     } catch (e: any) {

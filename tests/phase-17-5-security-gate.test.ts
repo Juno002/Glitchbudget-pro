@@ -226,7 +226,7 @@ test('17.5 Hide amounts coexists outside the App lock gate and remains presentat
 test('17.5 encrypted restore UI asks for password locally and uses the canonical restore helper', () => {
   const dialog = readFileSync(new URL('../src/components/backup/opfs-backup-dialog.tsx', import.meta.url), 'utf8');
   const restore = readFileSync(new URL('../src/components/backup/encrypted-backup-restore.tsx', import.meta.url), 'utf8');
-  const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
+  const backupHook = readFileSync(new URL('../src/hooks/use-backup-management.ts', import.meta.url), 'utf8');
   const helper = readFileSync(new URL('../src/lib/encrypted-backup-restore.ts', import.meta.url), 'utf8');
 
   assert.match(dialog, /EncryptedBackupRestore/);
@@ -234,7 +234,7 @@ test('17.5 encrypted restore UI asks for password locally and uses the canonical
   assert.match(restore, /Contraseña del backup/);
   assert.match(restore, /Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes/);
   assert.match(restore, /previewEncryptedBackupText/);
-  assert.match(context, /restoreEncryptedBackupText\([\s\S]*encryptedText,[\s\S]*password,[\s\S]*beforeWrite: backupBeforeDestructiveImport/);
+  assert.match(backupHook, /restoreEncryptedBackupText\([\s\S]*encryptedText,[\s\S]*password,[\s\S]*beforeWrite: backupBeforeDestructiveImport/);
   assert.match(helper, /decryptEncryptedBackupText/);
   assert.match(helper, /importDataJSON/);
   assert.ok(helper.indexOf('decryptEncryptedBackupText') < helper.indexOf('importDataJSON(json'));
