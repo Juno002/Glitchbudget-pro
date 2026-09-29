@@ -254,7 +254,21 @@ offline mode still works
 no financial network traffic introduced
 ```
 
-El resultado concreto del gate de CI se registra después de ejecutarlo.
+## Gate técnico
+
+Run funcional: `36585334550`.
+
+Resultado:
+
+- **420/420 pruebas**, 0 fallos;
+- typecheck aprobado;
+- lint aprobado con cero warnings;
+- guard local-only aprobado;
+- build de producción aprobado;
+- manifiesto offline: **42 recursos**;
+- `connect-src 'none'` en cada HTML generado.
+
+El único warning ajeno al producto provino de la infraestructura de GitHub Actions por la transición de sus acciones desde Node.js 20; no afecta el runtime ni las invariantes de GlitchBudget.
 
 ## Siguiente fase
 
