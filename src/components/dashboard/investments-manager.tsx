@@ -1,8 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
+import { useInvestmentManagerData } from '@/hooks/use-finance-queries';
 import { createInvestment } from '@/lib/investments';
 import { investmentProjection } from '@/domain/investments';
 import { accountBalance } from '@/lib/accounts';
@@ -36,16 +35,7 @@ export default function InvestmentsManager() {
   const today = localDate();
   const money = usePrivateCurrency();
   const { toast } = useToast();
-  const data = useLiveQuery(() => db.transaction('r', [
-    db.investments, db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments,
-  ], async () => ({
-    investments:await db.investments.toArray(),
-    accounts:await db.accounts.toArray(),
-    transfers:await db.account_transfers.toArray(),
-    incomes:await db.incomes.toArray(),
-    expenses:await db.expenses.toArray(),
-    payments:await db.debt_payments.toArray(),
-  })));
+  const data = useInvestmentManagerData();
 
   const [open,setOpen] = useState(false);
   const [busy,setBusy] = useState(false);
