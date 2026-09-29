@@ -1,4 +1,7 @@
-// Este módulo conserva helpers de planificación legacy.\n// Las métricas financieras canónicas se delegan al dominio.\nimport { selectDisposable } from '../domain/metrics';\n
+// Este módulo conserva helpers de planificación legacy.
+// Las métricas financieras canónicas se delegan al dominio.
+import { selectDisposable } from '../domain/metrics';
+
 type Money = number;
 export type SuggestionProfile = 'conservative' | 'balanced' | 'aggressive';
 
