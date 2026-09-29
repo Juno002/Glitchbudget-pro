@@ -18,7 +18,7 @@ Fase 18 exige:
 
 # Iteraciones acordadas
 
-## 18.1 — Contrato y versionado de Backup 2.0
+## 18.1 — Contrato y versionado de Backup 2.0 ✅
 
 Objetivo: separar explícitamente versión de formato, versión de esquema y versión de aplicación.
 
@@ -146,9 +146,12 @@ Durante 18.1–18.5:
 # Estado actual
 
 ```text
-18.1 — Contrato y versionado             ⏳ en ejecución
-18.2 — Cobertura automática de tablas    ⏳ pendiente
+18.1 — Contrato y versionado             ✅ completado
+18.2 — Cobertura automática de tablas    ⏳ siguiente
 18.3 — Preview + confirmación             ⏳ pendiente
 18.4 — Backup OPFS pre-import            ⏳ pendiente
 18.5 — Migraciones + hardening + gate    ⏳ pendiente
 ```
+
+
+**Fase 18 está en progreso. 18.1 quedó completado; 18.2 — Cobertura automática de tablas es el siguiente checkpoint.**
