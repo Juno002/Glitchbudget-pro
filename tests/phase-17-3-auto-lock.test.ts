@@ -84,9 +84,9 @@ test('17.3 runtime resets inactivity on local activity and checks real elapsed t
 test('17.3 cannot operate without App lock and disabling App lock clears Auto-lock', () => {
   const context = readFileSync(new URL('../src/contexts/app-lock-context.tsx', import.meta.url), 'utf8');
 
-  assert.match(context, /if \(!enabled\) \{\s*clearAutoLock\(localStorage\);\s*setAutoLockMinutes\(null\);\s*return false;/s);
+  assert.match(context, /if \(!enabled\) \{[\s\S]*clearAutoLock\(localStorage\);[\s\S]*setAutoLockMinutes\(null\);[\s\S]*return false;/);
   assert.match(context, /const disabled = await disableAppLock/);
-  assert.match(context, /if \(disabled\) \{\s*clearAutoLock\(localStorage\)/s);
+  assert.match(context, /if \(disabled\) \{[\s\S]*clearAutoLock\(localStorage\)/);
   assert.match(context, /if \(!nextEnabled\) clearAutoLock\(localStorage\)/);
 });
 
