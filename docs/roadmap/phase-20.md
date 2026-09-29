@@ -119,7 +119,7 @@ Visual parity matrix
 
 ## 20.2 — Design system, temas y shell
 
-**Estado: completada / Gate aprobado.** Evidencia: [phase-20-2.md](phase-20-2.md).
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-2.md](phase-20-2.md). Quality checks `36645087940`: 472/472 tests, build y browser E2E responsive/offline verdes.
 
 
 Construir la base visual común antes de migrar pantallas:
