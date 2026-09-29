@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
     "check": "npm run check:local && npm run typecheck && npm run lint && npm test",
-    "check:local": "node scripts/check-local-only.mjs"
+    "check:local": "node scripts/check-local-only.mjs",
+    "test:e2e": "node scripts/e2e-smoke.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
