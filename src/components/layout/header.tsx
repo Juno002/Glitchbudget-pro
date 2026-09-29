@@ -51,7 +51,7 @@ export default function Header() {
               className="h-9 shrink-0 px-2.5 text-xs text-muted-foreground hover:text-foreground sm:px-3"
               onClick={() => setCurrentMonth(periodContaining(localDate(), { periodStartDay }).id)}
             >
-              Actual
+              Período actual
             </Button>
           </div>
 
