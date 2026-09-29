@@ -8,10 +8,10 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 
 - Fases **0–19.5: completadas**.
 - **Fase 20 — Modo Prisma:** iniciada.
-- **20.1:** en curso.
+- **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
-- Pendiente para cerrar 20.1: contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones.
-- **20.2 no está iniciada.**
+- Contrato visual + inventario de paridad: **completado**.
+- **20.2 — Design system + temas + shell:** siguiente etapa; no iniciada.
 
 Baseline técnico actual:
 
@@ -28,7 +28,7 @@ browser E2E ✅
 
 | Etapa | Estado | Documento |
 |---|---|---|
-| 20.1 — Contrato visual + inventario de paridad | **En curso** | [phase-20.md](phase-20.md) |
+| 20.1 — Contrato visual + inventario de paridad | **Completado / Gate aprobado** | [phase-20-1.md](phase-20-1.md) |
 | Preflight técnico de 20.1 | **Completado** | [phase-20-1-preflight.md](phase-20-1-preflight.md) |
 | 20.2 — Design system + temas + shell | No iniciada | [phase-20.md](phase-20.md) |
 | 20.3 — Resumen / Home Prisma | No iniciada | [phase-20.md](phase-20.md) |
