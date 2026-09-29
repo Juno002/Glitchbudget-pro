@@ -45,7 +45,7 @@ test('Phase 20.1 forbids importing Prisma financial/runtime layers', () => {
     assert.ok(gate.includes(forbidden), forbidden);
   }
   assert.match(gate, /GlitchBudget financial engine/);
-  assert.match(gate, /datos financieros demo\/hardcoded/);
+  assert.match(gate, /dato financiero demo\/hardcoded/);
 });
 
 test('Phase 20.1 authorizes 20.2 only after explicit parity closure', () => {
