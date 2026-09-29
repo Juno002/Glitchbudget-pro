@@ -1,6 +1,6 @@
 import { accountFundsWorsen } from '../policies/account-protection';
 import { readFinancialPolicies } from './policy-settings';
-import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectPosition } from '../domain/ledger';
+import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectDefaultCashAccount, selectPosition } from '../domain/ledger';
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
@@ -23,9 +23,7 @@ const accountFields = z.object({ ...commonAccountFields, type:z.enum(['cash','ba
 export const accountSchema = accountFields.extend({
   currency: z.string().transform(requireCurrencyCode),
 }).refine(a => !a.isDefaultCash || a.type === 'cash', 'La cuenta predeterminada debe ser de efectivo.');
-export function defaultCashAccount(accounts: Account[]) {
-  return accounts.find(a => a.isDefaultCash && a.type === 'cash') || accounts.filter(a => a.type === 'cash').sort((a,b) => a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id))[0];
-}
+export const defaultCashAccount = selectDefaultCashAccount;
 export async function ensureCashAccount(startDate = localDate()): Promise<Account> {
   return db.transaction('rw', db.accounts, db.settings, async () => {
     const settings = await db.settings.get('general');
