@@ -49,7 +49,7 @@ test('final planned payments read model owns grouping, recent status and rule or
 test('active debt selectors centralize debt/card eligibility', () => {
   const debts: Debt[] = [
     { id:'active-card', name:'Card', type:'credit_card', principal:1000, apr:0, minPayment:0, createdAt:'2026-01-01', status:'active' },
-    { id:'closed-card', name:'Old', type:'credit_card', principal:1000, apr:0, minPayment:0, createdAt:'2026-01-01', status:'paid' },
+    { id:'closed-card', name:'Old', type:'credit_card', principal:1000, apr:0, minPayment:0, createdAt:'2026-01-01', status:'closed' },
     { id:'loan', name:'Loan', type:'loan', principal:1000, apr:0, minPayment:0, createdAt:'2026-01-01', status:'active' },
   ];
 
