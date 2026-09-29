@@ -27,12 +27,12 @@ test('17.1 defines Hide amounts as presentation privacy, not encryption', () => 
   assert.ok(LOCAL_SECURITY_CONTRACT.hideAmounts.doesNotProtect.includes('exports'));
 });
 
-test('17.1 freezes App lock and Auto-lock legacy behavior before implementation', () => {
+test('17.1 legacy security defaults remain frozen after App lock and Auto-lock implementation', () => {
   assert.equal(LOCAL_SECURITY_CONTRACT.appLock.status, 'implemented-17.2');
   assert.equal(LOCAL_SECURITY_CONTRACT.appLock.legacyDefault, 'disabled');
   assert.ok(LOCAL_SECURITY_CONTRACT.appLock.doesNotProtect.includes('dexie-at-rest'));
 
-  assert.equal(LOCAL_SECURITY_CONTRACT.autoLock.status, 'planned-17.3');
+  assert.equal(LOCAL_SECURITY_CONTRACT.autoLock.status, 'implemented-17.3');
   assert.equal(LOCAL_SECURITY_CONTRACT.autoLock.requires, 'app-lock');
   assert.equal(LOCAL_SECURITY_CONTRACT.autoLock.legacyDefault, 'disabled');
 
@@ -64,18 +64,18 @@ test('17.1 binds existing Hide amounts runtime to the canonical storage key and 
   assert.equal(BALANCE_VISIBILITY_STORAGE_KEY, 'glitchbudget_balances_hidden_v1');
 });
 
-test('17.1 boundaries remain explicit after 17.2 implements App lock while Auto-lock stays pending', () => {
+test('17.1 boundaries remain explicit after App lock and Auto-lock implementation', () => {
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
 
   assert.match(settings, /no cifra los datos almacenados ni los backups/i);
   assert.match(settings, /AppLockSettings/);
-  assert.match(settings, /Se implementará en 17\.3 sobre App lock/i);
+  assert.match(settings, /AutoLockSettings/);
 
   const privacyBlock = settings.slice(
     settings.indexOf('<TabsContent value="privacy"'),
     settings.indexOf('<TabsContent value="data"'),
   );
-  assert.equal((privacyBlock.match(/type="checkbox"/g) || []).length, 1, 'Hide amounts sigue siendo el único checkbox; App lock usa PIN');
+  assert.equal((privacyBlock.match(/type="checkbox"/g) || []).length, 1, 'Hide amounts sigue siendo el checkbox directo; Auto-lock vive en su componente');
 });
 
 test('17.1 does not introduce lock persistence in Dexie or encrypted-backup behavior early', () => {
