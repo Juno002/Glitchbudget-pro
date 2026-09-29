@@ -4,17 +4,17 @@
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecuta en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
 
-**Completadas:** [18.1](phase-18-1.md) contrato/versionado y [18.2](phase-18-2.md) cobertura automática de tablas.
+**Completadas:** [18.1](phase-18-1.md) contrato/versionado, [18.2](phase-18-2.md) cobertura automática de tablas y [18.3](phase-18-3.md) preview + confirmación de import.
 
-18.2 introduce un inventario canónico que se compara automáticamente contra las tablas reales de Dexie. Las **16 tablas actuales** deben declarar cobertura en `export`, `import`, `restore`, `validation` y `migration tests`; una tabla nueva no registrada hace fallar export/import y el gate. JSON v13 exige todas las claves actuales incluso cuando una tabla está vacía.
+18.3 obliga a validar y mostrar el contenido antes de cualquier restore completo destructivo. El resumen muestra **cuentas, movimientos, presupuestos, metas, tarjetas e inversiones**. JSON externo, copias OPFS existentes y backups cifrados comparten la misma preparación/validación previa; el cifrado añade primero autenticación/descifrado y solo después muestra el preview.
 
-El restore destructivo y los conteos post-import se derivan ahora del inventario, evitando listas manuales duplicadas. El gate realiza además un round-trip con **16/16 tablas no vacías**, de modo que una tabla no puede pasar por estar vacía.
+Preview y restore usan la misma función `prepareDataJSONImport(...)`, por lo que el resumen no utiliza un parser más débil. Un archivo inválido, contraseña incorrecta o ciphertext alterado no habilitan confirmación destructiva ni modifican Dexie. CSV mantiene su confirmación independiente por tabla y no se fuerza dentro del resumen de Backup 2.0.
 
 Versiones sin cambios: **Dexie v14 / JSON v13 / app 0.1.0 / encrypted envelope v1**.
 
-El gate funcional de 18.2 (`36537141932`) verificó **393/393 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+El gate funcional de 18.3 (`36539044319`) verificó **401/401 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Estado actual:** Fase 18 en progreso. **18.3 — Preview + confirmación de import es el siguiente checkpoint.** 18.4–18.5 permanecen pendientes. No avanzar a Fase 19 antes de completar 18.5 y su gate.
+**Estado actual:** Fase 18 en progreso. **18.4 — Backup OPFS automático pre-import es el siguiente checkpoint.** 18.5 permanece pendiente. No avanzar a Fase 19 antes de completar 18.5 y su gate.
 
 ## Fase 17 — Seguridad y privacidad local completada
 

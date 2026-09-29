@@ -43,9 +43,13 @@ import { ImportConfirmation } from './import-confirmation';
 import CsvBackupDialog from './csv-backup-dialog';
 import EncryptedBackupExport from './encrypted-backup-export';
 import EncryptedBackupRestore from './encrypted-backup-restore';
+import { previewDataJSON, type BackupImportPreview } from '@/lib/backup-json';
 
 export default function OpfsBackupDialog() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<BackupImportPreview | null>(null);
+  const [pendingLocalName, setPendingLocalName] = useState<string | null>(null);
+  const [previewingImport, setPreviewingImport] = useState(false);
   const [open, setOpen] = useState(false);
   const {
     createBackup,
@@ -89,13 +93,33 @@ export default function OpfsBackupDialog() {
     }
   };
   
+  const resetPendingImport = () => {
+    setPendingFile(null);
+    setPendingPreview(null);
+    setPendingLocalName(null);
+  };
+
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
+    const file = event.target.files?.[0] ?? null;
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (!file) return;
+
+    setPreviewingImport(true);
+    try {
+      const preview = previewDataJSON(await file.text());
       setPendingFile(file);
+      setPendingPreview(preview);
+      setPendingLocalName(null);
+    } catch (error) {
+      resetPendingImport();
+      toast({
+        title: 'Backup no válido',
+        description: error instanceof Error ? error.message : 'No se pudo validar el archivo.',
+        variant: 'destructive',
+      });
+    } finally {
+      setPreviewingImport(false);
     }
-    // Reset file input to allow selecting the same file again
-    if(fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleDownload = async (name: string) => {
@@ -112,11 +136,39 @@ export default function OpfsBackupDialog() {
     }
   };
 
-  const handleRestore = async (name: string) => {
+  const prepareLocalRestore = async (name: string) => {
+    setPreviewingImport(true);
     try {
-        if (await restoreBackup(name)) setOpen(false); // Close dialog on successful restore
+      const file = await getBackupFile(name);
+      if (!file) throw new Error('No se pudo leer la copia local seleccionada.');
+      const preview = previewDataJSON(await file.text());
+      setPendingFile(file);
+      setPendingPreview(preview);
+      setPendingLocalName(name);
     } catch (error) {
-        // Toast is handled in context
+      resetPendingImport();
+      toast({
+        title: 'No se pudo revisar la copia',
+        description: error instanceof Error ? error.message : 'La copia local no es válida.',
+        variant: 'destructive',
+      });
+    } finally {
+      setPreviewingImport(false);
+    }
+  };
+
+  const confirmPendingRestore = async () => {
+    if (!pendingFile || !pendingPreview) return;
+    try {
+      const restored = pendingLocalName
+        ? await restoreBackup(pendingLocalName)
+        : await importData(pendingFile);
+      if (restored) {
+        resetPendingImport();
+        setOpen(false);
+      }
+    } catch (error) {
+      // Toast is handled in context.
     }
   };
   
@@ -130,7 +182,7 @@ export default function OpfsBackupDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={value => { if (!isWorking) setOpen(value); }}>
+    <Dialog open={open} onOpenChange={value => { if (!isWorking && !previewingImport) setOpen(value); }}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <UploadCloud className="mr-2 h-4 w-4" />
@@ -146,7 +198,7 @@ export default function OpfsBackupDialog() {
         </DialogHeader>
         
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-            <Button onClick={handleCreate} disabled={isWorking} className="w-full sm:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
+            <Button onClick={handleCreate} disabled={isWorking || previewingImport} className="w-full sm:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
               {isWorking ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -154,7 +206,7 @@ export default function OpfsBackupDialog() {
               )}
               Crear Copia Local
             </Button>
-             <Button disabled={isWorking} variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto">
+             <Button disabled={isWorking || previewingImport} variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto">
                 <FileUp className="mr-2 h-4 w-4" />
                 Restaurar desde JSON
             </Button>
@@ -165,7 +217,7 @@ export default function OpfsBackupDialog() {
                 className="hidden"
                 accept="application/json"
             />
-            <Button disabled={isWorking} variant="outline" onClick={exportData} className="w-full sm:w-auto">
+            <Button disabled={isWorking || previewingImport} variant="outline" onClick={exportData} className="w-full sm:w-auto">
                 <Download className="mr-2 h-4 w-4" />
                 Exportar a JSON
             </Button>
@@ -199,25 +251,15 @@ export default function OpfsBackupDialog() {
                                 <FileDown className="h-4 w-4" />
                             </Button>
 
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" title="Restaurar">
-                                        <RotateCcw className="h-4 w-4" />
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>¿Restaurar esta copia?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            Esto reemplazará todos tus datos actuales con los de la copia de seguridad seleccionada. Esta acción no se puede deshacer.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleRestore(file.name)}>Restaurar</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Restaurar"
+                              disabled={isWorking || previewingImport}
+                              onClick={() => prepareLocalRestore(file.name)}
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </Button>
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
@@ -252,9 +294,16 @@ export default function OpfsBackupDialog() {
             </div>
         </ScrollArea>
         
-        <ImportConfirmation file={pendingFile} scope="todos tus datos actuales" onCancel={() => setPendingFile(null)} onConfirm={async () => { if (pendingFile && await importData(pendingFile)) { setPendingFile(null); setOpen(false); } }} />
+        <ImportConfirmation
+          file={pendingFile}
+          preview={pendingPreview}
+          requirePreview
+          scope="todos tus datos actuales"
+          onCancel={resetPendingImport}
+          onConfirm={confirmPendingRestore}
+        />
         <DialogFooter>
-          <Button disabled={isWorking} variant="outline" onClick={() => setOpen(false)}>
+          <Button disabled={isWorking || previewingImport} variant="outline" onClick={() => setOpen(false)}>
             Cerrar
           </Button>
         </DialogFooter>
