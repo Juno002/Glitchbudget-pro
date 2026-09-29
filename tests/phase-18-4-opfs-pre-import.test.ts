@@ -10,6 +10,7 @@ import {
 import { createPreImportSafetyBackup } from '../src/lib/pre-import-backup';
 import { exportEncryptedBackupText } from '../src/lib/encrypted-backup';
 import { restoreEncryptedBackupText } from '../src/lib/encrypted-backup-restore';
+import { importPlansCSV, serializeTableCSV } from '../src/lib/csv-backup';
 
 const fixture = JSON.parse(
   readFileSync(new URL('./fixtures/backup-v4.json', import.meta.url), 'utf8'),
@@ -174,6 +175,35 @@ test('18.4 encrypted restore authenticates and validates before invoking the sam
   assert.equal(hookCalls, 1);
 });
 
+test('18.4 destructive CSV import validates before the same pre-write safety hook', async () => {
+  await importDataJSON(JSON.stringify(fixture));
+  const before = await snapshot();
+  let hookCalls = 0;
+
+  const invalid = new File(['wrong\nvalue'], 'plans.csv', { type: 'text/csv' });
+  await assert.rejects(
+    importPlansCSV(invalid, {
+      beforeWrite: async () => { hookCalls += 1; },
+    }),
+  );
+  assert.equal(hookCalls, 0);
+  assert.deepEqual(await snapshot(), before);
+
+  const csv = await serializeTableCSV('plans');
+  const valid = new File([csv], 'plans.csv', { type: 'text/csv' });
+  await assert.rejects(
+    importPlansCSV(valid, {
+      beforeWrite: async () => {
+        hookCalls += 1;
+        throw new Error('csv pre-import backup failed');
+      },
+    }),
+    /csv pre-import backup failed/,
+  );
+  assert.equal(hookCalls, 1);
+  assert.deepEqual(await snapshot(), before);
+});
+
 test('18.4 all destructive full-backup routes use the automatic pre-import safety hook', () => {
   const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
 
@@ -191,6 +221,9 @@ test('18.4 all destructive full-backup routes use the automatic pre-import safet
     context,
     /restoreEncryptedBackupText\([\s\S]*\{ beforeWrite: backupBeforeDestructiveImport \}/,
   );
+
+  const csv = readFileSync(new URL('../src/components/backup/csv-backup-dialog.tsx', import.meta.url), 'utf8');
+  assert.match(csv, /beforeWrite: backupBeforeDestructiveImport/);
 });
 
 test('18.4 UI messaging distinguishes created backup from unavailable OPFS', () => {
