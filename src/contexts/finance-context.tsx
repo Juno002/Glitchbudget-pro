@@ -30,7 +30,28 @@ import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-managem
 import { initializeSettings, resetPersistedSettings, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
 import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
 import { createFinanceReadModels, resolveFinanceSettings, selectGoalViews } from '@/domain/finance-read-models';
-import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
+import { playExpense, playIncome, playGoalComplete } from "@/lib/sounds";
+import {
+  createAccountTransferCommand,
+  createDebtPaymentCommand,
+  createExpenseCommand,
+  createGoalCommand,
+  createIncomeCommand,
+  createRecurringRuleCommand,
+  contributeToGoalCommand,
+  deleteExpenseCommand,
+  deleteGoalCommand,
+  deleteIncomeCommand,
+  deleteRecurringRuleCommand,
+  saveBaseIncomeCommand,
+  saveBudgetCollectionCommand,
+  savePeriodStartDayCommand,
+  transferBudgetCommand,
+  updateExpenseCommand,
+  updateGoalCommand,
+  updateIncomeCommand,
+  updateRecurringRuleCommand,
+} from '@/application/finance-commands';
 
 const DEFAULT_SETTINGS: Settings = {
   id: 'general',
@@ -274,6 +295,237 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     [readModels],
   );
 
+  const updateSetting = useCallback(async (key: keyof Settings, value: unknown) => {
+    try {
+      await updatePersistedSetting(key, value);
+      return true;
+    } catch (error) {
+      console.error(`Failed to update setting ${key}:`, error);
+      toast({ title: 'Error al guardar configuración', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const updateSettings = useCallback(async (newSettings: Partial<Settings>) => {
+    try {
+      await updatePersistedSettings(newSettings);
+    } catch (error) {
+      toast({ title: 'Error al actualizar', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const setTheme = useCallback((theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme), [updateSetting]);
+
+  const setBaseCurrency = useCallback(async (currency: string) => {
+    try {
+      const next = await persistBaseCurrency(currency);
+      toast({ title: 'Moneda base actualizada', description: `Los importes nuevos usarán ${next}.` });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo cambiar la moneda base', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const setPreventNegativeAccountBalance = useCallback(
+    (value: boolean) => updateSetting('preventNegativeAccountBalance', value),
+    [updateSetting],
+  );
+  const setBudgetOverspendingBehavior = useCallback(
+    (value: BudgetOverspendingBehavior) => updateSetting('budgetOverspendingBehavior', value),
+    [updateSetting],
+  );
+  const setRolloverStrategy = useCallback(
+    (strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy),
+    [updateSetting],
+  );
+
+  const setPeriodStartDay = useCallback(async (day: number) => {
+    try {
+      const result = await savePeriodStartDayCommand(day, localDate());
+      setCurrentMonthState(result.nextId);
+      toast({
+        title: 'Inicio del período actualizado',
+        description: day === 1 ? 'Se usarán meses calendario.' : `Cada período comenzará el día ${day}.`,
+      });
+    } catch (error) {
+      toast({ title: 'Día inválido', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const setBaseIncome = useCallback(async (baseIncome: Settings['baseIncome']) => {
+    try {
+      await saveBaseIncomeCommand(baseIncome);
+      toast({ title: 'Ingreso base guardado' });
+    } catch (error) {
+      toast({ title: 'Monto inválido', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const addIncomeItem = useCallback(async (income: Omit<Income, 'id' | 'month'>) => {
+    try {
+      await createIncomeCommand(income);
+      playIncome();
+      toast({ title: 'Ingreso agregado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al agregar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const updateIncomeItem = useCallback(async (income: Income) => {
+    try {
+      await updateIncomeCommand(income);
+      toast({ title: 'Ingreso actualizado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al actualizar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const deleteIncomeItem = useCallback(async (id: string) => {
+    try {
+      await deleteIncomeCommand(id);
+      toast({ title: 'Ingreso eliminado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al eliminar ingreso', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const addExpense = useCallback(async (expense: Omit<Expense, 'id' | 'month'>) => {
+    try {
+      if (!await withBudgetConfirmation(token => createExpenseCommand(expense, token), confirmBudget)) return false;
+      playExpense();
+      toast({ title: 'Gasto agregado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al agregar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast, confirmBudget]);
+
+  const updateExpense = useCallback(async (expense: Expense) => {
+    try {
+      if (!await withBudgetConfirmation(token => updateExpenseCommand(expense, token), confirmBudget)) return false;
+      toast({ title: 'Gasto actualizado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al actualizar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast, confirmBudget]);
+
+  const deleteExpense = useCallback(async (id: string) => {
+    try {
+      await deleteExpenseCommand(id);
+      toast({ title: 'Gasto eliminado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al eliminar gasto', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const addAccountTransfer = useCallback(async (transfer: Omit<AccountTransfer, 'id'>) => {
+    try {
+      await createAccountTransferCommand(transfer);
+      toast({ title: 'Transferencia registrada', description: 'Se actualizó la cuenta de origen y destino sin crear ingreso ni gasto.' });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo registrar la transferencia', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const addGoal = useCallback(async (goal: Omit<Goal, 'id' | 'saved' | 'startDate' | 'status'>) => {
+    try {
+      const created = await createGoalCommand(goal, localDate());
+      toast({ title: '¡Meta creada!', description: `Tu meta "${created.name}" fue añadida.` });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al crear meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const updateGoal = useCallback(async (goal: Goal) => {
+    try {
+      await updateGoalCommand(goal);
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al actualizar meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const deleteGoal = useCallback(async (id: string) => {
+    try {
+      await deleteGoalCommand(id);
+      toast({ title: 'Meta eliminada' });
+    } catch (error) {
+      toast({ title: 'Error al eliminar meta', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
+  const contributeToGoal = useCallback(async (id: string, amount: number) => {
+    try {
+      const completed = await contributeToGoalCommand(id, amount, localDate());
+      if (completed) playGoalComplete();
+      toast({ title: '¡Contribución exitosa!', description: 'La reserva de tu meta se ha actualizado.' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al aportar a la meta', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const updateAllBudgets = useCallback(async (
+    month: string,
+    allBudgets: Omit<Budget, 'month'>[],
+    budgetPeriod?: BudgetPeriodRange,
+  ) => {
+    try {
+      await saveBudgetCollectionCommand(month, allBudgets, activeSettings, budgetPeriod);
+      toast({ title: '¡Presupuestos guardados!' });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error al guardar presupuestos', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast, activeSettings]);
+
+  const transferBetweenBudgets = useCallback(async (
+    month: string,
+    fromCategoryId: string,
+    toCategoryId: string,
+    amount: number,
+    budgetPeriod?: BudgetPeriodRange,
+  ) => {
+    try {
+      await transferBudgetCommand(month, fromCategoryId, toCategoryId, amount, activeSettings, budgetPeriod);
+      toast({
+        title: 'Transferencia de presupuesto completada',
+        description: 'Solo cambió la asignación planificada entre categorías; no se movió dinero real.',
+      });
+      return true;
+    } catch (error) {
+      toast({ title: 'Error en la transferencia de presupuesto', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast, activeSettings]);
+
+  const prepareBudgetPeriod = useCallback(async (budgetPeriod: BudgetPeriodRange) => {
+    try {
+      if (await rollBudgetsIntoPeriod(budgetPeriod)) setDataVersion(version => version + 1);
+    } catch (error) {
+      toast({ title: 'No se pudo aplicar el rollover', description: friendlyError(error), variant: 'destructive' });
+    }
+  }, [toast]);
+
   const addIncomeCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'income',iconName); }, []);
   const addExpenseCategory = useCallback(async (name:string, iconName?:string) => { await createCategory(name,'expense',iconName); }, []);
   const resetIncomeCategories = useCallback(async () => { await resetCategories('income'); }, []);
@@ -330,8 +582,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addDebtPayment = useCallback(async (payment: Omit<DebtPayment, "id">) => {
     try {
-      const newPayment: DebtPayment = { ...payment, id: crypto.randomUUID() };
-      await saveDebtPayment(newPayment);
+      await createDebtPaymentCommand(payment);
       toast({ title: 'Pago registrado' });
       return true;
     } catch (e: any) {
@@ -342,7 +593,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const addRecurringRule = useCallback(async (recurring: Omit<RecurringRule, "id">) => {
     try {
-      await saveRecurringRule({ ...recurring, id: crypto.randomUUID() });
+      await createRecurringRuleCommand(recurring);
       toast({ title: 'Planificación registrada' });
       return true;
     } catch (e: any) {
@@ -353,7 +604,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const updateRecurringRule = useCallback(async (recurring: RecurringRule) => {
     try {
-      await saveRecurringRule(recurring, true);
+      await updateRecurringRuleCommand(recurring);
       toast({ title: 'Planificación actualizada' });
       return true;
     } catch (e: any) {
@@ -364,7 +615,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   const deleteRecurringRule = useCallback(async (id: string) => {
     try {
-      await removeRecurringRule(id);
+      await deleteRecurringRuleCommand(id);
       toast({ title: 'Planificación borrada' });
       return true;
     } catch (e: any) {
