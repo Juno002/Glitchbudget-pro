@@ -54,5 +54,5 @@ Durante toda Fase 19.5:
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa: **completado**;
 - [19.5.2](phase-19-5-2.md) — persistencia fuera de React: **completado**;
 - [19.5.3](phase-19-5-3.md) — cálculos/read models: **completado**;
-- 19.5.4 — `finance-context` + hardening: pendiente;
+- [19.5.4](phase-19-5-4.md) — `finance-context` + hardening: **completado**;
 - 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
