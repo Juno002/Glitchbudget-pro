@@ -3,7 +3,7 @@
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 19.
 Plan de ejecución: [phase-19.md](phase-19.md).
 
-Estado: **en ejecución**.
+Estado: **completado**.
 
 ## Auditoría de componentes
 
@@ -80,7 +80,9 @@ No se cambian fórmulas financieras, schema, migraciones, backups ni semántica 
 
 ## Gate final de Fase 19
 
-Antes de cerrar Fase 19:
+Run de código final: `36592149312`.
+
+Quedaron verdes:
 
 ```text
 npm run typecheck
@@ -92,3 +94,18 @@ npm run build
 Además deben seguir verdes los guards local-only, backup/migration y límites arquitectónicos de 19.1–19.3.
 
 19.3 debe cerrar **Fase 19** y detenerse antes de **Fase 19.5**.
+
+
+## Resultado final
+
+- `TransactionModal` delega plantillas y feedback de Rules a una superficie propia;
+- `ReportsTab` delega los controles de rango;
+- `AccountsOverview` delega el controlador de cuentas, transferencias, conciliación y saldo inicial;
+- `GoalsManager` fue auditado y se mantiene sin fragmentación artificial;
+- las regresiones históricas de Fases 8, 13 y 16 fueron reorientadas a las nuevas ubicaciones sin relajar contratos;
+- **426/426 pruebas**, 0 fallos;
+- typecheck, lint y guards arquitectónicos/local-only aprobados;
+- build estático aprobado;
+- `connect-src 'none'` verificado en cada HTML.
+
+Fase 19 queda cerrada. La siguiente fase canónica es **Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate**, que permanece **no iniciada**.
