@@ -134,7 +134,7 @@ test('storing a pending occurrence does not change financial metrics or position
 test('backup v7 round-trips planned occurrences exactly', async () => {
   await addPendingOccurrence({ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15' });
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v, 11);
+  assert.equal(exported.v, 12);
   assert.deepEqual(exported.plannedOccurrences, [{ id:'occ-roundtrip', ruleId:'rule', scheduledDate:'2026-09-15', status:'pending' }]);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
