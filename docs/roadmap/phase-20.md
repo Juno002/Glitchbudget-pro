@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1 en curso — preflight técnico completado; contrato visual e inventario de paridad pendientes**.
+Estado: **20.1 completada / Gate aprobado. 20.2 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -24,7 +24,7 @@ Incluye:
 - browser E2E real sobre la build estática y recarga offline;
 - Quality checks `36617612176`: 463/463 tests, build y E2E verdes.
 
-Esto no cierra 20.1: la matriz de paridad, el inventario visual y el inventario protegido de gráficos/sonidos/animaciones siguen pendientes.
+El preflight no cerraba por sí solo 20.1. El contrato visual, matriz de paridad e inventarios protegidos quedaron cerrados posteriormente en [phase-20-1.md](phase-20-1.md).
 
 ## Objetivo
 
@@ -93,6 +93,9 @@ Ambos modos deben consumir exactamente el mismo motor y las mismas métricas.
 # Ejecución en 7 etapas
 
 ## 20.1 — Contrato visual + inventario de paridad
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-1.md](phase-20-1.md).
+
 
 Antes de cambiar componentes:
 
