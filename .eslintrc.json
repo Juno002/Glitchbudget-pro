@@ -6,7 +6,8 @@
     {
       "files": [
         "src/components/**/*.{ts,tsx}",
-        "src/app/**/*.{ts,tsx}"
+        "src/app/**/*.{ts,tsx}",
+        "src/contexts/**/*.{ts,tsx}"
       ],
       "rules": {
         "no-restricted-imports": [
@@ -15,11 +16,37 @@
             "paths": [
               {
                 "name": "@/lib/db",
-                "message": "UI must consume queries/services instead of importing the Dexie database directly."
+                "message": "React surfaces must consume queries/services instead of importing the Dexie database directly."
+              },
+              {
+                "name": "dexie",
+                "message": "React surfaces must not depend on Dexie persistence primitives directly."
               },
               {
                 "name": "dexie-react-hooks",
-                "message": "Reactive Dexie subscriptions belong behind application query hooks, not in UI components."
+                "message": "Reactive Dexie subscriptions belong only in dedicated query adapter hooks."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "src/hooks/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@/lib/db",
+                "message": "Hooks must consume non-React queries/services instead of importing the Dexie database directly."
+              },
+              {
+                "name": "dexie",
+                "message": "Hooks must not depend on Dexie persistence primitives directly."
               }
             ]
           }
