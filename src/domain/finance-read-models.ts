@@ -22,7 +22,14 @@ import { budgetPlanForRange, budgetPlansForRange, budgetStatusForRange } from '.
 import { selectPosition } from './ledger';
 import { selectReportsSnapshot } from './reports';
 import { goalView } from './goals';
-import { computeDisposable } from '@/lib/goal-calculator';
+
+export function selectDisposable(
+  averages: { incomeAvgMonthly: number; expenseAvgMonthly: number },
+  safetyPct = 0.05,
+) {
+  const safety = averages.incomeAvgMonthly * safetyPct;
+  return Math.max(averages.incomeAvgMonthly - averages.expenseAvgMonthly - safety, 0);
+}
 
 export type FinanceReadModelSource = {
   settings: Settings;
@@ -93,7 +100,7 @@ export function createFinanceReadModels(source: FinanceReadModelSource) {
     };
   };
 
-  const getDisposable = (safetyPct = 0.05) => computeDisposable(getMonthlyAverages(), safetyPct);
+  const getDisposable = (safetyPct = 0.05) => selectDisposable(getMonthlyAverages(), safetyPct);
 
   const getBudgetStatusDetails = (periodId: string, budgetPeriod?: BudgetPeriodRange) => {
     const range = budgetPeriod ?? { ...periodForId(periodId, source.settings), kind: 'monthly' as const };
