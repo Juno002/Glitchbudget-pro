@@ -309,4 +309,4 @@ Financial semantics: sin cambios
 Network contract: sin cambios
 ```
 
-Siguiente etapa autorizada: **20.2 — Design system, temas y shell**.
+Quality gate final:\n\n```text\n467/467 tests\nnpm run check ✅\nnpm run build ✅\nnpm run test:e2e ✅\nQuality checks 36640064226 ✅\n```\n\nSiguiente etapa autorizada: **20.2 — Design system, temas y shell**.
