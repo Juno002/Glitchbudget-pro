@@ -113,6 +113,21 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables, auto
   const original = JSON.parse(exported);
   delete again.exportedAt; delete original.exportedAt;
   assert.deepEqual(again, original);
+
+  const beforeInvalidV12 = await snapshot();
+  const automationBeforeInvalidV12 = exportLocalAutomation(storage);
+  const invalidV12 = JSON.parse(exported);
+  invalidV12.localAutomation.rules = [{
+    id:'bad',
+    name:'Bad',
+    enabled:true,
+    applyAutomatically:true,
+    condition:{field:'description',operator:'regex',value:'oops'},
+    suggestion:{categoryId:'food'},
+  }];
+  await assert.rejects(importDataJSON(JSON.stringify(invalidV12), storage), /Rules contiene datos inválidos/i);
+  assert.deepEqual(await snapshot(), beforeInvalidV12);
+  assert.deepEqual(exportLocalAutomation(storage), automationBeforeInvalidV12);
 });
 test('invalid v4 restore leaves every existing table unchanged', async () => {
   await importDataJSON(JSON.stringify(fixture('backup-v4')));
