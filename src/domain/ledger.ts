@@ -1,5 +1,12 @@
 import type { Account, Income, Expense, DebtPayment, AccountTransfer, Debt } from './models';
 export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
+
+export function selectDefaultCashAccount(accounts: Account[]) {
+  return accounts.find(account => account.isDefaultCash && account.type === 'cash')
+    || accounts
+      .filter(account => account.type === 'cash')
+      .sort((a, b) => a.startDate.localeCompare(b.startDate) || a.id.localeCompare(b.id))[0];
+}
 export function selectAccountEntries(account: Account, data: AccountSnapshot, through: string) {
   const entries = [
     ...data.incomes.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.amount, description: r.description || 'Ingreso', kind: 'income' })),
