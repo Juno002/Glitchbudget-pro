@@ -84,7 +84,7 @@ export const exportGoalContribCSV = () => exportTable('goal_contributions');
 export async function importIncomesCSV(file: File, options: CsvImportOptions = {}) {
   const rows = await readRows(file, 'incomes', z.union([IncomeV11, IncomeV6]));
   const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
-  const normalized = [];
+  const normalized: any[] = [];
   for (const row of rows) {
     const account = row.accountId ? await requireAccount(row.accountId, row.date) : undefined;
     if (account && account.currency !== baseCurrency) {
@@ -112,7 +112,7 @@ export async function importIncomesCSV(file: File, options: CsvImportOptions = {
 export async function importExpensesCSV(file: File, options: CsvImportOptions = {}) {
   const rows = await readRows(file, 'expenses', z.union([ExpenseV11, ExpenseCSV]));
   const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
-  const normalized = [];
+  const normalized: any[] = [];
   for (const row of rows) {
     const account = row.accountId ? await requireAccount(row.accountId, row.date) : undefined;
     if (account && account.currency !== baseCurrency) {
