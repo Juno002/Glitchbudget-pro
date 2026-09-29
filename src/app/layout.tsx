@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Syne, DM_Mono } from 'next/font/google';
+import { DM_Mono, DM_Sans, DM_Serif_Display } from 'next/font/google';
 import './globals.css';
 import { FinanceProvider } from '@/contexts/finance-context';
 import { Toaster } from '@/components/ui/toaster';
@@ -11,13 +11,18 @@ import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
 import { AppLockProvider } from '@/contexts/app-lock-context';
 import { AppLockGate } from '@/components/security/app-lock-gate';
 
-const syne = Syne({ 
-  subsets: ['latin'], 
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-syne',
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-dm-sans',
 });
-const dmMono = DM_Mono({ 
-  subsets: ['latin'], 
+const dmSerif = DM_Serif_Display({
+  subsets: ['latin'],
+  weight: ['400'],
+  variable: '--font-dm-serif',
+});
+const dmMono = DM_Mono({
+  subsets: ['latin'],
   weight: ['400', '500'],
   variable: '--font-dm-mono',
 });
@@ -41,13 +46,13 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <script dangerouslySetInnerHTML={{ __html: `try{document.documentElement.dataset.balancesHidden=localStorage.getItem('${BALANCE_VISIBILITY_STORAGE_KEY}')==='1'?'true':'false'}catch{document.documentElement.dataset.balancesHidden='false'}` }} />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0d0d0d" />
+        <meta name="theme-color" content="#f5f4ef" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="GlitchBudget" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body className={`${syne.variable} ${dmMono.variable} font-body bg-background text-foreground relative overflow-x-hidden min-h-screen`}>
+      <body className={`${dmSans.variable} ${dmSerif.variable} ${dmMono.variable} font-body bg-background text-foreground relative min-h-screen overflow-x-hidden`}>
         <VisibleViewport />
         {/* Background Gradients */}
         <div className="ambient-background fixed inset-0 pointer-events-none -z-10">
