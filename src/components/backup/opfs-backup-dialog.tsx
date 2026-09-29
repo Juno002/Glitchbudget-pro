@@ -41,6 +41,7 @@ import {
   } from "@/components/ui/alert-dialog"
 import { ImportConfirmation } from './import-confirmation';
 import CsvBackupDialog from './csv-backup-dialog';
+import EncryptedBackupExport from './encrypted-backup-export';
 
 export default function OpfsBackupDialog() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -139,7 +140,7 @@ export default function OpfsBackupDialog() {
         <DialogHeader>
           <DialogTitle>Gestión de Copias</DialogTitle>
           <DialogDescription>
-            Tus datos están en este navegador. Descarga un respaldo JSON y guárdalo fuera del navegador: borrar los datos del sitio también elimina las copias locales. Los archivos se exportan sin cifrar.
+            Tus datos están en este navegador. Puedes descargar el JSON normal o crear un backup cifrado opcional. Las copias locales del navegador siguen sin cifrar y se eliminan al borrar los datos del sitio.
           </DialogDescription>
         </DialogHeader>
         
@@ -167,6 +168,7 @@ export default function OpfsBackupDialog() {
                 <Download className="mr-2 h-4 w-4" />
                 Exportar a JSON
             </Button>
+            <EncryptedBackupExport />
             <CsvBackupDialog />
         </div>
         
