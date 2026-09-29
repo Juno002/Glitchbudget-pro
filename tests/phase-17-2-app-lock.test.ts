@@ -111,7 +111,7 @@ test('17.2 mounts lock gate before FinanceProvider so financial UI is not render
   assert.match(gate, /No cifra la base de datos Dexie/i);
 });
 
-test('17.2 settings supports enable, change, manual lock and disable while Auto-lock remains pending', () => {
+test('17.2 settings still supports enable, change, manual lock and disable with Auto-lock layered separately', () => {
   const settings = readFileSync(new URL('../src/components/settings/app-lock-settings.tsx', import.meta.url), 'utf8');
   assert.match(settings, /Activar App lock/);
   assert.match(settings, /Bloquear ahora/);
@@ -122,7 +122,7 @@ test('17.2 settings supports enable, change, manual lock and disable while Auto-
 
   const dialog = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
   assert.match(dialog, /<AppLockSettings \/>/);
-  assert.match(dialog, /Se implementará en 17\.3 sobre App lock/);
+  assert.match(dialog, /<AutoLockSettings \/>/);
   assert.match(dialog, /localStorage\.removeItem\(APP_LOCK_STORAGE_KEY\)/);
 });
 
