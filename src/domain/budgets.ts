@@ -5,6 +5,7 @@ import {
   periodForId,
   type BudgetPeriodKind,
   type BudgetPeriodRange,
+  type PeriodRange,
   type PeriodSettings,
 } from './periods';
 import { selectBudgetRemaining, selectCategorySpendingForPeriod } from './metrics';
@@ -115,6 +116,57 @@ export function budgetStatusForRange(
       : remaining < plan.limit * 0.25 ? 'alert'
       : 'ok';
   return { ...plan, range, spent, remaining, percentage, status, configured };
+}
+
+export type BudgetStatusDetail = ReturnType<typeof budgetStatusForRange>;
+
+export function selectBudgetStatusDetails(
+  plans: Plan[],
+  expenses: Expense[],
+  expenseCategoryIds: string[],
+  range: BudgetPeriodRange,
+): BudgetStatusDetail[] {
+  const periodBudgets = budgetPlansForRange(plans, range);
+  const budgetedCategoryIds = new Set(periodBudgets.map(plan => plan.categoryId));
+  const relevantCategoryIds = Array.from(new Set([
+    ...expenseCategoryIds,
+    ...budgetedCategoryIds,
+    ...expenses.filter(expense => contains(range, expense.date)).map(expense => expense.categoryId),
+  ]));
+
+  return relevantCategoryIds.map(categoryId => {
+    const plan = periodBudgets.find(item => item.categoryId === categoryId)
+      ?? budgetPlanForRange(range, categoryId, 0);
+    return budgetStatusForRange(plan, expenses, range, budgetedCategoryIds.has(categoryId));
+  });
+}
+
+export function selectFundedBudgetDetails(details: BudgetStatusDetail[]) {
+  return details.filter(detail => detail.remaining > 0);
+}
+
+export function selectBudgetStatusOverview(
+  plans: Plan[],
+  expenses: Expense[],
+  expenseCategoryIds: string[],
+  currentPeriod: PeriodRange,
+  today: string,
+  settings: PeriodSettings = {},
+) {
+  const currentRange: BudgetPeriodRange = { ...currentPeriod, kind: 'monthly' };
+  const trackedBudgets = selectBudgetStatusDetails(plans, expenses, expenseCategoryIds, currentRange)
+    .filter(detail => detail.configured);
+  const totalLimit = trackedBudgets.reduce((sum, detail) => sum + detail.limit, 0);
+  const totalSpent = trackedBudgets.reduce((sum, detail) => sum + detail.spent, 0);
+  const totalRemaining = trackedBudgets.reduce((sum, detail) => sum + detail.remaining, 0);
+  const anchor = contains(currentPeriod, today) ? today : currentPeriod.end;
+  const otherBudgets = plans
+    .filter(plan => plan.periodType && plan.periodType !== 'monthly')
+    .map(plan => budgetStatusForRange(plan, expenses, budgetRangeForPlan(plan, settings)))
+    .filter(detail => contains(detail.range, anchor))
+    .sort((a, b) => b.percentage - a.percentage);
+
+  return { trackedBudgets, totalLimit, totalSpent, totalRemaining, anchor, otherBudgets };
 }
 
 export function currentBudgetRange(
