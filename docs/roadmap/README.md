@@ -8,14 +8,16 @@ La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](phase-19-5.md). El primero ya está cerrado:
 
 - [19.5.1](phase-19-5-1.md) — auditoría forense completa de UI/hooks/contexts/app: **completado**;
-- 19.5.2 — persistencia fuera de React: pendiente;
+- [19.5.2](phase-19-5-2.md) — persistencia financiera fuera de React: **completado**;
 - 19.5.3 — cálculos financieros + read models reutilizables: pendiente;
 - 19.5.4 — `finance-context` + hardening: pendiente;
 - 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
 
 19.5.1 auditó 120 archivos TS/TSX de las superficies exigidas. Confirmó cero Dexie directo en `src/components/**` y `src/app/**`, pero identificó persistencia financiera aún alojada en hooks React y residuos de cálculo/read-model en `finance-context`, presupuestos, metas, deuda, transferencias, cuentas y achievements.
 
-**Estado actual:** 19.5.1 completada. El Prisma Engine Gate sigue abierto; no iniciar 19.5.2 sin autorización explícita del usuario.
+19.5.2 trasladó esas lecturas a `src/lib/finance-queries.ts`, una capa no-React. Los hooks conservan únicamente la suscripción reactiva; ningún component/app/hook/context importa ya la instancia Dexie financiera. ESLint y una regresión específica bloquean la reintroducción de esa dependencia.
+
+**Estado actual:** 19.5.2 completada. El Prisma Engine Gate sigue abierto; la siguiente ejecución es **19.5.3 — cálculos financieros + read models reutilizables**. No iniciar sin autorización explícita del usuario.
 
 ## Fase 19 — Technical-debt closure completada
 
