@@ -225,7 +225,7 @@ Resumen y Reportes reutilizan los mismos selectors canónicos para métricas com
 El gate previo a documentación:
 
 ```text
-Quality checks #36610513904
+Quality checks #36611134188
 
 npm run check ✅
   check:local ✅
