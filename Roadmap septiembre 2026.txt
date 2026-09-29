@@ -2314,6 +2314,206 @@ No dividir solo para obtener archivos pequeños; dividir donde existan responsab
 
 ---
 
+# FASE 19.5 — Residual architecture cleanup / Prisma Engine Gate
+
+Esta fase ocurre **después de cerrar la Fase 19** y antes de considerar estable el núcleo reutilizable.
+
+La Fase 19 elimina la deuda técnica estructural conocida. La Fase 19.5 debe asumir que pueden quedar residuos pequeños o indirectos y realizar una auditoría exhaustiva de frontera entre UI, aplicación, dominio y persistencia.
+
+Objetivo:
+
+```text
+dejar el núcleo financiero de GlitchBudget reutilizable por una interfaz distinta
+sin depender de componentes React, decisiones visuales ni acceso a persistencia desde UI
+```
+
+No añadir features nuevas durante esta fase.
+
+## 19.5.1 — Auditoría completa de la capa visual
+
+Revisar, como mínimo:
+
+```text
+src/components/**
+src/hooks/**
+src/contexts/**
+src/app/**
+```
+
+Buscar cualquier resto de:
+
+- cálculos financieros;
+- invariantes o reglas de negocio;
+- clasificación financiera;
+- construcción de read models financieros;
+- decisiones de dominio basadas en saldo, deuda, presupuesto, metas, inversiones o recurrencias;
+- acceso directo a Dexie;
+- mutaciones directas de datos financieros;
+- transformaciones que determinen el significado financiero de una entidad.
+
+La auditoría no debe limitarse a archivos ya conocidos en Fase 19.
+
+## 19.5.2 — Cero acceso financiero directo a Dexie desde UI
+
+Después de esta fase, los componentes visuales no deben ejecutar:
+
+```ts
+db.*
+useLiveQuery(() => db.*)
+```
+
+para leer o modificar datos financieros.
+
+Mover esos accesos a queries, repositories, application services o fachadas apropiadas.
+
+Los hooks y contexts de React tampoco deben convertirse en una vía alternativa para esconder acceso directo a persistencia financiera.
+
+Excepciones de persistencia puramente visual/local —por ejemplo preferencias de apariencia— deben quedar explícitamente documentadas y no contener datos ni reglas financieras.
+
+## 19.5.3 — Cero cálculos financieros canónicos en componentes
+
+Extraer de UI cualquier cálculo que determine o derive conceptos como:
+
+```text
+liquid position
+net worth
+spending
+cash flow
+available to plan
+budget spent / remaining / status
+debt / available credit
+goal progress / required contribution
+investment current value / projection
+period deficit / surplus
+planned-payment status
+```
+
+La UI puede convertir un valor ya calculado en una representación visual —por ejemplo ancho de una barra, coordenadas SVG o formato de moneda—, pero no debe decidir el significado financiero de ese valor.
+
+Ejemplo:
+
+```text
+Permitido en UI:
+percentForProgressBar = clamp(domainPercentage)
+
+No permitido en UI:
+remaining = budgetLimit - spending
+```
+
+## 19.5.4 — Read models reutilizables
+
+Las pantallas complejas deben consumir read models/selectores ya resueltos.
+
+En particular, revisar que superficies como:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+Cuentas
+Metas
+Inversiones
+Planificados
+```
+
+no reconstruyan por su cuenta relaciones entre ingresos, gastos, transferencias, pagos de deuda, aportes, cuentas o saldos iniciales.
+
+Cuando una pantalla necesite una vista compuesta, crear una query/selector/read model reutilizable independiente de React.
+
+## 19.5.5 — `finance-context` como fachada, no motor
+
+Verificar nuevamente `finance-context.tsx` después de la Fase 19.
+
+Debe limitarse principalmente a:
+
+- composición de estado React;
+- exposición de commands/queries;
+- coordinación de interacción;
+- adaptación mínima para la UI.
+
+No debe contener:
+
+- fórmulas financieras;
+- reglas de negocio;
+- consultas Dexie que pertenezcan a repositories/queries;
+- validaciones financieras canónicas;
+- construcción de reportes;
+- lógica propia de presupuestos, metas, deuda o inversiones.
+
+Si alguna de esas responsabilidades permanece, extraerla antes de cerrar 19.5.
+
+## 19.5.6 — Reglas automáticas para impedir regresiones
+
+Añadir o endurecer checks estáticos.
+
+Como mínimo:
+
+- `no-restricted-imports` para impedir importar `@/lib/db` o Dexie desde componentes;
+- regla equivalente para impedir `db.*` en UI;
+- pruebas o checks que fallen si selectores/servicios de dominio empiezan a depender de React;
+- búsqueda automatizada de accesos de persistencia financiera dentro de `src/components`, `src/hooks`, `src/contexts` y `src/app`.
+
+El objetivo es que la separación no dependa de disciplina manual futura.
+
+## 19.5.7 — Auditoría de residuos pequeños
+
+Revisar explícitamente lógica que puede parecer inocente por ocupar una sola línea, incluyendo:
+
+- `reduce()` de importes;
+- `limit - spent`;
+- `income - expenses`;
+- porcentajes con semántica financiera;
+- detección de estados como `over`, `completed`, `overdue`, `deficit` o `surplus`;
+- selección automática de cuenta/categoría basada en reglas financieras;
+- combinación de entidades de varias tablas para crear un movimiento o métrica;
+- validaciones monetarias que deberían pertenecer a commands/domain.
+
+No conservar una regla en UI únicamente porque sea pequeña.
+
+## Gate 19.5 — Prisma Engine Gate
+
+La fase solo se considera cerrada cuando se puede afirmar y demostrar:
+
+```text
+UI ≠ reglas financieras
+UI ≠ acceso financiero directo a Dexie
+React ≠ requisito del dominio
+Persistencia ≠ cálculo financiero
+```
+
+Además:
+
+- todos los cálculos financieros canónicos tienen una fuente de dominio única;
+- todas las mutaciones financieras pasan por commands/services;
+- las pantallas consumen queries/selectores/read models;
+- los tests del dominio pueden ejecutarse sin montar React;
+- cambiar completamente la interfaz no exige copiar fórmulas ni reglas desde componentes;
+- una interfaz nueva, como Prisma, puede reutilizar el núcleo sin importar componentes de GlitchBudget.
+
+Ejercicio obligatorio de cierre:
+
+Seleccionar al menos tres flujos representativos:
+
+```text
+crear gasto
+consultar Resumen
+consultar Plan o Reportes
+```
+
+y trazar para cada uno la ruta completa:
+
+```text
+UI
+→ command/query
+→ domain
+→ repository/persistence
+```
+
+No debe existir un atajo desde UI a Dexie ni una fórmula financiera exclusiva de la pantalla.
+
+Documentar cualquier excepción deliberada. Si una excepción contiene semántica financiera, **no cerrar la fase**.
+
 # Definition of Done obligatoria para CADA fase
 
 Codex **no debe pasar automáticamente a la fase siguiente**.
