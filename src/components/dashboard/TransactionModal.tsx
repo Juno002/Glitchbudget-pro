@@ -4,8 +4,9 @@ import { AccountSelect } from './account-select';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { cn } from '@/lib/utils';
+import { cn, toCents } from '@/lib/utils';
 import type { Expense, Income } from '@/domain/models';
+import { selectActiveCreditCards } from '@/domain/ledger';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -50,7 +51,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     addAccountTransfer,
   } = useFinances();
 
-  const debts = allDebts?.filter(d => d.status === 'active' && d.type === 'credit_card') || [];
+  const debts = selectActiveCreditCards(allDebts || []);
   const defaultCashId = useMemo(() => defaultCashAccount(accounts || [])?.id || '', [accounts]);
   const [isSaving, setIsSaving] = useState(false);
   const savingRef = useRef(false);
@@ -303,7 +304,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         success = await addAccountTransfer({
           fromAccountId: accountId,
           toAccountId,
-          amount: Math.round(numAmount * 100),
+          amount: toCents(numAmount),
           date,
           note: transferNote,
         });
