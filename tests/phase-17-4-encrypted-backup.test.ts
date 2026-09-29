@@ -108,7 +108,7 @@ test('17.4 authentication fails if ciphertext is modified', async () => {
   await assert.rejects(decryptForTest(tampered, 'backup-password'));
 });
 
-test('17.4 serialized export contains roadmap fields and remains separate from normal JSON v12', async () => {
+test('17.4 encrypted envelope remains separate from the normal JSON contract', async () => {
   const text = await exportEncryptedBackupText('{"v":12}', 'backup-password');
   const parsed = JSON.parse(text);
   for (const key of ['format', 'version', 'kdf', 'salt', 'nonce', 'ciphertext']) {
@@ -118,7 +118,7 @@ test('17.4 serialized export contains roadmap fields and remains separate from n
   assert.equal(parsed.version, 1);
 
   const normalBackup = readFileSync(new URL('../src/lib/backup-json.ts', import.meta.url), 'utf8');
-  assert.match(normalBackup, /v:z\.literal\(12\)/);
+  assert.match(normalBackup, /CURRENT_BACKUP_FORMAT_VERSION = 13/);
   assert.doesNotMatch(normalBackup, /AES-GCM|ciphertext|ENCRYPTED_BACKUP_FORMAT/);
 });
 

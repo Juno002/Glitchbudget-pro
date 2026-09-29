@@ -1,5 +1,21 @@
 # Roadmap: documentación vigente
 
+## Fase 18 — Backup 2.0 y migraciones permanentes en progreso
+
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecutará en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
+
+**18.1 — Contrato y versionado** quedó completado en [phase-18-1.md](phase-18-1.md). El backup JSON canónico pasa a **v13** y ahora lleva obligatoriamente:
+
+- `schemaVersion: 14`, ligado a la versión Dexie canónica;
+- `appVersion: "0.1.0"`, leído desde `package.json`;
+- `exportedAt`, timestamp ISO-8601.
+
+`v` sigue significando versión del **formato JSON**, no versión de Dexie. Backups legacy **v3–v12** permanecen legibles. Un JSON v13 con `schemaVersion` mayor al soportado se rechaza antes de modificar datos. El backup cifrado de Fase 17 conserva su sobre v1 y adopta automáticamente el nuevo JSON v13 como payload interno.
+
+Dexie permanece en **v14**. El gate funcional de 18.1 (`36535765428`) verificó **386/386 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+
+**Estado actual:** Fase 18 en progreso. **18.2 — Cobertura automática de tablas es el siguiente checkpoint.** 18.3–18.5 permanecen pendientes. No avanzar a Fase 19 antes de completar 18.5 y su gate.
+
 ## Fase 17 — Seguridad y privacidad local completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 17 quedó cerrada en cinco iteraciones: [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock, [17.3](phase-17-3.md) Auto-lock, [17.4](phase-17-4.md) backup cifrado opcional y [17.5](phase-17-5.md) restore cifrado + hardening + gate final.

@@ -107,7 +107,7 @@ test('card purchase does not debit bank; payment reduces both bank and debt',asy
 test('v4 backup preserves accounts, movements and transfers',async()=>{
   await saveTransfer(transfer);
   await saveIncome({id:'i',date:today,amount:100,categoryId:'salary',description:'Cobro',type:'extra',accountId:'bank'});
-  const backup=await exportDataJSON();assert.equal(JSON.parse(backup).v,12);
+  const backup=await exportDataJSON();assert.equal(JSON.parse(backup).v,13);
   await importDataJSON(backup);
   assert.equal(await db.accounts.count(),2);assert.equal(await db.account_transfers.count(),1);
   const data=await readAccountSnapshot();assert.equal(accountBalance(bank,data),80_000);assert.equal(accountBalance(cash,data),30_000);

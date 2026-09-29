@@ -6,6 +6,8 @@ import { migrateGoalRecords } from '../domain/goals';
 import { normalizeCurrencyCode } from '../domain/currency';
 
 import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category, Investment } from '../domain/models';
+
+export const CURRENT_DB_SCHEMA_VERSION = 14;
 export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Investment } from '../domain/models';
 
 export class GlitchBudgetDB extends Dexie {
@@ -28,7 +30,7 @@ export class GlitchBudgetDB extends Dexie {
 
   constructor(name = 'GlitchBudgetDB') {
     super(name);
-    this.version(14).stores({
+    this.version(CURRENT_DB_SCHEMA_VERSION).stores({
       accounts: 'id, type',
       investments: 'id, &accountId, type, status, maturityDate',
     });

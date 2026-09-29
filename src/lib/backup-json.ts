@@ -19,7 +19,8 @@ import {
 
 import { z } from 'zod';
 import { validateBudgetPlans } from '../domain/budgets';
-import { db } from '@/lib/db';
+import { db, CURRENT_DB_SCHEMA_VERSION } from '@/lib/db';
+import packageInfo from '../../package.json';
 import { isValidDate } from './finance-calculations';
 
 // ---------- Esquema JSON v3 ----------
@@ -207,9 +208,23 @@ const DumpV12 = DumpV11.extend({
   v:z.literal(12),
   localAutomation:LocalAutomationV12,
 });
-type DumpV12T = z.infer<typeof DumpV12>;
+export const CURRENT_BACKUP_FORMAT_VERSION = 13;
+export const CURRENT_APP_VERSION = packageInfo.version;
+const DumpV13 = DumpV12.extend({
+  v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
+  schemaVersion:z.number().int().positive(),
+  appVersion:z.string().trim().min(1),
+});
+type DumpV13T = z.infer<typeof DumpV13>;
 function parseBackup(raw:unknown) {
  const version=(raw as {v?:number})?.v;
+ if (version===CURRENT_BACKUP_FORMAT_VERSION) {
+   const parsed=DumpV13.parse(raw);
+   if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
+     throw new Error('Este respaldo requiere una versión más reciente del esquema de GlitchBudget.');
+   }
+   return parsed;
+ }
  if (version===12) return DumpV12.parse(raw);
  if (version===11) return DumpV11.parse(raw);
  if (version===10) return DumpV10.parse(raw);
@@ -263,9 +278,11 @@ export async function exportDataJSON(
   const goalData = migrateGoalRecords(goals, goalContributions);
   const baseCurrency = normalizeCurrencyCode(settings.currency);
   const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
-  // Current v12 contract includes the three local automation layers without moving them into Dexie.
-  const dump: DumpV12T = {
-    v: 12,
+  // Backup 2.0 v13 separates format, persistent schema and app version metadata.
+  const dump: DumpV13T = {
+    v: CURRENT_BACKUP_FORMAT_VERSION,
+    schemaVersion: CURRENT_DB_SCHEMA_VERSION,
+    appVersion: CURRENT_APP_VERSION,
     localAutomation: storage ? exportLocalAutomation(storage) : EMPTY_LOCAL_AUTOMATION,
     categories,
     accounts: accounts.map(account => ({ ...account, currency:normalizeCurrencyCode(account.currency, baseCurrency) })), accountTransfers,
@@ -346,7 +363,7 @@ export async function exportDataJSON(
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV12.parse(dump);
+  DumpV13.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -369,7 +386,7 @@ export async function importDataJSON(
   // 1) Parse + valida contrato v3
   const raw = JSON.parse(text);
   const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
-  const importedAutomation = d.v === 12 && 'localAutomation' in d
+  const importedAutomation = d.v >= 12 && 'localAutomation' in d
     ? normalizeLocalAutomationBackup(d.localAutomation)
     : null;
   if (importedAutomation && !storage && (

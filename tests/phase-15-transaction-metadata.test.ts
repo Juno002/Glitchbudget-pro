@@ -115,7 +115,7 @@ test('quick-add templates preserve selective metadata without adding automation'
   assert.deepEqual(template.labels,['trabajo']);
 });
 
-test('JSON v12 preserves Phase 15 metadata and legacy v10 imports without inventing it',async()=>{
+test('current JSON preserves Phase 15 metadata and legacy v10 imports without inventing it',async()=>{
   const cash=await ensureCashAccount(today);
   await db.accounts.update(cash.id,{openingBalance:100_000});
   await saveExpense({
@@ -129,7 +129,7 @@ test('JSON v12 preserves Phase 15 metadata and legacy v10 imports without invent
 
   const text=await exportDataJSON();
   const dump=JSON.parse(text);
-  assert.equal(dump.v,12);
+  assert.equal(dump.v,13);
   assert.equal(dump.expenses[0].necessity,'want');
   assert.deepEqual(dump.expenses[0].labels,['salida','amigos']);
   assert.deepEqual(dump.incomes[0].labels,['trabajo']);
