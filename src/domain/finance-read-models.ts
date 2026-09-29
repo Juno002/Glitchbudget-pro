@@ -45,7 +45,12 @@ export type FinanceReadModelSource = {
   expenseCategoryIds: string[];
 };
 
-export function resolveFinanceSettings(defaults: Settings, rawSettings: Settings | null): Settings {
+export type ResolvedFinanceSettings = Omit<Settings, 'preventNegativeAccountBalance' | 'budgetOverspendingBehavior'> & {
+  preventNegativeAccountBalance: boolean;
+  budgetOverspendingBehavior: 'allow' | 'warn' | 'block';
+};
+
+export function resolveFinanceSettings(defaults: Settings, rawSettings: Settings | null): ResolvedFinanceSettings {
   const source: Partial<Settings> = rawSettings ?? {};
   return {
     ...defaults,
