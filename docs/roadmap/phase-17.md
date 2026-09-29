@@ -121,7 +121,7 @@ No introducir heurísticas remotas ni comportamiento “inteligente” fuera del
 
 ---
 
-## 17.4 — Backup cifrado
+## 17.4 — Backup cifrado ✅
 
 Objetivo: añadir exportación cifrada **opcional** sin retirar el JSON normal.
 
@@ -240,8 +240,8 @@ Durante 17.1–17.5:
 17.1 — Contrato de seguridad local        ✅ completado
 17.2 — App lock                           ✅ completado
 17.3 — Auto-lock                          ✅ completado
-17.4 — Backup cifrado                     ⏳ siguiente
-17.5 — Restore + hardening + gate final   ⏳ pendiente
+17.4 — Backup cifrado                     ✅ completado
+17.5 — Restore + hardening + gate final   ⏳ siguiente
 ```
 
-**Fase 17 está en progreso. 17.1–17.3 quedaron completados; 17.4 — Backup cifrado es el siguiente checkpoint.**
+**Fase 17 está en progreso. 17.1–17.4 quedaron completados; 17.5 — Restore cifrado + hardening + gate final es el siguiente checkpoint.**
