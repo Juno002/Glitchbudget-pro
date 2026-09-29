@@ -51,7 +51,7 @@ export function TransactionRuleSuggestions({
   onDismiss,
 }: {
   automaticRuleId: string | null;
-  automaticRuleSuggestion?: RuleMatch;
+  automaticRuleSuggestion?: RuleMatch | null;
   hasAutomaticConflict: boolean;
   ruleSuggestions: RuleMatch[];
   categoryName: (id: string) => string;
