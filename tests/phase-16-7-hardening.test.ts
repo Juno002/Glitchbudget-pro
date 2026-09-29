@@ -121,10 +121,11 @@ test('16.7 replaces the three local layers atomically and rolls back if storage 
   assert.deepEqual(exportLocalAutomation(storage),before);
 });
 
-test('16.7 backup contract is v12, preserves older readers and does not move automation into Dexie',()=>{
+test('16.7 automation backup contract remains preserved under Backup 2.0',()=>{
   const backup=readFileSync(new URL('../src/lib/backup-json.ts',import.meta.url),'utf8');
   const db=readFileSync(new URL('../src/lib/db.ts',import.meta.url),'utf8');
-  assert.match(backup,/v:z\.literal\(12\)/);
+  assert.match(backup,/const DumpV12/);
+  assert.match(backup,/CURRENT_BACKUP_FORMAT_VERSION = 13/);
   assert.match(backup,/localAutomation/);
   assert.match(backup,/if \(version===11\) return DumpV11\.parse/);
   assert.match(backup,/replaceLocalAutomation/);
