@@ -24,7 +24,8 @@ import { useFinanceContextData } from '@/hooks/use-finance-context-data';
 import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-management';
 import { initializeSettings, resetPersistedSettings, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
 import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
-import { createFinanceReadModels, resolveFinanceSettings, selectGoalViews } from '@/domain/finance-read-models';
+import { createFinanceReadModels, selectGoalViews } from '@/domain/finance-read-models';
+import { resolveFinanceSettings } from '@/application/finance-settings';
 import { playExpense, playIncome, playGoalComplete } from "@/lib/sounds";
 import {
   createAccountTransferCommand,
