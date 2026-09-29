@@ -4,9 +4,9 @@ import { confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOcc
 import { plannedOccurrenceWindow } from '@/domain/upcoming';
 import { BudgetWarning } from '@/policies/budget-overspending';
 import { activeCategories } from '@/domain/categories';
-import { createCategory, resetCategories, requireCategory } from '@/lib/category-service';
+import { createCategory, resetCategories } from '@/lib/category-service';
 
-import { selectDisposable, selectExpensesByNature, selectPeriodAverages, selectPeriodMetrics, recordedCategoriesForPeriod, selectCategorySpendingForPeriod, selectBudgetRemaining } from '@/domain/metrics';
+import { selectDisposable, selectExpensesByNature, selectPeriodAverages, selectPeriodMetrics, recordedCategoriesForPeriod, selectCategorySpendingForPeriod } from '@/domain/metrics';
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
 import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
@@ -24,7 +24,7 @@ import type { Budget, Goal, GoalContribution } from "@/lib/types";
 import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
 import type { Settings, Income, Expense, Plan, Debt, DebtPayment, RecurringRule, PlannedOccurrence, AccountTransfer, Account, Investment } from '@/domain/models';
 import { useToast } from "@/hooks/use-toast";
-import { localDate, monthlyAmount } from '@/lib/finance-calculations';
+import { localDate } from '@/lib/finance-calculations';
 import { saveExpense, saveIncome, saveDebtPayment, saveGoalContribution, removeIncome, removeExpense } from '@/lib/transaction-service';
 import { ensureCashAccount, saveTransfer } from '@/lib/accounts';
 import { setBaseCurrency as persistBaseCurrency } from '@/lib/currency-service';
@@ -32,7 +32,7 @@ import { toCents } from "@/lib/utils";
 import { friendlyError } from "@/lib/errors";
 import { useFinanceContextData } from '@/hooks/use-finance-context-data';
 import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-management';
-import { initializeSettings, resetPersistedSettings, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
+import { initializeSettings, resetPersistedSettings, saveBaseIncomeInput, savePeriodStartDay, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
 import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
@@ -314,27 +314,24 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const setBudgetOverspendingBehavior = useCallback((value: BudgetOverspendingBehavior) => updateSetting('budgetOverspendingBehavior', value), [updateSetting]);
   const setRolloverStrategy = useCallback((strategy: RolloverStrategy) => updateSetting('rolloverStrategy', strategy), [updateSetting]);
   const setPeriodStartDay = useCallback(async (day: number) => {
-    if (!Number.isInteger(day) || day < 1 || day > 31) {
-      toast({ title: 'Día inválido', description: 'El inicio del período debe estar entre 1 y 31.', variant: 'destructive' });
-      return;
-    }
-    if (await updateSetting('periodStartDay', day)) {
+    try {
+      await savePeriodStartDay(day);
       const nextId = periodContaining(localDate(), { periodStartDay: day }).id;
       setCurrentMonthState(nextId);
       try { await rollBudgetsIntoMonth(nextId); } catch {}
       toast({ title: 'Inicio del período actualizado', description: day === 1 ? 'Se usarán meses calendario.' : `Cada período comenzará el día ${day}.` });
+    } catch (error) {
+      toast({ title: 'No se pudo actualizar el inicio del período', description: friendlyError(error), variant: 'destructive' });
     }
-  }, [updateSetting, toast]);
+  }, [toast]);
   const setBaseIncome = useCallback(async (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => {
-    const cents = toCents(baseIncome.amount);
-    if (!Number.isSafeInteger(cents) || cents < 0) {
-      toast({ title: 'Monto inválido', description: 'Introduce un ingreso positivo o cero.', variant: 'destructive' });
-      return;
-    }
-    if (await updateSetting('baseIncome', { freq: baseIncome.freq, amount: cents })) {
+    try {
+      await saveBaseIncomeInput(baseIncome);
       toast({ title: 'Ingreso base guardado' });
+    } catch (error) {
+      toast({ title: 'No se pudo guardar el ingreso base', description: friendlyError(error), variant: 'destructive' });
     }
-  }, [updateSetting, toast]);
+  }, [toast]);
 
   const addIncomeItem = useCallback(async (income: Omit<Income, "id" | "month">) => {
     try {
@@ -460,7 +457,6 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     const newContribution: GoalContribution = { id: crypto.randomUUID(), goalId: id, amount: amountInCents, date: today };
 
     try {
-      if (!Number.isSafeInteger(amountInCents) || amountInCents <= 0) throw new Error('El aporte debe ser un monto positivo.');
       const isCompletedNow = await saveGoalContribution(newContribution);
       if (isCompletedNow) {
           playGoalComplete();
