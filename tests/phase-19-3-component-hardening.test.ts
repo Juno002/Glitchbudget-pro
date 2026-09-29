@@ -21,11 +21,11 @@ test('19.3 large dashboard surfaces delegate independent responsibilities', () =
   assert.doesNotMatch(reports, /<Input type="date"/);
 
   assert.match(accounts, /useAccountManagement/);
-  assert.doesNotMatch(accounts, /addAccount/);
-  assert.doesNotMatch(accounts, /saveTransfer/);
-  assert.doesNotMatch(accounts, /reconcileDebt/);
+  assert.doesNotMatch(accounts, /addAccount/);
+  assert.doesNotMatch(accounts, /saveTransfer/);
+  assert.doesNotMatch(accounts, /reconcileDebt/);
 
-  assert.doesNotMatch(goals, /@\/lib\/db|dexie-react-hooks|db./);
+  assert.doesNotMatch(goals, /@\/lib\/db|dexie-react-hooks|db[.]/);
   assert.ok(goals.split('\n').length < 200, 'GoalsManager is already cohesive and should not be fragmented by size alone.');
 });
 
@@ -34,7 +34,7 @@ test('19.3 preserves the architectural boundaries established by 19.1 and 19.2',
   const accountController = source('src/hooks/use-account-management.ts');
   const transactionAutomation = source('src/components/dashboard/transaction-modal-automation.tsx');
 
-  assert.doesNotMatch(financeContext, /@\/lib\/db|dexie-react-hooks|db.|@\/lib\/opfs/);
-  assert.doesNotMatch(accountController, /@\/lib\/db|dexie-react-hooks|db./);
-  assert.doesNotMatch(transactionAutomation, /@\/lib\/db|dexie-react-hooks|db./);
+  assert.doesNotMatch(financeContext, /@\/lib\/db|dexie-react-hooks|db[.]|@\/lib\/opfs/);
+  assert.doesNotMatch(accountController, /@\/lib\/db|dexie-react-hooks|db[.]/);
+  assert.doesNotMatch(transactionAutomation, /@\/lib\/db|dexie-react-hooks|db[.]/);
 });
