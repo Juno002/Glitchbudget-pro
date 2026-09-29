@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 19.5.
 
-Estado: **en ejecución**.
+Estado: **completado**.
 
 ## Objetivo
 
@@ -214,15 +214,125 @@ Encrypted envelope v1
 
 No hay migration.
 
-## Gate pendiente
+## Gate final
 
-Antes de cerrar:
+Run de código: `36596762307`.
 
 ```text
-npm run typecheck
-npm run lint
-npm test
-npm run build
+npm run typecheck  ✅
+npm run lint       ✅
+npm test           ✅ 434/434
+npm run build      ✅
 ```
 
-También deben permanecer verdes los gates históricos de backup/import, migraciones permanentes, local-only y offline.
+El build estático verificó nuevamente:
+
+```text
+no diagnostic importer
+connect-src 'none' en cada HTML
+```
+
+Los gates históricos incluidos en la suite mantienen compatibilidad de backup/import, migraciones permanentes, financial totals, local-only y offline.
+
+## Definition of Done — reporte obligatorio
+
+### 1. Files changed
+
+Cambios arquitectónicos principales:
+
+```text
+src/repositories/finance-repository.ts
+src/adapters/dexie-live-query.ts
+src/application/finance-commands.ts
+src/application/finance-settings.ts
+src/domain/finance-read-models.ts
+src/domain/dashboard-read-models.ts
+src/domain/ledger.ts
+src/contexts/finance-context.tsx
+src/hooks/use-finance-context-data.ts
+src/hooks/use-finance-queries.ts
+src/hooks/use-categories.ts
+src/hooks/use-achievements.ts
+src/components/dashboard/TransactionModal.tsx
+src/components/dashboard/account-select.tsx
+src/components/dashboard/accounts-overview.tsx
+src/components/dashboard/budget-status.tsx
+src/components/dashboard/debts-tab.tsx
+src/components/dashboard/goals-manager.tsx
+src/components/dashboard/investments-manager.tsx
+src/components/dashboard/subscriptions-manager.tsx
+src/components/dashboard/transfer-dialog.tsx
+src/lib/achievements.ts
+src/lib/accounts.ts
+src/lib/goal-calculator.ts
+src/lib/recurring-rule-service.ts
+.eslintrc.json
+tests/phase-19-5-prisma-engine-gate.test.ts
+```
+
+También se actualizaron regresiones históricas cuando una responsabilidad cambió de ubicación sin cambiar de contrato.
+
+### 2. Schema changes
+
+Ninguno.
+
+```text
+Dexie v14
+Backup JSON v13
+Encrypted envelope v1
+```
+
+### 3. Migration behavior
+
+Sin migration nueva y sin reset destructivo.
+
+La historia Dexie permanente permanece intacta.
+
+### 4. Invariants affected
+
+No se cambió semántica financiera.
+
+Se hizo autoritativa en service una regla que ya existía en UI: una regla recurrente no puede tener monto cero. El comportamiento observable existente se conserva.
+
+Transferencias continúan persistiendo centavos; la conversión se movió desde Quick Add al application command.
+
+### 5. Tests added
+
+`phase-19-5-prisma-engine-gate.test.ts` verifica de forma permanente:
+
+- cero Dexie directo en React;
+- dominio/application/repositories independientes de React UI;
+- `finance-context` como fachada;
+- hotspots sin fórmulas canónicas duplicadas;
+- tres trazas obligatorias UI → command/query → domain/service → persistence;
+- prohibición de reintroducir `lib/accounts` en componentes para cálculos de lectura.
+
+Gate final: **434/434**.
+
+### 6. Known limitations
+
+- La persistencia actual del engine continúa siendo Dexie; 19.5 desacopla la interfaz de esa persistencia, no reemplaza Dexie.
+- `src/adapters/dexie-live-query.ts` es deliberadamente específico de React + Dexie y puede sustituirse sin modificar dominio/read models.
+- Los formularios pueden conservar validaciones duplicadas para feedback inmediato, pero los commands/services siguen siendo la autoridad.
+- Preferencias visuales/locales y estado de logros pueden continuar en localStorage porque no son ledger ni reglas financieras canónicas.
+
+### 7. Architectural concerns discovered
+
+No queda ningún concern bloqueante para reutilizar el núcleo desde otra UI.
+
+Los módulos históricos de service pueden seguir conteniendo orquestación Dexie, pero React ya no depende de Dexie ni aloja fórmulas financieras canónicas. Los selectors/read models y commands necesarios para una nueva interfaz son independientes de los componentes de GlitchBudget.
+
+## Prisma Engine Gate — veredicto
+
+Demostrado por tests:
+
+```text
+UI ≠ reglas financieras
+UI ≠ acceso financiero directo a Dexie
+React ≠ requisito del dominio
+Persistencia ≠ fuente de cálculo financiero
+```
+
+Los tres flujos obligatorios están trazados arriba y protegidos por tests.
+
+**Fase 19.5 completada.**
