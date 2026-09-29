@@ -83,7 +83,7 @@ No crear una promesa de cifrado de base de datos si solo existe una barrera de a
 
 ---
 
-## 17.2 — App lock
+## 17.2 — App lock ✅
 
 Objetivo: añadir un bloqueo local de la aplicación para protegerla frente a otra persona que use el mismo dispositivo/navegador.
 
@@ -238,10 +238,10 @@ Durante 17.1–17.5:
 
 ```text
 17.1 — Contrato de seguridad local        ✅ completado
-17.2 — App lock                           ⏳ siguiente
-17.3 — Auto-lock                          ⏳ pendiente
+17.2 — App lock                           ✅ completado
+17.3 — Auto-lock                          ⏳ siguiente
 17.4 — Backup cifrado                     ⏳ pendiente
 17.5 — Restore + hardening + gate final   ⏳ pendiente
 ```
 
-**Fase 17 está en progreso. 17.1 quedó completado; 17.2 — App lock es el siguiente checkpoint.**
+**Fase 17 está en progreso. 17.1–17.2 quedaron completados; 17.3 — Auto-lock es el siguiente checkpoint.**
