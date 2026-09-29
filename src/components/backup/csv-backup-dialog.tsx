@@ -28,6 +28,7 @@ import {
   importPlansCSV,
   importGoalsCSV,
   importGoalContribCSV,
+  type CsvImportOptions,
 } from '@/lib/csv-backup';
 
 type TableName = 'incomes' | 'expenses' | 'plans' | 'goals' | 'goalContributions';
@@ -36,7 +37,7 @@ const backupActions: {
     name: TableName;
     label: string;
     exportFn: () => Promise<void>;
-    importFn: (file: File) => Promise<void>;
+    importFn: (file: File, options?: CsvImportOptions) => Promise<void>;
 }[] = [
     { name: 'incomes', label: 'Ingresos', exportFn: exportIncomesCSV, importFn: importIncomesCSV },
     { name: 'expenses', label: 'Gastos', exportFn: exportExpensesCSV, importFn: importExpensesCSV },
@@ -49,9 +50,9 @@ export default function CsvBackupDialog() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const { toast } = useToast();
-  const { setDataVersion } = useFinances();
+  const { setDataVersion, backupBeforeDestructiveImport } = useFinances();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const currentImportFn = useRef<((file: File) => Promise<void>) | null>(null);
+  const currentImportFn = useRef<((file: File, options?: CsvImportOptions) => Promise<void>) | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPendingFile(event.target.files?.[0] ?? null);
@@ -62,7 +63,7 @@ export default function CsvBackupDialog() {
     if (file && currentImportFn.current && !busy) {
       setBusy(true);
       try {
-        await currentImportFn.current(file);
+        await currentImportFn.current(file, { beforeWrite: backupBeforeDestructiveImport });
         setDataVersion(v => v + 1);
         setPendingFile(null);
         toast({
@@ -82,7 +83,7 @@ export default function CsvBackupDialog() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
   
-  const triggerImport = (importFn: (file: File) => Promise<void>) => {
+  const triggerImport = (importFn: (file: File, options?: CsvImportOptions) => Promise<void>) => {
       currentImportFn.current = importFn;
       fileInputRef.current?.click();
   }
@@ -126,7 +127,7 @@ export default function CsvBackupDialog() {
         />
         <ImportConfirmation file={pendingFile} scope="los registros de la tabla seleccionada" onCancel={() => setPendingFile(null)} onConfirm={confirmImport} />
         <DialogFooter>
-          <p className="text-xs text-muted-foreground">Nota: La importación reemplazará todos los datos de la tabla seleccionada.</p>
+          <p className="text-xs text-muted-foreground">Nota: La importación reemplazará todos los datos de la tabla seleccionada. Antes de escribir, GlitchBudget intentará crear una copia local automática cuando OPFS esté disponible.</p>
         </DialogFooter>
       </DialogContent>
     </Dialog>
