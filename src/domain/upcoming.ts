@@ -1,4 +1,4 @@
-import type { PlannedOccurrence } from './models';
+import type { PlannedOccurrence, RecurringRule } from './models';
 import type { DateRange } from './periods';
 import { occurrenceDisplayStatus } from './occurrence-status';
 import { shiftDate } from './recurrence';
@@ -51,4 +51,24 @@ export function groupUpcomingOccurrences(
   }
 
   return groups;
+}
+
+
+export function selectPlannedPaymentsManagerReadModel(
+  occurrences: PlannedOccurrence[],
+  rules: RecurringRule[],
+  today: string,
+) {
+  const grouped = groupUpcomingOccurrences(occurrences, today);
+  const rulesById = new Map(rules.map(rule => [rule.id, rule]));
+  const sortedRules = [...rules].sort((a, b) =>
+    Number(b.active) - Number(a.active) || a.title.localeCompare(b.title, 'es'),
+  );
+  const unresolvedCount = Object.values(grouped).reduce((sum, rows) => sum + rows.length, 0);
+  const recentResolved = [...occurrences]
+    .filter(row => row.status === 'confirmed' || row.status === 'skipped')
+    .sort((a, b) => b.scheduledDate.localeCompare(a.scheduledDate) || b.id.localeCompare(a.id))
+    .slice(0, 5);
+
+  return { grouped, rulesById, sortedRules, unresolvedCount, recentResolved };
 }
