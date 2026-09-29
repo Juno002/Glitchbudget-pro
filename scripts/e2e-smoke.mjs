@@ -282,6 +282,57 @@ async function main() {
 
     await waitFor(client, `document.readyState === 'complete' && document.body.innerText.includes('Resumen')`, 'app inicial');
 
+    // Phase 20.2: verify the shared shell at desktop and mobile widths in a real browser.
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const sidebar = document.querySelector('[data-shell-sidebar="desktop"]');
+        const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        return sidebar && mobileNav
+          && getComputedStyle(sidebar).display !== 'none'
+          && getComputedStyle(mobileNav).display === 'none';
+      })()`,
+      'shell desktop',
+    );
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const sidebar = document.querySelector('[data-shell-sidebar="desktop"]');
+        const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        const mobileFab = document.querySelector('[data-shell-fab="mobile"]');
+        return sidebar && mobileNav && mobileFab
+          && getComputedStyle(sidebar).display === 'none'
+          && getComputedStyle(mobileNav).display !== 'none'
+          && getComputedStyle(mobileFab).display !== 'none';
+      })()`,
+      'shell móvil',
+    );
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
+      'retorno a shell desktop',
+    );
+
     // Fresh install: create actual data through the public UI, not by touching Dexie.
     await createMovement(client, 'Ingreso', 1000);
     await createMovement(client, 'Gasto', 100);
@@ -332,7 +383,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: responsive shell + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }
