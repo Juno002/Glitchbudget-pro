@@ -29,3 +29,36 @@ export function selectPosition(accounts: Account[], debts: Debt[], data: Account
 export function selectCardAvailableLimit(limit: number, signedBalance: number) {
   return limit - signedBalance;
 }
+
+
+export function selectCardReadModel(
+  debt: Debt,
+  expenses: Expense[],
+  payments: DebtPayment[],
+  through: string,
+) {
+  const signedBalance = selectCardSignedBalance(debt, expenses, payments, through);
+  const isSurplus = signedBalance < 0;
+  const absoluteBalance = Math.abs(signedBalance);
+  const availableLimit = selectCardAvailableLimit(debt.principal, signedBalance);
+  const utilizationPercent = debt.principal > 0
+    ? Math.min(100, Math.max(0, (signedBalance / debt.principal) * 100))
+    : 0;
+  return { signedBalance, isSurplus, absoluteBalance, availableLimit, utilizationPercent };
+}
+
+export function selectAccountOverviewReadModel(
+  accounts: Account[],
+  debts: Debt[],
+  data: AccountSnapshot,
+  through: string,
+) {
+  const cards = debts.filter(debt => debt.type === 'credit_card');
+  const liquidAccounts = accounts.filter(account => account.type !== 'investment');
+  const position = selectPosition(accounts, debts, data, through);
+  const unassignedMovementCount =
+    data.incomes.filter(income => !income.accountId).length
+    + data.expenses.filter(expense => expense.paymentMethod !== 'credit' && !expense.accountId).length
+    + data.payments.filter(payment => !payment.accountId).length;
+  return { cards, liquidAccounts, position, unassignedMovementCount };
+}
