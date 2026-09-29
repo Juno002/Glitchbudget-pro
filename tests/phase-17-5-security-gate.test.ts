@@ -62,6 +62,10 @@ function asLegacyVersion(current: any, version: number) {
   const value = structuredClone(current);
   value.v = version;
 
+  if (version < 13) {
+    delete value.schemaVersion;
+    delete value.appVersion;
+  }
   if (version < 12) delete value.localAutomation;
   if (version < 11) {
     value.incomes = value.incomes.map(({ labels, ...row }: any) => row);
