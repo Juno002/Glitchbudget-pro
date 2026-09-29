@@ -1,5 +1,6 @@
-// Este módulo contiene la lógica pura de cálculo para la planificación de metas.
-// Se basa en el modelo proporcionado por el usuario.
+// Este módulo conserva helpers de planificación legacy.
+// Las métricas financieras canónicas se delegan al dominio.
+import { selectDisposable } from '../domain/metrics';
 
 type Money = number;
 export type SuggestionProfile = 'conservative' | 'balanced' | 'aggressive';
@@ -13,8 +14,7 @@ export interface Averages {
  * Calcula el dinero disponible mensual después de gastos y un colchón de seguridad.
  */
 export function computeDisposable(avg: Averages, safetyPct = 0.05): Money {
-  const safety = avg.incomeAvgMonthly * safetyPct;
-  return Math.max(avg.incomeAvgMonthly - avg.expenseAvgMonthly - safety, 0);
+  return selectDisposable(avg, safetyPct);
 }
 
 /**

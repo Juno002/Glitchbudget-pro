@@ -1,6 +1,6 @@
 import type { Income, Expense } from './models';
 import type { FinanceSnapshot } from './snapshot';
-import { contains, periodForId, type DateRange, type PeriodRange } from './periods';
+import { contains, periodContaining, periodForId, type DateRange, type PeriodRange, type PeriodSettings } from './periods';
 
 /** Recorded activity: an actual purchase is counted once, on its recorded date. */
 export function recordedExpenseForPeriod(expense: Expense, period: DateRange): number {
@@ -83,4 +83,58 @@ export function selectRolloverLimit(limit: number, spending: number, strategy: '
 /** Explanatory chart split of the period result, not a cash-flow selector. */
 export function selectMonthlyResultSplit(recordedIncome: number, spending: number) {
   return { surplus: Math.max(0, recordedIncome - spending), deficit: Math.max(0, spending - recordedIncome) };
+}
+
+
+export function selectPeriodAverages(
+  data: FinanceSnapshot,
+  currentPeriodId: string,
+  settings: PeriodSettings = {},
+  numPeriods = 3,
+) {
+  const periodIds = Array.from(new Set([
+    currentPeriodId,
+    ...[...data.incomes, ...data.expenses].map(row => periodContaining(row.date, settings).id),
+  ]))
+    .filter(id => id <= currentPeriodId)
+    .sort()
+    .slice(-numPeriods);
+
+  const totals = periodIds.map(id => selectPeriodMetrics(data, periodForId(id, settings)));
+  const totalIncome = totals.reduce((sum, metrics) => sum + metrics.recordedIncome, 0);
+  const totalExpenses = totals.reduce((sum, metrics) => sum + metrics.spending, 0);
+  const divisor = Math.max(1, periodIds.length);
+
+  return {
+    incomeAvgMonthly: totalIncome / divisor,
+    expenseAvgMonthly: totalExpenses / divisor,
+  };
+}
+
+export function selectDisposable(
+  averages: { incomeAvgMonthly: number; expenseAvgMonthly: number },
+  safetyPct = 0.05,
+) {
+  const safety = averages.incomeAvgMonthly * safetyPct;
+  return Math.max(averages.incomeAvgMonthly - averages.expenseAvgMonthly - safety, 0);
+}
+
+export function selectExpensesByNature(expenses: Expense[], period: DateRange) {
+  const groups = expenses
+    .filter(expense => recordedExpenseForPeriod(expense, period) > 0)
+    .reduce((acc, expense) => {
+      const value = recordedExpenseForPeriod(expense, period);
+      const current = acc[expense.nature] ?? { total: 0, count: 0 };
+      current.total += value;
+      current.count += 1;
+      acc[expense.nature] = current;
+      return acc;
+    }, {} as Record<Expense['nature'], { total: number; count: number }>);
+
+  return Object.entries(groups).map(([name, values]) => ({
+    name,
+    total: values.total,
+    count: values.count,
+    avg: values.total / Math.max(1, values.count),
+  }));
 }

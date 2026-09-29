@@ -1,5 +1,5 @@
 'use client';
-import { selectPosition } from '@/domain/ledger';
+import { selectAccountOverviewReadModel } from '@/domain/ledger';
 import { useState } from 'react';
 import { accountBalance, accountEntries } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
@@ -33,10 +33,12 @@ export default function AccountsOverview() {
   } = management;
   if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
-  const cards = data.debts.filter(d => d.type === 'credit_card');
-  const liquidAccounts = data.accounts.filter(a => a.type !== 'investment');
-  const { cash, bank, investmentAssets, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
-  const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
+  const {
+    cards,
+    liquidAccounts,
+    position: { cash, bank, investmentAssets, balances, liabilities: owed, cardPositiveBalance: credit, netWorth },
+    unassignedMovementCount: unassigned,
+  } = selectAccountOverviewReadModel(data.accounts, data.debts, data, today);
   const account = liquidAccounts.find(a => a.id === selected);
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
     <div className="flex flex-wrap items-start justify-between gap-3">

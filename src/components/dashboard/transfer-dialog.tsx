@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowRightLeft } from 'lucide-react';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import type { BudgetPeriodRange } from '@/domain/periods';
+import { selectFundedBudgetDetails } from '@/domain/budgets';
 
 const formSchema = z.object({
   fromCategoryId: z.string().min(1, 'Debes seleccionar una categoría de origen'),
@@ -51,7 +52,7 @@ export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: Budget
     },
   });
 
-  const budgetsWithFunds = getBudgetStatusDetails(currentMonth, budgetPeriod).filter(b => b.remaining > 0);
+  const budgetsWithFunds = selectFundedBudgetDetails(getBudgetStatusDetails(currentMonth, budgetPeriod));
 
   async function onSubmit(values: TransferFormValues) {
     try {
