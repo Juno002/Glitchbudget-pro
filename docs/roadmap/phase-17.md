@@ -158,7 +158,7 @@ El JSON normal sigue disponible como opción separada.
 
 ---
 
-## 17.5 — Restore cifrado + hardening + gate final
+## 17.5 — Restore cifrado + hardening + gate final ✅
 
 Objetivo: cerrar Fase 17 con restauración segura y pruebas completas.
 
@@ -241,7 +241,7 @@ Durante 17.1–17.5:
 17.2 — App lock                           ✅ completado
 17.3 — Auto-lock                          ✅ completado
 17.4 — Backup cifrado                     ✅ completado
-17.5 — Restore + hardening + gate final   ⏳ siguiente
+17.5 — Restore + hardening + gate final   ✅ completado
 ```
 
-**Fase 17 está en progreso. 17.1–17.4 quedaron completados; 17.5 — Restore cifrado + hardening + gate final es el siguiente checkpoint.**
+**Fase 17 — Seguridad y privacidad local está completada. Las cinco iteraciones 17.1–17.5 quedaron cerradas; Fase 18 no está iniciada y requiere autorización explícita del usuario.**
