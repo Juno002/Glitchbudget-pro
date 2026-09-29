@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 29 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. El preflight técnico de 20.1 está cerrado; el contrato visual y el inventario de paridad de 20.1 son el siguiente trabajo.
+> **Estado del proyecto — 29 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. **20.1 está completada y su Gate de paridad visual está aprobado**; 20.2 — design system, temas y shell — es la siguiente etapa.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
@@ -160,6 +160,7 @@ Documentación de ejecución:
 - [Fase 20 — Modo Prisma](docs/roadmap/phase-20.md)
 - [Prisma UI System](docs/ux/prisma-mode.md)
 - [Preflight técnico 20.1](docs/roadmap/phase-20-1-preflight.md)
+- [Gate 20.1 — contrato visual + inventario de paridad](docs/roadmap/phase-20-1.md)
 
 Fase 20 mantiene **GlitchBudget Engine** como único motor financiero y utiliza el repositorio Prisma únicamente como referencia visual. El producto visible pasará a llamarse **Prisma** al aprobar el Gate 20.7. Ese cambio es branding: identificadores persistentes como `GlitchBudgetDB` no se renombran solo por estética.
 
