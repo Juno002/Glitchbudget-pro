@@ -232,7 +232,8 @@ test('17.5 encrypted restore UI asks for password locally and uses the canonical
   assert.match(dialog, /EncryptedBackupRestore/);
   assert.match(restore, /Restaurar cifrado/);
   assert.match(restore, /Contraseña del backup/);
-  assert.match(restore, /Solo si el archivo y la contraseña son válidos se reemplazarán tus datos actuales/);
+  assert.match(restore, /Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes/);
+  assert.match(restore, /previewEncryptedBackupText/);
   assert.match(context, /restoreEncryptedBackupText\(encryptedText, password\)/);
   assert.match(helper, /decryptEncryptedBackupText/);
   assert.match(helper, /importDataJSON/);
