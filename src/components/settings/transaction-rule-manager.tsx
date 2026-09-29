@@ -39,6 +39,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
   const [match, setMatch] = useState(emptyDraft.match);
   const [categoryId, setCategoryId] = useState(emptyDraft.categoryId);
   const [necessity, setNecessity] = useState<NecessityDraft>(emptyDraft.necessity);
+  const [applyAutomatically, setApplyAutomatically] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -69,6 +70,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
     setMatch('');
     setCategoryId('');
     setNecessity('');
+    setApplyAutomatically(false);
   };
 
   const editRule = (rule: TransactionRule) => {
@@ -77,6 +79,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
     setMatch(rule.condition.value);
     setCategoryId(rule.suggestion.categoryId || '');
     setNecessity(rule.suggestion.necessity || '');
+    setApplyAutomatically(rule.applyAutomatically === true);
   };
 
   const saveRule = () => {
@@ -86,6 +89,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
       id: existing?.id || crypto.randomUUID(),
       name,
       enabled: existing?.enabled ?? true,
+      ...(applyAutomatically ? { applyAutomatically: true } : {}),
       condition: {
         field: 'description',
         operator: 'contains',
@@ -131,7 +135,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
         <div>
           <h3 className="font-semibold">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Las reglas solo sugieren clasificación cuando el concepto contiene el texto indicado. Nada se aplica automáticamente.
+            Por defecto las reglas solo sugieren clasificación. Puedes habilitar aplicación automática de forma explícita en una regla concreta.
           </p>
         </div>
 
@@ -190,6 +194,22 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
             </select>
             <span className="block text-xs text-muted-foreground">La necesidad solo puede aplicarse a gastos.</span>
           </label>
+
+          <label className="flex items-start gap-3 rounded-lg border p-3 text-sm md:col-span-2">
+            <input
+              type="checkbox"
+              checked={applyAutomatically}
+              onChange={event => setApplyAutomatically(event.target.checked)}
+              aria-label="Aplicar automáticamente esta regla"
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-medium">Aplicar automáticamente</span>
+              <span className="mt-1 block text-xs text-muted-foreground">
+                Opcional y solo para esta regla. Si varias reglas automáticas coinciden a la vez, Quick Add no elegirá una por su cuenta.
+              </span>
+            </span>
+          </label>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -233,6 +253,11 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
                     <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
                       {rule.enabled ? 'Activa' : 'Desactivada'}
                     </span>
+                    {rule.applyAutomatically === true && (
+                      <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
+                        Automática
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Si descripción contiene “{rule.condition.value}” → {outputs}
