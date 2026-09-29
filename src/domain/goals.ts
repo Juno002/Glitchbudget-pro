@@ -40,6 +40,43 @@ export function goalMetrics(goal: Goal, contributions: GoalContribution[], today
   };
 }
 
+export function goalLegacyBalance(goalId: string, contributions: GoalContribution[]): number {
+  return contributions
+    .filter(row => row.goalId === goalId && row.kind === 'legacy_balance')
+    .reduce((sum, row) => sum + row.amount, 0);
+}
+
+export function goalManagerReadModel(
+  goal: Goal,
+  contributions: GoalContribution[],
+  today: string,
+  settings: PeriodSettings = {},
+) {
+  const metrics = goalMetrics(goal, contributions, today, settings);
+  return {
+    ...metrics,
+    legacyBalance: goalLegacyBalance(goal.id, contributions),
+    suggestedContribution: Math.min(goal.quota, metrics.remaining),
+  };
+}
+
+export function goalDraftFundingSchedule(
+  target: number,
+  currentSaved: number,
+  deadline: string | undefined,
+  today: string,
+  settings: PeriodSettings = {},
+) {
+  return goalFundingSchedule(Math.max(0, target - currentSaved), deadline, today, settings);
+}
+
+export function goalWouldComplete(
+  goal: Pick<GoalView, 'saved' | 'target'>,
+  contributionAmount: number,
+) {
+  return goal.saved < goal.target && goal.saved + contributionAmount >= goal.target;
+}
+
 export type LegacyGoal = Goal & { saved?: number; status?: 'active' | 'completed' };
 
 /** Keep real contributions; preserve only an undocumented positive legacy balance. */
