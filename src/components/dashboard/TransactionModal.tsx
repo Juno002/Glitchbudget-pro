@@ -303,7 +303,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         success = await addAccountTransfer({
           fromAccountId: accountId,
           toAccountId,
-          amount: Math.round(numAmount * 100),
+          amount: numAmount,
           date,
           note: transferNote,
         });
