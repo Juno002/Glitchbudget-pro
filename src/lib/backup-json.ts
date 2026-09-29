@@ -22,6 +22,7 @@ import { validateBudgetPlans } from '../domain/budgets';
 import { db, CURRENT_DB_SCHEMA_VERSION } from '@/lib/db';
 import packageInfo from '../../package.json';
 import { isValidDate } from './finance-calculations';
+import { BACKUP_TABLE_COVERAGE, assertBackupTableCoverage } from './backup-table-coverage';
 
 // ---------- Esquema JSON v3 ----------
 const ISODate = z.string().refine(isValidDate, 'Fecha inválida');
@@ -214,6 +215,13 @@ const DumpV13 = DumpV12.extend({
   v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
   schemaVersion:z.number().int().positive(),
   appVersion:z.string().trim().min(1),
+  categories:z.array(categorySchema),
+  accounts:z.array(accountSchema),
+  accountTransfers:z.array(transferSchema),
+  recurrents:z.array(recurringRuleSchema),
+  debts:z.array(DebtV3),
+  debtPayments:z.array(DebtPaymentV9),
+  fxRates:z.array(FxRateV3),
 });
 type DumpV13T = z.infer<typeof DumpV13>;
 function parseBackup(raw:unknown) {
@@ -255,6 +263,7 @@ const EMPTY_LOCAL_AUTOMATION: LocalAutomationBackup = {
 export async function exportDataJSON(
   storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
 ): Promise<string> {
+  assertBackupTableCoverage(db.tables.map(table => table.name));
   // Lee todo de Dexie
   const [settings, periods, incomes, expenses, plans, goals, goalContributions, recurrents, plannedOccurrences, debts, debtPayments, fxRates, accounts, accountTransfers, categories, investments] = await db.transaction('r', db.tables, () => Promise.all([
     db.settings.get('general').then(s => s ?? { id:'general', currency:'DOP', locale:'es-DO', theme: 'dark', strictMode: false, rolloverStrategy: 'reset', periodStartDay: 1, expenseCategories: [], incomeCategories: [], baseIncome: {freq: 'mensual', amount: 0}, savePct: 0, customCategoryIcons: {} }),
@@ -383,6 +392,7 @@ export async function importDataJSON(
 ): Promise<{
   counts: Record<string, number>
 }> {
+  assertBackupTableCoverage(db.tables.map(table => table.name));
   // 1) Parse + valida contrato v3
   const raw = JSON.parse(text);
   const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
@@ -544,24 +554,9 @@ export async function importDataJSON(
     await db.transaction('rw',
       db.tables,
       async () => {
-      await Promise.all([
-        db.categories.clear(),
-        db.settings.clear(),
-        db.periods.clear(),
-        db.incomes.clear(),
-        db.expenses.clear(),
-        db.plans.clear(),
-        db.goals.clear(),
-        db.goal_contributions.clear(),
-        db.recurrents.clear(),
-        db.planned_occurrences.clear(),
-        db.debts.clear(),
-        db.debt_payments.clear(),
-        db.fxRates.clear(),
-        db.accounts.clear(),
-        db.account_transfers.clear(),
-        db.investments.clear(),
-      ]);
+      await Promise.all(
+        BACKUP_TABLE_COVERAGE.map(entry => db.table(entry.table).clear()),
+      );
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
       if(categories.length) await db.categories.bulkAdd(categories);
       if (accounts.length) await db.accounts.bulkAdd(accounts);
@@ -585,25 +580,22 @@ export async function importDataJSON(
     throw error;
   }
 
-  // 5) Conteo post-import (para logs o toasts)
-  const [cs, cp, ci, ce, cpl, cg, cgc, cr, cpo, cd, cdp, cfr, cinv] = await Promise.all([
-    db.settings.count(), db.periods.count(), db.incomes.count(), db.expenses.count(),
-    db.plans.count(), db.goals.count(), db.goal_contributions.count(),
-    db.recurrents.count(), db.planned_occurrences.count(), db.debts.count(), db.debt_payments.count(), db.fxRates.count(), db.investments.count(),
-  ]);
+  // 5) Conteo post-import derivado del inventario canónico de tablas.
+  const tableCounts = Object.fromEntries(await Promise.all(
+    BACKUP_TABLE_COVERAGE.map(async entry => [entry.table, await db.table(entry.table).count()] as const),
+  ));
 
   const automationCounts = storage
     ? exportLocalAutomation(storage)
     : EMPTY_LOCAL_AUTOMATION;
 
   return { counts: {
-    settings: cs, periods: cp, incomes: ci, expenses: ce, plans: cpl, goals: cg, goal_contributions: cgc,
-    recurrents: cr, planned_occurrences: cpo, debts: cd, debt_payments: cdp, fxRates: cfr, investments:cinv,
+    ...tableCounts,
     templates: automationCounts.templates.length,
     savedFilters: automationCounts.savedFilters.length,
     rules: automationCounts.rules.length,
   }};
-}
+
 
 function validateCategoryReferences(data: {
   incomes: Array<{ categoryId:string }>;
