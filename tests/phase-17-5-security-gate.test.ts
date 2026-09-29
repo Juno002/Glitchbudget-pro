@@ -234,7 +234,7 @@ test('17.5 encrypted restore UI asks for password locally and uses the canonical
   assert.match(restore, /Contraseña del backup/);
   assert.match(restore, /Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes/);
   assert.match(restore, /previewEncryptedBackupText/);
-  assert.match(context, /restoreEncryptedBackupText\(encryptedText, password\)/);
+  assert.match(context, /restoreEncryptedBackupText\([\s\S]*encryptedText,[\s\S]*password,[\s\S]*beforeWrite: backupBeforeDestructiveImport/);
   assert.match(helper, /decryptEncryptedBackupText/);
   assert.match(helper, /importDataJSON/);
   assert.ok(helper.indexOf('decryptEncryptedBackupText') < helper.indexOf('importDataJSON(json'));
