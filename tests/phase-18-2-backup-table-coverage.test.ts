@@ -99,7 +99,7 @@ test('18.2 current v13 validation rejects omission of any table-backed backup ke
   for (const entry of BACKUP_TABLE_COVERAGE) {
     const invalid = structuredClone(dump);
     delete invalid[entry.backupKey];
-    await assert.rejects(importDataJSON(JSON.stringify(invalid)), undefined, entry.table);
+    await assert.rejects(importDataJSON(JSON.stringify(invalid)));
     assert.deepEqual(await snapshot(), before, entry.table);
   }
 });
