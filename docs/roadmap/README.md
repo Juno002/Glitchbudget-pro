@@ -4,17 +4,17 @@
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecuta en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
 
-**Completadas:** [18.1](phase-18-1.md) contrato/versionado, [18.2](phase-18-2.md) cobertura automática de tablas y [18.3](phase-18-3.md) preview + confirmación de import.
+**Completadas:** [18.1](phase-18-1.md) contrato/versionado, [18.2](phase-18-2.md) cobertura automática de tablas, [18.3](phase-18-3.md) preview + confirmación de import y [18.4](phase-18-4.md) backup OPFS automático pre-import.
 
-18.3 obliga a validar y mostrar el contenido antes de cualquier restore completo destructivo. El resumen muestra **cuentas, movimientos, presupuestos, metas, tarjetas e inversiones**. JSON externo, copias OPFS existentes y backups cifrados comparten la misma preparación/validación previa; el cifrado añade primero autenticación/descifrado y solo después muestra el preview.
+18.4 añade una red de seguridad previa a cualquier import destructivo. El archivo entrante se valida primero; después, si OPFS está disponible, GlitchBudget exporta el estado actual a un JSON v13 `glitchbudget-pre-import-...` y solo cuando esa escritura termina correctamente permite el reemplazo de datos. Si OPFS está disponible pero la copia falla, el import se cancela antes de tocar Dexie.
 
-Preview y restore usan la misma función `prepareDataJSONImport(...)`, por lo que el resumen no utiliza un parser más débil. Un archivo inválido, contraseña incorrecta o ciphertext alterado no habilitan confirmación destructiva ni modifican Dexie. CSV mantiene su confirmación independiente por tabla y no se fuerza dentro del resumen de Backup 2.0.
+Cuando OPFS no está disponible, la aplicación **no finge que existe una copia**: informa `Sin copia automática previa` y puede continuar el restore. La protección cubre JSON externo, restore desde una copia OPFS existente, backup cifrado y también los imports CSV que reemplazan tablas completas.
 
 Versiones sin cambios: **Dexie v14 / JSON v13 / app 0.1.0 / encrypted envelope v1**.
 
-El gate funcional de 18.3 (`36539044319`) verificó **401/401 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+El gate funcional de 18.4 (`36581303597`) verificó **412/412 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Estado actual:** Fase 18 en progreso. **18.4 — Backup OPFS automático pre-import es el siguiente checkpoint.** 18.5 permanece pendiente. No avanzar a Fase 19 antes de completar 18.5 y su gate.
+**Estado actual:** Fase 18 en progreso. **18.5 — Migraciones permanentes + hardening + gate final es el siguiente y último checkpoint.** No avanzar a Fase 19 antes de completar 18.5 y su gate.
 
 ## Fase 17 — Seguridad y privacidad local completada
 

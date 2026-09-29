@@ -87,7 +87,7 @@ Debe aplicarse de forma coherente a JSON normal y backup cifrado una vez descifr
 
 ---
 
-## 18.4 — Backup OPFS automático pre-import
+## 18.4 — Backup OPFS automático pre-import ✅
 
 Objetivo: crear una red de seguridad local antes de reemplazar datos.
 
@@ -149,9 +149,9 @@ Durante 18.1–18.5:
 18.1 — Contrato y versionado             ✅ completado
 18.2 — Cobertura automática de tablas    ✅ completado
 18.3 — Preview + confirmación             ✅ completado
-18.4 — Backup OPFS pre-import            ⏳ siguiente
-18.5 — Migraciones + hardening + gate    ⏳ pendiente
+18.4 — Backup OPFS pre-import            ✅ completado
+18.5 — Migraciones + hardening + gate    ⏳ siguiente
 ```
 
 
-**Fase 18 está en progreso. 18.1–18.3 quedaron completados; 18.4 — Backup OPFS automático pre-import es el siguiente checkpoint.**
+**Fase 18 está en progreso. 18.1–18.4 quedaron completados; 18.5 — Migraciones permanentes + hardening + gate final es el siguiente y último checkpoint.**

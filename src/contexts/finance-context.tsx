@@ -36,6 +36,7 @@ import { friendlyError } from "@/lib/errors";
 import { importDataJSON, exportDataJSON } from '@/lib/backup-json';
 import { restoreEncryptedBackupText } from '@/lib/encrypted-backup-restore';
 import { opfsWrite, opfsRead, hasOPFS, opfsList, opfsDelete } from "@/lib/opfs";
+import { createPreImportSafetyBackup } from '@/lib/pre-import-backup';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 
 const DEFAULT_SETTINGS: Settings = {
@@ -141,6 +142,7 @@ interface FinanceContextType {
   getBackupFile: (name: string) => Promise<File | null>;
   importData: (file: File) => Promise<boolean>;
   importEncryptedData: (file: File, password: string) => Promise<boolean>;
+  backupBeforeDestructiveImport: () => Promise<void>;
   exportData: () => Promise<void>;
   setDataVersion: React.Dispatch<React.SetStateAction<number>>;
 
@@ -585,6 +587,21 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
 
   // OPFS Backup Management
+  const backupBeforeDestructiveImport = useCallback(async () => {
+    const result = await createPreImportSafetyBackup();
+    if (result.status === 'created') {
+      toast({
+        title: 'Copia de seguridad automática creada',
+        description: result.name,
+      });
+    } else {
+      toast({
+        title: 'Sin copia automática previa',
+        description: 'OPFS no está disponible en este navegador. La restauración continuará sin una copia local previa.',
+      });
+    }
+  }, [toast]);
+
   const createBackup = useCallback(async (): Promise<BackupFile | undefined> => {
     if (!(await hasOPFS())) {
       toast({ title: "Función no soportada", description: "Tu navegador no soporta el sistema de archivos privados (OPFS).", variant: "destructive" });
@@ -617,7 +634,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     try {
         const fileContent = await opfsRead(name);
         if (!fileContent) throw new Error("El archivo de copia de seguridad está vacío o no se pudo leer.");
-        await importDataJSON(fileContent);
+        await importDataJSON(fileContent, undefined, { beforeWrite: backupBeforeDestructiveImport });
         setDataVersion(v => v + 1);
         toast({ title: 'Restauración completada', description: `Datos restaurados desde ${name}` });
       return true;
@@ -627,7 +644,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     } finally {
         setIsWorking(false);
     }
-  }, [toast]);
+  }, [toast, backupBeforeDestructiveImport]);
 
   const deleteBackup = useCallback(async (name: string) => {
     setIsWorking(true);
@@ -677,7 +694,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     setIsWorking(true);
     try {
         const text = await file.text();
-        await importDataJSON(text);
+        await importDataJSON(text, undefined, { beforeWrite: backupBeforeDestructiveImport });
         setDataVersion(v => v + 1);
         toast({ title: 'Datos restaurados', description: 'El dashboard se actualizará automáticamente.' });
       return true;
@@ -687,13 +704,18 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     } finally {
         setIsWorking(false);
     }
-  }, [toast]);
+  }, [toast, backupBeforeDestructiveImport]);
 
   const importEncryptedData = useCallback(async (file: File, password: string) => {
     setIsWorking(true);
     try {
       const encryptedText = await file.text();
-      await restoreEncryptedBackupText(encryptedText, password);
+      await restoreEncryptedBackupText(
+        encryptedText,
+        password,
+        undefined,
+        { beforeWrite: backupBeforeDestructiveImport },
+      );
       setDataVersion(v => v + 1);
       toast({
         title: 'Backup cifrado restaurado',
@@ -710,7 +732,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsWorking(false);
     }
-  }, [toast]);
+  }, [toast, backupBeforeDestructiveImport]);
 
   const addDebt = useCallback(async (debt: Omit<Debt, "id" | "createdAt">) => {
     try {
@@ -910,6 +932,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getBackupFile,
     importData,
     importEncryptedData,
+    backupBeforeDestructiveImport,
     exportData,
     setDataVersion,
     loading,
@@ -926,7 +949,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,
-    importData, importEncryptedData, exportData, setDataVersion, loading, isWorking
+    importData, importEncryptedData, backupBeforeDestructiveImport, exportData, setDataVersion, loading, isWorking
   ]);
 
   return (
