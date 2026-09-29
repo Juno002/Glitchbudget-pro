@@ -669,11 +669,17 @@ export function previewDataJSON(
   return prepareDataJSONImport(text, storage).preview;
 }
 
+export type BackupImportOptions = {
+  beforeWrite?: () => Promise<void>;
+};
+
 export async function importDataJSON(
   text: string,
   storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
+  options: BackupImportOptions = {},
 ): Promise<{ counts: Record<string, number> }> {
   const prepared = prepareDataJSONImport(text, storage);
+  if (options.beforeWrite) await options.beforeWrite();
   const {
     d,
     importedAutomation,
