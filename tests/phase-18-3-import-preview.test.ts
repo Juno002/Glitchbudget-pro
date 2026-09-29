@@ -135,14 +135,11 @@ test('18.3 encrypted UI is explicitly two-step: review then confirm', () => {
   assert.match(encrypted, /setPreview\(null\)/);
 });
 
-test('18.3 does not implement the 18.4 automatic OPFS pre-import backup early', () => {
+test('18.3 preview remains a prerequisite after 18.4 layers the pre-import safety copy', () => {
   const dialog = readFileSync(new URL('../src/components/backup/opfs-backup-dialog.tsx', import.meta.url), 'utf8');
   const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
 
-  const confirmStart = dialog.indexOf('const confirmPendingRestore');
-  const confirmEnd = dialog.indexOf('const handleDelete', confirmStart);
-  const confirmBlock = dialog.slice(confirmStart, confirmEnd);
-
-  assert.doesNotMatch(confirmBlock, /createBackup/);
-  assert.doesNotMatch(context, /preImportBackup|automatic pre-import|backupBeforeImport/i);
+  assert.match(dialog, /previewDataJSON\(await file\.text\(\)\)/);
+  assert.match(dialog, /pendingPreview/);
+  assert.match(context, /beforeWrite: backupBeforeDestructiveImport/);
 });
