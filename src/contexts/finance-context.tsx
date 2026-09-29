@@ -8,7 +8,7 @@ import { createCategory, resetCategories } from '@/lib/category-service';
 
 import { selectDisposable, selectExpensesByNature, selectPeriodAverages, selectPeriodMetrics, recordedCategoriesForPeriod, selectCategorySpendingForPeriod } from '@/domain/metrics';
 import { periodContaining, periodForId, type BudgetPeriodRange, type PeriodRange } from '@/domain/periods';
-import { normalizeFinancialPolicies, type BudgetOverspendingBehavior } from '@/policies/settings';
+import { type BudgetOverspendingBehavior } from '@/policies/settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
@@ -35,19 +35,7 @@ import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-managem
 import { initializeSettings, resetPersistedSettings, saveBaseIncomeInput, savePeriodStartDay, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
 import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
-
-const DEFAULT_SETTINGS: Settings = {
-  id: 'general',
-  theme: 'dark',
-  preventNegativeAccountBalance: true,
-  budgetOverspendingBehavior: 'block',
-  rolloverStrategy: 'reset',
-  periodStartDay: 1,
-  baseIncome: { freq: 'mensual', amount: 0 },
-  currency: "DOP",
-  locale: "es-DO",
-  savePct: 0.00,
-};
+import { DEFAULT_SETTINGS, resolveSettings } from "@/lib/settings-read-model";
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
 export type { BackupFile } from '@/hooks/use-backup-management';
@@ -200,19 +188,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     });
   }, [recurringRules, toast]);
 
-  const settings = useMemo(() => {
-    const s: Partial<Settings> = rawSettings ?? {};
-    return {
-      ...DEFAULT_SETTINGS,
-      ...s,
-      ...normalizeFinancialPolicies(rawSettings ?? DEFAULT_SETTINGS),
-      baseIncome: {
-        amount: Math.max(0, Number(s?.baseIncome?.amount ?? 0)),
-        freq: s?.baseIncome?.freq ?? 'mensual'
-      },
-      savePct: s.savePct ?? DEFAULT_SETTINGS.savePct,
-    };
-  }, [rawSettings]);
+  const settings = useMemo(() => resolveSettings(rawSettings), [rawSettings]);
 
   const loading = useMemo(() => [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, investments, categories].some(v => v === undefined), [expenses, incomes, goals, goalContributions, budgets, rawSettings, debts, debtPayments, recurringRules, plannedOccurrences, accounts, transfers, investments, categories]);
   const currentPeriod = useMemo(() => periodForId(currentMonth, settings), [currentMonth, settings]);
