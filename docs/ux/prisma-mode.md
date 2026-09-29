@@ -109,3 +109,22 @@ Especialmente, no cambiar `GlitchBudgetDB` únicamente por estética: un rename 
 Nunca presentar como datos reales las cifras demo del repositorio Prisma, incluyendo presupuestos, porcentajes, perfiles, planificados o reportes hardcoded.
 
 Toda cifra financiera visible en la app final debe provenir del motor GlitchBudget o estar marcada inequívocamente como ejemplo dentro de una superficie de ayuda/demo.
+
+
+## Decisiones congeladas por Gate 20.1
+
+El inventario completo y la matriz de destino viven en [phase-20-1.md](../roadmap/phase-20-1.md).
+
+Queda fijado que:
+
+- toda superficie actual tiene un destino explícito entre 20.2 y 20.7;
+- Resumen conserva posición, presupuesto, upcoming, metas, inversiones y personalización;
+- Movimientos conserva búsqueda, filtros, saved filters, metadata, cuentas, tarjetas, inversiones y compositor global;
+- Plan conserva Presupuestos / Metas / Planificados y todos sus estados;
+- Reportes conserva Spending, Cash Flow, Net Worth, comparaciones, rangos y análisis por categoría/naturaleza;
+- charts, sonidos, motion, hide amounts, App Lock, Auto-lock, backup, persistent storage y offline son capacidades protegidas;
+- el copy puede reducirse solo cuando no elimina información necesaria para una decisión financiera o destructiva;
+- `client/src/domain/**`, `client/src/application/**`, `client/src/persistence/**` y `server/**` de Prisma permanecen fuera del producto final;
+- `Home.tsx` de Prisma es referencia de composición, no fuente de métricas, datos o comandos.
+
+A partir de 20.2 cualquier retirada de una superficie antigua exige demostrar su reemplazo y paridad.
