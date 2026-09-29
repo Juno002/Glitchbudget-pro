@@ -41,6 +41,7 @@ export function saveAutoLockRecord(
   storage: AutoLockStorage,
   timeoutMinutes: AutoLockTimeoutMinutes,
 ): AutoLockRecordV1 {
+  if (!isAutoLockTimeoutMinutes(timeoutMinutes)) throw new Error('Tiempo de Auto-lock no válido.');
   const record: AutoLockRecordV1 = { v: 1, enabled: true, timeoutMinutes };
   storage.setItem(AUTO_LOCK_STORAGE_KEY, JSON.stringify(record));
   return record;
