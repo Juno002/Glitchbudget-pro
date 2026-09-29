@@ -1,4 +1,5 @@
 // Este módulo contiene la lógica pura de cálculo para la planificación de metas.
+import { selectDisposable } from '../domain/finance-read-models';
 // Se basa en el modelo proporcionado por el usuario.
 
 type Money = number;
@@ -13,8 +14,7 @@ export interface Averages {
  * Calcula el dinero disponible mensual después de gastos y un colchón de seguridad.
  */
 export function computeDisposable(avg: Averages, safetyPct = 0.05): Money {
-  const safety = avg.incomeAvgMonthly * safetyPct;
-  return Math.max(avg.incomeAvgMonthly - avg.expenseAvgMonthly - safety, 0);
+  return selectDisposable(avg, safetyPct);
 }
 
 /**
