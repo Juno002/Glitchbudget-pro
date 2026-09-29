@@ -205,10 +205,10 @@ test('18.4 destructive CSV import validates before the same pre-write safety hoo
 });
 
 test('18.4 all destructive full-backup routes use the automatic pre-import safety hook', () => {
-  const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
+  const backupHook = readFileSync(new URL('../src/hooks/use-backup-management.ts', import.meta.url), 'utf8');
 
-  assert.match(context, /const backupBeforeDestructiveImport = useCallback/);
-  assert.match(context, /createPreImportSafetyBackup\(\)/);
+  assert.match(backupHook, /const backupBeforeDestructiveImport = useCallback/);
+  assert.match(backupHook, /createPreImportSafetyBackup\(\)/);
   assert.match(
     context,
     /importDataJSON\(fileContent, undefined, \{ beforeWrite: backupBeforeDestructiveImport \}\)/,
@@ -229,8 +229,8 @@ test('18.4 all destructive full-backup routes use the automatic pre-import safet
 test('18.4 UI messaging distinguishes created backup from unavailable OPFS', () => {
   const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
 
-  assert.match(context, /Copia de seguridad automática creada/);
-  assert.match(context, /Sin copia automática previa/);
+  assert.match(backupHook, /Copia de seguridad automática creada/);
+  assert.match(backupHook, /Sin copia automática previa/);
   assert.match(
     context,
     /OPFS no está disponible en este navegador\. La restauración continuará sin una copia local previa\./,
