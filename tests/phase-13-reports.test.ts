@@ -110,7 +110,10 @@ test('Home and Reports consume the same shared selector exposed by FinanceContex
 });
 
 test('Reports 2.0 UI exposes every required roadmap range and section', () => {
-  const ui=readFileSync(new URL('../src/components/dashboard/reports-tab.tsx',import.meta.url),'utf8');
+  const ui=[
+    readFileSync(new URL('../src/components/dashboard/reports-tab.tsx',import.meta.url),'utf8'),
+    readFileSync(new URL('../src/components/dashboard/report-range-controls.tsx',import.meta.url),'utf8'),
+  ].join('\n');
   for (const text of ['7D','30D','3M','6M','1Y','Custom','Spending','Cash Flow','Net Worth','Comparison','Largest transactions','Fixed / Variable / Occasional']) {
     assert.ok(ui.includes(text),text);
   }
