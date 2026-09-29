@@ -101,10 +101,12 @@ test('shared report snapshot compares current versus immediately previous compar
 
 test('Home and Reports consume the same shared selector exposed by FinanceContext', () => {
   const context=readFileSync(new URL('../src/contexts/finance-context.tsx',import.meta.url),'utf8');
+  const readModels=readFileSync(new URL('../src/domain/finance-read-models.ts',import.meta.url),'utf8');
   const home=readFileSync(new URL('../src/components/dashboard/summary-tab.tsx',import.meta.url),'utf8');
   const reports=readFileSync(new URL('../src/components/dashboard/reports-tab.tsx',import.meta.url),'utf8');
   assert.match(context,/getReportSnapshot/);
-  assert.match(context,/selectReportsSnapshot/);
+  assert.match(context,/createFinanceReadModels/);
+  assert.match(readModels,/selectReportsSnapshot/);
   assert.match(home,/getReportSnapshot\(currentPeriod, today\)/);
   assert.match(reports,/getReportSnapshot\(range,range\.end\)/);
 });
