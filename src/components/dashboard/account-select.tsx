@@ -1,11 +1,11 @@
 'use client';
 import { useAccountsData } from '@/hooks/use-finance-queries';
-import { defaultCashAccount } from '@/lib/accounts';
+import { selectDefaultCashAccount } from '@/domain/ledger';
 import type { Account } from '@/domain/models';
 export function AccountSelect({ value, onChange, label = 'Cuenta de origen', disabled = false, cashDefault = false, allowedTypes = ['cash','bank'] }: { value: string; onChange: (value: string) => void; label?: string; disabled?: boolean; cashDefault?: boolean; allowedTypes?: Account['type'][] }) {
   const accounts = useAccountsData();
   const visibleAccounts = (accounts || []).filter(account => allowedTypes.includes(account.type));
-  const defaultAccount = cashDefault ? defaultCashAccount(visibleAccounts) : undefined;
+  const defaultAccount = cashDefault ? selectDefaultCashAccount(visibleAccounts) : undefined;
   if (!visibleAccounts.length && !cashDefault) return null;
   return (
     <label className="block space-y-1 text-sm">
