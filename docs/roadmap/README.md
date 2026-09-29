@@ -1,5 +1,15 @@
 # Roadmap: documentación vigente
 
+## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate en ejecución
+
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
+
+La auditoría canónica está documentada en [phase-19-5.md](phase-19-5.md). Se están eliminando residuos entre React, dominio y persistencia y añadiendo el Prisma Engine Gate permanente.
+
+Persistencia permanece en **Dexie v14 / JSON v13 / encrypted envelope v1**; no hay migración ni feature nueva.
+
+**Estado actual:** Fase 19 completada; Fase 19.5 en ejecución y pendiente de gate final.
+
 ## Fase 19 — Technical-debt closure completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
