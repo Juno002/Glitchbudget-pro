@@ -2,19 +2,19 @@
 
 ## Fase 18 — Backup 2.0 y migraciones permanentes en progreso
 
-La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecutará en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecuta en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md).
 
-**18.1 — Contrato y versionado** quedó completado en [phase-18-1.md](phase-18-1.md). El backup JSON canónico pasa a **v13** y ahora lleva obligatoriamente:
+**Completadas:** [18.1](phase-18-1.md) contrato/versionado y [18.2](phase-18-2.md) cobertura automática de tablas.
 
-- `schemaVersion: 14`, ligado a la versión Dexie canónica;
-- `appVersion: "0.1.0"`, leído desde `package.json`;
-- `exportedAt`, timestamp ISO-8601.
+18.2 introduce un inventario canónico que se compara automáticamente contra las tablas reales de Dexie. Las **16 tablas actuales** deben declarar cobertura en `export`, `import`, `restore`, `validation` y `migration tests`; una tabla nueva no registrada hace fallar export/import y el gate. JSON v13 exige todas las claves actuales incluso cuando una tabla está vacía.
 
-`v` sigue significando versión del **formato JSON**, no versión de Dexie. Backups legacy **v3–v12** permanecen legibles. Un JSON v13 con `schemaVersion` mayor al soportado se rechaza antes de modificar datos. El backup cifrado de Fase 17 conserva su sobre v1 y adopta automáticamente el nuevo JSON v13 como payload interno.
+El restore destructivo y los conteos post-import se derivan ahora del inventario, evitando listas manuales duplicadas. El gate realiza además un round-trip con **16/16 tablas no vacías**, de modo que una tabla no puede pasar por estar vacía.
 
-Dexie permanece en **v14**. El gate funcional de 18.1 (`36535765428`) verificó **386/386 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+Versiones sin cambios: **Dexie v14 / JSON v13 / app 0.1.0 / encrypted envelope v1**.
 
-**Estado actual:** Fase 18 en progreso. **18.2 — Cobertura automática de tablas es el siguiente checkpoint.** 18.3–18.5 permanecen pendientes. No avanzar a Fase 19 antes de completar 18.5 y su gate.
+El gate funcional de 18.2 (`36537141932`) verificó **393/393 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+
+**Estado actual:** Fase 18 en progreso. **18.3 — Preview + confirmación de import es el siguiente checkpoint.** 18.4–18.5 permanecen pendientes. No avanzar a Fase 19 antes de completar 18.5 y su gate.
 
 ## Fase 17 — Seguridad y privacidad local completada
 
