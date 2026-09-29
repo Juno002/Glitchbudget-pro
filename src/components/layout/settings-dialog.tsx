@@ -28,6 +28,7 @@ import {
 import TransactionRuleManager from '@/components/settings/transaction-rule-manager';
 import AppLockSettings from '@/components/settings/app-lock-settings';
 import AutoLockSettings from '@/components/settings/auto-lock-settings';
+import PersistentStorageSettings from '@/components/settings/persistent-storage-settings';
 import { APP_LOCK_STORAGE_KEY, AUTO_LOCK_STORAGE_KEY } from '@/domain/local-security';
 
 const SETTINGS_SECTIONS = [
@@ -300,6 +301,7 @@ export function SettingsDialog() {
 
           <TabsContent value="data" className="space-y-6">
             <SectionHeader title="Datos y respaldos" description="Exporta antes de cambiar de navegador, dirección o dispositivo." />
+            <div className="max-w-md"><PersistentStorageSettings /></div>
             <div className="max-w-md"><OpfsBackupDialog /></div>
             <div className="rounded-xl border border-destructive/30 p-4 space-y-3">
               <h3 className="font-semibold text-destructive">Zona destructiva</h3>
