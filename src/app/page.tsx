@@ -1,14 +1,15 @@
 'use client';
+
 import AppShell from '@/components/layout/app-shell';
-import {TabsProvider} from '@/contexts/tabs-context';
 import DashboardContent from '@/components/dashboard/dashboard-content';
+import { TabsProvider } from '@/contexts/tabs-context';
 
 export default function DashboardPage() {
   return (
-    <AppShell>
-      <TabsProvider defaultValue="summary">
+    <TabsProvider defaultValue="summary">
+      <AppShell>
         <DashboardContent />
-      </TabsProvider>
-    </AppShell>
+      </AppShell>
+    </TabsProvider>
   );
 }
