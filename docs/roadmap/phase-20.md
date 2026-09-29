@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1 completada / Gate aprobado. 20.2 no iniciada**.
+Estado: **20.1 y 20.2 completadas / Gates aprobados. 20.3 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -118,6 +118,9 @@ Visual parity matrix
 **Gate 20.1:** ninguna superficie funcional queda sin destino y ninguna capacidad existente queda marcada para eliminación implícita.
 
 ## 20.2 — Design system, temas y shell
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-2.md](phase-20-2.md).
+
 
 Construir la base visual común antes de migrar pantallas:
 
