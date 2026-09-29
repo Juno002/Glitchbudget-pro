@@ -19,8 +19,8 @@ Baseline técnico actual:
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
-463/463 tests
-Quality checks 36617612176
+467/467 tests
+Quality checks 36640064226
 browser E2E ✅
 ```
 
