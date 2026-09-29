@@ -10,9 +10,19 @@ import { db, GlitchBudgetDB } from '../src/lib/db';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { accountPosition, readAccountSnapshot } from '../src/lib/accounts';
 import { calculateRecordedTotals } from '../src/lib/finance-calculations';
+import { upsertQuickAddTemplate } from '../src/lib/quick-add-templates';
+import { upsertSavedTransactionFilter } from '../src/lib/saved-transaction-filters';
+import { upsertTransactionRule } from '../src/lib/transaction-rules';
+import { clearLocalAutomation, exportLocalAutomation } from '../src/lib/local-automation';
 
 const fixture = (name: string) => JSON.parse(readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), 'utf8'));
 const clean = (value: unknown) => JSON.parse(JSON.stringify(value));
+class MemoryStorage {
+  private values = new Map<string,string>();
+  getItem(key:string) { return this.values.get(key) ?? null; }
+  setItem(key:string,value:string) { this.values.set(key,value); }
+  removeItem(key:string) { this.values.delete(key); }
+}
 after(() => db.close());
 for (const version of [6, 7]) {
   test(`frozen Dexie v${version} fixture migrates without losing any historical table`, async () => {
@@ -57,9 +67,22 @@ async function metrics() {
     month: calculateRecordedTotals({ settings: (await db.settings.get('general'))!, incomes: rows.incomes, expenses: rows.expenses, debtPayments: rows.payments, budgets: await db.plans.toArray(), goalContributions: await db.goal_contributions.toArray() }, '2026-09'),
   };
 }
-test('frozen v4 backup: export, empty test DB, import preserves all tables and financial results', async () => {
+test('frozen v4 backup: export, empty test DB, import preserves all tables, automation and financial results', async () => {
   const source = fixture('backup-v4');
-  await importDataJSON(JSON.stringify(source));
+  const storage = new MemoryStorage();
+  upsertQuickAddTemplate(storage, { id:'bus', name:'Bus', type:'expense', amount:'35', categoryId:'food' });
+  upsertSavedTransactionFilter(storage, { id:'expenses', name:'Gastos', filters:{ type:'expense' } });
+  upsertTransactionRule(storage, {
+    id:'spotify',
+    name:'Spotify',
+    enabled:true,
+    applyAutomatically:true,
+    condition:{field:'description',operator:'contains',value:'Spotify'},
+    suggestion:{categoryId:'food',necessity:'want'},
+  });
+  const automationBeforeLegacyRestore = exportLocalAutomation(storage);
+  await importDataJSON(JSON.stringify(source), storage);
+  assert.deepEqual(exportLocalAutomation(storage), automationBeforeLegacyRestore, 'legacy backups preserve local automation');
   const before = await snapshot();
   assert.equal(Object.keys(before).length, 16);
   for (const [table, rows] of Object.entries(before)) {
@@ -74,13 +97,19 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables and f
   assert.equal(financial.month.totalIncome, 100000);
   assert.equal(financial.month.totalExpenses, 30000);
   assert.equal(financial.month.cashFlow, 80000);
-  const exported = await exportDataJSON();
+  const automationBefore = exportLocalAutomation(storage);
+  const exported = await exportDataJSON(storage);
+  const parsedExport = JSON.parse(exported);
+  assert.equal(parsedExport.v, 12);
+  assert.deepEqual(parsedExport.localAutomation, automationBefore);
   await db.transaction('rw', db.tables, async () => { for (const table of db.tables) await table.clear(); });
+  clearLocalAutomation(storage);
   for (const table of db.tables) assert.equal(await table.count(), 0);
-  await importDataJSON(exported);
+  await importDataJSON(exported, storage);
   assert.deepEqual(await snapshot(), before);
+  assert.deepEqual(exportLocalAutomation(storage), automationBefore);
   assert.deepEqual(await metrics(), financial);
-  const again = JSON.parse(await exportDataJSON());
+  const again = JSON.parse(await exportDataJSON(storage));
   const original = JSON.parse(exported);
   delete again.exportedAt; delete original.exportedAt;
   assert.deepEqual(again, original);
