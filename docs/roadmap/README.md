@@ -4,15 +4,15 @@
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 está dividida en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md).
 
-**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local y [17.2](phase-17-2.md) App lock.
+**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock y [17.3](phase-17-3.md) Auto-lock.
 
-17.2 implementa un bloqueo local de UI con PIN numérico de 6–12 dígitos. El PIN no se persiste en texto claro: se guarda únicamente un verifier PBKDF2-SHA-256 con salt aleatorio en `localStorage` bajo `glitchbudget_app_lock_v1`. El gate se monta antes de `FinanceProvider`, por lo que la UI financiera no se renderiza mientras la sesión está bloqueada.
+17.3 añade Auto-lock como opt-in local sobre App lock, con tiempos de **1, 5, 15 o 30 minutos**. La actividad local reinicia el reloj y, al volver desde segundo plano, se compara el tiempo real transcurrido para decidir si debe bloquearse inmediatamente. Si App lock se desactiva, la configuración de Auto-lock se elimina.
 
-App lock continúa siendo explícitamente **una barrera de UI, no cifrado de Dexie**. No se exporta en el backup financiero, no usa red y un usuario legacy sin configuración permanece desbloqueado. Dexie sigue en **v14** y el backup JSON normal en **v12**.
+App lock y Auto-lock continúan siendo **barreras de UI, no cifrado de Dexie**. Ninguno se exporta en el backup financiero ni usa red. Dexie sigue en **v14** y el backup JSON normal en **v12**.
 
-El gate de 17.2 (`36508079352`) verificó **355/355 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+El gate de 17.3 (`36530131884`) verificó **363/363 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Estado actual:** Fase 17 en progreso. **17.3 — Auto-lock es el siguiente checkpoint.** 17.4–17.5 permanecen pendientes. No avanzar a Fase 18 antes de completar 17.5 y su gate.
+**Estado actual:** Fase 17 en progreso. **17.4 — Backup cifrado es el siguiente checkpoint.** 17.5 permanece pendiente. No avanzar a Fase 18 antes de completar 17.5 y su gate.
 
 ## Fase 16 — Automatización local completada
 
