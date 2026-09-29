@@ -141,6 +141,26 @@ export function selectBudgetStatusDetails(
   });
 }
 
+export function selectBudgetCategoryGroups(
+  expenseCategoryIds: string[],
+  details: BudgetStatusDetail[],
+) {
+  const active: string[] = [];
+  const inactive: string[] = [];
+  const categoryIds = new Set([
+    ...expenseCategoryIds,
+    ...details.map(detail => detail.categoryId),
+  ]);
+
+  for (const categoryId of categoryIds) {
+    const detail = details.find(item => item.categoryId === categoryId);
+    if (detail?.configured || (detail?.spent ?? 0) > 0) active.push(categoryId);
+    else inactive.push(categoryId);
+  }
+
+  return { active, inactive };
+}
+
 export function selectFundedBudgetDetails(details: BudgetStatusDetail[]) {
   return details.filter(detail => detail.remaining > 0);
 }
