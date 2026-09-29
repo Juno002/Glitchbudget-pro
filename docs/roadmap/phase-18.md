@@ -46,7 +46,7 @@ exportedAt    = instante ISO-8601 de exportación
 
 ---
 
-## 18.2 — Cobertura automática de tablas
+## 18.2 — Cobertura automática de tablas ✅
 
 Objetivo: impedir que una nueva tabla quede olvidada fuera del sistema de backup.
 
@@ -147,11 +147,11 @@ Durante 18.1–18.5:
 
 ```text
 18.1 — Contrato y versionado             ✅ completado
-18.2 — Cobertura automática de tablas    ⏳ siguiente
-18.3 — Preview + confirmación             ⏳ pendiente
+18.2 — Cobertura automática de tablas    ✅ completado
+18.3 — Preview + confirmación             ⏳ siguiente
 18.4 — Backup OPFS pre-import            ⏳ pendiente
 18.5 — Migraciones + hardening + gate    ⏳ pendiente
 ```
 
 
-**Fase 18 está en progreso. 18.1 quedó completado; 18.2 — Cobertura automática de tablas es el siguiente checkpoint.**
+**Fase 18 está en progreso. 18.1–18.2 quedaron completados; 18.3 — Preview + confirmación de import es el siguiente checkpoint.**
