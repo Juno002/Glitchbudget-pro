@@ -8,6 +8,8 @@ import { PWARegistration } from '@/components/pwa-registration';
 import { VisibleViewport } from '@/components/visible-viewport';
 import { BalanceVisibilityProvider } from '@/contexts/balance-visibility-context';
 import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
+import { AppLockProvider } from '@/contexts/app-lock-context';
+import { AppLockGate } from '@/components/security/app-lock-gate';
 
 const syne = Syne({ 
   subsets: ['latin'], 
@@ -54,11 +56,19 @@ export default function RootLayout({
           <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[50%] rounded-full bg-[#ff2d78] opacity-10 blur-[120px]" />
         </div>
         
-        <MotionPreferences><BalanceVisibilityProvider><FinanceProvider>
-          {children}
-          <Toaster />
-          <PWARegistration />
-        </FinanceProvider></BalanceVisibilityProvider></MotionPreferences>
+        <MotionPreferences>
+          <BalanceVisibilityProvider>
+            <AppLockProvider>
+              <AppLockGate>
+                <FinanceProvider>
+                  {children}
+                  <Toaster />
+                  <PWARegistration />
+                </FinanceProvider>
+              </AppLockGate>
+            </AppLockProvider>
+          </BalanceVisibilityProvider>
+        </MotionPreferences>
       </body>
     </html>
   );

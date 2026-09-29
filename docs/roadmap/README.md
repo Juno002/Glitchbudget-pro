@@ -4,18 +4,15 @@
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 está dividida en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md).
 
-**17.1 — Contrato de seguridad local** quedó completado en [phase-17-1.md](phase-17-1.md). El contrato separa explícitamente privacidad frente a servidores de privacidad frente a otra persona usando el dispositivo:
+**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local y [17.2](phase-17-2.md) App lock.
 
-- **Hide amounts** = privacidad visual; no cifra Dexie ni backups.
-- **App lock** = bloqueo local de UI, planificado para 17.2; no equivale a cifrado de Dexie.
-- **Auto-lock** = control de sesión sobre App lock, planificado para 17.3.
-- **Backup cifrado** = protección separada y opcional, reservada para 17.4–17.5.
+17.2 implementa un bloqueo local de UI con PIN numérico de 6–12 dígitos. El PIN no se persiste en texto claro: se guarda únicamente un verifier PBKDF2-SHA-256 con salt aleatorio en `localStorage` bajo `glitchbudget_app_lock_v1`. El gate se monta antes de `FinanceProvider`, por lo que la UI financiera no se renderiza mientras la sesión está bloqueada.
 
-Los defaults legacy quedan congelados en OFF para Hide amounts/App lock/Auto-lock cuando no existe configuración previa. No hay cambios de schema: Dexie sigue en **v14** y el backup JSON normal en **v12**.
+App lock continúa siendo explícitamente **una barrera de UI, no cifrado de Dexie**. No se exporta en el backup financiero, no usa red y un usuario legacy sin configuración permanece desbloqueado. Dexie sigue en **v14** y el backup JSON normal en **v12**.
 
-El gate de 17.1 (`36506480694`) verificó **347/347 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+El gate de 17.2 (`36508079352`) verificó **355/355 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Estado actual:** Fase 17 en progreso. **17.2 — App lock es el siguiente checkpoint.** 17.3–17.5 permanecen pendientes. No avanzar a Fase 18 antes de completar 17.5 y su gate.
+**Estado actual:** Fase 17 en progreso. **17.3 — Auto-lock es el siguiente checkpoint.** 17.4–17.5 permanecen pendientes. No avanzar a Fase 18 antes de completar 17.5 y su gate.
 
 ## Fase 16 — Automatización local completada
 

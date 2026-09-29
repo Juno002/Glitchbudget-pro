@@ -1,4 +1,7 @@
 export const BALANCE_VISIBILITY_STORAGE_KEY = 'glitchbudget_balances_hidden_v1';
+export const APP_LOCK_STORAGE_KEY = 'glitchbudget_app_lock_v1';
+export const APP_LOCK_PIN_MIN_LENGTH = 6;
+export const APP_LOCK_PIN_MAX_LENGTH = 12;
 
 export const LOCAL_SECURITY_CONTRACT = {
   privacyFromServers: {
@@ -20,9 +23,12 @@ export const LOCAL_SECURITY_CONTRACT = {
     ],
   },
   appLock: {
-    status: 'planned-17.2',
+    status: 'implemented-17.2',
     protects: 'ui-access',
-    storage: 'local-only',
+    storage: 'localStorage',
+    storageKey: APP_LOCK_STORAGE_KEY,
+    verifier: 'PBKDF2-SHA-256',
+    plaintextPinStored: false,
     legacyDefault: 'disabled',
     doesNotProtect: [
       'dexie-at-rest',
