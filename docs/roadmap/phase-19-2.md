@@ -3,7 +3,7 @@
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 19.
 Plan de ejecución: [phase-19.md](phase-19.md).
 
-Estado: **en ejecución**.
+Estado: **completado**.
 
 ## Objetivo
 
@@ -75,7 +75,9 @@ No se modifica ninguna fórmula financiera ni migración.
 
 ## Gate
 
-Antes de cerrar 19.2:
+Run final: `36590179498`.
+
+Quedaron verdes:
 
 ```text
 npm run typecheck
@@ -85,3 +87,18 @@ npm run build
 ```
 
 Además, una regresión automática exige que `finance-context.tsx` no importe ni acceda directamente a Dexie, OPFS o los importadores/exportadores de backup.
+
+
+## Resultado final
+
+- `finance-context.tsx` no importa Dexie, `dexie-react-hooks`, OPFS ni helpers directos de backup;
+- lectura reactiva encapsulada en `use-finance-context-data`;
+- backup/restore encapsulado en `use-backup-management`;
+- settings y deudas pasan por services;
+- regresiones históricas 17.5/18.3/18.4 siguen verificando exactamente cifrado, preview y copia OPFS previa en la nueva ubicación;
+- **424/424 pruebas**, 0 fallos;
+- typecheck, lint y guard local-only aprobados;
+- build estático aprobado;
+- `connect-src 'none'` verificado en cada HTML.
+
+19.2 queda cerrada. La siguiente etapa es **19.3 — componentes grandes + hardening + gate final**.
