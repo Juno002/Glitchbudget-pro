@@ -2598,11 +2598,15 @@ npm run build ✅
 npm run test:e2e ✅
 ```
 
-Este preflight **no cierra 20.1**. El contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones siguen siendo requisitos del Gate 20.1.
+Este preflight no cerró por sí solo 20.1. El contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones se cerraron posteriormente en el Gate 20.1.
 
 No hubo cambio de schema, formato de backup ni semántica financiera.
 
 ## 20.1 — Contrato visual + inventario de paridad
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-1.md`.
+
+
 
 Crear la matriz completa:
 
@@ -2637,6 +2641,18 @@ datos financieros hardcoded
 **Gate 20.1:** ninguna capacidad existente queda sin destino o marcada para eliminación implícita.
 
 ## 20.2 — Design system + temas + shell
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-2.md`.
+
+Quality gate de cierre:
+
+```text
+472/472 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36645087940 ✅
+```
 
 Construir:
 

@@ -227,7 +227,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
         document.documentElement.classList.add(theme);
         // "only" opts out of automatic darkening in Chromium-based mobile browsers.
         document.documentElement.style.colorScheme = theme === 'dark' ? 'only dark' : 'only light';
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080808' : theme === 'serious' ? '#f7f7f7' : '#fafafa');
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080808' : theme === 'serious' ? '#f7f7f7' : '#f5f4ef');
     }
   }, [activeSettings.theme]);
 

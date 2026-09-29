@@ -15,7 +15,7 @@ export function PageHeader({
   return (
     <header className={cn('flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between', className)}>
       <div className="min-w-0">
-        <h1 className="font-headline text-[length:var(--text-page-title)] font-bold tracking-tight">{title}</h1>
+        <h1 className="font-headline text-[length:var(--text-page-title)] font-normal tracking-[-0.035em] leading-[1.05]">{title}</h1>
         {description ? <div className="mt-1 text-sm text-muted-foreground">{description}</div> : null}
       </div>
       {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
@@ -37,7 +37,7 @@ export function SectionHeader({
   return (
     <div className={cn('flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between', className)}>
       <div className="min-w-0">
-        <h2 className="text-[length:var(--text-section-title)] font-semibold tracking-tight">{title}</h2>
+        <h2 className="font-headline text-[length:var(--text-section-title)] font-normal tracking-[-0.02em]">{title}</h2>
         {description ? <div className="mt-1 text-sm text-muted-foreground">{description}</div> : null}
       </div>
       {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}

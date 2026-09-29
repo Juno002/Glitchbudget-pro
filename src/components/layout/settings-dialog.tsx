@@ -329,10 +329,10 @@ export function SettingsDialog() {
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="dark" id="theme-dark" /><Moon className="h-4 w-4" /> Neón oscuro</div>
               </Label>
               <Label htmlFor="theme-light" className="cursor-pointer rounded-xl border p-4">
-                <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="light" id="theme-light" /><Sun className="h-4 w-4" /> Claro</div>
+                <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="light" id="theme-light" /><Sun className="h-4 w-4" /> Prisma claro</div>
               </Label>
               <Label htmlFor="theme-serious" className="cursor-pointer rounded-xl border p-4">
-                <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="serious" id="theme-serious" /><Briefcase className="h-4 w-4" /> Minimalista</div>
+                <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="serious" id="theme-serious" /><Briefcase className="h-4 w-4" /> Minimalista legado</div>
               </Label>
             </RadioGroup>
           </TabsContent>

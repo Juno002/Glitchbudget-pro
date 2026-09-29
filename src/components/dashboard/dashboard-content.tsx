@@ -1,21 +1,11 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart2, NotebookPen, FileText, ArrowLeftRight } from "lucide-react";
-import SummaryTab from "@/components/dashboard/summary-tab";
-import ReportsTab from "@/components/dashboard/reports-tab";
-import BottomNav from "@/components/layout/bottom-nav";
-import { PRIMARY_NAV_ITEMS, type PrimaryArea } from "@/components/layout/primary-navigation";
-import { useTabs } from "@/contexts/tabs-context";
-import MovementsTab from "./movements-tab";
-import PlanningTab from "./planning-tab";
-
-const icons = {
-  summary: BarChart2,
-  movements: ArrowLeftRight,
-  planning: NotebookPen,
-  reports: FileText,
-} satisfies Record<PrimaryArea, typeof BarChart2>;
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import SummaryTab from '@/components/dashboard/summary-tab';
+import ReportsTab from '@/components/dashboard/reports-tab';
+import { useTabs } from '@/contexts/tabs-context';
+import MovementsTab from './movements-tab';
+import PlanningTab from './planning-tab';
 
 export default function DashboardContent() {
   const { activeTab, setActiveTab } = useTabs();
@@ -23,19 +13,7 @@ export default function DashboardContent() {
   return (
     <div className="w-full fade-in">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList aria-label="Navegación principal" className="hidden md:grid w-full grid-cols-4 mb-6">
-          {PRIMARY_NAV_ITEMS.map(item => {
-            const Icon = icons[item.value];
-            return (
-              <TabsTrigger key={item.value} value={item.value}>
-                <Icon className="w-4 h-4 mr-2" />
-                {item.label}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-
-        <div className="min-h-[calc(100vh-200px)] w-full relative">
+        <div className="relative min-h-[calc(100vh-180px)] w-full">
           <TabsContent value="summary">
             <SummaryTab />
           </TabsContent>
@@ -49,7 +27,6 @@ export default function DashboardContent() {
             <ReportsTab />
           </TabsContent>
         </div>
-        <BottomNav />
       </Tabs>
     </div>
   );
