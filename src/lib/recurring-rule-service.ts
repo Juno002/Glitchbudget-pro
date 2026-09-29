@@ -7,7 +7,7 @@ import type { RecurringRule } from '../domain/models';
 export const recurringRuleSchema = z.object({
   id: z.string().min(1), direction: z.enum(['income', 'expense']),
   title: z.string().min(1), categoryId: z.string().min(1),
-  amount: z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER),
+  amount: z.number().int().positive('El monto debe ser mayor que cero.').max(Number.MAX_SAFE_INTEGER),
   defaultAccountId: z.string().min(1).optional(),
   cadence: z.enum(['weekly', 'biweekly', 'monthly']),
   day: z.number().int().min(0).max(31).optional(),
