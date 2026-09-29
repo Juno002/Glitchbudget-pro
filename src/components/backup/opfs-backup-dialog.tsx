@@ -182,7 +182,7 @@ export default function OpfsBackupDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={value => { if (!isWorking) setOpen(value); }}>
+    <Dialog open={open} onOpenChange={value => { if (!isWorking && !previewingImport) setOpen(value); }}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <UploadCloud className="mr-2 h-4 w-4" />
@@ -297,6 +297,7 @@ export default function OpfsBackupDialog() {
         <ImportConfirmation
           file={pendingFile}
           preview={pendingPreview}
+          requirePreview
           scope="todos tus datos actuales"
           onCancel={resetPendingImport}
           onConfirm={confirmPendingRestore}
