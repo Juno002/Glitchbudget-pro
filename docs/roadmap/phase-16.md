@@ -35,11 +35,12 @@ Este documento fija la división de ejecución acordada para completar Fase 16. 
    - Rules como clasificación;
    - sin competir ni fusionar responsabilidades.
 
-6. **16.6 — Apply automatically opcional**
-   - solo después de estabilizar Suggestions;
+6. **16.6 — Apply automatically opcional** ✅
    - opt-in explícito **por regla**;
-   - nunca comportamiento global implícito;
-   - mantener motor determinista y local.
+   - legacy permanece manual por defecto;
+   - una sola coincidencia automática compatible puede rellenar clasificación;
+   - múltiples coincidencias automáticas caen a decisión manual, sin precedencia implícita;
+   - motor determinista y local.
 
 7. **16.7 — Hardening + gate**
    - conflictos entre reglas;
@@ -67,7 +68,7 @@ Durante 16.1–16.7:
 - 16.3 ✅
 - 16.4 ✅
 - 16.5 ✅
-- 16.6 ⏳ pendiente
+- 16.6 ✅
 - 16.7 ⏳ pendiente
 
 Por tanto, **Fase 16 permanece en progreso**.
