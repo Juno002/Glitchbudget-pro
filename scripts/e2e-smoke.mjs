@@ -214,11 +214,26 @@ async function main() {
   let chrome;
   let client;
 
+  const stop = async child => {
+    if (!child || child.exitCode !== null) return;
+    child.kill('SIGTERM');
+    await Promise.race([
+      new Promise(resolve => child.once('exit', resolve)),
+      delay(2_000),
+    ]);
+    if (child.exitCode === null) child.kill('SIGKILL');
+  };
+
   const cleanup = async () => {
     client?.close();
-    chrome?.kill('SIGTERM');
-    server.kill('SIGTERM');
-    await rm(userDataDir, { recursive: true, force: true });
+    await stop(chrome);
+    await stop(server);
+    await rm(userDataDir, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+      retryDelay: 200,
+    });
   };
 
   const failOnEarlyExit = (child, name) => {
