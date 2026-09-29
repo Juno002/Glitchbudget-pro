@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 19.5.
 
-Estado: **en progreso**.
+Estado: **completado**.
 
 ## Objetivo
 
@@ -55,4 +55,11 @@ Durante toda Fase 19.5:
 - [19.5.2](phase-19-5-2.md) — persistencia fuera de React: **completado**;
 - [19.5.3](phase-19-5-3.md) — cálculos/read models: **completado**;
 - [19.5.4](phase-19-5-4.md) — `finance-context` + hardening: **completado**;
-- 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
+- [19.5.5](phase-19-5-5.md) — barrido final + Prisma Engine Gate: **completado / aprobado**.
+
+
+## Cierre
+
+Fase 19.5 queda **completada** con el Prisma Engine Gate aprobado en [19.5.5](phase-19-5-5.md).
+
+No existe una fase posterior definida en `Roadmap septiembre 2026.txt`; cualquier trabajo nuevo debe partir de una nueva decisión de roadmap, no de una continuación implícita.
