@@ -22,6 +22,7 @@ import { useCategoryResolver } from '@/hooks/use-categories';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRightLeft } from 'lucide-react';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { selectBudgetsWithAvailableFunds } from '@/domain/dashboard-read-models';
 import type { BudgetPeriodRange } from '@/domain/periods';
 
 const formSchema = z.object({
@@ -51,7 +52,7 @@ export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: Budget
     },
   });
 
-  const budgetsWithFunds = getBudgetStatusDetails(currentMonth, budgetPeriod).filter(b => b.remaining > 0);
+  const budgetsWithFunds = selectBudgetsWithAvailableFunds(getBudgetStatusDetails(currentMonth, budgetPeriod));
 
   async function onSubmit(values: TransferFormValues) {
     try {
