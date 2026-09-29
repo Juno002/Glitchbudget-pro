@@ -1,7 +1,10 @@
 export const BALANCE_VISIBILITY_STORAGE_KEY = 'glitchbudget_balances_hidden_v1';
 export const APP_LOCK_STORAGE_KEY = 'glitchbudget_app_lock_v1';
+export const AUTO_LOCK_STORAGE_KEY = 'glitchbudget_auto_lock_v1';
 export const APP_LOCK_PIN_MIN_LENGTH = 6;
 export const APP_LOCK_PIN_MAX_LENGTH = 12;
+export const AUTO_LOCK_TIMEOUT_OPTIONS = [1, 5, 15, 30] as const;
+export type AutoLockTimeoutMinutes = typeof AUTO_LOCK_TIMEOUT_OPTIONS[number];
 
 export const LOCAL_SECURITY_CONTRACT = {
   privacyFromServers: {
@@ -37,10 +40,12 @@ export const LOCAL_SECURITY_CONTRACT = {
     ],
   },
   autoLock: {
-    status: 'planned-17.3',
+    status: 'implemented-17.3',
     protects: 'ui-session-after-inactivity',
     requires: 'app-lock',
-    storage: 'local-only',
+    storage: 'localStorage',
+    storageKey: AUTO_LOCK_STORAGE_KEY,
+    timeoutOptionsMinutes: AUTO_LOCK_TIMEOUT_OPTIONS,
     legacyDefault: 'disabled',
     doesNotProtect: [
       'dexie-at-rest',
