@@ -22,6 +22,7 @@ export default function BottomNav() {
   return (
     <nav
       aria-label="Navegación principal"
+      data-shell-nav="mobile"
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 backdrop-blur-xl shadow-[var(--shadow-nav)] md:hidden"
     >
       <div
