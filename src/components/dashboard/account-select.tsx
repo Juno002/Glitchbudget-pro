@@ -1,10 +1,9 @@
 'use client';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
+import { useAccountsData } from '@/hooks/use-finance-queries';
 import { defaultCashAccount } from '@/lib/accounts';
-import type { Account } from '@/lib/db';
+import type { Account } from '@/domain/models';
 export function AccountSelect({ value, onChange, label = 'Cuenta de origen', disabled = false, cashDefault = false, allowedTypes = ['cash','bank'] }: { value: string; onChange: (value: string) => void; label?: string; disabled?: boolean; cashDefault?: boolean; allowedTypes?: Account['type'][] }) {
-  const accounts = useLiveQuery(() => db.accounts.toArray());
+  const accounts = useAccountsData();
   const visibleAccounts = (accounts || []).filter(account => allowedTypes.includes(account.type));
   const defaultAccount = cashDefault ? defaultCashAccount(visibleAccounts) : undefined;
   if (!visibleAccounts.length && !cashDefault) return null;

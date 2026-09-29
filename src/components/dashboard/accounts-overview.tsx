@@ -1,8 +1,6 @@
 'use client';
 import { selectPosition } from '@/domain/ledger';
 import { useRef, useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/lib/db';
 import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { toCents } from '@/lib/utils';
@@ -18,11 +16,12 @@ import { ActionMenu, DetailHeader } from '@/components/finance-ui';
 import { Pencil, Settings2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFinances } from '@/contexts/finance-context';
+import { useAccountOverviewData } from '@/hooks/use-finance-queries';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
   const { currency } = useFinances();
-  const data = useLiveQuery(() => db.transaction('r', [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts], async () => ({ accounts: await db.accounts.toArray(), transfers: await db.account_transfers.toArray(), incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), debts: await db.debts.toArray() })));
+  const data = useAccountOverviewData();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);

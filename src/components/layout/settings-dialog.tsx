@@ -14,7 +14,7 @@ import OpfsBackupDialog from '@/components/backup/opfs-backup-dialog';
 import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
 import IncomeCategoryManager from '@/components/dashboard/income-category-manager';
 import { HelpDialog } from './help-dialog';
-import { db } from '@/lib/db';
+import { clearPersistedFinanceData } from '@/lib/data-reset-service';
 import { useToast } from '@/hooks/use-toast';
 import { SectionHeader } from '@/components/finance-ui';
 import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
@@ -71,9 +71,7 @@ export function SettingsDialog() {
 
   const handleClearData = async () => {
     try {
-      await db.transaction('rw', db.tables, async () => {
-        for (const table of db.tables) await table.clear();
-      });
+      await clearPersistedFinanceData();
       localStorage.removeItem('glitchbudget_achievements');
       localStorage.removeItem('glitchbudget_contribution_streak');
       clearLocalAutomation(localStorage);

@@ -1,5 +1,30 @@
 {
   "extends": [
     "next/core-web-vitals"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "src/components/**/*.{ts,tsx}",
+        "src/app/**/*.{ts,tsx}"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@/lib/db",
+                "message": "UI must consume queries/services instead of importing the Dexie database directly."
+              },
+              {
+                "name": "dexie-react-hooks",
+                "message": "Reactive Dexie subscriptions belong behind application query hooks, not in UI components."
+              }
+            ]
+          }
+        ]
+      }
+    }
   ]
 }

@@ -1,15 +1,14 @@
 'use client';
 
-import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { db } from '@/lib/db';
-import type { Expense, Income } from '@/lib/db';
+import type { Expense, Income } from '@/domain/models';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { EmptyState, TransactionRow } from '@/components/finance-ui';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
+import { useMovementAccountData } from '@/hooks/use-finance-queries';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useOptionalTabs } from '@/contexts/tabs-context';
 import { cn, toCents } from '@/lib/utils';
@@ -62,10 +61,7 @@ export default function MovementsView() {
   const clearMovementFocus=tabs?.clearMovementFocus;
   const {incomes,expenses,currentMonth,debtPayments,debts,goalContributions,goals}=useFinances();
 
-  const accountData=useLiveQuery(()=>db.transaction('r',db.accounts,db.account_transfers,async()=>({
-    accounts:await db.accounts.toArray(),
-    transfers:await db.account_transfers.toArray(),
-  })));
+  const accountData=useMovementAccountData();
 
   const [detailItem,setDetailItem]=useState<UnifiedItem|null>(null);
   const [search,setSearch]=useState('');

@@ -1,5 +1,22 @@
 # Roadmap: documentación vigente
 
+## Fase 19 — Technical-debt closure en ejecución
+
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
+
+Fase 19 se divide en tres checkpoints documentados en [phase-19.md](phase-19.md).
+
+- [19.1](phase-19-1.md) — frontera UI → queries/services: **completado**.
+- 19.2 — `finance-context.tsx` como fachada: siguiente.
+- 19.3 — componentes grandes + hardening + gate final: pendiente.
+
+19.1 eliminó los accesos directos a Dexie desde `src/components` y `src/app`, encapsuló lecturas reactivas y el reset explícito detrás de hooks/services, y añadió un guard permanente de ESLint + regresión automática. El gate `36587989589` verificó `npm run check` y `npm run build` correctamente.
+
+Persistencia sin cambios: **Dexie v14 / JSON v13**. No se modificaron fórmulas financieras.
+
+**Estado actual:** 19.1 cerrada. No iniciar 19.2 sin continuar explícitamente la Fase 19.
+
+
 ## Fase 18 — Backup 2.0 y migraciones permanentes completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. Fase 18 se ejecutó en **cinco iteraciones**, documentadas en [phase-18.md](phase-18.md):
