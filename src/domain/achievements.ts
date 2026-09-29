@@ -1,7 +1,21 @@
 import type { Expense, GoalContribution, Income, Plan } from './models';
 import type { GoalView } from './goals';
 import type { BudgetStatusDetail } from './budgets';
-import type { AchievementId } from '@/lib/achievements';
+export type AchievementEligibilityId =
+  | 'first_expense'
+  | 'first_income'
+  | 'first_goal'
+  | 'goal_complete'
+  | 'budget_master'
+  | 'saver_streak_3'
+  | 'saver_streak_7'
+  | 'big_saver'
+  | 'five_transactions'
+  | 'twenty_transactions'
+  | 'budget_under_control'
+  | 'diversified_income'
+  | 'zero_waste'
+  | 'consistent_tracker';
 
 export interface AchievementEvaluationInput {
   expenses: Expense[];
@@ -15,8 +29,8 @@ export interface AchievementEvaluationInput {
 }
 
 export function evaluateAchievementEligibility(input: AchievementEvaluationInput) {
-  const eligible: AchievementId[] = [];
-  const add = (id: AchievementId, condition: boolean) => {
+  const eligible: AchievementEligibilityId[] = [];
+  const add = (id: AchievementEligibilityId, condition: boolean) => {
     if (condition) eligible.push(id);
   };
 
