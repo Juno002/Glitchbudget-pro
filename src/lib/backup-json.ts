@@ -386,66 +386,129 @@ export async function downloadExportJSON() {
   URL.revokeObjectURL(a.href);
 }
 
-export async function importDataJSON(
+export type BackupImportPreview = {
+  formatVersion: number;
+  schemaVersion?: number;
+  appVersion?: string;
+  exportedAt: string;
+  accounts: number;
+  transactions: number;
+  budgets: number;
+  goals: number;
+  cards: number;
+  investments: number;
+};
+
+type PreparedBackupImport = {
+  d: any;
+  importedAutomation: LocalAutomationBackup | null;
+  categories: any[];
+  accounts: any[];
+  investments: any[];
+  periodsEnsured: any[];
+  settingsRow: any;
+  incomes: any[];
+  expenses: any[];
+  plans: any[];
+  goals: any[];
+  goalContributions: any[];
+  recurrents: any[];
+  plannedOccurrences: any[];
+  debts: any[];
+  debtPayments: any[];
+  fxRates: any[];
+  preview: BackupImportPreview;
+};
+
+function prepareDataJSONImport(
   text: string,
-  storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
-): Promise<{
-  counts: Record<string, number>
-}> {
+  storage: LocalAutomationStorage | undefined,
+): PreparedBackupImport {
   assertBackupTableCoverage(db.tables.map(table => table.name));
-  // 1) Parse + valida contrato v3
+
   const raw = JSON.parse(text);
-  const d = parseBackup(raw); // si no cumple, explota aquí con un mensaje útil
+  const d = parseBackup(raw);
   const importedAutomation = d.v >= 12 && 'localAutomation' in d
     ? normalizeLocalAutomationBackup(d.localAutomation)
     : null;
+
   if (importedAutomation && !storage && (
-    importedAutomation.templates.length ||
-    importedAutomation.savedFilters.length ||
-    importedAutomation.rules.length
+    importedAutomation.templates.length
+    || importedAutomation.savedFilters.length
+    || importedAutomation.rules.length
   )) {
     throw new Error('Este respaldo incluye automatización local, pero el almacenamiento local no está disponible.');
   }
-  validateBudgetPlans(d.plans);
 
-  if (d.v >= 4 && (!d.accounts || !d.accountTransfers)) throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
-  if(d.v>=5 && !d.categories) throw new Error('El respaldo no contiene categorías.');
-  const categories=d.v>=5 ? d.categories! : reconstructCategories({settings:d.settings,incomes:d.incomes,expenses:d.expenses,plans:d.plans,recurrents:d.recurrents.map(r=>({categoryId:r.categoryId,type:r.direction}))});
+  validateBudgetPlans(d.plans);
+  if (d.v >= 4 && (!d.accounts || !d.accountTransfers)) {
+    throw new Error('El respaldo v4 está incompleto: faltan cuentas o transferencias.');
+  }
+  if (d.v >= 5 && !d.categories) throw new Error('El respaldo no contiene categorías.');
+
+  const categories = d.v >= 5
+    ? d.categories!
+    : reconstructCategories({
+      settings:d.settings,
+      incomes:d.incomes,
+      expenses:d.expenses,
+      plans:d.plans,
+      recurrents:d.recurrents.map((rule:any) => ({ categoryId:rule.categoryId, type:rule.direction })),
+    });
   validateCategorySet(categories);
   validateCategoryReferences(d, categories);
+
   const baseCurrency = normalizeCurrencyCode(d.settings.currency);
-  const accounts = (d.accounts || []).map(account => ({
+  const accounts = (d.accounts || []).map((account:any) => ({
     ...account,
     currency: normalizeCurrencyCode('currency' in account ? account.currency : undefined, baseCurrency),
   }));
-  if (accounts.some(account => account.currency !== baseCurrency)) {
+  if (accounts.some((account:any) => account.currency !== baseCurrency)) {
     throw new Error('Este respaldo contiene cuentas en otra moneda. Fase 11 requiere conversión manual antes de admitirlas.');
   }
-  const accountMap = new Map(accounts.map(a => [a.id, a]));
+
+  const accountMap = new Map<string, any>(accounts.map((account:any) => [account.id, account]));
   const investments = d.investments ?? [];
   const investmentAccountIds = new Set<string>();
   for (const investment of investments) {
     const account = accountMap.get(investment.accountId);
-    if (!account || account.type !== 'investment') throw new Error('El respaldo contiene una inversión sin su cuenta de inversión.');
-    if (investmentAccountIds.has(investment.accountId)) throw new Error('El respaldo contiene varias inversiones para la misma cuenta.');
+    if (!account || account.type !== 'investment') {
+      throw new Error('El respaldo contiene una inversión sin su cuenta de inversión.');
+    }
+    if (investmentAccountIds.has(investment.accountId)) {
+      throw new Error('El respaldo contiene varias inversiones para la misma cuenta.');
+    }
     investmentAccountIds.add(investment.accountId);
   }
-  if (accounts.some(account => account.type === 'investment' && !investmentAccountIds.has(account.id))) {
+  if (accounts.some((account:any) => account.type === 'investment' && !investmentAccountIds.has(account.id))) {
     throw new Error('El respaldo contiene una cuenta de inversión sin metadatos de inversión.');
   }
-  if (accounts.filter(a => a.isDefaultCash).length > 1) throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
-  for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
-    if (row.accountId && (!accountMap.has(row.accountId) || row.date.slice(0,10) < accountMap.get(row.accountId)!.startDate)) throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
-    if (row.accountId && accountMap.get(row.accountId)!.type === 'investment') throw new Error('El respaldo usa una inversión como cuenta operativa.');
+  if (accounts.filter((account:any) => account.isDefaultCash).length > 1) {
+    throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   }
+
+  for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
+    const account = row.accountId ? accountMap.get(row.accountId) : undefined;
+    if (row.accountId && (!account || row.date.slice(0, 10) < account.startDate)) {
+      throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
+    }
+    if (account?.type === 'investment') {
+      throw new Error('El respaldo usa una inversión como cuenta operativa.');
+    }
+  }
+
   for (const rule of d.recurrents || []) {
     if (rule.defaultAccountId && !accountMap.has(rule.defaultAccountId)) {
       throw new Error('El respaldo contiene una regla recurrente con cuenta predeterminada desconocida.');
     }
   }
+
   for (const transfer of d.accountTransfers || []) {
     for (const id of [transfer.fromAccountId, transfer.toAccountId]) {
-      if (!accountMap.has(id) || transfer.date < accountMap.get(id)!.startDate) throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
+      const account = accountMap.get(id);
+      if (!account || transfer.date < account.startDate) {
+        throw new Error('El respaldo contiene una transferencia con cuentas o fechas inválidas.');
+      }
     }
     const fromAccount = accountMap.get(transfer.fromAccountId)!;
     const toAccount = accountMap.get(transfer.toAccountId)!;
@@ -456,36 +519,40 @@ export async function importDataJSON(
       throw new Error('El respaldo contiene un retiro de inversión que no pertenece a Investments 1.0.');
     }
   }
-  const goalIds = new Set(d.goals.map(g => g.id));
-  const debtIds = new Set((d.debts || []).map(debt => debt.id));
-  if (d.goalContributions.some(c => !goalIds.has(c.goalId))) throw new Error('El respaldo contiene aportes a metas inexistentes.');
-  if ((d.debtPayments || []).some(p => !debtIds.has(p.debtId))) throw new Error('El respaldo contiene pagos de tarjetas inexistentes.');
-  if (d.expenses.some(e => e.paymentMethod === 'credit' && (!e.debtId || !debtIds.has(e.debtId)))) {
+
+  const goalIds = new Set(d.goals.map((goal:any) => goal.id));
+  const debtIds = new Set((d.debts || []).map((debt:any) => debt.id));
+  if (d.goalContributions.some((contribution:any) => !goalIds.has(contribution.goalId))) {
+    throw new Error('El respaldo contiene aportes a metas inexistentes.');
+  }
+  if ((d.debtPayments || []).some((payment:any) => !debtIds.has(payment.debtId))) {
+    throw new Error('El respaldo contiene pagos de tarjetas inexistentes.');
+  }
+  if (d.expenses.some((expense:any) => (
+    expense.paymentMethod === 'credit' && (!expense.debtId || !debtIds.has(expense.debtId))
+  ))) {
     throw new Error('El respaldo contiene gastos vinculados a tarjetas inexistentes.');
   }
 
-  // 2) Integridad referencial mínima: periods presentes
-  //    Si faltan periods pero los periodId aparecen en incomes/expenses/plans, los creamos.
   const periodIds = uniq([
-    ...d.periods.map(p => p.id),
-    ...d.incomes.map(i => i.date.slice(0, 7)),
-    ...d.expenses.map(e => e.date.slice(0, 7)),
-    ...d.plans.map(p => p.month).filter(id => /^\d{4}-\d{2}$/.test(id))
+    ...d.periods.map((period:any) => period.id),
+    ...d.incomes.map((income:any) => income.date.slice(0, 7)),
+    ...d.expenses.map((expense:any) => expense.date.slice(0, 7)),
+    ...d.plans.map((plan:any) => plan.month).filter((id:string) => /^\d{4}-\d{2}$/.test(id)),
   ]);
   const periodsEnsured = periodIds.map(id => {
-    const found = d.periods.find(p => p.id === id);
+    const found = d.periods.find((period:any) => period.id === id);
     if (found) return found;
-    const [y, m] = id.split('-').map(n => parseInt(n, 10));
-    return { id, year: y, month: m, createdAt: nowIsoZ() };
+    const [year, month] = id.split('-').map((value:string) => parseInt(value, 10));
+    return { id, year, month, createdAt: nowIsoZ() };
   });
 
-  // 3) Mapea a tu DB (nombres internos)
   const settingsRow = {
     ...d.settings,
     id: 'general',
     currency: baseCurrency,
-    locale:   d.settings.locale   ?? 'es-DO',
-    theme:    (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
+    locale: d.settings.locale ?? 'es-DO',
+    theme: (d.settings.theme as ('light' | 'dark' | 'system' | 'serious')) ?? 'system',
     strictMode: d.settings.strictMode ?? false,
     ...normalizeFinancialPolicies(d.settings),
     rolloverStrategy: d.settings.rolloverStrategy ?? 'reset',
@@ -493,50 +560,63 @@ export async function importDataJSON(
       amount: Math.max(0, Number(d.settings.baseIncome?.amount ?? 0)),
       freq: d.settings.baseIncome?.freq ?? 'mensual',
     },
-    incomeCategories:  Array.isArray(d.settings.incomeCategories)  ? d.settings.incomeCategories  : [],
-    expenseCategories: Array.isArray(d.settings.expenseCategories) ? d.settings.expenseCategories : []
+    incomeCategories: Array.isArray(d.settings.incomeCategories) ? d.settings.incomeCategories : [],
+    expenseCategories: Array.isArray(d.settings.expenseCategories) ? d.settings.expenseCategories : [],
   };
 
-  const incomes = d.incomes.map(i => ({
-    id: i.id, month: i.date.slice(0, 7), date: i.date, categoryId: i.categoryId,
-    amount: i.amount, description: i.description, type: i.type, recurringRuleId: 'recurringRuleId' in i ? i.recurringRuleId : undefined,
-    accountId: i.accountId,
-    currency: i.accountId ? accountMap.get(i.accountId)!.currency : baseCurrency,
+  const incomes = d.incomes.map((income:any) => ({
+    id: income.id,
+    month: income.date.slice(0, 7),
+    date: income.date,
+    categoryId: income.categoryId,
+    amount: income.amount,
+    description: income.description,
+    type: income.type,
+    recurringRuleId: 'recurringRuleId' in income ? income.recurringRuleId : undefined,
+    accountId: income.accountId,
+    currency: income.accountId ? accountMap.get(income.accountId)!.currency : baseCurrency,
     fxRate: 1,
-    amountBase: i.amount,
-    labels: 'labels' in i && i.labels ? normalizeTransactionLabels(i.labels) : undefined,
+    amountBase: income.amount,
+    labels: 'labels' in income && income.labels ? normalizeTransactionLabels(income.labels) : undefined,
   }));
 
-  const expenses = d.expenses.map(e => ({
-    id: e.id, month: e.date.slice(0, 7), date: e.date, categoryId: e.categoryId,
-    amount: e.amount, concept: e.concept ?? '', nature: e.nature,
-    accountId: e.accountId,
-    currency: e.accountId ? accountMap.get(e.accountId)!.currency : baseCurrency,
+  const expenses = d.expenses.map((expense:any) => ({
+    id: expense.id,
+    month: expense.date.slice(0, 7),
+    date: expense.date,
+    categoryId: expense.categoryId,
+    amount: expense.amount,
+    concept: expense.concept ?? '',
+    nature: expense.nature,
+    accountId: expense.accountId,
+    currency: expense.accountId ? accountMap.get(expense.accountId)!.currency : baseCurrency,
     fxRate: 1,
-    amountBase: e.amount,
-    paymentMethod: e.paymentMethod, debtId: e.debtId, recurringRuleId: e.recurringRuleId,
-    necessity: 'necessity' in e ? e.necessity : undefined,
-    labels: 'labels' in e && e.labels ? normalizeTransactionLabels(e.labels) : undefined,
+    amountBase: expense.amount,
+    paymentMethod: expense.paymentMethod,
+    debtId: expense.debtId,
+    recurringRuleId: expense.recurringRuleId,
+    necessity: 'necessity' in expense ? expense.necessity : undefined,
+    labels: 'labels' in expense && expense.labels ? normalizeTransactionLabels(expense.labels) : undefined,
   }));
 
-  const plans = d.plans.map(p => ({
-    month: p.month,
-    categoryId: p.categoryId,
-    limit: p.limit,
-    periodType: 'periodType' in p ? p.periodType : undefined,
-    periodStart: 'periodStart' in p ? p.periodStart : undefined,
-    periodEnd: 'periodEnd' in p ? p.periodEnd : undefined,
+  const plans = d.plans.map((plan:any) => ({
+    month: plan.month,
+    categoryId: plan.categoryId,
+    limit: plan.limit,
+    periodType: 'periodType' in plan ? plan.periodType : undefined,
+    periodStart: 'periodStart' in plan ? plan.periodStart : undefined,
+    periodEnd: 'periodEnd' in plan ? plan.periodEnd : undefined,
   }));
 
   const goalData = migrateGoalRecords(d.goals, d.goalContributions);
   const goals = goalData.goals;
-  const goal_contributions = goalData.contributions;
-
+  const goalContributions = goalData.contributions;
   const recurrents = d.recurrents ?? [];
   const plannedOccurrences = d.plannedOccurrences ?? [];
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
+
   const debts = d.debts ?? [];
-  const debtPayments = (d.debtPayments ?? []).map(payment => ({
+  const debtPayments = (d.debtPayments ?? []).map((payment:any) => ({
     ...payment,
     currency: payment.accountId ? accountMap.get(payment.accountId)!.currency : baseCurrency,
     fxRate: 1,
@@ -544,21 +624,86 @@ export async function importDataJSON(
   }));
   const fxRates = d.fxRates ?? [];
 
+  const preview: BackupImportPreview = {
+    formatVersion: d.v,
+    schemaVersion: 'schemaVersion' in d ? d.schemaVersion : undefined,
+    appVersion: 'appVersion' in d ? d.appVersion : undefined,
+    exportedAt: d.exportedAt,
+    accounts: accounts.length,
+    transactions: d.incomes.length
+      + d.expenses.length
+      + (d.debtPayments?.length ?? 0)
+      + (d.accountTransfers?.length ?? 0),
+    budgets: plans.length,
+    goals: goals.length,
+    cards: debts.length,
+    investments: investments.length,
+  };
 
-  // 4) Restore local automation + Dexie as one logical operation.
-  // Older backups did not contain these local layers, so they preserve the current local automation.
+  return {
+    d,
+    importedAutomation,
+    categories,
+    accounts,
+    investments,
+    periodsEnsured,
+    settingsRow,
+    incomes,
+    expenses,
+    plans,
+    goals,
+    goalContributions,
+    recurrents,
+    plannedOccurrences,
+    debts,
+    debtPayments,
+    fxRates,
+    preview,
+  };
+}
+
+export function previewDataJSON(
+  text: string,
+  storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
+): BackupImportPreview {
+  return prepareDataJSONImport(text, storage).preview;
+}
+
+export async function importDataJSON(
+  text: string,
+  storage: LocalAutomationStorage | undefined = browserAutomationStorage(),
+): Promise<{ counts: Record<string, number> }> {
+  const prepared = prepareDataJSONImport(text, storage);
+  const {
+    d,
+    importedAutomation,
+    categories,
+    accounts,
+    investments,
+    periodsEnsured,
+    settingsRow,
+    incomes,
+    expenses,
+    plans,
+    goals,
+    goalContributions,
+    recurrents,
+    plannedOccurrences,
+    debts,
+    debtPayments,
+    fxRates,
+  } = prepared;
+
   const previousAutomation = importedAutomation && storage ? exportLocalAutomation(storage) : null;
   if (importedAutomation && storage) replaceLocalAutomation(storage, importedAutomation);
 
   try {
-    await db.transaction('rw',
-      db.tables,
-      async () => {
+    await db.transaction('rw', db.tables, async () => {
       await Promise.all(
         BACKUP_TABLE_COVERAGE.map(entry => db.table(entry.table).clear()),
       );
       await db.settings.put(withoutLegacyCategories(settingsRow) as any);
-      if(categories.length) await db.categories.bulkAdd(categories);
+      if (categories.length) await db.categories.bulkAdd(categories);
       if (accounts.length) await db.accounts.bulkAdd(accounts);
       if (d.accountTransfers?.length) await db.account_transfers.bulkAdd(d.accountTransfers);
       if (investments.length) await db.investments.bulkAdd(investments);
@@ -567,34 +712,31 @@ export async function importDataJSON(
       if (expenses.length) await db.expenses.bulkAdd(expenses as any);
       if (plans.length) await db.plans.bulkPut(plans as any);
       if (goals.length) await db.goals.bulkAdd(goals as any);
-      if (goal_contributions.length) await db.goal_contributions.bulkAdd(goal_contributions as any);
+      if (goalContributions.length) await db.goal_contributions.bulkAdd(goalContributions as any);
       if (recurrents.length) await db.recurrents.bulkAdd(recurrents as any);
       if (plannedOccurrences.length) await db.planned_occurrences.bulkAdd(plannedOccurrences as any);
       if (debts.length) await db.debts.bulkAdd(debts as any);
       if (debtPayments.length) await db.debt_payments.bulkAdd(debtPayments as any);
       if (fxRates.length) await db.fxRates.bulkAdd(fxRates as any);
-      }
-    );
+    });
   } catch (error) {
     if (previousAutomation && storage) replaceLocalAutomation(storage, previousAutomation);
     throw error;
   }
 
-  // 5) Conteo post-import derivado del inventario canónico de tablas.
   const tableCounts = Object.fromEntries(await Promise.all(
     BACKUP_TABLE_COVERAGE.map(async entry => [entry.table, await db.table(entry.table).count()] as const),
   ));
+  const automationCounts = storage ? exportLocalAutomation(storage) : EMPTY_LOCAL_AUTOMATION;
 
-  const automationCounts = storage
-    ? exportLocalAutomation(storage)
-    : EMPTY_LOCAL_AUTOMATION;
-
-  return { counts: {
-    ...tableCounts,
-    templates: automationCounts.templates.length,
-    savedFilters: automationCounts.savedFilters.length,
-    rules: automationCounts.rules.length,
-  }};
+  return {
+    counts: {
+      ...tableCounts,
+      templates: automationCounts.templates.length,
+      savedFilters: automationCounts.savedFilters.length,
+      rules: automationCounts.rules.length,
+    },
+  };
 }
 
 function validateCategoryReferences(data: {
