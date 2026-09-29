@@ -46,6 +46,7 @@ import {
   updateGoalCommand,
   updateIncomeCommand,
   updateRecurringRuleCommand,
+  type AccountTransferDraft,
 } from '@/application/finance-commands';
 
 const DEFAULT_SETTINGS: Settings = {
@@ -103,7 +104,7 @@ interface FinanceContextType {
   addExpense: (expense: Omit<Expense, "id" | "month">) => Promise<boolean>;
   updateExpense: (expense: Expense) => Promise<boolean>;
   deleteExpense: (id: string) => Promise<boolean>;
-  addAccountTransfer: (transfer: Omit<AccountTransfer, 'id'>) => Promise<boolean>;
+  addAccountTransfer: (transfer: AccountTransferDraft) => Promise<boolean>;
   addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => Promise<boolean>;
   updateGoal: (goal: Goal) => Promise<boolean>;
   deleteGoal: (id: string) => void;
@@ -425,7 +426,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addAccountTransfer = useCallback(async (transfer: Omit<AccountTransfer, 'id'>) => {
+  const addAccountTransfer = useCallback(async (transfer: AccountTransferDraft) => {
     try {
       await createAccountTransferCommand(transfer);
       toast({ title: 'Transferencia registrada', description: 'Se actualizó la cuenta de origen y destino sin crear ingreso ni gasto.' });
