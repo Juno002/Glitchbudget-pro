@@ -1,20 +1,18 @@
 # Roadmap: documentación vigente
 
-## Fase 16 — Automatización local en progreso
+## Fase 16 — Automatización local completada
 
-La ejecución de Fase 16 está dividida en **siete iteraciones**, documentadas en [phase-16.md](phase-16.md).
+Fase 16 quedó cerrada mediante **siete iteraciones**, documentadas en [phase-16.md](phase-16.md): [16.1](phase-16-1.md) contrato, [16.2](phase-16-2.md) motor determinista, [16.3](phase-16-3.md) suggestions, [16.4](phase-16-4.md) gestión local, [16.5](phase-16-5.md) integración **Templates → Saved filters → Rules**, [16.6](phase-16-6.md) auto-apply opcional por Rule y [16.7](phase-16-7.md) hardening + gate final.
 
-**Completadas:** [16.1](phase-16-1.md) contrato de Rules, [16.2](phase-16-2.md) motor determinista, [16.3](phase-16-3.md) suggestions en Quick Add, [16.4](phase-16-4.md) gestión local, [16.5](phase-16-5.md) integración **Templates → Saved filters → Rules** y [16.6](phase-16-6.md) **Apply automatically opcional por Rule**.
+La política final de precedencia es **stored-order-manual-on-automatic-conflict**: el orden guardado define evaluación/presentación, pero con dos o más Rules automáticas compatibles no existe ganador implícito; se vuelve a decisión manual.
 
-16.6 mantiene compatibilidad legacy: una Rule sin `applyAutomatically: true` sigue siendo manual. Una única coincidencia automática compatible puede rellenar category/necessity en Quick Add, pero **no guarda el movimiento** y los campos siguen editables. Si coinciden varias Rules automáticas, no se elige ganador: se vuelve a sugerencias manuales hasta que 16.7 formalice conflictos y precedencia.
+El backup completo sube a **JSON v12** e incluye `localAutomation.templates`, `localAutomation.savedFilters` y `localAutomation.rules`. Backups v3–v11 siguen siendo compatibles y preservan la automatización local existente; v12 la restaura explícitamente. Dexie permanece en **v14**.
 
-Durante toda Fase 16 se mantienen las invariantes: **cero IA, cero transmisión de descripciones y cero dependencia de red para evaluar/aplicar Rules**. No existe auto-apply global implícito.
+Las invariantes de toda la fase quedan preservadas: **cero IA, cero transmisión de descripciones, cero red para evaluar/aplicar Rules, ningún movimiento guardado automáticamente y ninguna alteración de las invariantes financieras**.
 
-El gate de 16.6 (`36502529791`) verificó **333/333 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+El gate final `Quality checks` run `36503687919` verificó **339/339 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Pendiente antes de cerrar la fase:** **16.7 — Hardening + gate**, incluyendo conflictos, precedencia, legacy, backup/export si aplica, pruebas, documentación y cierre formal.
-
-**Estado actual del roadmap:** Fase 16 en progreso. **16.7 es el siguiente y último checkpoint. Fase 17 no se ha iniciado.**
+**Estado actual del roadmap:** Fase 16 completada. La siguiente fase canónica es **Fase 17 — Seguridad y privacidad local**, todavía no iniciada.
 
 ## Fase 15 — Transaction Metadata + filtros completada
 
