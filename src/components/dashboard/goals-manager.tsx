@@ -13,7 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { goalFundingSchedule, goalMetrics, type GoalView } from '@/domain/goals';
+import type { GoalView } from '@/domain/goals';
+import { goalContributionCompletes, selectGoalContributionPrompt, selectGoalFundingSuggestion, selectGoalManagerRows } from '@/domain/dashboard-read-models';
 import { formatDate, toCents } from '@/lib/utils';
 import { isValidDate, localDate } from '@/lib/finance-calculations';
 import { triggerGoalCompletionConfetti } from '@/lib/confetti';
@@ -32,17 +33,18 @@ function ContributeDialog({ goal }: { goal:GoalView }) {
   const { contributeToGoal } = useFinances();
   const money = usePrivateCurrency();
   const [open, setOpen] = useState(false);
-  const form = useForm<z.infer<typeof contributionSchema>>({ resolver:zodResolver(contributionSchema), defaultValues:{ amount:goal.quota / 100 } });
+  const prompt = selectGoalContributionPrompt(goal);
+  const form = useForm<z.infer<typeof contributionSchema>>({ resolver:zodResolver(contributionSchema), defaultValues:{ amount:prompt.suggestedAmount / 100 } });
   async function submit(values:z.infer<typeof contributionSchema>) {
     if (!await contributeToGoal(goal.id, values.amount)) return;
-    if (goal.saved < goal.target && goal.saved + toCents(values.amount) >= goal.target) triggerGoalCompletionConfetti();
+    if (goalContributionCompletes(goal, toCents(values.amount))) triggerGoalCompletionConfetti();
     setOpen(false);
   }
-  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (value) form.reset({ amount:Math.min(goal.quota, Math.max(0, goal.target-goal.saved))/100 }); }}>
+  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (value) form.reset({ amount:prompt.suggestedAmount/100 }); }}>
     <DialogTrigger asChild><Button variant="outline" size="sm"><PlusCircle className="mr-2 h-4 w-4" />Aportar</Button></DialogTrigger>
     <DialogContent className="sm:max-w-md">
       <DialogHeader><DialogTitle>Aportar a {goal.name}</DialogTitle><DialogDescription>Registrarás una reserva para esta meta. El efectivo y los saldos bancarios no cambian.</DialogDescription></DialogHeader>
-      <p className="text-sm text-muted-foreground">Ahorrado: {money(goal.saved)} · Restante: {money(Math.max(0, goal.target-goal.saved))}</p>
+      <p className="text-sm text-muted-foreground">Ahorrado: {money(goal.saved)} · Restante: {money(prompt.remaining)}</p>
       <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4">
         <FormField control={form.control} name="amount" render={({field}) => <FormItem><FormLabel>Importe del aporte</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0.01" step="0.01" autoFocus /></FormControl><FormMessage /></FormItem>} />
         <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">{form.formState.isSubmitting ? 'Guardando…' : 'Confirmar aporte'}</Button>
@@ -61,7 +63,10 @@ export default function GoalsManager() {
   const form = useForm<GoalInput>({ resolver:zodResolver(goalSchema.refine(value => !value.date || value.date >= earliestDate, {path:['date'], message:'La fecha límite no puede ser anterior al inicio de la meta.'})), defaultValues:{ name:'', target:0, date:'', quota:0 } });
   const target = form.watch('target');
   const deadline = form.watch('date');
-  const schedule = deadline && isValidDate(deadline) && target > 0 ? goalFundingSchedule(Math.max(0, toCents(target) - (editing?.saved || 0)), deadline, today, {periodStartDay}) : null;
+  const schedule = deadline && isValidDate(deadline) && target > 0
+    ? selectGoalFundingSuggestion(toCents(target), editing?.saved || 0, deadline, today, periodStartDay)
+    : null;
+  const goalRows = selectGoalManagerRows(goals || [], goalContributions || [], today, periodStartDay);
   async function submit(values:GoalInput) {
     const saved = editing
       ? await updateGoal({...editing, name:values.name, target:toCents(values.target), quota:toCents(values.quota), date:values.date || undefined})
@@ -72,9 +77,7 @@ export default function GoalsManager() {
   }
   return <section className="space-y-4" aria-labelledby="goals-heading">
     <div><h3 id="goals-heading" className="text-lg font-semibold">Metas de ahorro</h3><p className="text-sm text-muted-foreground">Los aportes son reservas de planificación: no son gastos ni mueven dinero entre cuentas.</p></div>
-    {goals?.length ? <div className="grid gap-4">{goals.map(goal => {
-      const metrics = goalMetrics(goal, goalContributions || [], today, { periodStartDay });
-      const legacy = (goalContributions || []).filter(row => row.goalId === goal.id && row.kind === 'legacy_balance').reduce((sum,row) => sum+row.amount,0);
+    {goalRows.length ? <div className="grid gap-4">{goalRows.map(({ goal, metrics, legacyBalance: legacy }) => {
       return <article key={goal.id} className="min-w-0 rounded-xl border p-4 space-y-3">
         <ProgressMetric label={<span className="break-words">{goal.name}</span>} current={metrics.saved} total={goal.target} remaining={metrics.remaining} currentLabel="Ahorrado" totalLabel="Objetivo" status={metrics.status === 'completed' ? 'success' : metrics.overdue ? 'warning' : 'neutral'} statusLabel={metrics.status === 'completed' ? 'Completada' : metrics.overdue ? 'Plazo vencido' : 'En progreso'} />
         <div className="grid gap-2 text-sm sm:grid-cols-2">
