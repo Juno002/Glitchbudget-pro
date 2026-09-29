@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, CirclePause, CirclePlay, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { EmptyState, PlannedPaymentRow, StatusBadge } from '@/components/finance-ui';
 import { useTabs } from '@/contexts/tabs-context';
@@ -91,8 +91,8 @@ export default function SubscriptionsManager() {
 
   const handleAddSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const amountCents = Math.round(Number(newRule.amount) * 100);
-    if (!newRule.title.trim() || amountCents <= 0 || !newRule.categoryId || !newRule.startDate) return;
+    const amountCents = toCents(newRule.amount);
+    if (!newRule.title.trim() || !newRule.categoryId || !newRule.startDate) return;
 
     const success = await addRecurringRule({
       title: newRule.title.trim(),
