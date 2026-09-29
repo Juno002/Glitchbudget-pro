@@ -52,7 +52,7 @@ El backup JSON normal puede continuar disponible.
 
 # Iteraciones acordadas
 
-## 17.1 — Contrato de seguridad local
+## 17.1 — Contrato de seguridad local ✅
 
 Objetivo: fijar las fronteras de seguridad antes de implementar App lock.
 
@@ -237,11 +237,11 @@ Durante 17.1–17.5:
 # Estado actual
 
 ```text
-17.1 — Contrato de seguridad local        ⏳ siguiente
-17.2 — App lock                           ⏳ pendiente
+17.1 — Contrato de seguridad local        ✅ completado
+17.2 — App lock                           ⏳ siguiente
 17.3 — Auto-lock                          ⏳ pendiente
 17.4 — Backup cifrado                     ⏳ pendiente
 17.5 — Restore + hardening + gate final   ⏳ pendiente
 ```
 
-**Fase 17 no está iniciada todavía. 17.1 es el siguiente checkpoint autorizado cuando el usuario indique proceder.**
+**Fase 17 está en progreso. 17.1 quedó completado; 17.2 — App lock es el siguiente checkpoint.**
