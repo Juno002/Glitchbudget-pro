@@ -3,7 +3,7 @@ import { normalizeFinancialPolicies, type FinancialPolicies } from '@/policies/s
 
 export const DEFAULT_SETTINGS: Settings = {
   id: 'general',
-  theme: 'dark',
+  theme: 'light',
   preventNegativeAccountBalance: true,
   budgetOverspendingBehavior: 'block',
   rolloverStrategy: 'reset',
