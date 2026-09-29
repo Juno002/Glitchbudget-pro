@@ -8,20 +8,10 @@ import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, MetricCard, PageHeader, SectionHeader } from '@/components/finance-ui';
-import { cn } from '@/lib/utils';
 import { useTabs } from '@/contexts/tabs-context';
-
-const presets: Array<{ value:ReportRangePreset; label:string }> = [
-  { value:'7d', label:'7D' },
-  { value:'30d', label:'30D' },
-  { value:'3m', label:'3M' },
-  { value:'6m', label:'6M' },
-  { value:'1y', label:'1Y' },
-  { value:'custom', label:'Custom' },
-];
+import { ReportRangeControls } from './report-range-controls';
 
 function rangeLabel(start:string,end:string) {
   const formatter=new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric'});
@@ -77,38 +67,18 @@ export default function ReportsTab() {
         description="Spending, cash flow y patrimonio calculados desde los mismos selectors que usa Resumen."
       />
 
-      <section className="space-y-3" aria-labelledby="range-title">
-        <SectionHeader
-          title={<span id="range-title">Rango</span>}
-          description="El período anterior siempre usa una ventana inmediatamente anterior de duración comparable."
-        />
-        <div className="flex flex-wrap gap-2">
-          {presets.map(option=>(
-            <Button
-              key={option.value}
-              type="button"
-              size="sm"
-              variant={preset===option.value?'default':'outline'}
-              onClick={()=>setPreset(option.value)}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-        {preset==='custom' && (
-          <div className="grid max-w-xl gap-3 sm:grid-cols-2">
-            <label className="text-sm">Desde
-              <Input type="date" max={customEnd || today} value={customStart} onChange={event=>setCustomStart(event.target.value)} />
-            </label>
-            <label className="text-sm">Hasta
-              <Input type="date" min={customStart} max={today} value={customEnd} onChange={event=>setCustomEnd(event.target.value)} />
-            </label>
-          </div>
-        )}
-        <p className={cn('text-xs',rangeError?'text-bad':'text-muted-foreground')}>
-          {rangeError || 'Actual: '+currentLabel+' · Comparable: '+previousLabel}
-        </p>
-      </section>
+      <ReportRangeControls
+        preset={preset}
+        customStart={customStart}
+        customEnd={customEnd}
+        today={today}
+        rangeError={rangeError}
+        currentLabel={currentLabel}
+        previousLabel={previousLabel}
+        onPresetChange={setPreset}
+        onCustomStartChange={setCustomStart}
+        onCustomEndChange={setCustomEnd}
+      />
 
       {loading ? (
         <div className="h-40 animate-pulse rounded-xl bg-muted/20" />
