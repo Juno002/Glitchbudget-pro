@@ -105,7 +105,7 @@ Baseline vigente al cerrar Fase 20.2:
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
 - E2E: verificar shell desktop/móvil → crear ingreso → crear gasto → verificar Movimientos → recargar offline desde service worker;
-- Quality checks del PR **#45** verdes.
+- Quality checks **36645087940** verdes en el PR #45.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
