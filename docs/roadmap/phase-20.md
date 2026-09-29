@@ -25,6 +25,7 @@ Incluye:
 - Quality checks `36617612176`: 463/463 tests, build y E2E verdes.
 
 Esto no cierra 20.1: la matriz de paridad, el inventario visual y el inventario protegido de gráficos/sonidos/animaciones siguen pendientes.
+
 ## Objetivo
 
 Transformar GlitchBudget en el producto visual **Prisma** sin sustituir ni duplicar su motor financiero.
