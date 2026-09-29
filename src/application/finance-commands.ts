@@ -45,8 +45,10 @@ export async function deleteExpenseCommand(id: string) {
   await removeExpense(id);
 }
 
-export async function createAccountTransferCommand(transfer: Omit<AccountTransfer, 'id'>) {
-  await saveTransfer({ ...transfer, id: crypto.randomUUID() });
+export type AccountTransferDraft = Omit<AccountTransfer, 'id' | 'amount'> & { amount: number };
+
+export async function createAccountTransferCommand(transfer: AccountTransferDraft) {
+  await saveTransfer({ ...transfer, id: crypto.randomUUID(), amount: toCents(transfer.amount) });
 }
 
 export async function createGoalCommand(
