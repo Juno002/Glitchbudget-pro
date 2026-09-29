@@ -1,7 +1,5 @@
 'use client';
-import { selectPosition } from '@/domain/ledger';
 import { useState } from 'react';
-import { accountBalance, accountEntries } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Button } from '@/components/ui/button';
@@ -15,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useFinances } from '@/contexts/finance-context';
 import { useAccountOverviewData } from '@/hooks/use-finance-queries';
 import { useAccountManagement } from '@/hooks/use-account-management';
+import { selectAccountsOverviewModel } from '@/domain/dashboard-read-models';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
@@ -33,11 +32,11 @@ export default function AccountsOverview() {
   } = management;
   if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
-  const cards = data.debts.filter(d => d.type === 'credit_card');
-  const liquidAccounts = data.accounts.filter(a => a.type !== 'investment');
-  const { cash, bank, investmentAssets, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = selectPosition(data.accounts, data.debts, data, today);
-  const unassigned = data.incomes.filter(i => !i.accountId).length + data.expenses.filter(e => e.paymentMethod !== 'credit' && !e.accountId).length + data.payments.filter(p => !p.accountId).length;
-  const account = liquidAccounts.find(a => a.id === selected);
+  const overview = selectAccountsOverviewModel(data, today);
+  const { cards, liquidAccounts, unassignedCount: unassigned, accounts: accountViews } = overview;
+  const { cash, bank, investmentAssets, balances, liabilities: owed, cardPositiveBalance: credit, netWorth } = overview.position;
+  const accountView = accountViews.find(row => row.account.id === selected);
+  const account = accountView?.account;
   return <section className="rounded-2xl border bg-card p-4 space-y-4" aria-label="Cuentas y situación actual">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
@@ -108,12 +107,12 @@ export default function AccountsOverview() {
       {unassigned > 0 && <details className="rounded-xl border p-3 text-sm"><summary className="cursor-pointer font-medium">{unassigned} movimientos anteriores sin cuenta</summary><p className="mt-2 text-muted-foreground">Se conservan en los reportes, pero no modifican tus saldos. Incluye el dinero que te quedaba al comenzar el seguimiento en el saldo inicial de Efectivo (Ver cuentas y deuda → Efectivo → Ajustar saldo inicial). Si un movimiento posterior a esa fecha no está incluido en el saldo inicial, puedes editarlo en el historial y asignarle Efectivo. No vuelvas a registrar el ingreso: se contaría dos veces.</p></details>}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">{[['Inversiones registradas',investmentAssets],['Deuda de tarjetas',owed],['Saldo neto registrado',netWorth]].map(([label,value])=><div key={String(label)} className="rounded-xl border p-3 min-w-0"><p className="text-xs text-muted-foreground">{label}</p><p className="font-semibold break-words">{money(Number(value))}</p></div>)}</div>
       <p className="text-xs text-muted-foreground">El saldo neto incluye efectivo, bancos, inversiones al valor actualmente registrado y tarjetas. Las proyecciones futuras de rendimiento no se suman. El crédito disponible no es dinero propio. {credit > 0 && <>Saldo a favor en tarjetas: {money(credit)}.</>}</p>
-      <div className="grid sm:grid-cols-2 gap-2">{liquidAccounts.map(a=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex min-h-12 flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · {a.currency} · Desde {a.startDate}</span></span><strong>{money(accountBalance(a,data), a.currency)}</strong></button>)}</div>
+      <div className="grid sm:grid-cols-2 gap-2">{accountViews.map(({account:a,balance})=><button key={a.id} onClick={()=>setSelected(selected===a.id?'':a.id)} aria-expanded={selected===a.id} className="text-left flex min-h-12 flex-wrap justify-between gap-2 rounded-xl border p-3 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"><span className="break-words min-w-0">{a.name}<span className="block text-xs text-muted-foreground">{a.isDefaultCash ? 'Efectivo predeterminado' : a.type==='cash'?'Efectivo':'Banco'} · {a.currency} · Desde {a.startDate}</span></span><strong>{money(balance, a.currency)}</strong></button>)}</div>
       {balances.map(d=><p key={d.id} className="text-sm break-words">{d.name}: {d.signedBalance >= 0 ? 'deuda' : 'saldo a favor'} {money(Math.abs(d.signedBalance))}</p>)}
       {account && <div className="border-t pt-3 space-y-2"><DetailHeader
         title={account.name}
         subtitle={account.isDefaultCash ? 'Efectivo predeterminado' : account.type === 'cash' ? 'Efectivo' : 'Cuenta bancaria'}
-        amount={accountBalance(account,data)}
+        amount={accountView?.balance ?? 0}
         supporting={<>Saldo inicial: {money(account.openingBalance, account.currency)} · {account.currency} · Desde {account.startDate}</>}
         actions={<ActionMenu
           label={`Acciones de ${account.name}`}
@@ -130,7 +129,7 @@ export default function AccountsOverview() {
             },
           ]}
         />}
-      /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const transfer=data.transfers.find(item=>item.id===r.id);if(transfer)editTransfer(transfer);}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount, account.currency)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
+      /><h4 className="font-medium text-sm">Movimientos recientes</h4>{(accountView?.entries || []).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.transfer && <button className="block underline text-primary" onClick={()=>editTransfer(r.transfer!)}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount, account.currency)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>
     <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle>Saldo inicial de efectivo</DialogTitle><DialogDescription>Corrige solo el dinero que tenías al iniciar el seguimiento. Los ingresos y gastos registrados se calculan automáticamente.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitCashOpening(); }}><label className="block text-sm">{`Saldo inicial (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label><Button disabled={busy} type="submit">Guardar saldo inicial</Button></form></DialogContent></Dialog>
