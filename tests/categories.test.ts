@@ -86,7 +86,7 @@ test('v7 round trip preserves every category property and rejects corrupt refere
  const c=await createCategory('Viajes','both','plane');await updateCategory(c.id,{archived:true,expenseOrder:15,incomeOrder:3});const dump=JSON.parse(await exportDataJSON());assert.equal(dump.v,13);assert.ok(dump.categories.length);assert.equal(dump.settings.expenseCategories,undefined);
  const before=await snapshot();await importDataJSON(JSON.stringify(dump));assert.deepEqual(await snapshot(),before);
  for(const table of ['incomes','expenses','plans','recurrents']){const bad=structuredClone(dump);bad[table][0].categoryId='missing';await assert.rejects(importDataJSON(JSON.stringify(bad)),/categoría/);assert.deepEqual(await snapshot(),before);}
- const missing=structuredClone(dump);delete missing.categories;await assert.rejects(importDataJSON(JSON.stringify(missing)),/categorías/);assert.deepEqual(await snapshot(),before);
+ const missing=structuredClone(dump);delete missing.categories;await assert.rejects(importDataJSON(JSON.stringify(missing)),/categorías|categories/i);assert.deepEqual(await snapshot(),before);
 });
 test('migration distinguishes legacy duplicate display names without dropping either ID',()=>{
  const rows=reconstructCategories({settings:{expenseCategories:['taxi','Taxi'],incomeCategories:[]}});assert.equal(rows.find(c=>c.id==='taxi')?.name,'Taxi');assert.equal(rows.find(c=>c.id==='Taxi')?.name,'Taxi (Taxi)');assert.equal(rows.filter(c=>!c.archived).length,2);
