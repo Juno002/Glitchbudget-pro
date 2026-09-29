@@ -27,7 +27,8 @@ import {
 } from '@/lib/local-automation';
 import TransactionRuleManager from '@/components/settings/transaction-rule-manager';
 import AppLockSettings from '@/components/settings/app-lock-settings';
-import { APP_LOCK_STORAGE_KEY } from '@/domain/local-security';
+import AutoLockSettings from '@/components/settings/auto-lock-settings';
+import { APP_LOCK_STORAGE_KEY, AUTO_LOCK_STORAGE_KEY } from '@/domain/local-security';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
@@ -78,6 +79,7 @@ export function SettingsDialog() {
       clearLocalAutomation(localStorage);
       localStorage.removeItem(HOME_PREFERENCES_KEY);
       localStorage.removeItem(APP_LOCK_STORAGE_KEY);
+      localStorage.removeItem(AUTO_LOCK_STORAGE_KEY);
       await resetSettings();
       toast({ title:'Datos eliminados', description:'Todos los datos han sido borrados. La página se recargará.' });
       setTimeout(() => window.location.reload(), 1500);
@@ -287,10 +289,7 @@ export function SettingsDialog() {
               <div className="border-t pt-4">
                 <AppLockSettings />
               </div>
-              <div className="rounded-lg border p-3">
-                <p className="text-sm font-medium">Auto-lock</p>
-                <p className="mt-1 text-xs text-muted-foreground">Se implementará en 17.3 sobre App lock. Permanecerá desactivado mientras App lock esté desactivado.</p>
-              </div>
+              <AutoLockSettings />
               <div className="flex items-start gap-3 border-t pt-4">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div>

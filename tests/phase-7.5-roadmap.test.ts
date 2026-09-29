@@ -92,10 +92,11 @@ test('settings hierarchy includes roadmap sections without pretending future sec
   }
   assert.match(settings, /Moneda base/);
   assert.match(settings, /AppLockSettings/);
-  assert.match(settings, /Auto-lock/);
-  assert.match(settings, /Se implementará en 17\.3 sobre App lock/);
+  assert.match(settings, /AutoLockSettings/);
   const appLock = read('src/components/settings/app-lock-settings.tsx');
+  const autoLock = read('src/components/settings/auto-lock-settings.tsx');
   assert.match(appLock, /Bloqueo de aplicación/);
+  assert.match(autoLock, /Auto-lock/);
   assert.match(settings, /Zona destructiva/);
 });
 
