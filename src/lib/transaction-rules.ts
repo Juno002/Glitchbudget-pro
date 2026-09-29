@@ -3,7 +3,7 @@ import { normalizeTransactionRule, type TransactionRule } from '../domain/rules'
 type RuleStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 export const TRANSACTION_RULES_KEY = 'glitchbudget_transaction_rules_v1';
-const MAX_RULES = 50;
+export const TRANSACTION_RULES_MAX = 50;
 
 export function normalizeTransactionRules(value: unknown): TransactionRule[] {
   if (!Array.isArray(value)) return [];
@@ -16,7 +16,7 @@ export function normalizeTransactionRules(value: unknown): TransactionRule[] {
     if (!rule || ids.has(rule.id)) continue;
     ids.add(rule.id);
     rules.push(rule);
-    if (rules.length >= MAX_RULES) break;
+    if (rules.length >= TRANSACTION_RULES_MAX) break;
   }
 
   return rules;
