@@ -28,7 +28,7 @@ test('17.1 defines Hide amounts as presentation privacy, not encryption', () => 
 });
 
 test('17.1 freezes App lock and Auto-lock legacy behavior before implementation', () => {
-  assert.equal(LOCAL_SECURITY_CONTRACT.appLock.status, 'planned-17.2');
+  assert.equal(LOCAL_SECURITY_CONTRACT.appLock.status, 'implemented-17.2');
   assert.equal(LOCAL_SECURITY_CONTRACT.appLock.legacyDefault, 'disabled');
   assert.ok(LOCAL_SECURITY_CONTRACT.appLock.doesNotProtect.includes('dexie-at-rest'));
 
@@ -64,19 +64,18 @@ test('17.1 binds existing Hide amounts runtime to the canonical storage key and 
   assert.equal(BALANCE_VISIBILITY_STORAGE_KEY, 'glitchbudget_balances_hidden_v1');
 });
 
-test('17.1 UI states the boundaries and does not expose fake App lock or Auto-lock controls', () => {
+test('17.1 boundaries remain explicit after 17.2 implements App lock while Auto-lock stays pending', () => {
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
 
   assert.match(settings, /no cifra los datos almacenados ni los backups/i);
-  assert.match(settings, /bloqueo local de la interfaz/i);
-  assert.match(settings, /No se presentará como cifrado de Dexie/i);
+  assert.match(settings, /AppLockSettings/);
   assert.match(settings, /Se implementará en 17\.3 sobre App lock/i);
 
   const privacyBlock = settings.slice(
     settings.indexOf('<TabsContent value="privacy"'),
     settings.indexOf('<TabsContent value="data"'),
   );
-  assert.equal((privacyBlock.match(/type="checkbox"/g) || []).length, 1, 'solo Hide amounts tiene control funcional en 17.1');
+  assert.equal((privacyBlock.match(/type="checkbox"/g) || []).length, 1, 'Hide amounts sigue siendo el único checkbox; App lock usa PIN');
 });
 
 test('17.1 does not introduce lock persistence in Dexie or encrypted-backup behavior early', () => {
