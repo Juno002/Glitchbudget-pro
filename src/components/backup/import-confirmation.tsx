@@ -16,28 +16,31 @@ import type { BackupImportPreview } from '@/lib/backup-json';
 
 export function ImportConfirmation({
   file,
-  preview,
+  preview = null,
+  requirePreview = false,
   onCancel,
   onConfirm,
   scope,
 }: {
   file: File | null;
-  preview: BackupImportPreview | null;
+  preview?: BackupImportPreview | null;
+  requirePreview?: boolean;
   onCancel: () => void;
   onConfirm: () => Promise<void>;
   scope: string;
 }) {
   const [busy, setBusy] = useState(false);
   const locked = useRef(false);
+  const ready = !!file && (!requirePreview || !!preview);
 
   return (
-    <AlertDialog open={!!file && !!preview} onOpenChange={open => { if (!open && !locked.current) onCancel(); }}>
+    <AlertDialog open={ready} onOpenChange={open => { if (!open && !locked.current) onCancel(); }}>
       <AlertDialogContent aria-busy={busy}>
         <AlertDialogHeader>
           <AlertDialogTitle>¿Restaurar este archivo?</AlertDialogTitle>
           <AlertDialogDescription>
             Se reemplazarán {scope} con los datos de <span className="font-medium break-all">{file?.name}</span>.
-            Revisa el contenido validado antes de continuar.
+            {preview ? ' Revisa el contenido validado antes de continuar.' : ' Esta acción reemplaza los registros actuales del alcance indicado.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -46,9 +49,9 @@ export function ImportConfirmation({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Cancelar</AlertDialogCancel>
           <Button
-            disabled={busy || !preview}
+            disabled={busy || (requirePreview && !preview)}
             onClick={async () => {
-              if (locked.current || !preview) return;
+              if (locked.current || (requirePreview && !preview)) return;
               locked.current = true;
               setBusy(true);
               try {
@@ -59,7 +62,7 @@ export function ImportConfirmation({
               }
             }}
           >
-            {busy ? 'Restaurando…' : 'Confirmar y restaurar'}
+            {busy ? 'Restaurando…' : preview ? 'Confirmar y restaurar' : 'Restaurar datos'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
