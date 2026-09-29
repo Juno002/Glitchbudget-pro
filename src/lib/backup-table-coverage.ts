@@ -38,8 +38,8 @@ export const BACKUP_TABLE_NAMES = BACKUP_TABLE_COVERAGE.map(entry => entry.table
 export const BACKUP_TABLE_KEYS = BACKUP_TABLE_COVERAGE.map(entry => entry.backupKey);
 
 export function assertBackupTableCoverage(tableNames: readonly string[]): void {
-  const live = new Set(tableNames);
-  const covered = new Set(BACKUP_TABLE_NAMES);
+  const live = new Set<string>(tableNames);
+  const covered = new Set<string>(BACKUP_TABLE_NAMES);
 
   const missing = [...live].filter(name => !covered.has(name)).sort();
   const stale = [...covered].filter(name => !live.has(name)).sort();
