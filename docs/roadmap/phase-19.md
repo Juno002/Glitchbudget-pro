@@ -61,7 +61,7 @@ Debe:
 ## Estado
 
 ```text
-19.1 — Frontera UI → queries/services      ⏳ en ejecución
-19.2 — finance-context como fachada        ⏸ pendiente
+19.1 — Frontera UI → queries/services      ✅ completado
+19.2 — finance-context como fachada        ⏭ siguiente
 19.3 — Componentes + hardening + gate      ⏸ pendiente
 ```
