@@ -4,6 +4,10 @@ export const AUTO_LOCK_STORAGE_KEY = 'glitchbudget_auto_lock_v1';
 export const APP_LOCK_PIN_MIN_LENGTH = 6;
 export const APP_LOCK_PIN_MAX_LENGTH = 12;
 export const AUTO_LOCK_TIMEOUT_OPTIONS = [1, 5, 15, 30] as const;
+export const ENCRYPTED_BACKUP_FORMAT = 'GlitchBudget encrypted backup';
+export const ENCRYPTED_BACKUP_VERSION = 1;
+export const ENCRYPTED_BACKUP_PASSWORD_MIN_LENGTH = 8;
+export const ENCRYPTED_BACKUP_PASSWORD_MAX_LENGTH = 128;
 export type AutoLockTimeoutMinutes = typeof AUTO_LOCK_TIMEOUT_OPTIONS[number];
 
 export const LOCAL_SECURITY_CONTRACT = {
@@ -53,12 +57,17 @@ export const LOCAL_SECURITY_CONTRACT = {
     ],
   },
   encryptedBackup: {
-    status: 'planned-17.4-17.5',
+    status: 'export-implemented-17.4',
     optional: true,
+    format: ENCRYPTED_BACKUP_FORMAT,
+    version: ENCRYPTED_BACKUP_VERSION,
+    kdf: 'PBKDF2-SHA-256',
+    cipher: 'AES-256-GCM',
     crypto: 'web-crypto-authenticated',
     normalJsonRemainsAvailable: true,
     passwordStoredRemotely: false,
     passwordTransmitted: false,
+    restoreStatus: 'planned-17.5',
   },
 } as const;
 
