@@ -66,7 +66,7 @@ No asumir que una tabla nueva puede ignorarse porque esté vacía.
 
 ---
 
-## 18.3 — Preview y confirmación de import
+## 18.3 — Preview y confirmación de import ✅
 
 Objetivo: mostrar qué contiene el archivo **antes** de una restauración destructiva.
 
@@ -148,10 +148,10 @@ Durante 18.1–18.5:
 ```text
 18.1 — Contrato y versionado             ✅ completado
 18.2 — Cobertura automática de tablas    ✅ completado
-18.3 — Preview + confirmación             ⏳ siguiente
-18.4 — Backup OPFS pre-import            ⏳ pendiente
+18.3 — Preview + confirmación             ✅ completado
+18.4 — Backup OPFS pre-import            ⏳ siguiente
 18.5 — Migraciones + hardening + gate    ⏳ pendiente
 ```
 
 
-**Fase 18 está en progreso. 18.1–18.2 quedaron completados; 18.3 — Preview + confirmación de import es el siguiente checkpoint.**
+**Fase 18 está en progreso. 18.1–18.3 quedaron completados; 18.4 — Backup OPFS automático pre-import es el siguiente checkpoint.**
