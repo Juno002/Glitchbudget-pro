@@ -1,16 +1,23 @@
 # Roadmap: documentación vigente
 
-## Fase 16 — Automatización local completada
+## Fase 16 — Automatización local en progreso
 
-Fase 16 quedó cerrada contra `Roadmap septiembre 2026.txt` con **16.5 — Integración del stack de automatización local**, documentada en [phase-16-5.md](phase-16-5.md). Los checkpoints de contrato, motor, sugerencias y gestión permanecen en [phase-16-1.md](phase-16-1.md), [phase-16-2.md](phase-16-2.md), [phase-16-3.md](phase-16-3.md) y [phase-16-4.md](phase-16-4.md).
+La ejecución de Fase 16 está dividida en **siete iteraciones**, documentadas en [phase-16.md](phase-16.md).
 
-El orden canónico **Templates → Saved filters → Rules** queda visible y separado: Templates se gestionan en Quick Add, Saved filters en Movimientos y Rules en Ajustes → Automatización. `src/lib/local-automation.ts` coordina únicamente el resumen y la limpieza de sus tres storages; no fusiona formatos ni responsabilidades.
+**Completadas:** [16.1](phase-16-1.md) contrato de Rules, [16.2](phase-16-2.md) motor determinista, [16.3](phase-16-3.md) suggestions en Quick Add, [16.4](phase-16-4.md) gestión local y [16.5](phase-16-5.md) integración **Templates → Saved filters → Rules**.
 
-Rules permanecen deterministas y **suggestion-only** con **Aceptar sugerencia / Ignorar sugerencia**. No se implementa `Apply automatically`: el roadmap lo deja como posibilidad posterior, no como requisito de esta primera versión. No hay IA, red, transmisión de descripciones, tabla Dexie nueva ni cambio de backup.
+El orden canónico queda visible y separado: Templates se gestionan en Quick Add, Saved filters en Movimientos y Rules en Ajustes → Automatización. Rules siguen siendo deterministas y suggestion-only con **Aceptar sugerencia / Ignorar sugerencia**.
 
-El gate `Quality checks` run `36500337917` verificó **327/327 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
+**Pendientes obligatorios antes de cerrar la fase:**
 
-**Estado actual del roadmap:** Fase 16 completada. La siguiente fase canónica es **Fase 17 — Seguridad y privacidad local**, todavía no iniciada.
+- **16.6 — Apply automatically opcional:** opt-in explícito por rule; nunca global implícito.
+- **16.7 — Hardening + gate:** conflictos, precedencia, legacy, backup/export si aplica, pruebas, documentación y cierre formal.
+
+Durante toda Fase 16 se mantienen dos invariantes: **cero IA** y **cero transmisión de descripciones**. La evaluación y automatización permanecen locales.
+
+El gate de 16.5 (`36500337917`) verificó **327/327 pruebas**, typecheck, lint, guard local-only y build estático; eso cierra **16.5**, no Fase 16.
+
+**Estado actual del roadmap:** Fase 16 en progreso. **16.6 es el siguiente checkpoint. Fase 17 no se ha iniciado.**
 
 ## Fase 15 — Transaction Metadata + filtros completada
 
