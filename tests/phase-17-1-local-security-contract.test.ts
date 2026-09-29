@@ -45,8 +45,8 @@ test('17.1 legacy security defaults remain frozen after App lock and Auto-lock i
 
 test('17.1 keeps encrypted backup separate, optional and local', () => {
   const backup = LOCAL_SECURITY_CONTRACT.encryptedBackup;
-  assert.equal(backup.status, 'export-implemented-17.4');
-  assert.equal(backup.restoreStatus, 'planned-17.5');
+  assert.equal(backup.status, 'implemented-17.5');
+  assert.equal(backup.restoreStatus, 'implemented-17.5');
   assert.equal(backup.optional, true);
   assert.equal(backup.crypto, 'web-crypto-authenticated');
   assert.equal(backup.normalJsonRemainsAvailable, true);
