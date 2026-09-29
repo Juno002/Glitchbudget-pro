@@ -42,6 +42,7 @@ import {
 import { ImportConfirmation } from './import-confirmation';
 import CsvBackupDialog from './csv-backup-dialog';
 import EncryptedBackupExport from './encrypted-backup-export';
+import EncryptedBackupRestore from './encrypted-backup-restore';
 
 export default function OpfsBackupDialog() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -169,6 +170,7 @@ export default function OpfsBackupDialog() {
                 Exportar a JSON
             </Button>
             <EncryptedBackupExport />
+            <EncryptedBackupRestore />
             <CsvBackupDialog />
         </div>
         

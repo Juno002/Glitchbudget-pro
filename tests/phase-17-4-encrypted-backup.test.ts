@@ -55,7 +55,7 @@ async function decryptForTest(envelope: EncryptedBackupEnvelopeV1, password: str
 
 test('17.4 freezes a versioned authenticated encrypted-backup envelope', () => {
   const contract = LOCAL_SECURITY_CONTRACT.encryptedBackup;
-  assert.equal(contract.status, 'export-implemented-17.4');
+  assert.equal(contract.status, 'implemented-17.5');
   assert.equal(contract.format, ENCRYPTED_BACKUP_FORMAT);
   assert.equal(contract.version, ENCRYPTED_BACKUP_VERSION);
   assert.equal(contract.kdf, 'PBKDF2-SHA-256');
@@ -65,7 +65,7 @@ test('17.4 freezes a versioned authenticated encrypted-backup envelope', () => {
   assert.equal(contract.normalJsonRemainsAvailable, true);
   assert.equal(contract.passwordStoredRemotely, false);
   assert.equal(contract.passwordTransmitted, false);
-  assert.equal(contract.restoreStatus, 'planned-17.5');
+  assert.equal(contract.restoreStatus, 'implemented-17.5');
 });
 
 test('17.4 validates password length without trimming or persisting it', () => {
@@ -122,7 +122,7 @@ test('17.4 serialized export contains roadmap fields and remains separate from n
   assert.doesNotMatch(normalBackup, /AES-GCM|ciphertext|ENCRYPTED_BACKUP_FORMAT/);
 });
 
-test('17.4 UI keeps plain JSON available and adds encrypted export without encrypted restore early', () => {
+test('17.4 export remains available after 17.5 layers encrypted restore separately', () => {
   const dialog = readFileSync(new URL('../src/components/backup/opfs-backup-dialog.tsx', import.meta.url), 'utf8');
   const encryptedUi = readFileSync(new URL('../src/components/backup/encrypted-backup-export.tsx', import.meta.url), 'utf8');
 
@@ -132,8 +132,8 @@ test('17.4 UI keeps plain JSON available and adds encrypted export without encry
   assert.match(encryptedUi, /Crear backup cifrado/);
   assert.match(encryptedUi, /\.gbenc/);
   assert.match(encryptedUi, /La contraseña no se envía ni se guarda/);
-  assert.match(encryptedUi, /restauración de archivos \.gbenc se incorpora en 17\.5/);
-  assert.doesNotMatch(dialog, /Restaurar desde \.gbenc|Restaurar cifrado/);
+  assert.match(encryptedUi, /restauración cifrada está disponible/i);
+  assert.match(dialog, /EncryptedBackupRestore/);
 });
 
 test('17.4 crypto implementation is Web Crypto only and has no network or credential storage', () => {

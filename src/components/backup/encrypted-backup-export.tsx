@@ -138,7 +138,7 @@ export default function EncryptedBackupExport() {
         Mínimo {ENCRYPTED_BACKUP_PASSWORD_MIN_LENGTH} caracteres. Si pierdes la contraseña, el archivo no podrá recuperarse.
       </p>
       <p className="text-xs text-muted-foreground">
-        En 17.4 solo se añade la exportación cifrada; la restauración de archivos .gbenc se incorpora en 17.5.
+        Guarda la contraseña junto con el archivo. La restauración cifrada está disponible desde la misma sección de backups.
       </p>
 
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}

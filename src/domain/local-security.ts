@@ -57,7 +57,7 @@ export const LOCAL_SECURITY_CONTRACT = {
     ],
   },
   encryptedBackup: {
-    status: 'export-implemented-17.4',
+    status: 'implemented-17.5',
     optional: true,
     format: ENCRYPTED_BACKUP_FORMAT,
     version: ENCRYPTED_BACKUP_VERSION,
@@ -67,7 +67,7 @@ export const LOCAL_SECURITY_CONTRACT = {
     normalJsonRemainsAvailable: true,
     passwordStoredRemotely: false,
     passwordTransmitted: false,
-    restoreStatus: 'planned-17.5',
+    restoreStatus: 'implemented-17.5',
   },
 } as const;
 
