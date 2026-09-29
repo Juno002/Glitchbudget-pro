@@ -1,18 +1,21 @@
 # Roadmap: documentación vigente
 
-## Fase 17 — Seguridad y privacidad local planificada
+## Fase 17 — Seguridad y privacidad local en progreso
 
-La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 se acordó en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md), sin redefinir el alcance del roadmap:
+La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 está dividida en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md).
 
-1. **17.1 — Contrato de seguridad local**
-2. **17.2 — App lock**
-3. **17.3 — Auto-lock**
-4. **17.4 — Backup cifrado**
-5. **17.5 — Restore cifrado + hardening + gate final**
+**17.1 — Contrato de seguridad local** quedó completado en [phase-17-1.md](phase-17-1.md). El contrato separa explícitamente privacidad frente a servidores de privacidad frente a otra persona usando el dispositivo:
 
-`Hide amounts` ya existe y sirve como base. App lock y Auto-lock todavía no están implementados. El roadmap exige distinguir bloqueo de UI de cifrado de Dexie, mantener el backup JSON normal disponible y añadir backup cifrado opcional con Web Crypto, autenticación criptográfica y formato versionado.
+- **Hide amounts** = privacidad visual; no cifra Dexie ni backups.
+- **App lock** = bloqueo local de UI, planificado para 17.2; no equivale a cifrado de Dexie.
+- **Auto-lock** = control de sesión sobre App lock, planificado para 17.3.
+- **Backup cifrado** = protección separada y opcional, reservada para 17.4–17.5.
 
-**Estado actual:** Fase 17 todavía no iniciada. **17.1 es el siguiente checkpoint.** No avanzar a Fase 18 antes de completar 17.5 y su gate.
+Los defaults legacy quedan congelados en OFF para Hide amounts/App lock/Auto-lock cuando no existe configuración previa. No hay cambios de schema: Dexie sigue en **v14** y el backup JSON normal en **v12**.
+
+El gate de 17.1 (`36506480694`) verificó **347/347 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+
+**Estado actual:** Fase 17 en progreso. **17.2 — App lock es el siguiente checkpoint.** 17.3–17.5 permanecen pendientes. No avanzar a Fase 18 antes de completar 17.5 y su gate.
 
 ## Fase 16 — Automatización local completada
 

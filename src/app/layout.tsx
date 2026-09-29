@@ -7,6 +7,7 @@ import { MotionPreferences } from '@/components/motion-preferences';
 import { PWARegistration } from '@/components/pwa-registration';
 import { VisibleViewport } from '@/components/visible-viewport';
 import { BalanceVisibilityProvider } from '@/contexts/balance-visibility-context';
+import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
 
 const syne = Syne({ 
   subsets: ['latin'], 
@@ -36,7 +37,7 @@ export default function RootLayout({
       <head>
         {process.env.NODE_ENV === 'production' && <meta httpEquiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'" />}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <script dangerouslySetInnerHTML={{ __html: "try{document.documentElement.dataset.balancesHidden=localStorage.getItem('glitchbudget_balances_hidden_v1')==='1'?'true':'false'}catch{document.documentElement.dataset.balancesHidden='false'}" }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{document.documentElement.dataset.balancesHidden=localStorage.getItem('${BALANCE_VISIBILITY_STORAGE_KEY}')==='1'?'true':'false'}catch{document.documentElement.dataset.balancesHidden='false'}` }} />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0d0d0d" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

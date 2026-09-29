@@ -6,8 +6,10 @@ const read = (path: string) => readFileSync(new URL('../' + path, import.meta.ur
 
 test('hide balances is a local UI preference and does not enter the financial database', () => {
   const visibility = read('src/contexts/balance-visibility-context.tsx');
+  const contract = read('src/domain/local-security.ts');
   assert.match(visibility, /localStorage/);
-  assert.match(visibility, /glitchbudget_balances_hidden_v1/);
+  assert.match(visibility, /BALANCE_VISIBILITY_STORAGE_KEY/);
+  assert.match(contract, /glitchbudget_balances_hidden_v1/);
   assert.doesNotMatch(visibility, /from ['"]@\/lib\/db['"]/);
   assert.doesNotMatch(visibility, /fetch\(/);
 

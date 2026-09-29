@@ -3,8 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { formatCurrency } from '@/lib/utils';
 import { useFinances } from '@/contexts/finance-context';
-
-const STORAGE_KEY = 'glitchbudget_balances_hidden_v1';
+import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
 
 type BalanceVisibilityContextValue = {
   balancesHidden: boolean;
@@ -20,7 +19,7 @@ export function BalanceVisibilityProvider({ children }: { children: ReactNode })
   const apply = useCallback((value: boolean) => {
     setHiddenState(value);
     try {
-      localStorage.setItem(STORAGE_KEY, value ? '1' : '0');
+      localStorage.setItem(BALANCE_VISIBILITY_STORAGE_KEY, value ? '1' : '0');
     } catch {}
     document.documentElement.dataset.balancesHidden = value ? 'true' : 'false';
     document.documentElement.dataset.balancesReady = 'true';
@@ -28,11 +27,11 @@ export function BalanceVisibilityProvider({ children }: { children: ReactNode })
 
   useEffect(() => {
     let hidden = false;
-    try { hidden = localStorage.getItem(STORAGE_KEY) === '1'; } catch {}
+    try { hidden = localStorage.getItem(BALANCE_VISIBILITY_STORAGE_KEY) === '1'; } catch {}
     apply(hidden);
 
     const onStorage = (event: StorageEvent) => {
-      if (event.key === STORAGE_KEY) apply(event.newValue === '1');
+      if (event.key === BALANCE_VISIBILITY_STORAGE_KEY) apply(event.newValue === '1');
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);

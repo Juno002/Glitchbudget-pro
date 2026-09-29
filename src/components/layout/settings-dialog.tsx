@@ -271,7 +271,7 @@ export function SettingsDialog() {
               <label className="flex items-start justify-between gap-4">
                 <span>
                   <span className="block font-medium">Ocultar importes</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador.</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador; no cifra los datos almacenados ni los backups.</span>
                 </span>
                 <input
                   type="checkbox"
@@ -284,11 +284,11 @@ export function SettingsDialog() {
               <div className="grid gap-3 border-t pt-4 sm:grid-cols-2">
                 <div className="rounded-lg border p-3">
                   <p className="text-sm font-medium">Bloqueo de aplicación</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Reservado para Fase 17 — Seguridad y privacidad UX.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Se implementará en 17.2 como bloqueo local de la interfaz. No se presentará como cifrado de Dexie.</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <p className="text-sm font-medium">Auto-lock</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Reservado para Fase 17; no se muestra un control falso antes de existir el comportamiento.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Se implementará en 17.3 sobre App lock. Permanecerá desactivado mientras App lock no exista o esté desactivado.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 border-t pt-4">
