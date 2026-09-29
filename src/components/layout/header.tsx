@@ -24,7 +24,9 @@ export default function Header() {
     <>
       <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-[1280px] flex-wrap items-center gap-2 px-4 py-3 sm:px-6 md:min-h-[68px] md:flex-nowrap lg:px-10">
-          <a href="/" className="flex min-w-0 items-center gap-2 md:hidden" aria-label="GlitchBudget Pro">
+          {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+      <a href="/" className="flex min-w-0 items-center gap-2 md:hidden" aria-label="GlitchBudget Pro">
             <BrandMark className="h-7 w-7 rounded-[9px] p-[6px]" />
             <span className="truncate font-headline text-[1.05rem] leading-none tracking-[-0.03em]">GlitchBudget Pro</span>
           </a>
