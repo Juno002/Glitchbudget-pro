@@ -3,8 +3,6 @@
 import { useMemo, useState } from 'react';
 import { useInvestmentManagerData } from '@/hooks/use-finance-queries';
 import { createInvestment } from '@/lib/investments';
-import { investmentProjection } from '@/domain/investments';
-import { accountBalance } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
@@ -17,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AccountSelect } from './account-select';
 import { EmptyState } from '@/components/finance-ui';
 import { Landmark, Plus } from 'lucide-react';
+import { selectInvestmentManagerRows } from '@/domain/dashboard-read-models';
 
 const typeLabels = {
   certificate:'Certificado financiero',
@@ -58,27 +57,10 @@ export default function InvestmentsManager() {
     setAnnualRate(''); setCompounding('simple'); setSource(''); setNotes('');
   };
 
-  const rows = useMemo(() => {
-    if (!data) return [];
-    return [...data.investments].sort((a,b) =>
-      (a.maturityDate || '9999-12-31').localeCompare(b.maturityDate || '9999-12-31') ||
-      a.name.localeCompare(b.name,'es')
-    ).map(investment => {
-      const account = data.accounts.find(a => a.id === investment.accountId);
-      if (!account) return null;
-      return {
-        investment,
-        account,
-        currentValue:accountBalance(account,data,today),
-        projection:investmentProjection(investment,today),
-      };
-    }).filter(Boolean) as Array<{
-      investment:(typeof data.investments)[number];
-      account:(typeof data.accounts)[number];
-      currentValue:number;
-      projection:ReturnType<typeof investmentProjection>;
-    }>;
-  }, [data,today]);
+  const rows = useMemo(
+    () => data ? selectInvestmentManagerRows(data, today) : [],
+    [data, today],
+  );
 
   const submit = async (event:React.FormEvent) => {
     event.preventDefault();
