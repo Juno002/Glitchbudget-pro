@@ -595,7 +595,7 @@ export async function importDataJSON(
     savedFilters: automationCounts.savedFilters.length,
     rules: automationCounts.rules.length,
   }};
-
+}
 
 function validateCategoryReferences(data: {
   incomes: Array<{ categoryId:string }>;
