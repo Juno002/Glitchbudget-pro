@@ -222,12 +222,16 @@ Criterios demostrados:
 - cambiar tema/shell no crea ni recalcula datos financieros;
 - hide amounts, security y reduced motion siguen presentes;
 - browser E2E cubre desktop + mobile + mutación financiera + offline;
-- `npm run check`, `npm run build` y `npm run test:e2e` deben permanecer verdes en el commit final del PR #45.
+- `npm run check`, `npm run build` y `npm run test:e2e` quedaron verdes en Quality checks `36645087940` del PR #45.
 
 Baseline funcional:
 
 ```text
 472/472 tests
+Quality checks 36645087940 ✅
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
