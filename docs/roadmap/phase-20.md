@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **planificado / no iniciado**.
+Estado: **20.1 en curso — preflight técnico completado; contrato visual e inventario de paridad pendientes**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -12,6 +12,19 @@ main @ dc4310040f42cefd74cf41bad75152902e549c24
 ```
 
 La referencia Prisma se utiliza **solo como fuente visual**. Su dominio, commands, persistencia, backup, servidor y roadmap técnico no forman parte de la implementación final.
+
+## Preflight técnico de 20.1
+
+El hardening previo está **completado** y documentado en [phase-20-1-preflight.md](phase-20-1-preflight.md).
+
+Incluye:
+
+- browser persistent storage awareness/request;
+- 1 200 escenarios deterministas de propiedades del ledger;
+- browser E2E real sobre la build estática y recarga offline;
+- Quality checks `36617612176`: 463/463 tests, build y E2E verdes.
+
+Esto no cierra 20.1: la matriz de paridad, el inventario visual y el inventario protegido de gráficos/sonidos/animaciones siguen pendientes.
 
 ## Objetivo
 
@@ -322,6 +335,7 @@ Cada etapa requiere:
 ```text
 npm run check
 npm run build
+npm run test:e2e
 ```
 
 y debe reportar:

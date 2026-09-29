@@ -2516,6 +2516,8 @@ Documentar cualquier excepción deliberada. Si una excepción contiene semántic
 
 # FASE 20 — Modo Prisma / transformación visual y branding
 
+Estado: **20.1 en curso — preflight técnico completado; contrato visual e inventario de paridad pendientes**.
+
 ## Objetivo
 
 Transformar la interfaz de GlitchBudget en el producto visual **Prisma** sin sustituir, duplicar ni reinterpretar el motor financiero cerrado en Fase 19.5.
@@ -2574,6 +2576,31 @@ Encrypted envelope v1
 ```
 
 Si una etapa puramente visual parece requerir una migración financiera o cambio de schema, detenerse y revisar antes de implementar.
+
+### Preflight técnico de 20.1 — completado
+
+Antes del inventario visual se ejecutó un hardening técnico para proteger la transición de interfaz:
+
+- awareness y solicitud explícita de browser persistent storage mediante `navigator.storage.persisted()` / `persist()`;
+- suite determinista de propiedades del ledger con 1 200 escenarios generados;
+- browser E2E real sobre la build estática: crear ingreso, crear gasto, verificar Movimientos y recargar offline desde el service worker;
+- el E2E falla ante requests HTTP(S) a un origen externo durante el recorrido.
+
+Evidencia:
+
+```text
+PR #42
+merge addb91ccd93207f64cfbf8c6a3f883f01dec3be7
+Quality checks 36617612176
+463/463 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+```
+
+Este preflight **no cierra 20.1**. El contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones siguen siendo requisitos del Gate 20.1.
+
+No hubo cambio de schema, formato de backup ni semántica financiera.
 
 ## 20.1 — Contrato visual + inventario de paridad
 
@@ -2757,6 +2784,17 @@ Y además:
 - ningún dato hardcoded de la maqueta Prisma presentado como dato real.
 
 Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostrar paridad.
+
+
+### Gate adicional vigente desde Fase 20
+
+Además del Definition of Done general, Fase 20 exige:
+
+```text
+npm run test:e2e
+```
+
+El browser E2E se ejecuta después de `npm run build` sobre la salida estática y no reemplaza los tests de dominio/integración.
 
 # Definition of Done obligatoria para CADA fase
 
