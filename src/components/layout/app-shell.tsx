@@ -41,6 +41,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         type="button"
         onClick={() => setComposerOpen(true)}
         aria-label="Nuevo movimiento"
+        data-shell-fab="mobile"
         className="fixed right-4 z-40 grid h-12 w-12 place-items-center rounded-full bg-[hsl(var(--brand-coral))] text-white shadow-[var(--shadow-floating)] transition-[transform,box-shadow] duration-[var(--motion-standard)] bottom-[calc(env(safe-area-inset-bottom,0px)+5.4rem)] hover:shadow-[var(--shadow-floating-strong)] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden"
       >
         <Plus className="h-5 w-5" />
