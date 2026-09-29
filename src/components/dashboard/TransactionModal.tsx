@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, BookmarkPlus, ChevronDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
-import { NECESSITY_LABELS, parseTransactionLabelsInput } from '@/domain/transaction-metadata';
+import { parseTransactionLabelsInput } from '@/domain/transaction-metadata';
 import { evaluateTransactionRules, type RuleMatch } from '@/domain/rule-engine';
 import { quickAddRuleSuggestions, resolveAutomaticRuleSuggestion } from '@/domain/rule-suggestions';
 import type { TransactionRule } from '@/domain/rules';
@@ -26,6 +26,7 @@ import {
   type QuickAddTemplate,
   type QuickAddTransactionType,
 } from '@/lib/quick-add-templates';
+import { QuickAddTemplateSave, QuickAddTemplateSelector, TransactionRuleSuggestions } from './transaction-modal-automation';
 
 interface TransactionModalProps {
   open: boolean;
@@ -406,24 +407,13 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             </div>
           </motion.div>
 
-          {!isEditing && templates.length > 0 && (
-            <div className="border-b px-6 py-3">
-              <div className="flex items-center gap-2">
-                <label htmlFor="quick-add-template" className="sr-only">Usar plantilla</label>
-                <select
-                  id="quick-add-template"
-                  value={selectedTemplateId}
-                  onChange={event => handleTemplateSelection(event.target.value)}
-                  className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
-                >
-                  <option value="">Usar plantilla…</option>
-                  {templates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
-                </select>
-                <Button type="button" variant="ghost" size="sm" disabled={!selectedTemplateId} onClick={handleDeleteTemplate}>
-                  Eliminar
-                </Button>
-              </div>
-            </div>
+          {!isEditing && (
+            <QuickAddTemplateSelector
+              templates={templates}
+              selectedTemplateId={selectedTemplateId}
+              onSelect={handleTemplateSelection}
+              onDelete={handleDeleteTemplate}
+            />
           )}
 
           <div className="space-y-4 px-6 py-5">
@@ -526,55 +516,16 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       />
                     </label>
 
-                    {!isEditing && automaticRuleId && automaticRuleSuggestion && (
-                      <div className="rounded-lg border bg-muted/20 p-3 text-xs" aria-label="Regla aplicada automáticamente">
-                        <p className="font-medium">Aplicado automáticamente · {automaticRuleSuggestion.ruleName}</p>
-                        <p className="mt-1 text-muted-foreground">
-                          Solo rellenó la clasificación de Quick Add. Puedes cambiar estos campos antes de guardar.
-                        </p>
-                      </div>
-                    )}
-
-                    {!isEditing && ruleResolution.hasAutomaticConflict && (
-                      <div className="rounded-lg border bg-muted/20 p-3 text-xs" role="status">
-                        <p className="font-medium">Varias reglas automáticas coinciden</p>
-                        <p className="mt-1 text-muted-foreground">
-                          No se aplicó ninguna automáticamente. Elige una sugerencia manualmente.
-                        </p>
-                      </div>
-                    )}
-
-                    {!isEditing && ruleSuggestions.length > 0 && (
-                      <div className="space-y-2 rounded-lg border bg-muted/20 p-3" aria-label="Sugerencias de reglas">
-                        <div>
-                          <p className="text-sm font-medium">Sugerencias de reglas</p>
-                          <p className="text-xs text-muted-foreground">Nada cambia hasta que aceptes una sugerencia.</p>
-                        </div>
-                        {ruleSuggestions.map(match => {
-                          const suggestedCategory = match.suggestion.categoryId
-                            ? getCategoryInfo(match.suggestion.categoryId)?.name || match.suggestion.categoryId
-                            : null;
-                          const suggestedNecessity = match.suggestion.necessity
-                            ? NECESSITY_LABELS[match.suggestion.necessity]
-                            : null;
-                          return (
-                            <div key={match.ruleId} className="rounded-md border bg-background p-3">
-                              <p className="text-xs font-medium">{match.ruleName}</p>
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {[suggestedCategory && `Categoría: ${suggestedCategory}`, suggestedNecessity && `Necesidad: ${suggestedNecessity}`].filter(Boolean).join(' · ')}
-                              </p>
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                <Button type="button" size="sm" variant="outline" aria-label={`Aceptar sugerencia ${match.ruleName}`} onClick={() => acceptRuleSuggestion(match)}>
-                                  Aceptar sugerencia
-                                </Button>
-                                <Button type="button" size="sm" variant="ghost" aria-label={`Ignorar sugerencia ${match.ruleName}`} onClick={() => dismissRuleSuggestion(match.ruleId)}>
-                                  Ignorar sugerencia
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                    {!isEditing && (
+                      <TransactionRuleSuggestions
+                        automaticRuleId={automaticRuleId}
+                        automaticRuleSuggestion={automaticRuleSuggestion}
+                        hasAutomaticConflict={ruleResolution.hasAutomaticConflict}
+                        ruleSuggestions={ruleSuggestions}
+                        categoryName={id => getCategoryInfo(id)?.name || id}
+                        onAccept={acceptRuleSuggestion}
+                        onDismiss={dismissRuleSuggestion}
+                      />
                     )}
 
                     {txType === 'expense' && (
@@ -678,23 +629,12 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 )}
 
                 {!isEditing && (
-                  <div className="space-y-2 border-t pt-4">
-                    <span className="text-sm font-medium">Plantilla</span>
-                    <p className="text-xs text-muted-foreground">Guarda estos valores para reutilizarlos. La fecha siempre se restablece al día en que uses la plantilla.</p>
-                    <div className="flex gap-2">
-                      <Input
-                        aria-label="Nombre de plantilla"
-                        placeholder="Ej. Bus"
-                        value={templateName}
-                        onChange={event => setTemplateName(event.target.value)}
-                        maxLength={80}
-                      />
-                      <Button type="button" variant="outline" disabled={!templateReady || !templateName.trim()} onClick={handleSaveTemplate}>
-                        <BookmarkPlus className="mr-2 h-4 w-4" />
-                        Guardar como plantilla
-                      </Button>
-                    </div>
-                  </div>
+                  <QuickAddTemplateSave
+                    templateName={templateName}
+                    templateReady={templateReady}
+                    onNameChange={setTemplateName}
+                    onSave={handleSaveTemplate}
+                  />
                 )}
               </div>
             </details>

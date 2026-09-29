@@ -105,7 +105,7 @@ test('16.6 refuses to invent precedence when multiple automatic rules match', ()
 
 test('16.6 UI makes opt-in explicit per rule and automatic application only fills Quick Add classification', () => {
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
-  const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const modal = [readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8'), readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx', import.meta.url), 'utf8')].join('\n');
   const context = readFileSync(new URL('../src/contexts/finance-context.tsx', import.meta.url), 'utf8');
   const db = readFileSync(new URL('../src/lib/db.ts', import.meta.url), 'utf8');
 
@@ -129,6 +129,7 @@ test('16.6 remains local, deterministic and does not transmit descriptions or in
     '../src/lib/transaction-rules.ts',
     '../src/components/settings/transaction-rule-manager.tsx',
     '../src/components/dashboard/TransactionModal.tsx',
+    '../src/components/dashboard/transaction-modal-automation.tsx',
   ].map(path => readFileSync(new URL(path, import.meta.url), 'utf8')).join('\n');
 
   assert.doesNotMatch(files, /fetch\s*\(|axios|XMLHttpRequest|WebSocket|EventSource|sendBeacon|https?:\/\//i);

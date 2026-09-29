@@ -1,22 +1,26 @@
 # Roadmap: documentación vigente
 
-## Fase 19 — Technical-debt closure en ejecución
+## Fase 19 — Technical-debt closure completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 
-Fase 19 se divide en tres checkpoints documentados en [phase-19.md](phase-19.md).
+Fase 19 quedó cerrada en tres checkpoints documentados en [phase-19.md](phase-19.md):
 
-- [19.1](phase-19-1.md) — frontera UI → queries/services: **completado**.
-- [19.2](phase-19-2.md) — `finance-context.tsx` como fachada: **completado**.
-- 19.3 — componentes grandes + hardening + gate final: siguiente.
+- [19.1](phase-19-1.md) — frontera UI → queries/services: **completado**;
+- [19.2](phase-19-2.md) — `finance-context.tsx` como fachada: **completado**;
+- [19.3](phase-19-3.md) — componentes grandes + hardening + gate final: **completado**.
 
-19.1 eliminó los accesos directos a Dexie desde `src/components` y `src/app`, encapsuló lecturas reactivas y el reset explícito detrás de hooks/services, y añadió un guard permanente de ESLint + regresión automática.
+19.1 eliminó los accesos directos a Dexie desde `src/components` y `src/app` y añadió guards permanentes.
 
-19.2 retiró de `finance-context.tsx` el acceso directo a Dexie, settings persistence, deuda persistente y todo el subsistema de backup/restore/OPFS. El contexto conserva su API pública, pero ahora compone hooks/services/selectors. El gate final `36590179498` verificó **424/424 pruebas**, typecheck, lint, guard local-only y build estático; `connect-src 'none'` continúa presente en cada HTML.
+19.2 retiró de `finance-context.tsx` el acceso directo a Dexie, settings persistence, deuda persistente y el subsistema de backup/restore/OPFS, conservando la API pública de `useFinances()`.
 
-Persistencia sin cambios: **Dexie v14 / JSON v13**. No se modificaron fórmulas financieras.
+19.3 extrajo responsabilidades independientes de `TransactionModal`, `ReportsTab` y `AccountsOverview`; `GoalsManager` fue auditado y se mantuvo cohesivo para evitar fragmentación artificial.
 
-**Estado actual:** 19.1 y 19.2 cerradas. La siguiente etapa es **19.3 — componentes grandes + hardening + gate final**.
+El gate final de código `36592149312` verificó **426/426 pruebas**, typecheck, lint, guards arquitectónicos/local-only y build estático. `connect-src 'none'` continúa presente en cada HTML.
+
+Persistencia e invariantes permanecen sin cambios: **Dexie v14 / JSON v13 / encrypted envelope v1** y ninguna fórmula financiera nueva.
+
+**Estado actual:** Fase 19 completada. La siguiente fase canónica es **Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate**, todavía no iniciada.
 
 
 ## Fase 18 — Backup 2.0 y migraciones permanentes completada

@@ -89,7 +89,7 @@ test('16.4 preserves explicit order and supports enable, reorder and delete', ()
 test('16.4 exposes explicit local rule management and Quick Add consumes persisted rules', () => {
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
-  const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const modal = [readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8'), readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx', import.meta.url), 'utf8')].join('\n');
   const automation = readFileSync(new URL('../src/lib/local-automation.ts', import.meta.url), 'utf8');
   const db = readFileSync(new URL('../src/lib/db.ts', import.meta.url), 'utf8');
 
@@ -109,7 +109,7 @@ test('16.4 exposes explicit local rule management and Quick Add consumes persist
 test('16.4 management remains local and deterministic while legacy rules stay manual by default', () => {
   const storage = readFileSync(new URL('../src/lib/transaction-rules.ts', import.meta.url), 'utf8');
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
-  const modal = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  const modal = [readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8'), readFileSync(new URL('../src/components/dashboard/transaction-modal-automation.tsx', import.meta.url), 'utf8')].join('\n');
   const combined = [storage, manager, modal].join('\n');
 
   const legacy = loadTransactionRules(memoryStorage(JSON.stringify([spotifyRule])))[0];

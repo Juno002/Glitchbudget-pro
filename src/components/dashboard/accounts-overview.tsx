@@ -1,12 +1,9 @@
 'use client';
 import { selectPosition } from '@/domain/ledger';
-import { useRef, useState } from 'react';
-import { accountBalance, accountEntries, addAccount, saveTransfer, debtBalance, reconcileDebt } from '@/lib/accounts';
+import { useState } from 'react';
+import { accountBalance, accountEntries } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
-import { toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { friendlyError } from '@/lib/errors';
-import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -17,35 +14,23 @@ import { Pencil, Settings2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFinances } from '@/contexts/finance-context';
 import { useAccountOverviewData } from '@/hooks/use-finance-queries';
+import { useAccountManagement } from '@/hooks/use-account-management';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
   const { currency } = useFinances();
   const data = useAccountOverviewData();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const locked = useRef(false);
-  const [editingAccount, setEditingAccount] = useState('');
-  const [editingTransfer, setEditingTransfer] = useState('');
-  const [name, setName] = useState('');
-  const [cashOpen, setCashOpen] = useState(false);
-  const [cardsOpen, setCardsOpen] = useState(false);
-  const [opening, setOpening] = useState('');
-  const [from, setFrom] = useState('');
-  const [to, setTo] = useState('');
-  const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(localDate());
-  const [note, setNote] = useState('');
+  const management = useAccountManagement(data?.accounts || [], currency);
   const [selected, setSelected] = useState('');
-  const [card, setCard] = useState('');
-  const [cardBalance, setCardBalance] = useState('');
-  const run = async (action: () => Promise<void>, title: string) => {
-    if (locked.current) return;
-    locked.current = true; setBusy(true);
-    try { await action(); toast({ title }); } catch (error) { toast({ title: 'No se guardó el cambio', description: friendlyError(error), variant: 'destructive' }); }
-    finally { locked.current = false; setBusy(false); }
-  };
+  const {
+    open, setOpen, busy, locked,
+    editingAccount, setEditingAccount, editingTransfer, setEditingTransfer,
+    name, setName, cashOpen, setCashOpen, cardsOpen, setCardsOpen,
+    opening, setOpening, from, setFrom, to, setTo, amount, setAmount,
+    date, setDate, note, setNote, card, setCard, cardBalance, setCardBalance,
+    resetAccountDraft, openManagement, editAccount, editTransfer,
+    submitAccount, submitTransfer, submitCardReconciliation, submitCashOpening,
+  } = management;
   if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
   const today = localDate();
   const cards = data.debts.filter(d => d.type === 'credit_card');
@@ -70,7 +55,7 @@ export default function AccountsOverview() {
           {
             label: 'Bancos y transferencias',
             icon: <Settings2 className="h-4 w-4" />,
-            onSelect: () => { setEditingAccount(''); setName(''); setOpening(''); setOpen(true); },
+            onSelect: openManagement,
           },
           {
             label: 'Tarjetas y pagos',
@@ -82,14 +67,14 @@ export default function AccountsOverview() {
       <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}>
         <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle>Bancos y transferencias</DialogTitle><DialogDescription>Registra tus bancos con su saldo actual. Efectivo se administra automáticamente con tus ingresos y gastos.</DialogDescription></DialogHeader>
           <fieldset disabled={busy} className="space-y-6 min-w-0">
-            <form className="space-y-3" onSubmit={e => { e.preventDefault(); void run(async () => { const existing = data.accounts.find(a => a.id === editingAccount); await addAccount({ id: editingAccount || crypto.randomUUID(), name, type: 'bank', currency: existing?.currency || currency, openingBalance: toCents(opening), startDate: existing?.startDate || localDate() }, !!editingAccount); setName(''); setOpening(''); setEditingAccount(''); }, editingAccount ? 'Cuenta actualizada' : 'Cuenta creada'); }}>
+            <form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitAccount(); }}>
               <h3 className="font-semibold">{editingAccount ? 'Editar cuenta y saldo inicial' : 'Añadir cuenta bancaria'}</h3>
               <label className="block text-sm">Nombre<Input required maxLength={80} value={name} onChange={e=>setName(e.target.value)} placeholder="Ej. Banco principal" /></label>
               <label className="block text-sm">{editingAccount ? `Saldo inicial (${currency})` : `Saldo actual (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e=>setOpening(e.target.value)} /></label>
               <p className="text-xs text-muted-foreground">{editingAccount ? 'Corrige el saldo con el que comenzaste el seguimiento. Los movimientos registrados después se suman o restan a esta cifra.' : 'Incluye los movimientos ya realizados hoy. Registra con esta cuenta solo los que hagas después de crearla. Este saldo no es un ingreso mensual.'}</p>
-              <Button type="submit">{editingAccount ? 'Guardar cuenta' : 'Crear cuenta'}</Button>{editingAccount && <Button type="button" variant="ghost" onClick={()=>{setEditingAccount('');setName('');setOpening('');}}>Cancelar edición</Button>}
+              <Button type="submit">{editingAccount ? 'Guardar cuenta' : 'Crear cuenta'}</Button>{editingAccount && <Button type="button" variant="ghost" onClick={resetAccountDraft}>Cancelar edición</Button>}
             </form>
-            {liquidAccounts.length >= 2 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{ e.preventDefault(); void run(async()=>{ await saveTransfer({id:editingTransfer || crypto.randomUUID(),fromAccountId:from,toAccountId:to,amount:toCents(amount),date,note},!!editingTransfer);setAmount('');setNote('');setEditingTransfer(''); },editingTransfer ? 'Transferencia actualizada' : 'Transferencia registrada'); }}>
+            {liquidAccounts.length >= 2 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{ e.preventDefault(); void submitTransfer(); }}>
               <h3 className="font-semibold">Mover dinero entre mis cuentas</h3>
               <AccountSelect value={from} onChange={setFrom}/><AccountSelect value={to} onChange={setTo} label="Cuenta de destino"/>
               <label className="block text-sm">{`Monto (${data.accounts.find(a => a.id === from)?.currency || currency})`}<Input required type="number" min="0.01" step="0.01" value={amount} onChange={e=>setAmount(e.target.value)}/></label>
@@ -98,7 +83,7 @@ export default function AccountsOverview() {
               <p className="text-xs text-muted-foreground">No cuenta como ingreso ni gasto. Si hubo comisión, regístrala como un gasto separado desde la cuenta que la pagó.</p>
               <Button disabled={!from || !to || from===to} type="submit">{editingTransfer ? 'Guardar transferencia' : 'Registrar transferencia'}</Button>{editingTransfer && <Button type="button" variant="ghost" onClick={()=>{setEditingTransfer('');setAmount('');setNote('');}}>Cancelar edición</Button>}
             </form>}
-            {cards.length > 0 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{e.preventDefault();void run(async()=>{await reconcileDebt(card,toCents(cardBalance));setCardBalance('');},'Saldo de tarjeta ajustado');}}>
+            {cards.length > 0 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{e.preventDefault();void submitCardReconciliation();}}>
               <h3 className="font-semibold">Conciliar deuda actual de una tarjeta</h3>
               <label className="block text-sm">Tarjeta<select required className="w-full rounded-lg border bg-background p-2" value={card} onChange={e=>setCard(e.target.value)}><option value="">Selecciona una tarjeta</option>{cards.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
               <label className="block text-sm">{`Deuda actual (${currency})`}<Input required type="number" step="0.01" value={cardBalance} onChange={e=>setCardBalance(e.target.value)}/></label>
@@ -136,29 +121,18 @@ export default function AccountsOverview() {
             {
               label: account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar cuenta',
               icon: <Pencil className="h-4 w-4" />,
-              onSelect: () => {
-                setEditingAccount(account.id);
-                setName(account.name);
-                setOpening(String(account.openingBalance / 100));
-                if (account.type === 'cash') setCashOpen(true);
-                else setOpen(true);
-              },
+              onSelect: () => editAccount(account),
             },
             {
               label: 'Gestionar cuentas y transferencias',
               icon: <Settings2 className="h-4 w-4" />,
-              onSelect: () => {
-                setEditingAccount('');
-                setName('');
-                setOpening('');
-                setOpen(true);
-              },
+              onSelect: openManagement,
             },
           ]}
         />}
-      /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const t=data.transfers.find(t=>t.id===r.id);if(t){setEditingAccount('');setName('');setOpening('');setEditingTransfer(t.id);setFrom(t.fromAccountId);setTo(t.toAccountId);setAmount(String(t.amount/100));setDate(t.date);setNote(t.note);setOpen(true);}}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount, account.currency)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
+      /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block underline text-primary" onClick={()=>{const transfer=data.transfers.find(item=>item.id===r.id);if(transfer)editTransfer(transfer);}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount, account.currency)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>
-    <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle>Saldo inicial de efectivo</DialogTitle><DialogDescription>Corrige solo el dinero que tenías al iniciar el seguimiento. Los ingresos y gastos registrados se calculan automáticamente.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void run(async () => { const existing = data.accounts.find(a => a.id === editingAccount); if (!existing || existing.type !== 'cash') throw new Error('Cuenta de efectivo no encontrada.'); await addAccount({ ...existing, openingBalance: toCents(opening) }, true); setCashOpen(false); setEditingAccount(''); setName(''); setOpening(''); }, 'Saldo inicial actualizado'); }}><label className="block text-sm">{`Saldo inicial (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label><Button disabled={busy} type="submit">Guardar saldo inicial</Button></form></DialogContent></Dialog>
+    <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle>Saldo inicial de efectivo</DialogTitle><DialogDescription>Corrige solo el dinero que tenías al iniciar el seguimiento. Los ingresos y gastos registrados se calculan automáticamente.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitCashOpening(); }}><label className="block text-sm">{`Saldo inicial (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label><Button disabled={busy} type="submit">Guardar saldo inicial</Button></form></DialogContent></Dialog>
   </section>;
 }
