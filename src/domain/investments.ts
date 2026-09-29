@@ -1,4 +1,5 @@
-import type { Investment } from './models';
+import type { Account, Investment } from './models';
+import { selectAccountBalance, type AccountSnapshot } from './ledger';
 
 function isLeapYear(year: number): boolean {
   return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -71,4 +72,28 @@ export function investmentProjection(investment: Investment, asOf: string): Inve
     estimatedInterest: estimatedMaturityValue - investment.principal,
     maturityReached,
   };
+}
+
+
+export type InvestmentManagerSnapshot = AccountSnapshot & {
+  investments: Investment[];
+  accounts: Account[];
+};
+
+export function selectInvestmentManagerRows(data: InvestmentManagerSnapshot, asOf: string) {
+  return [...data.investments]
+    .sort((a, b) =>
+      (a.maturityDate || '9999-12-31').localeCompare(b.maturityDate || '9999-12-31')
+      || a.name.localeCompare(b.name, 'es'),
+    )
+    .flatMap(investment => {
+      const account = data.accounts.find(item => item.id === investment.accountId);
+      if (!account) return [];
+      return [{
+        investment,
+        account,
+        currentValue: selectAccountBalance(account, data, asOf),
+        projection: investmentProjection(investment, asOf),
+      }];
+    });
 }

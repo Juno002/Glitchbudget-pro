@@ -1,7 +1,7 @@
 'use client';
 
 import { AccountSelect } from './account-select';
-import { selectCardReadModel } from '@/domain/ledger';
+import { selectActiveDebts, selectCardReadModel } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
 import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -28,7 +28,7 @@ export default function DebtsTab() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [accountId, setAccountId] = useState('');
 
-  const activeDebts = debts?.filter(d => d.status === 'active') || [];
+  const activeDebts = selectActiveDebts(debts || []);
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

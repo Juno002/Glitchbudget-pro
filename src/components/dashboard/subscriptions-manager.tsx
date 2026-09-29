@@ -9,13 +9,13 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { CalendarDays, CirclePause, CirclePlay, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { EmptyState, PlannedPaymentRow, StatusBadge } from '@/components/finance-ui';
 import { useTabs } from '@/contexts/tabs-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { groupUpcomingOccurrences, type UpcomingBucket } from '@/domain/upcoming';
+import { selectPlannedPaymentsManagerReadModel, type UpcomingBucket } from '@/domain/upcoming';
 import type { PlannedOccurrence, RecurringRule } from '@/domain/models';
 
 const GROUPS: Array<{ key: UpcomingBucket; label: string }> = [
@@ -66,32 +66,15 @@ export default function SubscriptionsManager() {
   });
 
   const today = localDate();
-  const grouped = useMemo(
-    () => groupUpcomingOccurrences(plannedOccurrences || [], today),
-    [plannedOccurrences, today],
-  );
-  const rulesById = useMemo(
-    () => new Map((recurringRules || []).map(rule => [rule.id, rule])),
-    [recurringRules],
+  const { grouped, rulesById, sortedRules, unresolvedCount, recentResolved } = useMemo(
+    () => selectPlannedPaymentsManagerReadModel(plannedOccurrences || [], recurringRules || [], today),
+    [plannedOccurrences, recurringRules, today],
   );
   const categoryIds = newRule.direction === 'expense' ? expenseCategories : incomeCategories;
-  const sortedRules = useMemo(
-    () => [...(recurringRules || [])].sort((a, b) =>
-      Number(b.active) - Number(a.active) || a.title.localeCompare(b.title, 'es')),
-    [recurringRules],
-  );
-  const unresolvedCount = Object.values(grouped).reduce((sum, rows) => sum + rows.length, 0);
-  const recentResolved = useMemo(
-    () => [...(plannedOccurrences || [])]
-      .filter(row => row.status === 'confirmed' || row.status === 'skipped')
-      .sort((a, b) => b.scheduledDate.localeCompare(a.scheduledDate) || b.id.localeCompare(a.id))
-      .slice(0, 5),
-    [plannedOccurrences],
-  );
 
   const handleAddSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    const amountCents = Math.round(Number(newRule.amount) * 100);
+    const amountCents = toCents(newRule.amount);
     if (!newRule.title.trim() || amountCents <= 0 || !newRule.categoryId || !newRule.startDate) return;
 
     const success = await addRecurringRule({

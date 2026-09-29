@@ -1,7 +1,7 @@
 # Roadmap: documentación vigente
 
 
-## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate en progreso
+## Fase 19.5 — Residual architecture cleanup / Prisma Engine Gate completada
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`.
 
@@ -11,7 +11,7 @@ La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](pha
 - [19.5.2](phase-19-5-2.md) — persistencia financiera fuera de React: **completado**;
 - [19.5.3](phase-19-5-3.md) — cálculos financieros + read models reutilizables: **completado**;
 - [19.5.4](phase-19-5-4.md) — `finance-context` + hardening: **completado**;
-- 19.5.5 — barrido final + Prisma Engine Gate: pendiente.
+- [19.5.5](phase-19-5-5.md) — barrido final + Prisma Engine Gate: **completado / aprobado**.
 
 19.5.1 auditó 120 archivos TS/TSX de las superficies exigidas. Confirmó cero Dexie directo en `src/components/**` y `src/app/**`, pero identificó persistencia financiera aún alojada en hooks React y residuos de cálculo/read-model en `finance-context`, presupuestos, metas, deuda, transferencias, cuentas y achievements.
 
@@ -21,7 +21,9 @@ La ejecución se divide en cinco checkpoints documentados en [phase-19-5.md](pha
 
 19.5.4 retiró las validaciones/configuración financiera residual de `finance-context`, extrajo `resolveSettings()` a un read model no-React y añadió guards permanentes para mantener dominio, policies y services financieros independientes de React.
 
-**Estado actual:** 19.5.4 completada. El Prisma Engine Gate sigue abierto; la siguiente ejecución es **19.5.5 — barrido final + Prisma Engine Gate**. No iniciar sin autorización explícita del usuario.
+19.5.5 repitió el barrido desde cero y encontró los últimos residuos en Investments, Planificados y selección de deudas/tarjetas. Se extrajeron a read models/selectors no-React y los tres flujos obligatorios —crear gasto, consultar Resumen y consultar Reportes— quedaron codificados como regresión estructural.
+
+**Estado actual:** Fase 19.5 completada. **Prisma Engine Gate aprobado.** GlitchBudget puede servir como núcleo reutilizable para una UI distinta sin copiar fórmulas ni importar componentes React. `Roadmap septiembre 2026.txt` no define una fase posterior; cualquier continuación requiere una nueva decisión de roadmap.
 
 ## Fase 19 — Technical-debt closure completada
 

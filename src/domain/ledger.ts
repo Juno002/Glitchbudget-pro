@@ -31,6 +31,14 @@ export function selectCardAvailableLimit(limit: number, signedBalance: number) {
 }
 
 
+export function selectActiveDebts(debts: Debt[]) {
+  return debts.filter(debt => debt.status === 'active');
+}
+
+export function selectActiveCreditCards(debts: Debt[]) {
+  return selectActiveDebts(debts).filter(debt => debt.type === 'credit_card');
+}
+
 export function selectCardReadModel(
   debt: Debt,
   expenses: Expense[],
