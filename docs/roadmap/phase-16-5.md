@@ -2,7 +2,7 @@
 
 Fuente de verdad: `Roadmap septiembre 2026.txt`, Fase 16.
 
-Estado: **checkpoint completado y Fase 16 cerrada**.
+Estado: **checkpoint 16.5 completado; Fase 16 continúa en progreso**.
 
 ## Objetivo
 
@@ -77,9 +77,9 @@ La centralización no mezcla formatos ni almacenamiento; cada capa conserva su p
 
 ## Apply automatically
 
-El roadmap indica que **después puede existir** una opción explícita `Apply automatically`.
+El roadmap indica que **después puede existir** una opción explícita `Apply automatically` y el plan de ejecución de Fase 16 reserva ese trabajo para **16.6**.
 
-La primera versión de Fase 16 queda cerrada en modo suggestion-only. `Apply automatically` no es requisito del cierre actual y no se implementa de forma implícita.
+16.5 permanece deliberadamente suggestion-only. `Apply automatically` no se implementa antes de 16.6.
 
 ## Pruebas
 
@@ -106,9 +106,9 @@ GitHub Actions `Quality checks` run `36500337917` verificó:
 - manifiesto offline: **42 recursos**;
 - `connect-src 'none'` en cada HTML generado.
 
-## Cierre de Fase 16
+## Estado después de 16.5
 
-Fase 16 cumple la primera versión exigida por `Roadmap septiembre 2026.txt`:
+16.5 completa la convivencia de:
 
 ```text
 Templates
@@ -120,6 +120,11 @@ Rules deterministas
 sugerencias explícitas
 ```
 
-La siguiente fase canónica es **Fase 17 — Seguridad y privacidad local**.
+pero **no cierra Fase 16**.
 
-Fase 17 no queda iniciada por este documento.
+Pendientes obligatorios:
+
+- **16.6 — Apply automatically opcional**, opt-in explícito por rule;
+- **16.7 — Hardening + gate**, incluyendo conflictos, precedencia, legacy, backup/export si aplica, pruebas, documentación y cierre formal.
+
+La siguiente fase del roadmap, **Fase 17 — Seguridad y privacidad local**, no debe iniciarse antes de cerrar 16.7.
