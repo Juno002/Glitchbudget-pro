@@ -2516,6 +2516,8 @@ Documentar cualquier excepción deliberada. Si una excepción contiene semántic
 
 # FASE 20 — Modo Prisma / transformación visual y branding
 
+Estado: **20.1 en curso — preflight técnico completado; contrato visual e inventario de paridad pendientes**.
+
 ## Objetivo
 
 Transformar la interfaz de GlitchBudget en el producto visual **Prisma** sin sustituir, duplicar ni reinterpretar el motor financiero cerrado en Fase 19.5.
@@ -2599,6 +2601,7 @@ npm run test:e2e ✅
 Este preflight **no cierra 20.1**. El contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones siguen siendo requisitos del Gate 20.1.
 
 No hubo cambio de schema, formato de backup ni semántica financiera.
+
 ## 20.1 — Contrato visual + inventario de paridad
 
 Crear la matriz completa:
@@ -2792,6 +2795,7 @@ npm run test:e2e
 ```
 
 El browser E2E se ejecuta después de `npm run build` sobre la salida estática y no reemplaza los tests de dominio/integración.
+
 # Definition of Done obligatoria para CADA fase
 
 Codex **no debe pasar automáticamente a la fase siguiente**.
