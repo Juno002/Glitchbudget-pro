@@ -4,15 +4,15 @@
 
 La fuente funcional única sigue siendo `Roadmap septiembre 2026.txt`. La ejecución de Fase 17 está dividida en **cinco iteraciones**, documentadas en [phase-17.md](phase-17.md).
 
-**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock y [17.3](phase-17-3.md) Auto-lock.
+**Completadas:** [17.1](phase-17-1.md) contrato de seguridad local, [17.2](phase-17-2.md) App lock, [17.3](phase-17-3.md) Auto-lock y [17.4](phase-17-4.md) backup cifrado opcional.
 
-17.3 añade Auto-lock como opt-in local sobre App lock, con tiempos de **1, 5, 15 o 30 minutos**. La actividad local reinicia el reloj y, al volver desde segundo plano, se compara el tiempo real transcurrido para decidir si debe bloquearse inmediatamente. Si App lock se desactiva, la configuración de Auto-lock se elimina.
+17.4 añade una exportación cifrada separada del JSON normal. El sobre `GlitchBudget encrypted backup` **v1** usa PBKDF2-SHA-256 (310,000 iteraciones), salt aleatorio de 16 bytes y AES-256-GCM autenticado con nonce aleatorio de 12 bytes. El payload interno sigue siendo el backup JSON canónico **v12**.
 
-App lock y Auto-lock continúan siendo **barreras de UI, no cifrado de Dexie**. Ninguno se exporta en el backup financiero ni usa red. Dexie sigue en **v14** y el backup JSON normal en **v12**.
+La contraseña no se transmite ni se persiste. El JSON normal, sus imports legacy y las copias OPFS actuales permanecen disponibles sin cambios. El restore de `.gbenc` todavía no existe y queda reservado para 17.5.
 
-El gate de 17.3 (`36530131884`) verificó **363/363 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
+Dexie sigue en **v14**. El gate de 17.4 (`36531177196`) verificó **370/370 pruebas**, typecheck, lint, guard local-only y build estático; manifiesto offline de **42 recursos** y `connect-src 'none'` en cada HTML.
 
-**Estado actual:** Fase 17 en progreso. **17.4 — Backup cifrado es el siguiente checkpoint.** 17.5 permanece pendiente. No avanzar a Fase 18 antes de completar 17.5 y su gate.
+**Estado actual:** Fase 17 en progreso. **17.5 — Restore cifrado + hardening + gate final es el siguiente y último checkpoint.** No avanzar a Fase 18 antes de completar 17.5 y su gate.
 
 ## Fase 16 — Automatización local completada
 
