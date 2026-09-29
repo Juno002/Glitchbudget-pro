@@ -16,6 +16,7 @@ export type TransactionRule = {
   id: string;
   name: string;
   enabled: boolean;
+  applyAutomatically?: boolean;
   condition: RuleCondition;
   suggestion: RuleSuggestion;
 };
@@ -71,6 +72,7 @@ export function normalizeTransactionRule(value: unknown): TransactionRule | null
     id,
     name,
     enabled: raw.enabled,
+    ...(raw.applyAutomatically === true ? { applyAutomatically: true } : {}),
     condition,
     suggestion,
   };
