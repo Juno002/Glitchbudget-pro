@@ -93,7 +93,7 @@ test('settings hierarchy includes roadmap sections without pretending future sec
   assert.match(settings, /Moneda base/);
   assert.match(settings, /Bloqueo de aplicación/);
   assert.match(settings, /Auto-lock/);
-  assert.match(settings, /Se implementará en 17\.2 como bloqueo local de la interfaz/);
+  assert.match(settings, /AppLockSettings/);
   assert.match(settings, /Se implementará en 17\.3 sobre App lock/);
   assert.match(settings, /Zona destructiva/);
 });
