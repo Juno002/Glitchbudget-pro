@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.5 completadas / Gates aprobados; 20.7.5.6 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.6 completadas / Gates aprobados; 20.7.5.7 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -764,6 +764,18 @@ No implementar multi-moneda real en 20.7.5.
 
 ### 20.7.5.6 — Encrypted Backup v2 assessment
 
+**Estado: completada / Gate aprobado como assessment.**
+
+Quality gate de cierre:
+
+```text
+530/530 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36784502529 ✅
+```
+
 #### Objetivo
 
 Reevaluar el endurecimiento criptográfico del backup cifrado sin romper archivos v1 existentes.
@@ -809,7 +821,20 @@ Si se crea v2:
 
 No subir iteraciones a un número arbitrario sin benchmark.
 
-**Gate 20.7.5.6:** decisión documentada y, si procede, v2 implementado con compatibilidad completa hacia v1.
+#### Resultado de implementación
+
+- Se auditó el baseline real de encrypted backup v1: PBKDF2-HMAC-SHA-256 310k, salt aleatorio de 16 bytes, AES-256-GCM, nonce aleatorio de 12 bytes, tag de 128 bits y AAD autenticado.
+- La guía vigente se revisó contra OWASP y NIST. El valor OWASP de 600k se trata como referencia de endurecimiento para PBKDF2 password hashing, no como requisito directo del formato de backup.
+- `scripts/benchmark-encrypted-backup.mjs` mide 310k y 600k sobre Web Crypto sin cambiar parámetros productivos.
+- El desktop medido admite 600k cómodamente, pero no existe benchmark representativo de hardware móvil físico en el entorno disponible.
+- Por la regla del roadmap de no escoger un work factor arbitrario sin benchmark, **no se crea envelope v2**.
+- El presupuesto <= 750 ms, con revisión a 1 000 ms, queda documentado como objetivo de ingeniería del proyecto.
+- `tests/phase-20-7-5-6-encrypted-backup-assessment.test.ts` congela v1, round-trip y el mismo límite de error para contraseña incorrecta/tamper.
+- v1 sigue siendo importable/exportable; no se reescribe automáticamente ningún archivo histórico.
+- Dexie v15, Backup JSON v13, red, UI y persistencia financiera permanecen sin cambios.
+- Evidencia completa: [phase-20-7-5-6.md](phase-20-7-5-6.md).
+
+**Gate 20.7.5.6:** decisión documentada; v2 no procede todavía por falta de benchmark físico-móvil representativo, y la compatibilidad v1 queda protegida.
 
 ---
 

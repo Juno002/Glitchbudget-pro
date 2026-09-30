@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: en curso.** 20.7.5.1–20.7.5.5 completadas / Gates aprobados; próxima intervención autorizada: 20.7.5.6. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: en curso.** 20.7.5.1–20.7.5.6 completadas / Gates aprobados; próxima intervención autorizada: 20.7.5.7. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3168,6 +3168,32 @@ No implementar multi-moneda real aquí.
 **Gate 20.7.5.5:** ningún camino soportado puede sumar monedas distintas como equivalentes.
 
 ### 20.7.5.6 — Encrypted Backup v2 assessment
+
+**Estado: completada / Gate aprobado como assessment.**
+
+Quality gate de cierre:
+
+```text
+530/530 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36784502529 ✅
+```
+
+Decisión de cierre:
+
+- no introducir envelope v2 todavía;
+- encrypted backup v1 permanece como formato de export e import vigente;
+- PBKDF2-HMAC-SHA-256 permanece en 310 000 iteraciones hasta contar con benchmark físico-móvil representativo;
+- OWASP 600 000 se usa como referencia de endurecimiento para PBKDF2 password hashing, no como mandato directo para cifrado de backups;
+- NIST SP 800-132 continúa siendo la referencia directamente aplicable a derivación de claves para almacenamiento y su revisión memory-hard sigue pendiente;
+- benchmark reproducible de desktop/Web Crypto compara 310k vs 600k sin modificar producción;
+- presupuesto de latencia <= 750 ms / revisión a 1 000 ms queda documentado como objetivo interno del proyecto, no como estándar externo;
+- v1 conserva salt/nonce aleatorios, AES-256-GCM, AAD autenticado, error común para contraseña incorrecta/tamper y arquitectura local-only;
+- sin cambios de schema, migraciones, Backup JSON, red, UI ni persistencia financiera.
+
+Evidencia detallada: `docs/roadmap/phase-20-7-5-6.md`.
 
 Baseline:
 
@@ -4068,7 +4094,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.7.5.6 → 20.7.5.9
+20.7.5.7 → 20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
