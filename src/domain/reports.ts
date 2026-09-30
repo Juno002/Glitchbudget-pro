@@ -166,7 +166,7 @@ export function selectNetWorthReport(input:ReportsSnapshotInput, through:string)
     cash:position.cash,
     banks:position.bank,
     investments:position.investmentAssets,
-    creditCardLiabilities:position.liabilities,
+    liabilities:position.liabilities,
     cardPositiveBalance:position.cardPositiveBalance,
     netWorth:position.netWorth,
     liquidAssets:position.liquidAssets,
