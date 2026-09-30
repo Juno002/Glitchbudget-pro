@@ -2703,6 +2703,18 @@ Conservar:
 
 ## 20.4 — Movimientos + compositor global
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-4.md`.
+
+Quality gate de cierre:
+
+```text
+483/483 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36660263082 ✅
+```
+
 Migrar:
 
 - historial;
