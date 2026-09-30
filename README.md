@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 cerradas; 20.7.5 en curso con 20.7.5.1–20.7.5.5 cerradas; 20.7.5.6 es la siguiente intervención.** 20.8–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
+> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 cerradas; 20.7.5 en curso con 20.7.5.1–20.7.5.6 cerradas; 20.7.5.7 es la siguiente intervención.** 20.8–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
@@ -98,16 +98,17 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente tras 20.7.5.5:
+Baseline vigente tras 20.7.5.6:
 
-- **526/526 tests**;
+- **530/530 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
 - E2E: branding Prisma desktop/móvil → Home → compositor/Movimientos → cuentas/inversiones → Logros → Ajustes/Categorías/Seguridad/Backups → Plan → Reportes/gráficos → recarga offline;
 - fecha financiera canónica local con migración Dexie v15;
 - posición protegida contra suma nominal de monedas heterogéneas;
-- Quality checks **36776913726** verdes en `main`.
+- encrypted backup v1 evaluado y conservado sin un v2 no benchmarkeado;
+- Quality checks **36784502529** verdes en la rama de 20.7.5.6 antes del merge.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
