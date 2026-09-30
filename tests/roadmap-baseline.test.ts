@@ -35,7 +35,7 @@ for (const version of [6, 7]) {
     const current = new GlitchBudgetDB(name);
     try {
       await current.open();
-      assert.equal(current.verno, 14);
+      assert.equal(current.verno, 15);
       for (const [table, rows] of Object.entries(source.tables)) {
         let expected = structuredClone(rows) as any[];
         if (table === 'goals') expected=migrateGoalRecords(source.tables.goals,source.tables.goal_contributions).goals;

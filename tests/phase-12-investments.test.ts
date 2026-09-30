@@ -125,7 +125,7 @@ test('generic transfers cannot bypass the Investments 1.0 lifecycle', async () =
   assert.equal(await db.account_transfers.count(),0);
 });
 
-test('Dexie v13 upgrades to v14 by adding an empty investment store without rewriting accounts', async () => {
+test('Dexie v13 upgrades through the current schema while preserving the v14 investment migration', async () => {
   const name='phase12-migration-'+crypto.randomUUID();
   const schema = Object.fromEntries(db.tables.filter(t=>t.name!=='investments').map(table => [
     table.name,[table.schema.primKey.src,...table.schema.indexes.map(index=>index.src)].join(',')
@@ -140,7 +140,7 @@ test('Dexie v13 upgrades to v14 by adding an empty investment store without rewr
   const current=new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno,14);
+    assert.equal(current.verno, 15);
     assert.deepEqual(await current.accounts.get('bank'),account);
     assert.equal(await current.investments.count(),0);
   } finally {

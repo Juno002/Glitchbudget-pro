@@ -45,7 +45,7 @@ test('v9 -> v10 preserves every financial field and metric, removes frequency an
   }
   old.close();const current=new GlitchBudgetDB(name);
   try{
-    await current.open();assert.equal(current.verno, 14);const migrated=await snapshot(current);
+    await current.open();assert.equal(current.verno, 15);const migrated=await snapshot(current);
     assert.deepEqual(metrics(migrated),before);
     assert.deepEqual(clean(migrated.expenses),clean(data.expenses.map(row => {
       const migratedRow = migrateActualExpense(row);

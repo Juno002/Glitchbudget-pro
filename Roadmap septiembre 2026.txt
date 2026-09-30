@@ -3075,6 +3075,30 @@ Si hace falta modificar persistencia:
 
 ### 20.7.5.4 — Canonical financial dates
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+522/522 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36764771406 (attempt 2) ✅
+```
+
+Resultado de cierre:
+
+- fecha financiera canónica = `YYYY-MM-DD` local, sin hora ni zona;
+- `DebtPayment.date` queda documentado y persistido como fecha financiera local;
+- `normalizeFinancialDate()` concentra la compatibilidad con ISO datetime legacy fuera de `src/domain`;
+- Dexie sube a v15 con migración explícita de `debt_payments.date` legacy a fecha local;
+- restore JSON normaliza pagos legacy antes de persistirlos y export vuelve a emitir date-only;
+- Backup JSON permanece en v13 y conserva compatibilidad histórica;
+- nuevos pagos rechazan datetime y solo aceptan fecha canónica;
+- el ledger deja de depender de `.slice(0,10)` para pagos;
+- tests cubren UTC−4 alrededor de medianoche, restore legacy, migración v14→v15, pago nuevo y comparación `through`.
+
 Contrato objetivo para nuevos movimientos:
 
 ```text

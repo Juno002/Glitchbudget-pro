@@ -71,7 +71,7 @@ test('v10 upgrades through the current schema, adds planned occurrences, and onl
   const current = new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno, 14);
+    assert.equal(current.verno, 15);
     assert.deepEqual(clean(await current.settings.toArray()), clean(before.settings));
     assert.deepEqual(clean(await current.recurrents.toArray()), clean(before.recurrents));
     assert.deepEqual(clean(await current.expenses.toArray()), clean(before.expenses.map(row => ({ ...row, currency:'DOP', fxRate:1, amountBase:row.amount }))));

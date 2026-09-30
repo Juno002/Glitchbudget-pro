@@ -9,6 +9,7 @@ import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchem
 import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
+import { normalizeFinancialDate } from './financial-date';
 import {
   exportLocalAutomation,
   normalizeLocalAutomationBackup,
@@ -359,6 +360,7 @@ export async function exportDataJSON(
     debts,
     debtPayments: debtPayments.map(payment => ({
       ...payment,
+      date:normalizeFinancialDate(payment.date),
       currency:accountCurrencies.get(payment.accountId || '') || baseCurrency,
       fxRate:1,
       amountBase:toCents(payment.amount),
@@ -487,9 +489,14 @@ function prepareDataJSONImport(
     throw new Error('El respaldo contiene varias cuentas de efectivo predeterminadas.');
   }
 
-  for (const row of [...d.incomes, ...d.expenses, ...(d.debtPayments || [])]) {
+  const normalizedDebtPayments = (d.debtPayments || []).map((payment:any) => ({
+    ...payment,
+    date: normalizeFinancialDate(payment.date),
+  }));
+
+  for (const row of [...d.incomes, ...d.expenses, ...normalizedDebtPayments]) {
     const account = row.accountId ? accountMap.get(row.accountId) : undefined;
-    if (row.accountId && (!account || row.date.slice(0, 10) < account.startDate)) {
+    if (row.accountId && (!account || row.date < account.startDate)) {
       throw new Error('El respaldo contiene una cuenta desconocida o un movimiento anterior a su saldo inicial.');
     }
     if (account?.type === 'investment') {
@@ -525,7 +532,7 @@ function prepareDataJSONImport(
   if (d.goalContributions.some((contribution:any) => !goalIds.has(contribution.goalId))) {
     throw new Error('El respaldo contiene aportes a metas inexistentes.');
   }
-  if ((d.debtPayments || []).some((payment:any) => !debtIds.has(payment.debtId))) {
+  if (normalizedDebtPayments.some((payment:any) => !debtIds.has(payment.debtId))) {
     throw new Error('El respaldo contiene pagos de tarjetas inexistentes.');
   }
   if (d.expenses.some((expense:any) => (
@@ -616,7 +623,7 @@ function prepareDataJSONImport(
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
 
   const debts = d.debts ?? [];
-  const debtPayments = (d.debtPayments ?? []).map((payment:any) => ({
+  const debtPayments = normalizedDebtPayments.map((payment:any) => ({
     ...payment,
     currency: payment.accountId ? accountMap.get(payment.accountId)!.currency : baseCurrency,
     fxRate: 1,

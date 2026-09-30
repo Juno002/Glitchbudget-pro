@@ -35,8 +35,8 @@ export function applyTransactionFilters<T extends FilterableMovement>(rows:T[], 
     if(filters.type && row.kind!==filters.type) return false;
     if(filters.accountId && !(row.accountIds || []).includes(filters.accountId)) return false;
     if(filters.categoryId && row.categoryId!==filters.categoryId) return false;
-    if(filters.dateStart && row.date.slice(0,10)<filters.dateStart) return false;
-    if(filters.dateEnd && row.date.slice(0,10)>filters.dateEnd) return false;
+    if(filters.dateStart && row.date<filters.dateStart) return false;
+    if(filters.dateEnd && row.date>filters.dateEnd) return false;
     if(filters.amountMin!==undefined && row.amount<filters.amountMin) return false;
     if(filters.amountMax!==undefined && row.amount>filters.amountMax) return false;
     if(filters.necessity && row.necessity!==filters.necessity) return false;
