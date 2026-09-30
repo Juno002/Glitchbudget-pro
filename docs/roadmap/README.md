@@ -62,7 +62,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Mov
 | 20.5 — Plan Prisma | **Completado / Gate aprobado** | [phase-20-5.md](phase-20-5.md) |
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
-| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1 completada / Gate aprobado** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
+| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1–20.7.5.2 completadas / Gates aprobados** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | Planificada | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |
