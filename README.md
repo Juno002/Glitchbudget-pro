@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — Modo Prisma / transformación visual y branding — completada con Gate final aprobado.** El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
+> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 cerradas; extensión final 20.8–20.10 planificada.** El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
