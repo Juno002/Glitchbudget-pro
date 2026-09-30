@@ -2811,7 +2811,9 @@ Quality checks 36675832852 ✅
 Quality checks 36675835726 ✅
 ```
 
-**Fase 20: completada.**
+**Baseline visual/branding hasta 20.7: completado y aprobado.**
+
+El 30 sep 2026 se amplía Fase 20 con tres etapas finales. 20.7 no se reabre: permanece como baseline estable sobre el que se construyen 20.8–20.10.
 
 Completar:
 
@@ -2863,6 +2865,192 @@ Y además:
 - ningún dato hardcoded de la maqueta Prisma presentado como dato real.
 
 Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostrar paridad.
+
+## 20.8 — Information Design + Deterministic Insights
+
+**Estado: planificada / no iniciada.** Plan detallado: `docs/roadmap/phase-20-8.md`.
+
+Objetivo:
+
+```text
+decir más con menos
++ comparar antes que explicar
++ interpretar con reglas deterministas
+```
+
+Microintervenciones obligatorias:
+
+1. **20.8.1 — Preflight de información + regresión de categorías**
+   - auditar KPI/copy/gráficos;
+   - clasificar copy visible/contextual/redundante;
+   - proteger con test las categorías por defecto en instalación limpia;
+   - no añadir reparación especulativa mientras no exista reproducción del bug.
+
+2. **20.8.2 — Contrato canónico de comparaciones KPI**
+   - disponible líquido;
+   - patrimonio neto;
+   - deuda total;
+   - inversiones;
+   - actual/anterior/delta/%;
+   - cero cálculo comparativo en React.
+
+3. **20.8.3 — Motor local de Lectura rápida**
+   - completamente local;
+   - determinista;
+   - sin LLM;
+   - sin red;
+   - sin texto libre probabilístico;
+   - insights parametrizados desde métricas canónicas;
+   - prioridades/umbrales explícitos y testeados.
+
+4. **20.8.4 — KPI de Resumen**
+   - cifra + comparación + señal;
+   - explicaciones secundarias a popover/tooltip cuando sea seguro;
+   - conservar visibles advertencias financieras relevantes.
+
+5. **20.8.5 — Home: decir más con menos**
+   - reducir copy permanente;
+   - reforzar jerarquía;
+   - mantener capacidad de decisión y detalle bajo demanda.
+
+6. **20.8.6 — Reportes: jerarquía editorial**
+   - Lectura rápida;
+   - hero analítico;
+   - tendencias/comparaciones;
+   - categorías/naturaleza;
+   - cash flow;
+   - net worth;
+   - detalle exacto.
+
+7. **20.8.7 — Progressive disclosure**
+   - visible si ayuda a decidir;
+   - popover/tooltip si define;
+   - eliminar si es redundante;
+   - visible si advierte una consecuencia importante;
+   - nunca depender solo de hover.
+
+8. **20.8.8 — Gate 20.8**
+   - Home/Reportes desktop + móvil;
+   - insights reproducibles;
+   - categorías default;
+   - cero red/LLM;
+   - cero nuevas fórmulas financieras en UI;
+   - offline/backup intactos;
+   - `npm run check`, `npm run build`, `npm run test:e2e`.
+
+## 20.9 — Premium UI Polish
+
+**Estado: planificada.** Plan detallado: `docs/roadmap/phase-20-9.md`.
+
+Objetivo:
+
+```text
+la app nunca debe animarse más lento de lo que responde
+```
+
+Microintervenciones obligatorias:
+
+1. **20.9.1 — Auditoría visual**
+   - radios, bordes, sombras, overlays, tipografía, iconos, spacing, focus, responsive.
+
+2. **20.9.2 — Motion tokens ultra rápidos**
+   - press 60–90 ms;
+   - controles 90–120 ms;
+   - menus/popovers 100–140 ms;
+   - contenido 120–160 ms;
+   - dialogs/sheets 140–180 ms;
+   - sin delays artificiales;
+   - `prefers-reduced-motion`.
+
+3. **20.9.3 — Superficies/textura/profundidad**
+   - cards, panels, blur, shadows, separators;
+   - profundidad suave sin sacrificar legibilidad.
+
+4. **20.9.4 — Tooltips/popovers/dialogs**
+   - sistema único de triggers, foco, toque, cierre, contraste y copy contextual.
+
+5. **20.9.5 — Achievement toast**
+   - corregir legibilidad;
+   - menos transparencia;
+   - mejor contraste;
+   - blur controlado;
+   - jerarquía título/descripcion/XP/CTA;
+   - mobile + ambos temas;
+   - conservar sonido/confetti/reduced motion.
+
+6. **20.9.6 — Idioma visible único**
+   - idioma final: español;
+   - eliminar mezclas como Spending / Cash Flow / Net Worth / Templates / Saved Filters / Rules;
+   - identificadores internos pueden permanecer en inglés.
+
+7. **20.9.7 — Estados y feedback**
+   - loading/skeleton/empty/success/warning/error/disabled/destructive.
+
+8. **20.9.8 — Mobile/touch/focus/accessibilidad**
+   - targets, teclado móvil, safe areas, scroll, FAB, focus, contraste, hover-only info.
+
+9. **20.9.9 — Pixel/interaction sweep + Gate**
+   - recorrido completo en ambos temas y varios tamaños;
+   - cero features nuevas;
+   - `npm run check`, `npm run build`, `npm run test:e2e`.
+
+## 20.10 — Repository Consolidation + Product README
+
+**Estado: planificada / etapa final.** Plan detallado: `docs/roadmap/phase-20-10.md`.
+
+Baseline al planificar: **54 ramas remotas**.
+
+La consolidación ocurre solo después de aprobar 20.8 y 20.9.
+
+Microintervenciones obligatorias:
+
+1. **20.10.1 — Inventario de ramas**
+   - clasificar cada rama como contenida en main, histórica, única relevante, única obsoleta o activa;
+   - no borrar a ciegas.
+
+2. **20.10.2 — Auditoría de trabajo único**
+   - comparar cualquier rama no contenida en main;
+   - decidir explícitamente qué conservar;
+   - no fusionar código viejo solo para salvarlo.
+
+3. **20.10.3 — Unificación controlada**
+   - integrar únicamente trabajo vigente;
+   - `main` debe quedar autosuficiente;
+   - ninguna rama puede ser fuente paralela de verdad.
+
+4. **20.10.4 — Gate completo sobre main**
+   - check/build/E2E;
+   - backup round-trip;
+   - offline;
+   - `connect-src 'none'`;
+   - Home/Movimientos/Plan/Reportes/Lectura rápida/temas/seguridad/backups/categorías/idioma/toast.
+
+5. **20.10.5 — Eliminación de ramas**
+   - eliminar ramas fusionadas/históricas/WIP obsoletas;
+   - conservar únicamente `main`;
+   - si una rama es ambigua, detener y revisar antes de borrar.
+
+   Política futura:
+
+   ```text
+   tarea
+   → rama temporal si hace falta
+   → validación/merge
+   → borrar rama
+   ```
+
+6. **20.10.6 — README final estrictamente de producto**
+   - rehacer `README.md` desde cero;
+   - hablar solo de Prisma y sus funciones;
+   - incluir producto, áreas, features, privacidad, offline, seguridad, backups y temas;
+   - excluir roadmaps, fases, gates, PRs, commits, SHAs, CI, historial de implementación, producción/build y narrativa de migración.
+
+7. **20.10.7 — Cierre definitivo**
+   - `main` única rama permanente;
+   - README = producto;
+   - Prisma = branding visible;
+   - GlitchBudget Engine = núcleo interno;
+   - 20.8/20.9/gate final verdes.
 
 
 ### Gate adicional vigente desde Fase 20
@@ -2964,7 +3152,13 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 ↓
 19.5 Prisma Engine Gate
 ↓
-20 Modo Prisma / visual transformation + branding
+20.1–20.7 Prisma visual transformation + branding baseline
+↓
+20.8 Information Design + Deterministic Insights
+↓
+20.9 Premium UI Polish
+↓
+20.10 Repository Consolidation + Product README
 ```
 
 
