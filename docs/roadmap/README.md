@@ -17,7 +17,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
-- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1 completada / Gate aprobado.
+- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.2 completadas / Gates aprobados.
 - **20.8 — Information Design + Deterministic Insights:** planificada.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
