@@ -377,6 +377,18 @@ Durante toda 20.7.5:
 
 ### 20.7.5.1 — Debt semantics audit
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+505/505 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36745462982 ✅
+```
+
 #### Objetivo
 
 Determinar formalmente qué significa cada variante de `Debt` antes de modificar cálculos o persistencia.
