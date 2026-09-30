@@ -26,9 +26,9 @@ export default function Header() {
         <div className="mx-auto flex w-full max-w-[1280px] flex-wrap items-center gap-2 px-4 py-3 sm:px-6 md:min-h-[68px] md:flex-nowrap lg:px-10">
           {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a href="/" className="flex min-w-0 items-center gap-2 md:hidden" aria-label="GlitchBudget Pro">
+      <a href="/" className="flex min-w-0 items-center gap-2 md:hidden" aria-label="Prisma">
             <BrandMark className="h-7 w-7 rounded-[9px] p-[6px]" />
-            <span className="truncate font-headline text-[1.05rem] leading-none tracking-[-0.03em]">GlitchBudget Pro</span>
+            <span className="truncate font-headline text-[1.05rem] leading-none tracking-[-0.03em]">Prisma</span>
           </a>
 
           <div className="order-last flex w-full min-w-0 items-center gap-2 pt-1 md:order-none md:w-auto md:pt-0">

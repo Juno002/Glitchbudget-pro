@@ -44,7 +44,7 @@ export function AppLockGate({ children }: { children: ReactNode }) {
         <div className="flex items-center gap-3">
           <div className="rounded-xl border p-2"><LockKeyhole className="h-5 w-5" /></div>
           <div>
-            <h1 className="font-display text-2xl font-normal">GlitchBudget bloqueado</h1>
+            <h1 className="font-display text-2xl font-normal">Prisma bloqueado</h1>
             <p className="text-xs text-muted-foreground">Introduce tu PIN local para acceder a la interfaz financiera.</p>
           </div>
         </div>

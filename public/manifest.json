@@ -1,11 +1,11 @@
 {
-  "name": "GlitchBudget",
-  "short_name": "GlitchBudget",
-  "description": "Tu presupuesto personal, con datos guardados en tu dispositivo.",
+  "name": "Prisma",
+  "short_name": "Prisma",
+  "description": "Finanzas personales privadas, con datos guardados en tu dispositivo.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d0d",
-  "theme_color": "#0d0d0d",
+  "background_color": "#f5f4ef",
+  "theme_color": "#18443d",
   "icons": [
     {
       "src": "/icon-192.png",

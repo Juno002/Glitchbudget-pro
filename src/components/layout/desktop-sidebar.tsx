@@ -20,10 +20,10 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
     <aside data-shell-sidebar="desktop" className="sticky top-0 hidden h-screen w-[244px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
       {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a href="/" className="flex items-center gap-3 px-2" aria-label="GlitchBudget Pro">
+      <a href="/" className="flex items-center gap-3 px-2" aria-label="Prisma">
         <BrandMark />
         <span className="min-w-0">
-          <span className="block truncate font-headline text-[1.2rem] leading-none tracking-[-0.035em] text-sidebar-primary">GlitchBudget Pro</span>
+          <span className="block truncate font-headline text-[1.2rem] leading-none tracking-[-0.035em] text-sidebar-primary">Prisma</span>
           <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Local / privado</span>
         </span>
       </a>
