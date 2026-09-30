@@ -270,7 +270,7 @@ export function SettingsDialog() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-5">
-            <SectionHeader title="Privacidad y seguridad" description="GlitchBudget funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
+            <SectionHeader title="Privacidad y seguridad" description="Prisma funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
             <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] text-sm space-y-4">
               <label className="flex items-start justify-between gap-4">
                 <span>

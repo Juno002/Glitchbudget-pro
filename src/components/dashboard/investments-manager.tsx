@@ -106,7 +106,7 @@ export default function InvestmentsManager() {
           <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl" data-investment-dialog="prisma">
             <DialogHeader>
               <DialogTitle className="font-display text-2xl font-normal">Registrar inversión</DialogTitle>
-              <DialogDescription>Elige si ya existía al empezar a usar GlitchBudget o si la financias ahora desde una cuenta registrada.</DialogDescription>
+              <DialogDescription>Elige si ya existía al empezar a usar Prisma o si la financias ahora desde una cuenta registrada.</DialogDescription>
             </DialogHeader>
             <form className="space-y-4" onSubmit={submit}>
               <label className="block text-sm">Origen del valor

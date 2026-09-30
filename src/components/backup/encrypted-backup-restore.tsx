@@ -126,7 +126,7 @@ export default function EncryptedBackupRestore() {
             <AlertDialogDescription>
               Primero se autenticará, descifrará y validará <span className="font-medium break-all">{file?.name}</span>.
               Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes.
-              Antes de escribir, GlitchBudget intentará crear una copia local automática cuando OPFS esté disponible.
+              Antes de escribir, Prisma intentará crear una copia local automática cuando OPFS esté disponible.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
