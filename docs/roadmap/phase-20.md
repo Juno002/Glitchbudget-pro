@@ -634,6 +634,18 @@ Los componentes no deben volver a usar un campo ambiguo directamente para decidi
 
 ### 20.7.5.4 — Canonical financial dates
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+522/522 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36764771406 (attempt 2) ✅
+```
+
 #### Objetivo
 
 Unificar el contrato temporal de movimientos financieros para evitar desplazamientos de día por zona horaria.
@@ -675,6 +687,19 @@ Cubrir al menos:
 - restore legacy;
 - pago creado por UI;
 - comparación `through`.
+
+#### Resultado de implementación
+
+- `src/domain/financial-date.ts` define únicamente el contrato civil puro `YYYY-MM-DD`, sin reloj ni dependencias de plataforma.
+- `src/lib/financial-date.ts` concentra la conversión legacy ISO datetime → día civil local.
+- `DebtPayment.date` se declara como fecha financiera local.
+- `saveDebtPayment()` valida y persiste solo date-only.
+- Dexie v15 migra una sola vez pagos históricos con datetime.
+- Restore JSON v3–v13 acepta datetime histórico, lo normaliza antes de persistir y exporta nuevamente date-only.
+- Backup JSON permanece en v13; no se introduce un formato nuevo.
+- `src/domain/ledger.ts` ya compara pagos directamente por fecha canónica y no recorta timestamps.
+- Los contratos históricos de schema fueron actualizados para el nuevo CURRENT_DB_SCHEMA_VERSION sin reescribir la historia de migraciones anteriores.
+- `tests/phase-20-7-5-4-canonical-financial-dates.test.ts` cubre UTC−4, cambio de día UTC/local, pago nuevo, `through`, restore legacy y migración v14→v15.
 
 **Gate 20.7.5.4:** ninguna operación financiera nueva puede cambiar de día por conversión UTC implícita.
 
