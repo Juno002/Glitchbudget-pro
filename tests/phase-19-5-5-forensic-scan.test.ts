@@ -75,7 +75,7 @@ test('Prisma Engine Gate: final audit residues stay outside React', () => {
   assert.doesNotMatch(planned, /groupUpcomingOccurrences|Object\.values\(grouped\)\.reduce|row\.status === ['"]confirmed/);
 
   const debts = source('src/components/dashboard/debts-tab.tsx');
-  assert.match(debts, /selectActiveDebts/);
+  assert.match(debts, /selectActiveCreditCards/);
   assert.doesNotMatch(debts, /debts\?\.filter\([^\n]*status === ['"]active/);
 
   const transactionModal = source('src/components/dashboard/TransactionModal.tsx');
