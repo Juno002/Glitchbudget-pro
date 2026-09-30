@@ -2798,6 +2798,21 @@ Los componentes gráficos pueden transformar métricas en representación visual
 
 ## 20.7 — Superficies secundarias + branding Prisma + gate final
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-7.md`.
+
+Quality gate de cierre:
+
+```text
+502/502 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36675832852 ✅
+Quality checks 36675835726 ✅
+```
+
+**Fase 20: completada.**
+
 Completar:
 
 - cuentas;
