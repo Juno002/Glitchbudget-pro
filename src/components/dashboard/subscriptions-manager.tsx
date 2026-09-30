@@ -136,10 +136,10 @@ export default function SubscriptionsManager() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-plan-planned-manager="prisma">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h3 className="text-lg font-bold">Movimientos planificados</h3>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Recurrencias</p><h3 className="mt-1 font-display text-2xl font-normal tracking-[-0.025em]">Movimientos planificados</h3>
           <p className="text-sm text-muted-foreground">
             Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un ingreso o gasto real.
           </p>
@@ -147,13 +147,13 @@ export default function SubscriptionsManager() {
 
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="outline" className="min-h-11 sm:min-h-9 border-primary/30 text-primary hover:bg-primary/10">
+            <Button size="sm" variant="outline" className="min-h-11 rounded-[var(--radius-interactive)] border-primary/30 text-primary hover:bg-primary/10 sm:min-h-9">
               <Plus className="mr-2 h-4 w-4" /> Añadir regla
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent data-recurring-rule-dialog="prisma">
             <DialogHeader>
-              <DialogTitle>Nueva planificación recurrente</DialogTitle>
+              <DialogTitle className="font-display text-2xl font-normal">Nueva planificación recurrente</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAddSubmit} className="space-y-4 pt-4">
               <div className="space-y-2">
@@ -262,7 +262,7 @@ export default function SubscriptionsManager() {
         </Dialog>
       </div>
 
-      <div className="rounded-xl border p-4 space-y-2">
+      <div className="space-y-2 rounded-[var(--radius-card)] border bg-muted/25 p-4" data-plan-confirmation-account="prisma">
         <AccountSelect
           value={accountOverride}
           onChange={setAccountOverride}
@@ -276,7 +276,7 @@ export default function SubscriptionsManager() {
       <section className="space-y-3" aria-labelledby="upcoming-title">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h4 id="upcoming-title" className="font-semibold">Próximos movimientos</h4>
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Pendientes</p><h4 id="upcoming-title" className="mt-1 font-display text-xl font-normal">Próximos movimientos</h4>
             <p aria-live="polite" className="text-xs text-muted-foreground">{unresolvedCount} pendientes dentro de la planificación materializada.</p>
           </div>
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
@@ -292,8 +292,8 @@ export default function SubscriptionsManager() {
             const rows = grouped[group.key];
             if (!rows.length) return null;
             return (
-              <div key={group.key} className="space-y-2">
-                <h5 className={cn("text-xs font-semibold uppercase tracking-wide text-muted-foreground", group.key === 'overdue' && "text-amber-600 dark:text-amber-400")}>
+              <div key={group.key} className="space-y-2 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-planned-group={group.key}>
+                <h5 className={cn("text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground", group.key === 'overdue' && "text-warning")}>
                   {group.label}
                 </h5>
                 {rows.map(occurrence => {
@@ -326,10 +326,10 @@ export default function SubscriptionsManager() {
       {recentResolved.length > 0 && (
         <section className="space-y-3" aria-labelledby="recent-planned-title">
           <div>
-            <h4 id="recent-planned-title" className="font-semibold">Actividad planificada reciente</h4>
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Resueltas</p><h4 id="recent-planned-title" className="mt-1 font-display text-xl font-normal">Actividad planificada reciente</h4>
             <p className="text-xs text-muted-foreground">Últimas ocurrencias confirmadas u omitidas.</p>
           </div>
-          <div className="grid gap-2">
+          <div className="grid gap-2 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
             {recentResolved.map(occurrence => {
               const rule = rulesById.get(occurrence.ruleId);
               return (
@@ -355,7 +355,7 @@ export default function SubscriptionsManager() {
 
       <section className="space-y-3" aria-labelledby="rules-title">
         <div>
-          <h4 id="rules-title" className="font-semibold">Reglas recurrentes</h4>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Motor local</p><h4 id="rules-title" className="mt-1 font-display text-xl font-normal">Reglas recurrentes</h4>
           <p className="text-xs text-muted-foreground">Pausar una regla detiene nuevas ocurrencias; las pendientes ya creadas se conservan.</p>
         </div>
 
@@ -366,7 +366,7 @@ export default function SubscriptionsManager() {
             {sortedRules.map(rule => {
               const category = getCategoryInfo(rule.categoryId);
               return (
-                <div key={rule.id} className="flex items-center justify-between gap-3 rounded-xl border p-3">
+                <div key={rule.id} className="flex items-center justify-between gap-3 rounded-[var(--radius-interactive)] border bg-card p-3 shadow-[var(--shadow-control)]" data-recurring-rule="prisma">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">{rule.title}</p>
                     <p className="text-xs text-muted-foreground">
