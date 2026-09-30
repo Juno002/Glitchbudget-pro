@@ -39,18 +39,22 @@ export function ReportRangeControls({
   onCustomEndChange: (value: string) => void;
 }) {
   return (
-    <section className="space-y-3" aria-labelledby="range-title">
+    <section className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-card)]" aria-labelledby="range-title" data-report-range-controls="prisma">
       <SectionHeader
+        eyebrow="Ventana analítica"
         title={<span id="range-title">Rango</span>}
         description="El período anterior siempre usa una ventana inmediatamente anterior de duración comparable."
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {presets.map(option=>(
           <Button
             key={option.value}
             type="button"
             size="sm"
             variant={preset===option.value?'default':'outline'}
+            className="min-h-10 rounded-[var(--radius-interactive)]"
+            data-report-preset={option.value}
+            aria-pressed={preset===option.value}
             onClick={()=>onPresetChange(option.value)}
           >
             {option.label}
@@ -58,7 +62,7 @@ export function ReportRangeControls({
         ))}
       </div>
       {preset==='custom' && (
-        <div className="grid max-w-xl gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 rounded-[var(--radius-interactive)] bg-muted/30 p-3 sm:grid-cols-2">
           <label className="text-sm">Desde
             <Input type="date" max={customEnd || today} value={customStart} onChange={event=>onCustomStartChange(event.target.value)} />
           </label>
@@ -67,7 +71,7 @@ export function ReportRangeControls({
           </label>
         </div>
       )}
-      <p className={cn('text-xs',rangeError?'text-bad':'text-muted-foreground')}>
+      <p className={cn('rounded-[var(--radius-interactive)] bg-muted/25 px-3 py-2 text-xs',rangeError?'text-bad':'text-muted-foreground')} aria-live="polite">
         {rangeError || 'Actual: '+currentLabel+' · Comparable: '+previousLabel}
       </p>
     </section>
