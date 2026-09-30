@@ -19,7 +19,7 @@ export default function AutoLockSettings() {
 
   if (!enabled) {
     return (
-      <div className="rounded-lg border p-3 text-sm">
+      <div className="rounded-[var(--radius-interactive)] border bg-card p-3 text-sm shadow-[var(--shadow-control)]" data-auto-lock-settings="prisma">
         <div className="flex items-start gap-3">
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
@@ -36,7 +36,7 @@ export default function AutoLockSettings() {
   const active = autoLockMinutes !== null;
 
   return (
-    <div className="rounded-lg border p-3 text-sm space-y-3" aria-label="Configurar Auto-lock">
+    <div className="space-y-3 rounded-[var(--radius-interactive)] border bg-card p-3 text-sm shadow-[var(--shadow-control)]" data-auto-lock-settings="prisma" aria-label="Configurar Auto-lock">
       <label className="flex items-start justify-between gap-4">
         <span className="flex items-start gap-3">
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />

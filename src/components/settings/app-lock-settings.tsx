@@ -126,7 +126,7 @@ export default function AppLockSettings() {
 
   if (!enabled) {
     return (
-      <form onSubmit={activate} className="rounded-xl border p-4 space-y-4" aria-label="Configurar App lock">
+      <form onSubmit={activate} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Configurar App lock">
         <div className="flex items-start gap-3">
           <LockOpen className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
@@ -151,7 +151,7 @@ export default function AppLockSettings() {
   }
 
   return (
-    <div className="rounded-xl border p-4 space-y-5" aria-label="Administrar App lock">
+    <div className="space-y-5 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Administrar App lock">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />

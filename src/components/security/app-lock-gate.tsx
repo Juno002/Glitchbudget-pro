@@ -39,12 +39,12 @@ export function AppLockGate({ children }: { children: ReactNode }) {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4" aria-label="Aplicación bloqueada">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-2xl border bg-background/95 p-6 shadow-xl">
+    <main className="flex min-h-screen items-center justify-center px-4" aria-label="Aplicación bloqueada" data-lock-screen="prisma">
+      <form onSubmit={submit} className="w-full max-w-sm rounded-[var(--radius-card)] border bg-card/95 p-6 shadow-[var(--shadow-floating)]">
         <div className="flex items-center gap-3">
           <div className="rounded-xl border p-2"><LockKeyhole className="h-5 w-5" /></div>
           <div>
-            <h1 className="text-lg font-semibold">GlitchBudget bloqueado</h1>
+            <h1 className="font-display text-2xl font-normal">GlitchBudget bloqueado</h1>
             <p className="text-xs text-muted-foreground">Introduce tu PIN local para acceder a la interfaz financiera.</p>
           </div>
         </div>

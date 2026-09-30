@@ -56,7 +56,7 @@ export default function PersistentStorageSettings() {
   const Icon = settled === 'persistent' ? ShieldCheck : settled === 'best-effort' ? ShieldAlert : HardDrive;
 
   return (
-    <section className="rounded-xl border p-4 space-y-3" aria-label="Persistencia del almacenamiento local">
+    <section className="space-y-3 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-persistent-storage-settings="prisma" aria-label="Persistencia del almacenamiento local">
       <div className="flex items-start gap-3">
         <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
         <div className="min-w-0">
