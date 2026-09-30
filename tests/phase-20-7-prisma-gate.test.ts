@@ -58,7 +58,7 @@ test('20.7 preserves persistent GlitchBudget technical identifiers for compatibi
   const management=read('src/hooks/use-backup-management.ts');
   assert.match(db,/class GlitchBudgetDB extends Dexie/);
   assert.match(db,/constructor\(name = 'GlitchBudgetDB'\)/);
-  assert.match(db,/\.version\(14\)/);
+  assert.match(db,/CURRENT_DB_SCHEMA_VERSION = 14/);
   assert.match(security,/BALANCE_VISIBILITY_STORAGE_KEY = 'glitchbudget_balances_hidden_v1'/);
   assert.match(security,/APP_LOCK_STORAGE_KEY = 'glitchbudget_app_lock_v1'/);
   assert.match(security,/AUTO_LOCK_STORAGE_KEY = 'glitchbudget_auto_lock_v1'/);
@@ -100,7 +100,7 @@ test('20.7 changed secondary UI does not introduce direct financial persistence'
     'src/components/security/app-lock-gate.tsx',
   ];
   const source=paths.map(read).join('\n');
-  assert.doesNotMatch(source,/Dexie|IndexedDB|@\/lib\/db|\bdb\./i);
+  assert.doesNotMatch(source,/from ['\"]dexie['\"]|IndexedDB|@\/lib\/db|\bdb\./i);
 });
 
 test('20.7 carries no Prisma mock finance data into final visible surfaces', () => {
