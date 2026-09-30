@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.7 completadas; extensión final 20.8–20.10 planificada.
+- **Fase 20 — Modo Prisma:** 20.1–20.7 completadas; 20.7.5–20.10 planificadas.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -17,19 +17,21 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
-- **20.8 — Information Design + Deterministic Insights:** siguiente etapa; no iniciada.
+- **20.7.5 — Semantic Integrity & Security Hardening:** siguiente etapa; no iniciada.
+- **20.8 — Information Design + Deterministic Insights:** planificada.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
 
 ## Próxima intervención autorizada
 
 ```text
-20.8.1 — Preflight de información + regresión de categorías
+20.7.5.1 — Debt semantics audit
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
+20.7.5.1 → 20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
@@ -61,6 +63,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Mov
 | 20.5 — Plan Prisma | **Completado / Gate aprobado** | [phase-20-5.md](phase-20-5.md) |
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
+| 20.7.5 — Semantic Integrity & Security Hardening | Planificada | [phase-20-7-5.md](phase-20-7-5.md) |
 | 20.8 — Information Design + Deterministic Insights | Planificada | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |
