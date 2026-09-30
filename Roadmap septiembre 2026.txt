@@ -2866,6 +2866,383 @@ Y además:
 
 Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostrar paridad.
 
+## 20.7.5 — Semantic Integrity & Security Hardening
+
+**Estado: planificada / no iniciada.** Plan detallado: `docs/roadmap/phase-20-7-5.md`.
+
+Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
+
+Ocurre después del baseline visual/branding aprobado en 20.7 y **antes de 20.8**.
+
+### Objetivo
+
+Cerrar ambigüedades semánticas, temporales, criptográficas y de escalabilidad del núcleo **antes de construir comparaciones e insights sobre esos datos**.
+
+Regla central:
+
+```text
+no construir insights sobre semántica financiera ambigua
+```
+
+### Hallazgos que justifican la fase
+
+- el modelo persistente admite `Debt.type = 'loan'`;
+- `selectPosition()` incorpora actualmente pasivos de tarjetas, no préstamos;
+- la UI crea tarjetas, pero backups históricos pueden restaurar `loan`;
+- `Debt.principal` tiene significado distinto según tipo;
+- `DebtPayment.date` mezcla contrato legado ISO datetime con flujo actual local `YYYY-MM-DD`;
+- el contrato de moneda está protegido hoy, pero debe quedar congelado antes de nuevas comparaciones;
+- encrypted backup v1 requiere revisión de endurecimiento con compatibilidad hacia atrás;
+- `selectAccountEntries()` debe medirse con volúmenes grandes antes de optimizar;
+- se necesita un gate de reconciliación financiera con datasets golden independientes.
+
+### Invariantes protegidas
+
+Durante 20.7.5:
+
+- dinero persistido sigue en enteros de unidades menores;
+- compra con tarjeta = gasto + pasivo, sin reducir efectivo;
+- pago de tarjeta = reduce efectivo + pasivo, sin duplicar gasto;
+- transferencia = neutral para ingreso/gasto y patrimonio;
+- planificación no mueve dinero;
+- inversión financiada desde cuenta = líquido → inversión, no gasto;
+- rendimiento proyectado no entra automáticamente en patrimonio;
+- UI no define fórmulas financieras canónicas;
+- UI no accede directamente a Dexie;
+- backups existentes siguen siendo legibles;
+- offline y `connect-src 'none'` permanecen;
+- no se introduce red para FX, seguridad ni análisis.
+
+### 20.7.5.1 — Debt semantics audit
+
+Auditar como mínimo:
+
+- modelos;
+- ledger;
+- debt service;
+- account/debt services;
+- transaction service;
+- backup/import;
+- Debt UI;
+- migraciones;
+- fixtures históricos;
+- tests de deuda.
+
+Responder formalmente:
+
+1. si `loan` es feature vigente, incompleta o compatibilidad histórica;
+2. cómo se calcula su saldo;
+3. qué significa `principal` por tipo;
+4. qué movimientos reducen cada deuda;
+5. cómo impacta Home/Reportes/net worth;
+6. qué ocurre al importar un `loan`;
+7. qué datos históricos deben preservarse.
+
+Entregable:
+
+```text
+tipo de deuda
+→ significado de campos
+→ saldo canónico
+→ impacto en net worth
+→ acciones permitidas
+→ representación UI
+→ compatibilidad backup
+```
+
+No migrar ni “arreglar” préstamos antes de cerrar esta definición.
+
+**Gate 20.7.5.1:** contrato de deuda explícito, documentado y testeado.
+
+### 20.7.5.2 — Loans + Net Worth correctness
+
+Aplicar el contrato anterior para que ninguna deuda persistida/restaurada pueda inflar o distorsionar patrimonio.
+
+Si `loan` continúa soportado:
+
+- fuente canónica de saldo;
+- pagos;
+- pasivo;
+- impacto en net worth;
+- estado activo/cerrado.
+
+Si queda como compatibilidad histórica:
+
+- no tratarlo como tarjeta;
+- no ocultarlo silenciosamente de pasivos;
+- no permitir acciones incompatibles;
+- conservar export/restore;
+- definir representación segura o migración explícita.
+
+Fixtures mínimos:
+
+- tarjeta sin saldo;
+- tarjeta con compra;
+- tarjeta con pago;
+- saldo a favor;
+- préstamo activo;
+- préstamo parcialmente pagado;
+- préstamo cerrado;
+- tarjeta + préstamo;
+- backup histórico con `loan`;
+- net worth antes/después de pagos.
+
+**Gate 20.7.5.2:** patrimonio y pasivos cuadran para todos los tipos de deuda persistibles/restaurables.
+
+### 20.7.5.3 — Debt model normalization
+
+Eliminar la ambigüedad de `Debt.principal`.
+
+Problema:
+
+```text
+credit_card.principal ≈ límite aprobado
+loan.principal        ≈ principal original
+```
+
+Preferir primero:
+
+- read models discriminados;
+- helpers/selectors con nombres explícitos;
+- tipos derivados discriminados;
+- evitar que UI consuma directamente un campo ambiguo.
+
+Si hace falta modificar persistencia:
+
+- migración Dexie explícita;
+- versionada;
+- fixtures antiguos;
+- compatibilidad de backup;
+- sin `db.clear()`;
+- sin recrear base.
+
+**Gate 20.7.5.3:** cada cantidad de deuda tiene significado inequívoco fuera de compatibilidad histórica.
+
+### 20.7.5.4 — Canonical financial dates
+
+Contrato objetivo para nuevos movimientos:
+
+```text
+fecha financiera = YYYY-MM-DD local
+```
+
+Revisar y normalizar:
+
+- comentarios/tipos legacy;
+- pagos de deuda;
+- imports con ISO datetime;
+- migraciones;
+- comparaciones `through`;
+- ordenamiento;
+- `.slice(0,10)` dispersos.
+
+Normalización legacy debe ocurrir en un punto canónico, no repartida entre selectores.
+
+Tests:
+
+- UTC−4 cerca de medianoche;
+- datetime UTC con día distinto;
+- date-only canónica;
+- restore legacy;
+- pago creado por UI;
+- comparación temporal.
+
+**Gate 20.7.5.4:** ninguna operación financiera nueva cambia de día por UTC implícito.
+
+### 20.7.5.5 — Currency invariant defense
+
+Preservar y endurecer el contrato actual:
+
+- cuentas operativas en moneda base;
+- cuentas extranjeras rechazadas en el flujo soportado;
+- transferencias cross-currency bloqueadas sin conversión;
+- restore incompatible bloqueado;
+- movimientos normalizados a cuenta/base;
+- sin FX remoto.
+
+Añadir un fixture adversarial con monedas mezcladas para impedir que una futura feature FX permita sumas nominales accidentales.
+
+No implementar multi-moneda real aquí.
+
+**Gate 20.7.5.5:** ningún camino soportado puede sumar monedas distintas como equivalentes.
+
+### 20.7.5.6 — Encrypted Backup v2 assessment
+
+Baseline:
+
+```text
+PBKDF2-HMAC-SHA-256
+310 000 iteraciones
+AES-256-GCM
+salt aleatorio
+nonce aleatorio
+AAD autenticado
+envelope v1
+contraseña mínima 8 caracteres
+```
+
+Trabajo:
+
+1. contrastar parámetros con guía de seguridad vigente;
+2. benchmark desktop/móvil;
+3. fijar presupuesto de latencia aceptable;
+4. evaluar mayor coste KDF y política de contraseña;
+5. diseñar v2 solo si existe una mejora concreta.
+
+Si existe v2:
+
+- export nuevo puede usar v2;
+- import sigue leyendo v1;
+- v1 no se reescribe automáticamente;
+- error de contraseña/manipulación no filtra información útil;
+- AAD mantiene metadata autenticada;
+- contraseña nunca se almacena ni transmite.
+
+No fijar un número arbitrario de iteraciones sin benchmark.
+
+**Gate 20.7.5.6:** decisión documentada y, si procede, v2 compatible hacia atrás.
+
+### 20.7.5.7 — Ledger performance baseline
+
+Medir antes de optimizar.
+
+Benchmark determinista como mínimo:
+
+- 1 000 movimientos;
+- 10 000 movimientos;
+- 50 000 movimientos;
+- varias cuentas;
+- ingresos/gastos/pagos/transferencias;
+- posición;
+- historial por cuenta.
+
+Regla:
+
+```text
+sin degradación medible
+→ no optimizar
+
+degradación medible
+→ optimización mínima y testeada
+```
+
+Posibles optimizaciones solo si se justifican:
+
+- agrupar una vez por `accountId`;
+- índices/read models intermedios;
+- evitar filtrar el mismo snapshot N veces.
+
+No crear caches persistentes como segunda fuente financiera.
+
+**Gate 20.7.5.7:** baseline reproducible y toda optimización justificada por medición.
+
+### 20.7.5.8 — Independent financial reconciliation gate
+
+Crear datasets golden cuyos resultados esperados se definan independientemente del código productivo.
+
+Principio:
+
+```text
+expected financial outcome
+≠
+copiar la fórmula de producción dentro del test
+```
+
+Casos mínimos:
+
+- saldo inicial;
+- ingreso;
+- gasto efectivo;
+- gasto bancario;
+- compra tarjeta;
+- pago tarjeta;
+- saldo a favor;
+- transferencia;
+- inversión financiada;
+- préstamo según 20.7.5.1;
+- presupuesto;
+- pago planificado;
+- meta;
+- cambio de período.
+
+Cuadrar cuando aplique:
+
+- efectivo;
+- bancos;
+- inversiones;
+- líquido;
+- pasivos;
+- net worth;
+- spending;
+- debt payments;
+- cash flow;
+- neutralidad de transferencias;
+- neutralidad de planning;
+- Home;
+- Reportes.
+
+Puede hacerse reconciliación manual adicional con datos reales fuera del repo, pero nunca subir información financiera personal a fixtures.
+
+**Gate 20.7.5.8:** invariantes principales cuadran contra resultados esperados independientes.
+
+### 20.7.5.9 — Final hardening gate
+
+Requerido:
+
+```text
+npm run check
+npm run build
+npm run test:e2e
+```
+
+Además validar:
+
+- deuda/loan;
+- net worth;
+- fechas local/legacy;
+- moneda;
+- backup JSON round-trip;
+- encrypted backup v1;
+- v2 si fue aprobado;
+- migraciones antiguas;
+- golden reconciliation;
+- benchmark;
+- offline;
+- `connect-src 'none'`;
+- cero fórmulas financieras nuevas en UI;
+- cero Dexie directo en UI.
+
+Entrega obligatoria:
+
+1. archivos cambiados;
+2. decisión final sobre `loan`;
+3. semántica final de deuda;
+4. contrato final de fechas;
+5. cambios de schema;
+6. migraciones;
+7. formatos de backup soportados;
+8. parámetros criptográficos vigentes;
+9. benchmark;
+10. datasets golden;
+11. riesgos restantes.
+
+**Gate 20.7.5:** integridad semántica cerrada antes de permitir 20.8.
+
+### Fuera de alcance de 20.7.5
+
+No añadir:
+
+- préstamos nuevos en UI salvo que el audit demuestre que son una feature vigente que necesita representación correcta;
+- multi-moneda real;
+- sincronización bancaria;
+- APIs FX;
+- servidor;
+- IA;
+- cambios visuales de 20.8/20.9;
+- optimizaciones sin benchmark.
+
+---
+
 ## 20.8 — Information Design + Deterministic Insights
 
 **Estado: planificada / no iniciada.** Plan auxiliar: `docs/roadmap/phase-20-8.md`.
@@ -3590,6 +3967,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
+20.7.5.1 → 20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
@@ -3714,6 +4092,8 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 19.5 Prisma Engine Gate
 ↓
 20.1–20.7 Prisma visual transformation + branding baseline
+↓
+20.7.5 Semantic Integrity & Security Hardening
 ↓
 20.8 Information Design + Deterministic Insights
 ↓
