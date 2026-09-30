@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.7 completadas; 20.7.5–20.10 planificadas.
+- **Fase 20 — Modo Prisma:** 20.1–20.7 completadas; 20.7.5 en curso; 20.8–20.10 planificadas.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -17,7 +17,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
-- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.4 completadas / Gates aprobados.
+- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.5 completadas / Gates aprobados.
 - **20.8 — Information Design + Deterministic Insights:** planificada.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
@@ -25,13 +25,13 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-20.7.5.5 — Currency invariant defense
+20.7.5.6 — Encrypted Backup v2 assessment
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.7.5.1 → 20.7.5.9
+20.7.5.6 → 20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
@@ -45,8 +45,8 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-522/522 tests
-Quality checks 36764771406 (attempt 2) ✅
+526/526 tests
+Quality checks 36776913726 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
@@ -62,7 +62,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Mov
 | 20.5 — Plan Prisma | **Completado / Gate aprobado** | [phase-20-5.md](phase-20-5.md) |
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
-| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1–20.7.5.4 completadas / Gates aprobados** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
+| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1–20.7.5.5 completadas / Gates aprobados** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | Planificada | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |

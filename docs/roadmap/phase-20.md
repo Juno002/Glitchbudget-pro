@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5, 20.8, 20.9 y 20.10 planificadas por decisiones posteriores del 30 sep 2026.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.5 completadas / Gates aprobados; 20.7.5.6 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -707,6 +707,18 @@ Cubrir al menos:
 
 ### 20.7.5.5 — Currency invariant defense
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+526/526 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36776913726 ✅
+```
+
 #### Objetivo
 
 Convertir la protección actual de moneda en un invariant explícito del ledger/posición antes de introducir nuevas comparaciones.
@@ -735,6 +747,16 @@ Hoy el sistema:
 #### Restricción
 
 No implementar multi-moneda real en 20.7.5.
+
+#### Resultado de implementación
+
+- `src/domain/ledger.ts` incorpora `requireSinglePositionCurrency()` como precondición ejecutable del agregado de posición.
+- Los códigos se normalizan antes de comparar, por lo que variantes como `dop` y ` DOP ` siguen siendo equivalentes.
+- `selectPosition()` invoca el guard antes de sumar efectivo, bancos, inversiones y pasivos.
+- `tests/phase-20-7-5-5-currency-invariant.test.ts` cubre dataset homogéneo, fixture adversarial DOP + USD, normalización y posición vacía.
+- Las restricciones de servicios existentes continúan bloqueando cuentas/transferencias incompatibles sin conversión explícita.
+- No se añade conversión FX, multi-moneda real, red ni segunda fuente de posición.
+- Persistencia permanece en Dexie v15; Backup JSON v13 y encrypted envelope v1 no cambian.
 
 **Gate 20.7.5.5:** ningún camino soportado puede sumar nominalmente monedas diferentes como si fueran equivalentes.
 
