@@ -1,16 +1,16 @@
-# GlitchBudget Pro
+# Prisma
 
 [![Quality checks](https://github.com/Juno002/Glitchbudget-pro/actions/workflows/checks.yml/badge.svg)](https://github.com/Juno002/Glitchbudget-pro/actions/workflows/checks.yml)
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. **20.1, 20.2, 20.3, 20.4, 20.5 y 20.6 están completadas con sus Gates aprobados**; 20.7 — superficies secundarias + branding Prisma + gate final — es la siguiente etapa.
+> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — Modo Prisma / transformación visual y branding — completada con Gate final aprobado.** El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
 ## Producto
 
-GlitchBudget registra y analiza dinero real sin confundirlo con planificación futura.
+Prisma registra y analiza dinero real sin confundirlo con planificación futura.
 
 Las cuatro áreas principales son:
 
@@ -98,14 +98,14 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente al cerrar Fase 20.6:
+Baseline vigente al cerrar Fase 20.7 / Fase 20:
 
-- **495/495 tests**;
+- **502/502 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
-- E2E: verificar shell + Home Prisma → compositor/Movimientos Prisma → crear ingreso/gasto → recorrer Plan Prisma → Reportes Prisma + cinco gráficos + 7D/Custom → recargar offline desde service worker;
-- Quality checks **36670721688** verdes en el PR #49.
+- E2E: branding Prisma desktop/móvil → Home → compositor/Movimientos → cuentas/inversiones → Logros → Ajustes/Categorías/Seguridad/Backups → Plan → Reportes/gráficos → recarga offline;
+- Quality checks **36675832852** y **36675835726** verdes en el PR #50.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
@@ -166,8 +166,9 @@ Documentación de ejecución:
 - [Gate 20.4 — Movimientos + compositor global Prisma](docs/roadmap/phase-20-4.md)
 - [Gate 20.5 — Plan Prisma](docs/roadmap/phase-20-5.md)
 - [Gate 20.6 — Reportes + sistema de gráficos Prisma](docs/roadmap/phase-20-6.md)
+- [Gate 20.7 — Prisma Visual/Branding Gate final](docs/roadmap/phase-20-7.md)
 
-Fase 20 mantiene **GlitchBudget Engine** como único motor financiero y utiliza el repositorio Prisma únicamente como referencia visual. El producto visible pasará a llamarse **Prisma** al aprobar el Gate 20.7. Ese cambio es branding: identificadores persistentes como `GlitchBudgetDB` no se renombran solo por estética.
+**Prisma** es el producto visible. **GlitchBudget Engine** continúa como único motor financiero y el repositorio Prisma original permanece únicamente como referencia visual histórica. Identificadores persistentes como `GlitchBudgetDB`, claves `glitchbudget_*` y formatos de backup históricos no se renombran por branding.
 
 ## Principio de evolución
 
