@@ -71,14 +71,14 @@ export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: Budget
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="rounded-[var(--radius-interactive)]">
           <ArrowRightLeft className="mr-2 h-4 w-4" />
           Reasignar presupuesto
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" data-budget-transfer-dialog="prisma">
         <DialogHeader>
-          <DialogTitle>Reasignar presupuesto</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-normal">Reasignar presupuesto</DialogTitle>
           <DialogDescription>
             Reasigna límite entre categorías del mismo período. Esto no mueve dinero entre cuentas ni crea movimientos reales.
           </DialogDescription>
@@ -145,7 +145,7 @@ export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: Budget
               )}
             />
             <DialogFooter>
-                <Button disabled={form.formState.isSubmitting} type="submit" className="bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">Confirmar reasignación</Button>
+                <Button disabled={form.formState.isSubmitting} type="submit" className="shadow-[var(--shadow-control)]">Confirmar reasignación</Button>
             </DialogFooter>
           </form>
         </Form>
