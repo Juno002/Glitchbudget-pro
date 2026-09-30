@@ -2813,7 +2813,7 @@ Quality checks 36675835726 ✅
 
 **Baseline visual/branding hasta 20.7: completado y aprobado.**
 
-El 30 sep 2026 se amplía Fase 20 con tres etapas finales. 20.7 no se reabre: permanece como baseline estable sobre el que se construyen 20.8–20.10.
+El 30 sep 2026 se amplía Fase 20 con una etapa intermedia de hardening (20.7.5) y tres etapas finales (20.8–20.10). 20.7 no se reabre: permanece como baseline estable.
 
 Completar:
 
