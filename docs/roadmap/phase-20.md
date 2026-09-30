@@ -431,6 +431,43 @@ tipo de deuda
 
 No hacer migración de datos ni “arreglar” `loan` antes de cerrar esta definición.
 
+#### Resultado de la auditoría
+
+La decisión de 20.7.5.1 es:
+
+```text
+credit_card = feature operativa vigente
+loan        = compatibilidad histórica; no es una feature operativa vigente
+```
+
+Evidencia revisada:
+
+- el modelo persistente conserva `Debt.type = credit_card | loan` desde los esquemas históricos;
+- Fase 2 dejó documentado que `loan` quedaba fuera de la posición agregada y que incorporarlo requería una decisión posterior explícita;
+- la UI actual solo crea tarjetas de crédito;
+- `saveExpense()` exige una deuda activa de tipo `credit_card` para una compra a crédito;
+- backup/import sigue aceptando y preservando filas `loan` y sus `DebtPayment`;
+- el ledger actual calcula posición únicamente con tarjetas;
+- existen residuos genéricos que todavía pueden tratar un `loan` como si fuera tarjeta en algunos caminos. Esos desajustes se registran para 20.7.5.2 y no se corrigen en esta microintervención.
+
+Contrato adoptado:
+
+| Tipo | `principal` | Saldo canónico | Net worth | Acciones permitidas | UI | Backup |
+|---|---|---|---|---|---|---|
+| `credit_card` | límite de crédito aprobado; no es activo ni saldo pendiente | saldo firmado = `openingAdjustment + compras a crédito vinculadas - pagos vinculados`; un valor negativo es saldo a favor | saldo positivo = pasivo; saldo negativo = activo de saldo a favor; el límite nunca entra al patrimonio | crear, registrar compra a crédito, registrar pago, conciliar y preservar historial | tarjeta operativa con saldo pendiente/a favor y límite disponible | preservar campos, compras, pagos y `openingAdjustment` |
+| `loan` | principal original del préstamo | compatibilidad = `max(0, principal + openingAdjustment histórico - pagos históricos vinculados)`; no se sintetizan intereses desde `apr`; compras de tarjeta nunca aumentan un préstamo | todo saldo positivo computado es pasivo y reduce patrimonio; `status` por sí solo no borra una deuda pendiente | restaurar, exportar y consultar historial en modo lectura | préstamo histórico identificable y de solo lectura; nunca renderizado ni operado como tarjeta | preservar tipo, principal, status, APR, pago mínimo, `openingAdjustment` y pagos vinculados |
+
+Reglas adicionales:
+
+- `DebtPayment` histórico vinculado a un `loan` reduce su saldo compatible.
+- `status` es metadata de ciclo de vida; un préstamo marcado `closed` con saldo computado positivo sigue requiriendo tratamiento como pasivo hasta que los datos históricos lo concilien a cero.
+- `openingAdjustment` en `loan` se conserva como corrección histórica de baseline si existe; esta fase no crea una nueva UI para producirlo.
+- Home y Reportes deben recibir el mismo pasivo de préstamo desde la posición canónica; esa aplicación pertenece a 20.7.5.2.
+- Un backup con `loan` no puede convertirlo a tarjeta, descartarlo ni habilitar acciones de tarjeta.
+
+Contrato ejecutable de apoyo: `src/domain/debt-semantics.ts`.
+Tests de contrato: `tests/phase-20-7-5-1-debt-semantics.test.ts`.
+
 **Gate 20.7.5.1:** contrato de deuda explícito, documentado y cubierto por tests de contrato.
 
 ---
