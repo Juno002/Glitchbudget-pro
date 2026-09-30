@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1, 20.2 y 20.3 completadas / Gates aprobados. 20.4 no iniciada**.
+Estado: **20.1, 20.2, 20.3 y 20.4 completadas / Gates aprobados. 20.5 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -175,6 +175,8 @@ Los gráficos que tengan sentido en Home pueden mantenerse o recolocarse, pero c
 **Gate 20.3:** Home tiene apariencia Prisma, paridad funcional con la versión anterior y cero fórmulas financieras nuevas en UI.
 
 ## 20.4 — Movimientos + compositor global
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-4.md](phase-20-4.md). Quality checks `36660263082`: 483/483 tests, build y browser E2E responsive/offline verdes.
 
 Migrar:
 
