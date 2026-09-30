@@ -1,9 +1,28 @@
 'use client';
 
 import { useEffect, useMemo, useRef, type ReactNode } from 'react';
-import { Settings2, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpRight,
+  CreditCard,
+  Landmark,
+  Settings2,
+  TrendingUp,
+  WalletCards,
+} from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
-import { PageHeader, SectionHeader, MetricCard, EmptyState, PlannedPaymentRow, ProgressMetric } from '@/components/finance-ui';
+import {
+  EmptyState,
+  MoneyValue,
+  PageHeader,
+  PlannedPaymentRow,
+  ProgressMetric,
+  SectionHeader,
+  StatusBadge,
+  type FinancialStatus,
+  type MoneyTone,
+} from '@/components/finance-ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,6 +35,8 @@ import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
 import { useHomePreferences } from '@/hooks/use-home-preferences';
 import { HOME_MODULES } from '@/lib/home-preferences';
 import { formatPeriodRange } from '@/lib/period-format';
+import { cn } from '@/lib/utils';
+import type { LucideIcon } from 'lucide-react';
 
 function dateLabel(value:string) {
   return new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
@@ -42,7 +63,7 @@ function HomePreferencesDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-2 h-4 w-4" />Personalizar Home</Button>
+        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-1 h-4 w-4" />Personalizar Home</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
@@ -56,7 +77,7 @@ function HomePreferencesDialog({
               const isHidden=hidden.includes(module.id);
               const orderIndex=visibleOrder.indexOf(module.id);
               return (
-                <div key={module.id} className="flex items-center gap-2 rounded-lg border p-3">
+                <div key={module.id} className="flex items-center gap-2 rounded-[var(--radius-interactive)] border bg-card p-3">
                   <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
                     <input
                       type="checkbox"
@@ -80,7 +101,7 @@ function HomePreferencesDialog({
           <label className="block space-y-2 text-sm">
             <span className="font-medium">Sección inicial al abrir Home</span>
             <select
-              className="h-10 w-full rounded-md border border-input bg-background px-3"
+              className="h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3"
               value={defaultSection}
               onChange={event=>onDefaultChange(event.target.value as HomeModuleId)}
             >
@@ -95,8 +116,83 @@ function HomePreferencesDialog({
   );
 }
 
-function HomeSection({id,children}:{id:HomeModuleId;children:ReactNode}) {
-  return <section id={'home-'+id} className="scroll-mt-24 space-y-3" data-home-module={id}>{children}</section>;
+function HomeSection({id,children,className}:{id:HomeModuleId;children:ReactNode;className?:string}) {
+  return (
+    <section
+      id={'home-'+id}
+      className={cn('scroll-mt-24',className)}
+      data-home-module={id}
+    >
+      {children}
+    </section>
+  );
+}
+
+function PositionCard({
+  label,
+  amount,
+  supporting,
+  icon:Icon,
+  tone='neutral',
+  variant='default',
+}: {
+  label:string;
+  amount:number;
+  supporting:string;
+  icon:LucideIcon;
+  tone?:MoneyTone;
+  variant?:'default'|'featured'|'warm'|'mint';
+}) {
+  return (
+    <Card className={cn(
+      'relative overflow-hidden',
+      variant==='featured' && 'border-primary bg-primary text-primary-foreground shadow-[var(--shadow-floating)]',
+      variant==='warm' && 'border-[hsl(var(--brand-coral)/0.18)] bg-[hsl(var(--brand-coral)/0.07)]',
+      variant==='mint' && 'border-[hsl(var(--brand-mint)/0.22)] bg-[hsl(var(--brand-mint)/0.08)]',
+    )}>
+      <CardContent className="p-5">
+        <div className={cn(
+          'flex items-center justify-between gap-3 text-xs font-semibold',
+          variant==='featured' ? 'text-primary-foreground/70' : 'text-muted-foreground',
+        )}>
+          <span>{label}</span>
+          <Icon className="h-[19px] w-[19px]" aria-hidden="true" />
+        </div>
+        <MoneyValue
+          amount={amount}
+          tone={tone}
+          className={cn(
+            'mt-4 block font-display text-[1.75rem] leading-none tracking-[-0.04em]',
+            variant==='featured' && '!text-primary-foreground',
+          )}
+        />
+        <p className={cn(
+          'mt-3 text-[11px] leading-relaxed',
+          variant==='featured' ? 'text-primary-foreground/65' : 'text-muted-foreground',
+        )}>{supporting}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PanelHeading({
+  eyebrow,
+  title,
+  action,
+}: {
+  eyebrow:string;
+  title:string;
+  action?:ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
+        <h2 className="mt-1 font-display text-xl font-normal tracking-[-0.025em]">{title}</h2>
+      </div>
+      {action}
+    </div>
+  );
 }
 
 export default function SummaryTab() {
@@ -151,147 +247,261 @@ export default function SummaryTab() {
     window.setTimeout(()=>document.getElementById('investments-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
   };
 
+  const budgetStatus: { status:FinancialStatus; label:string } =
+    home.budget.status==='over'
+      ? {status:'danger',label:'Excedido'}
+      : home.budget.status==='alert'
+        ? {status:'warning',label:'Requiere atención'}
+        : home.budget.status==='ok'
+          ? {status:'success',label:'En presupuesto'}
+          : {status:'neutral',label:'Sin presupuesto'};
+
   const modules:Record<HomeModuleId,ReactNode>={
     position:(
-      <HomeSection id="position">
+      <HomeSection id="position" className="space-y-3">
         <SectionHeader
           title="Posición financiera"
-          description="¿Cuánto tienes y cuánto debes ahora?"
-          actions={<Button type="button" variant="outline" size="sm" onClick={goToAccounts}>Ver cuentas</Button>}
+          description="Dinero líquido, activos registrados y deuda real."
+          actions={<Button type="button" variant="ghost" size="sm" onClick={goToAccounts}>Ver cuentas <ArrowUpRight className="h-4 w-4" /></Button>}
         />
-        {loading ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[0,1,2,3].map(i=><Skeleton key={i} className="h-24 w-full" />)}</div> : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard label="Disponible líquido" amount={home.position.liquidAssets} tone={home.position.liquidAssets<0?'negative':'positive'} supporting="Efectivo + bancos. No incluye crédito disponible." />
-            <MetricCard label="Inversiones" amount={home.position.investments} tone={home.position.investments>0?'positive':'neutral'} supporting="Valor registrado real; sin rendimiento estimado." />
-            <MetricCard label="Debes" amount={home.position.liabilities} tone={home.position.liabilities>0?'negative':'neutral'} supporting="Pasivo real de tarjetas registradas." />
-            <MetricCard label="Patrimonio neto" amount={home.position.netWorth} tone={home.position.netWorth<0?'negative':'neutral'} supporting="Misma fórmula compartida con Reportes." />
+        {loading ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[0,1,2,3].map(i=><Skeleton key={i} className="h-[150px] w-full rounded-[var(--radius-card)]" />)}</div> : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-home-layout="position-metrics">
+            <PositionCard
+              label="Disponible líquido"
+              amount={home.position.liquidAssets}
+              tone={home.position.liquidAssets<0?'negative':'neutral'}
+              supporting="Efectivo + bancos. No incluye crédito disponible."
+              icon={WalletCards}
+              variant="featured"
+            />
+            <PositionCard
+              label="Patrimonio neto"
+              amount={home.position.netWorth}
+              tone={home.position.netWorth<0?'negative':'neutral'}
+              supporting="Activos reales menos pasivos registrados."
+              icon={TrendingUp}
+            />
+            <PositionCard
+              label="Deuda total"
+              amount={home.position.liabilities}
+              tone={home.position.liabilities>0?'negative':'neutral'}
+              supporting="Pasivo real de tarjetas registradas."
+              icon={CreditCard}
+              variant="warm"
+            />
+            <PositionCard
+              label="Inversiones"
+              amount={home.position.investments}
+              tone="neutral"
+              supporting="Valor registrado real; sin rendimiento proyectado."
+              icon={Landmark}
+              variant="mint"
+            />
           </div>
         )}
       </HomeSection>
     ),
     budget:(
       <HomeSection id="budget">
-        <SectionHeader
-          title="Presupuesto disponible"
-          description="¿Cuánto puedes gastar dentro de tus límites actuales?"
-          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos</Button>}
-        />
-        {home.budget.configuredCount ? (
-          <Card><CardContent className="grid gap-4 pt-6 sm:grid-cols-3">
-            <MetricCard label="Restante" amount={home.budget.remaining} tone={home.budget.remaining<0?'negative':'neutral'} supporting={'de '+money(home.budget.limit)+' presupuestados'} />
-            <MetricCard label="Gastado" amount={home.budget.spent} tone={home.budget.overCount>0?'negative':'neutral'} supporting={home.budget.configuredCount+' categorías con límite'} />
-            <div className="rounded-xl border p-4">
-              <p className="text-xs text-muted-foreground">Estado</p>
-              <p className="mt-2 text-lg font-semibold">{home.budget.status==='over'?'Excedido':home.budget.status==='alert'?'Requiere atención':'En presupuesto'}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{home.budget.overCount>0?home.budget.overCount+' presupuestos excedidos':home.budget.alertCount>0?home.budget.alertCount+' cerca del límite':'Sin alertas de presupuesto'}</p>
-            </div>
-          </CardContent></Card>
-        ) : <EmptyState title="Aún no tienes presupuestos" description="Crea límites en Plan → Presupuestos para que Home pueda responder cuánto te queda." />}
+        <Card className="h-full">
+          <CardContent className="p-5 sm:p-6">
+            <PanelHeading
+              eyebrow="Seguimiento"
+              title="Presupuesto disponible"
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos <ArrowUpRight className="h-4 w-4" /></Button>}
+            />
+            {home.budget.configuredCount ? (
+              <div className="mt-6 space-y-5">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground">Te queda</p>
+                    <MoneyValue
+                      amount={home.budget.remaining}
+                      tone={home.budget.remaining<0?'negative':'neutral'}
+                      className="mt-1 block font-display text-[2rem] leading-none tracking-[-0.045em]"
+                    />
+                    <p className="mt-2 text-xs text-muted-foreground">de {money(home.budget.limit)} presupuestados</p>
+                  </div>
+                  <StatusBadge status={budgetStatus.status} label={budgetStatus.label} />
+                </div>
+                <ProgressMetric
+                  label="Uso del presupuesto"
+                  current={home.budget.spent}
+                  total={home.budget.limit}
+                  remaining={home.budget.remaining}
+                  currentLabel="Gastado"
+                  totalLabel="Presupuestado"
+                  status={budgetStatus.status}
+                  statusLabel={home.budget.overCount>0
+                    ? home.budget.overCount+' excedidos'
+                    : home.budget.alertCount>0
+                      ? home.budget.alertCount+' cerca del límite'
+                      : 'Sin alertas'}
+                />
+              </div>
+            ) : (
+              <EmptyState
+                className="mt-5"
+                title="Aún no tienes presupuestos"
+                description="Crea límites en Plan → Presupuestos para ver cuánto te queda en este período."
+              />
+            )}
+          </CardContent>
+        </Card>
       </HomeSection>
     ),
     upcoming:(
       <HomeSection id="upcoming">
-        <SectionHeader
-          title="Próximos pagos"
-          description="¿Qué viene y qué ya requiere atención?"
-          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan</Button>}
-        />
-        {home.upcoming.rows.length ? (
-          <div className="grid gap-2">
-            {home.upcoming.rows.map(({occurrence,rule})=>(
-              <PlannedPaymentRow
-                key={occurrence.id}
-                title={rule.title}
-                amount={rule.amount}
-                dateLabel={dateLabel(occurrence.scheduledDate)}
-                kindLabel={rule.direction==='expense'?'Gasto':'Ingreso'}
-                status={occurrenceDisplayStatus(occurrence,today)}
-                actions={{
-                  confirm:()=>{void confirmPlannedOccurrenceItem(occurrence.id);},
-                  skip:()=>{void skipPlannedOccurrenceItem(occurrence.id);},
-                }}
+        <Card className="h-full">
+          <CardContent className="p-5 sm:p-6">
+            <PanelHeading
+              eyebrow="Lo que viene"
+              title="Próximos pagos"
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan <ArrowUpRight className="h-4 w-4" /></Button>}
+            />
+            {home.upcoming.rows.length ? (
+              <div className="mt-5 grid gap-2">
+                {home.upcoming.rows.map(({occurrence,rule})=>(
+                  <PlannedPaymentRow
+                    key={occurrence.id}
+                    title={rule.title}
+                    amount={rule.amount}
+                    dateLabel={dateLabel(occurrence.scheduledDate)}
+                    kindLabel={rule.direction==='expense'?'Gasto':'Ingreso'}
+                    status={occurrenceDisplayStatus(occurrence,today)}
+                    actions={{
+                      confirm:()=>{void confirmPlannedOccurrenceItem(occurrence.id);},
+                      skip:()=>{void skipPlannedOccurrenceItem(occurrence.id);},
+                    }}
+                  />
+                ))}
+                <div className="flex flex-wrap items-center gap-2 pt-2 text-xs text-muted-foreground">
+                  <span>{home.upcoming.overdueCount>0 ? home.upcoming.overdueCount+' vencidos' : 'Sin pagos vencidos'}</span>
+                  <span aria-hidden="true">·</span>
+                  <span>{home.upcoming.todayCount>0 ? home.upcoming.todayCount+' para hoy' : 'Nada adicional para hoy'}</span>
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                className="mt-5"
+                title="Nada próximo"
+                description="No hay pagos o ingresos planificados pendientes en los próximos 7 días."
               />
-            ))}
-          </div>
-        ) : <EmptyState title="Nada próximo" description="No hay pagos o ingresos planificados pendientes en los próximos 7 días." />}
+            )}
+          </CardContent>
+        </Card>
       </HomeSection>
     ),
     goals:(
       <HomeSection id="goals">
-        <SectionHeader
-          title="Metas relevantes"
-          description="Objetivos activos que pueden requerir una acción."
-          actions={<Button type="button" variant="outline" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas</Button>}
-        />
-        {home.goals.length ? (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {home.goals.map(({goal,remaining,schedule})=>(
-              <Card key={goal.id}><CardContent className="pt-6">
-                <ProgressMetric
-                  label={goal.name}
-                  current={goal.saved}
-                  total={goal.target}
-                  currentLabel="Ahorrado"
-                  remaining={remaining}
-                  supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporte mensual requerido: '+money(schedule.requiredMonthly)}
-                  status={schedule.overdue?'danger':'neutral'}
-                  statusLabel={goal.date?'Para '+dateLabel(goal.date):'Sin fecha límite'}
-                />
-              </CardContent></Card>
-            ))}
-          </div>
-        ) : <EmptyState title="Aún no tienes metas activas" description="Crea una meta en Plan → Metas para seguirla desde Home." />}
+        <Card className="h-full">
+          <CardContent className="p-5 sm:p-6">
+            <PanelHeading
+              eyebrow="Objetivos"
+              title="Metas relevantes"
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas <ArrowUpRight className="h-4 w-4" /></Button>}
+            />
+            {home.goals.length ? (
+              <div className="mt-5 grid gap-5">
+                {home.goals.map(({goal,remaining,schedule})=>(
+                  <ProgressMetric
+                    key={goal.id}
+                    label={goal.name}
+                    current={goal.saved}
+                    total={goal.target}
+                    currentLabel="Ahorrado"
+                    remaining={remaining}
+                    supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporte mensual requerido: '+money(schedule.requiredMonthly)}
+                    status={schedule.overdue?'danger':'neutral'}
+                    statusLabel={goal.date?'Para '+dateLabel(goal.date):'Sin fecha límite'}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                className="mt-5"
+                title="Aún no tienes metas activas"
+                description="Crea una meta en Plan → Metas para seguirla desde Resumen."
+              />
+            )}
+          </CardContent>
+        </Card>
       </HomeSection>
     ),
     investments:(
       <HomeSection id="investments">
-        <SectionHeader
-          title="Inversiones"
-          description="Activos no líquidos y próximos vencimientos."
-          actions={<Button type="button" variant="outline" size="sm" onClick={goToInvestments}>Ver inversiones</Button>}
-        />
-        {home.investments.activeCount ? (
-          <Card><CardContent className="space-y-4 pt-6">
-            <MetricCard label="Valor registrado" amount={home.investments.totalRegistered} tone="neutral" supporting={home.investments.activeCount+' inversiones activas · sin proyecciones futuras'} />
-            <div className="space-y-2 border-t pt-4">
-              {home.investments.rows.map(({investment,projection})=>(
-                <div key={investment.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm">
-                  <div>
-                    <p className="font-medium">{investment.name}</p>
-                    <p className="text-xs text-muted-foreground">{investment.maturityDate ? 'Vence '+dateLabel(investment.maturityDate) : 'Sin vencimiento registrado'}</p>
-                  </div>
-                  <p className={projection.maturityReached?'font-medium text-warning':'text-muted-foreground'}>{projection.maturityReached?'Revisar vencimiento':projection.daysRemaining===null?'Sin fecha':projection.daysRemaining+' días'}</p>
+        <Card className="h-full">
+          <CardContent className="p-5 sm:p-6">
+            <PanelHeading
+              eyebrow="Activos no líquidos"
+              title="Inversiones"
+              action={<Button type="button" variant="ghost" size="sm" onClick={goToInvestments}>Ver inversiones <ArrowUpRight className="h-4 w-4" /></Button>}
+            />
+            {home.investments.activeCount ? (
+              <div className="mt-5 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground">Valor registrado</p>
+                  <MoneyValue amount={home.investments.totalRegistered} className="mt-1 block font-display text-[2rem] leading-none tracking-[-0.045em]" />
+                  <p className="mt-2 text-xs text-muted-foreground">{home.investments.activeCount} inversiones activas · sin proyecciones futuras</p>
                 </div>
-              ))}
-            </div>
-          </CardContent></Card>
-        ) : <EmptyState title="Aún no hay inversiones" description="Registra certificados o depósitos a plazo desde Movimientos → Inversiones." />}
+                <div className="space-y-2 border-t border-border/70 pt-4">
+                  {home.investments.rows.map(({investment,projection})=>(
+                    <div key={investment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-interactive)] bg-muted/45 px-3 py-3 text-sm">
+                      <div>
+                        <p className="font-semibold">{investment.name}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{investment.maturityDate ? 'Vence '+dateLabel(investment.maturityDate) : 'Sin vencimiento registrado'}</p>
+                      </div>
+                      <StatusBadge
+                        status={projection.maturityReached?'warning':'neutral'}
+                        label={projection.maturityReached?'Revisar vencimiento':projection.daysRemaining===null?'Sin fecha':projection.daysRemaining+' días'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <EmptyState
+                className="mt-5"
+                title="Aún no hay inversiones"
+                description="Registra certificados o depósitos a plazo desde Movimientos → Inversiones."
+              />
+            )}
+          </CardContent>
+        </Card>
       </HomeSection>
     ),
   };
 
   return (
-    <div className="space-y-7 pb-24 md:pb-8">
-      <PageHeader
-        title="Resumen"
-        description={<>
-          <span>Lo importante ahora · {formatPeriodRange(currentPeriod)}.</span>
-          <span className="ml-2">{home.attentionCount>0 ? home.attentionCount+' elementos requieren atención.' : 'Sin alertas críticas.'}</span>
-        </>}
-        actions={<HomePreferencesDialog
-          visibleOrder={preferences.visibleOrder}
-          hidden={preferences.preferences.hidden}
-          defaultSection={preferences.preferences.defaultSection}
-          onHiddenChange={preferences.setHidden}
-          onMove={preferences.move}
-          onDefaultChange={preferences.setDefaultSection}
-          onReset={preferences.reset}
-        />}
-      />
+    <div className="space-y-7 pb-24 md:pb-8" data-home-prisma="true">
+      <div className="space-y-3">
+        <StatusBadge
+          status={home.attentionCount>0?'warning':'success'}
+          label={home.attentionCount>0 ? home.attentionCount+' elementos requieren atención' : 'Todo está en orden'}
+          className="min-h-7 px-3"
+        />
+        <PageHeader
+          title={<><span>Resumen</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
+          description={<>Tu panorama financiero · <strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong></>}
+          actions={<HomePreferencesDialog
+            visibleOrder={preferences.visibleOrder}
+            hidden={preferences.preferences.hidden}
+            defaultSection={preferences.preferences.defaultSection}
+            onHiddenChange={preferences.setHidden}
+            onMove={preferences.move}
+            onDefaultChange={preferences.setDefaultSection}
+            onReset={preferences.reset}
+          />}
+        />
+      </div>
 
-      {preferences.visibleOrder.map(id=><div key={id}>{modules[id]}</div>)}
-
-      <p className="text-xs text-muted-foreground">Home es un read model: análisis histórico y por categoría vive en Reportes; edición detallada vive en Plan y Movimientos.</p>
+      <div className="grid gap-4 lg:grid-cols-2" data-home-layout="module-grid">
+        {preferences.visibleOrder.map(id=>(
+          <div key={id} className={cn('min-w-0',id==='position' && 'lg:col-span-2')}>
+            {modules[id]}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

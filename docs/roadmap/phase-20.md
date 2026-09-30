@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1 y 20.2 completadas / Gates aprobados. 20.3 no iniciada**.
+Estado: **20.1, 20.2 y 20.3 completadas / Gates aprobados. 20.4 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -152,6 +152,8 @@ Preservar:
 **Gate 20.2:** el shell puede cambiar de tema sin cambiar datos ni comportamiento financiero.
 
 ## 20.3 — Resumen / Home Prisma
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-3.md](phase-20-3.md). Quality checks `36650050876`: 477/477 tests, build y browser E2E responsive/offline verdes.
 
 Usar Resumen como primera pantalla real sobre el nuevo sistema visual.
 

@@ -300,6 +300,19 @@ async function main() {
       })()`,
       'shell desktop',
     );
+    await waitFor(
+      client,
+      `(() => {
+        const home = document.querySelector('[data-home-prisma="true"]');
+        const modules = document.querySelector('[data-home-layout="module-grid"]');
+        const metrics = document.querySelector('[data-home-layout="position-metrics"]');
+        if (!home || !modules || !metrics) return false;
+        const moduleColumns = getComputedStyle(modules).gridTemplateColumns.split(' ').filter(Boolean).length;
+        const metricColumns = getComputedStyle(metrics).gridTemplateColumns.split(' ').filter(Boolean).length;
+        return moduleColumns === 2 && metricColumns === 4;
+      })()`,
+      'Home Prisma desktop',
+    );
 
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 390,
@@ -319,6 +332,18 @@ async function main() {
           && getComputedStyle(mobileFab).display !== 'none';
       })()`,
       'shell móvil',
+    );
+    await waitFor(
+      client,
+      `(() => {
+        const modules = document.querySelector('[data-home-layout="module-grid"]');
+        const metrics = document.querySelector('[data-home-layout="position-metrics"]');
+        if (!modules || !metrics) return false;
+        const moduleColumns = getComputedStyle(modules).gridTemplateColumns.split(' ').filter(Boolean).length;
+        const metricColumns = getComputedStyle(metrics).gridTemplateColumns.split(' ').filter(Boolean).length;
+        return moduleColumns === 1 && metricColumns === 1;
+      })()`,
+      'Home Prisma móvil',
     );
 
     await client.command('Emulation.setDeviceMetricsOverride', {
@@ -383,7 +408,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: responsive shell + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }

@@ -2674,6 +2674,18 @@ Preservar hide amounts, App Lock, Auto-lock, reduced motion, sonidos y microanim
 
 ## 20.3 — Resumen / Home Prisma
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-3.md`.
+
+Quality gate de cierre:
+
+```text
+477/477 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36650050876 ✅
+```
+
 Migrar Resumen sobre los read models existentes.
 
 Conservar:
