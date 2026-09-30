@@ -1,6 +1,6 @@
 # Prisma UI System — contrato visual de integración
 
-Estado: **contrato de Fase 20**.
+Estado: **implementado / Gate 20.7 aprobado**.
 
 Referencia visual: `Juno002/Prisma@dc4310040f42cefd74cf41bad75152902e549c24`.
 
@@ -92,15 +92,14 @@ Ambos deben respetar las preferencias de accesibilidad existentes, incluyendo re
 
 ## Branding final
 
-Hasta 20.7, GlitchBudget sigue siendo el nombre técnico/histórico del proyecto durante la transición.
-
-En el Gate 20.7:
+Desde el Gate 20.7:
 
 ```text
 nombre visible final = Prisma
+motor financiero = GlitchBudget Engine
 ```
 
-El branding no obliga a renombrar persistencia interna.
+GlitchBudget permanece como nombre técnico/histórico del motor y de ciertos identificadores de compatibilidad. El branding no obliga a renombrar persistencia interna.
 
 Especialmente, no cambiar `GlitchBudgetDB` únicamente por estética: un rename de IndexedDB puede crear otra base y aparentar pérdida de datos.
 

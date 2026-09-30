@@ -95,29 +95,29 @@ export default function InvestmentsManager() {
   if (!data) return <div className="h-24 animate-pulse rounded-xl bg-muted/20" />;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5" data-investments-prisma="true">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="font-semibold">Inversiones</h3>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Activos</p><h3 className="mt-1 font-display text-2xl font-normal tracking-[-0.025em]">Inversiones</h3>
           <p className="text-sm text-muted-foreground">Activos no líquidos. El rendimiento futuro siempre se muestra como estimado y no aumenta tu patrimonio real.</p>
         </div>
         <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value && !busy) reset(); }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Añadir inversión</Button></DialogTrigger>
-          <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+          <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl" data-investment-dialog="prisma">
             <DialogHeader>
-              <DialogTitle>Registrar inversión</DialogTitle>
-              <DialogDescription>Elige si ya existía al empezar a usar GlitchBudget o si la financias ahora desde una cuenta registrada.</DialogDescription>
+              <DialogTitle className="font-display text-2xl font-normal">Registrar inversión</DialogTitle>
+              <DialogDescription>Elige si ya existía al empezar a usar Prisma o si la financias ahora desde una cuenta registrada.</DialogDescription>
             </DialogHeader>
             <form className="space-y-4" onSubmit={submit}>
               <label className="block text-sm">Origen del valor
-                <select className="mt-1 w-full rounded-lg border bg-background p-2" value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>
+                <select className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)]" value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>
                   <option value="existing">Ya la tenía — usar valor actual como saldo inicial</option>
                   <option value="new">La acabo de abrir — transferir principal desde una cuenta</option>
                 </select>
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm">Tipo
-                  <select className="mt-1 w-full rounded-lg border bg-background p-2" value={type} onChange={e=>setType(e.target.value as typeof type)}>
+                  <select className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)]" value={type} onChange={e=>setType(e.target.value as typeof type)}>
                     {Object.entries(typeLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
                   </select>
                 </label>
@@ -133,7 +133,7 @@ export default function InvestmentsManager() {
                 )}
                 <label className="block text-sm">Tasa anual (%)<Input type="number" min="0" step="0.0001" value={annualRate} onChange={e=>setAnnualRate(e.target.value)} placeholder="Opcional" /></label>
                 <label className="block text-sm">Capitalización
-                  <select disabled={!annualRate} className="mt-1 w-full rounded-lg border bg-background p-2 disabled:opacity-50" value={compounding} onChange={e=>setCompounding(e.target.value as typeof compounding)}>
+                  <select disabled={!annualRate} className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)] disabled:opacity-50" value={compounding} onChange={e=>setCompounding(e.target.value as typeof compounding)}>
                     {Object.entries(compoundingLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
                   </select>
                 </label>
@@ -155,7 +155,7 @@ export default function InvestmentsManager() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {rows.map(({investment,account,currentValue,projection}) => (
-            <article key={investment.id} className="space-y-4 rounded-xl border p-4">
+            <article key={investment.id} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-5 shadow-[var(--shadow-card)]">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2"><Landmark className="h-4 w-4 text-primary" /><h4 className="truncate font-semibold">{investment.name}</h4></div>
@@ -180,7 +180,7 @@ export default function InvestmentsManager() {
                 </div>
               )}
 
-              <div className="rounded-lg border border-dashed p-3">
+              <div className="rounded-[var(--radius-interactive)] border border-dashed bg-muted/20 p-3">
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Estimado · no forma parte del patrimonio real</p>
                 <div className="mt-2 grid grid-cols-2 gap-3 text-sm">
                   <div><p className="text-xs text-muted-foreground">Valor al vencimiento</p><p className="font-mono font-semibold">{projection.estimatedMaturityValue === null ? '—' : money(projection.estimatedMaturityValue,account.currency)}</p></div>

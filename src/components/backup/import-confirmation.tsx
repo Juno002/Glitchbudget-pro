@@ -35,13 +35,13 @@ export function ImportConfirmation({
 
   return (
     <AlertDialog open={ready} onOpenChange={open => { if (!open && !locked.current) onCancel(); }}>
-      <AlertDialogContent aria-busy={busy}>
+      <AlertDialogContent aria-busy={busy} data-import-confirmation="prisma">
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Restaurar este archivo?</AlertDialogTitle>
+          <AlertDialogTitle className="font-display text-2xl font-normal">¿Restaurar este archivo?</AlertDialogTitle>
           <AlertDialogDescription>
             Se reemplazarán {scope} con los datos de <span className="font-medium break-all">{file?.name}</span>.
             {preview ? ' Revisa el contenido validado antes de continuar.' : ' Esta acción reemplaza los registros actuales del alcance indicado.'}
-            {' '}Antes de escribir, GlitchBudget intentará crear una copia local automática cuando OPFS esté disponible.
+            {' '}Antes de escribir, Prisma intentará crear una copia local automática cuando OPFS esté disponible.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

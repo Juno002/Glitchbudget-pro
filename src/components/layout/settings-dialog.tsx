@@ -94,22 +94,22 @@ export function SettingsDialog() {
           {isWorking ? <Loader className="animate-spin" /> : <Settings className="h-4 w-4" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl max-h-[88vh] overflow-y-auto">
+      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-4xl" data-settings-prisma="true">
         <DialogHeader>
-          <DialogTitle>Ajustes</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-normal">Ajustes</DialogTitle>
           <DialogDescription>Preferencias, categorías, privacidad y datos en un solo lugar.</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="general" className="space-y-5" onValueChange={value => { if (value === 'automation') refreshAutomationSummary(); }}>
-          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 p-1">
+          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)]" data-settings-navigation="prisma">
             {SETTINGS_SECTIONS.map(([value, label]) => (
-              <TabsTrigger key={value} value={value} className="text-xs sm:text-sm">{label}</TabsTrigger>
+              <TabsTrigger key={value} value={value} className="min-h-9 rounded-[var(--radius-interactive)] text-xs sm:text-sm">{label}</TabsTrigger>
             ))}
           </TabsList>
 
           <TabsContent value="general" className="space-y-5">
             <SectionHeader title="General" description="Cómo se organiza tu período financiero." />
-            <form className="max-w-sm rounded-xl border p-4 space-y-3" onSubmit={e => { e.preventDefault(); void setBaseCurrency(baseCurrencyDraft); }}>
+            <form className="max-w-sm rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-3" onSubmit={e => { e.preventDefault(); void setBaseCurrency(baseCurrencyDraft); }}>
               <div>
                 <p className="text-sm font-medium">Moneda base</p>
                 <p className="mt-1 text-xs text-muted-foreground">Código de tres letras. No hay tasas remotas ni conversión automática.</p>
@@ -145,7 +145,7 @@ export function SettingsDialog() {
           <TabsContent value="finance" className="space-y-6">
             <SectionHeader title="Finanzas" description="Protecciones y reglas de planificación. No cambian las fórmulas del ledger." />
 
-            <div className="rounded-xl border p-4 space-y-2">
+            <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium">
                 <input
                   type="checkbox"
@@ -174,15 +174,15 @@ export function SettingsDialog() {
             <div className="space-y-3">
               <h3 className="font-semibold">Cierre de período</h3>
               <RadioGroup value={rolloverStrategy} onValueChange={value => setRolloverStrategy(value as typeof rolloverStrategy)} className="grid gap-3 md:grid-cols-3">
-                <Label htmlFor="roll-reset" className="cursor-pointer rounded-xl border p-4">
+                <Label htmlFor="roll-reset" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Resetear</div>
                   <p className="mt-2 text-xs text-muted-foreground">Empieza el siguiente período con los límites base.</p>
                 </Label>
-                <Label htmlFor="roll-surplus" className="cursor-pointer rounded-xl border p-4">
+                <Label htmlFor="roll-surplus" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="accumulate_surplus" id="roll-surplus" /><Plus className="h-4 w-4" /> Acumular sobrante</div>
                   <p className="mt-2 text-xs text-muted-foreground">Suma lo no gastado al siguiente período.</p>
                 </Label>
-                <Label htmlFor="roll-debt" className="cursor-pointer rounded-xl border p-4">
+                <Label htmlFor="roll-debt" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="accumulate_debt" id="roll-debt" /><Minus className="h-4 w-4" /> Acumular exceso</div>
                   <p className="mt-2 text-xs text-muted-foreground">Resta el exceso del límite base siguiente.</p>
                 </Label>
@@ -247,7 +247,7 @@ export function SettingsDialog() {
                     ? automationSummary.savedFilters
                     : automationSummary.rules;
                 return (
-                  <div key={layer.id} className="rounded-xl border p-4">
+                  <div key={layer.id} className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                     <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{layer.location}</p>
                     <div className="mt-1 flex items-baseline justify-between gap-3">
                       <h3 className="font-semibold">{layer.title}</h3>
@@ -270,8 +270,8 @@ export function SettingsDialog() {
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-5">
-            <SectionHeader title="Privacidad y seguridad" description="GlitchBudget funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
-            <div className="rounded-xl border p-4 text-sm space-y-4">
+            <SectionHeader title="Privacidad y seguridad" description="Prisma funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
+            <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] text-sm space-y-4">
               <label className="flex items-start justify-between gap-4">
                 <span>
                   <span className="block font-medium">Ocultar importes</span>
@@ -325,13 +325,13 @@ export function SettingsDialog() {
           <TabsContent value="appearance" className="space-y-5">
             <SectionHeader title="Apariencia" description="Los temas cambian presentación, no jerarquía ni funcionalidad." />
             <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-3">
-              <Label htmlFor="theme-dark" className="cursor-pointer rounded-xl border p-4">
+              <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="dark" id="theme-dark" /><Moon className="h-4 w-4" /> Neón oscuro</div>
               </Label>
-              <Label htmlFor="theme-light" className="cursor-pointer rounded-xl border p-4">
+              <Label htmlFor="theme-light" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="light" id="theme-light" /><Sun className="h-4 w-4" /> Prisma claro</div>
               </Label>
-              <Label htmlFor="theme-serious" className="cursor-pointer rounded-xl border p-4">
+              <Label htmlFor="theme-serious" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="serious" id="theme-serious" /><Briefcase className="h-4 w-4" /> Minimalista legado</div>
               </Label>
             </RadioGroup>

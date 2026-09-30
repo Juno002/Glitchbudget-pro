@@ -105,7 +105,7 @@ export default function CsvBackupDialog() {
         </DialogHeader>
         <div className="space-y-2 py-4">
             {backupActions.map(({ name, label, exportFn, importFn }) => (
-                <div key={name} className="flex items-center justify-between p-2 rounded-md border">
+                <div key={name} className="flex items-center justify-between rounded-[var(--radius-interactive)] border bg-card p-2 shadow-[var(--shadow-control)]">
                     <span className="font-medium">{label}</span>
                     <div className="flex gap-2">
                         <Button variant="ghost" size="icon" disabled={busy} onClick={() => triggerImport(importFn)} aria-label={`Importar ${label}`} title={`Importar ${label}`}>
@@ -127,7 +127,7 @@ export default function CsvBackupDialog() {
         />
         <ImportConfirmation file={pendingFile} scope="los registros de la tabla seleccionada" onCancel={() => setPendingFile(null)} onConfirm={confirmImport} />
         <DialogFooter>
-          <p className="text-xs text-muted-foreground">Nota: La importación reemplazará todos los datos de la tabla seleccionada. Antes de escribir, GlitchBudget intentará crear una copia local automática cuando OPFS esté disponible.</p>
+          <p className="text-xs text-muted-foreground">Nota: La importación reemplazará todos los datos de la tabla seleccionada. Antes de escribir, Prisma intentará crear una copia local automática cuando OPFS esté disponible.</p>
         </DialogFooter>
       </DialogContent>
     </Dialog>

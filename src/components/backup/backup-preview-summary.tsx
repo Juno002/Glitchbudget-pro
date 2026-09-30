@@ -13,13 +13,13 @@ const ITEMS: Array<{ key: keyof Pick<BackupImportPreview, 'accounts' | 'transact
 
 export function BackupPreviewSummary({ preview }: { preview: BackupImportPreview }) {
   return (
-    <div className="rounded-xl border bg-muted/20 p-3" aria-label="Resumen del backup">
+    <div className="rounded-[var(--radius-card)] border bg-muted/20 p-3 shadow-[var(--shadow-control)]" aria-label="Resumen del backup" data-backup-preview="prisma">
       <p className="text-sm font-medium">Este archivo contiene</p>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {ITEMS.map(item => {
           const value = preview[item.key];
           return (
-            <div key={item.key} className="rounded-lg border bg-background px-3 py-2">
+            <div key={item.key} className="rounded-[var(--radius-interactive)] border bg-background px-3 py-2">
               <p className="text-lg font-semibold tabular-nums">{value}</p>
               <p className="text-xs text-muted-foreground">{value === 1 ? item.singular : item.plural}</p>
             </div>

@@ -133,7 +133,7 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
         <motion.button
           type="button"
           whileHover={isUnlocked ? { scale: 1.05, y: -2 } : {}}
-          className="relative flex flex-col items-center text-center gap-1 p-2.5 rounded-xl border transition-all duration-300 w-full focus:outline-none"
+          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-300 focus:outline-none"
           style={{
             background: isUnlocked ? tier.bg : 'rgba(255,255,255,0.02)',
             borderColor: isUnlocked ? tier.border : 'rgba(255,255,255,0.04)',
@@ -198,7 +198,7 @@ export function AchievementsDialogContent() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-achievements-prisma="true">
       {/* Header stats */}
       <div className="flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Progreso</span>

@@ -189,16 +189,16 @@ export default function OpfsBackupDialog() {
           <span>Copias de Seguridad</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-2xl" data-backups-prisma="true">
         <DialogHeader>
-          <DialogTitle>Gestión de Copias</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
           <DialogDescription>
             Tus datos están en este navegador. Puedes descargar el JSON normal o crear un backup cifrado opcional. Las copias locales del navegador siguen sin cifrar y se eliminan al borrar los datos del sitio.
           </DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
-            <Button onClick={handleCreate} disabled={isWorking || previewingImport} className="w-full sm:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">
+            <Button onClick={handleCreate} disabled={isWorking || previewingImport} className="w-full rounded-[var(--radius-interactive)] sm:w-auto">
               {isWorking ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -227,7 +227,7 @@ export default function OpfsBackupDialog() {
         </div>
         
         <p className="text-sm font-semibold text-muted-foreground mt-4">Copias Locales (Dispositivo)</p>
-        <ScrollArea className="h-64 mt-2 border rounded-md">
+        <ScrollArea className="mt-2 h-64 rounded-[var(--radius-card)] border bg-muted/15">
             <div className="p-4">
                 {isWorking && backupFiles.length === 0 ? (
                     <div className="flex justify-center items-center h-full">
@@ -236,7 +236,7 @@ export default function OpfsBackupDialog() {
                 ) : backupFiles.length > 0 ? (
                     <ul className="space-y-2">
                     {backupFiles.map((file) => (
-                        <li key={file.name} className="flex items-center justify-between p-2 rounded-md hover:bg-accent">
+                        <li key={file.name} className="flex items-center justify-between rounded-[var(--radius-interactive)] p-2 hover:bg-accent">
                         <div className="flex items-center gap-3">
                             <FileClock className="h-5 w-5 text-muted-foreground" />
                             <div>

@@ -106,7 +106,7 @@ test('17.2 mounts lock gate before FinanceProvider so financial UI is not render
   assert.ok(gateIndex < financeIndex);
 
   const gate = readFileSync(new URL('../src/components/security/app-lock-gate.tsx', import.meta.url), 'utf8');
-  assert.match(gate, /GlitchBudget bloqueado/);
+  assert.match(gate, /Prisma bloqueado/);
   assert.match(gate, /PIN incorrecto/);
   assert.match(gate, /No cifra la base de datos Dexie/i);
 });

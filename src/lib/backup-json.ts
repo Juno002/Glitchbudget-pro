@@ -229,7 +229,7 @@ function parseBackup(raw:unknown) {
  if (version===CURRENT_BACKUP_FORMAT_VERSION) {
    const parsed=DumpV13.parse(raw);
    if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
-     throw new Error('Este respaldo requiere una versión más reciente del esquema de GlitchBudget.');
+     throw new Error('Este respaldo requiere una versión más reciente del esquema de Prisma.');
    }
    return parsed;
  }
@@ -381,7 +381,7 @@ export async function downloadExportJSON() {
   const blob = new Blob([s], { type:'application/json;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `glitchbudget-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `prisma-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
