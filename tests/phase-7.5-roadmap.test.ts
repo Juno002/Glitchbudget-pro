@@ -65,7 +65,7 @@ test('global movement composer offers expense income and transfer in one surface
 
 test('mobile header prioritizes brand period privacy and settings while gamification stays secondary', () => {
   const header = read('src/components/layout/header.tsx');
-  assert.match(header, /GlitchBudget Pro/);
+  assert.match(header, />Prisma<\\/span>/);
   assert.match(header, /BalanceVisibilityToggle/);
   assert.match(header, /SettingsDialog/);
   assert.match(header, /Período actual/);
