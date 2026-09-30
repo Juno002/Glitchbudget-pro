@@ -175,6 +175,7 @@ async function createMovement(client, type, amount) {
     throw new Error('No se encontró la acción global Nuevo movimiento.');
   }
   await waitFor(client, `Boolean(document.querySelector('[aria-label="Monto"]'))`, 'Quick Add');
+  await waitFor(client, `Boolean(document.querySelector('[data-global-composer="prisma"]'))`, 'compositor Prisma');
 
   if (!await client.evaluate(clickButtonExpression(type))) {
     throw new Error('No se pudo seleccionar ' + type + '.');
@@ -370,6 +371,14 @@ async function main() {
       `document.body.innerText.includes('Ingreso') && document.body.innerText.includes('Gasto')`,
       'movimientos creados visibles',
     );
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-movements-prisma="true"]'))
+        && Boolean(document.querySelector('[data-movement-filter-bar="primary"]'))
+        && Boolean(document.querySelector('[data-movement-filter-panel="advanced"]'))
+        && Boolean(document.querySelector('[data-movement-history="list"]'))`,
+      'Movimientos Prisma',
+    );
 
     const externalRequests = requests.filter(url => {
       try {
@@ -408,7 +417,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }
