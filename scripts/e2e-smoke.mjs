@@ -431,6 +431,50 @@ async function main() {
       'Planificados Prisma',
     );
 
+    if (!await client.evaluate(clickButtonExpression('Reportes'))) {
+      throw new Error('No se pudo abrir Reportes.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-reports-prisma="true"]'))
+        && Boolean(document.querySelector('[data-report-range-controls="prisma"]'))
+        && Boolean(document.querySelector('[data-report-section="spending"]'))
+        && Boolean(document.querySelector('[data-report-section="cash-flow"]'))
+        && Boolean(document.querySelector('[data-report-section="net-worth"]'))
+        && Boolean(document.querySelector('[data-report-section="comparison"]'))
+        && document.querySelectorAll('[data-report-chart]').length >= 5`,
+      'Reportes Prisma y gráficos',
+    );
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('[data-report-preset="7d"]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+      button.click();
+      return true;
+    })()`)) {
+      throw new Error('No se pudo activar 7D.');
+    }
+    await waitFor(
+      client,
+      `document.querySelector('[data-report-preset="7d"]')?.getAttribute('aria-pressed') === 'true'`,
+      'rango 7D',
+    );
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('[data-report-preset="custom"]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+      button.click();
+      return true;
+    })()`)) {
+      throw new Error('No se pudo activar Custom.');
+    }
+    await waitFor(
+      client,
+      `document.querySelector('[data-report-preset="custom"]')?.getAttribute('aria-pressed') === 'true'
+        && document.querySelectorAll('[data-report-range-controls="prisma"] input[type="date"]').length === 2`,
+      'rango Custom',
+    );
+
     const externalRequests = requests.filter(url => {
       try {
         const parsed = new URL(url);
@@ -468,7 +512,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + Prisma Plan + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + Prisma Plan + Prisma Reports/charts + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }

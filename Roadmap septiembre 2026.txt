@@ -2763,6 +2763,18 @@ La UI no reconstruye remaining, status, required contribution, overdue ni semán
 
 ## 20.6 — Reportes + sistema de gráficos
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-6.md`.
+
+Quality gate de cierre:
+
+```text
+495/495 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36670721688 ✅
+```
+
 Rediseñar Reportes conservando:
 
 - Spending;

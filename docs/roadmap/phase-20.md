@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1, 20.2, 20.3, 20.4 y 20.5 completadas / Gates aprobados. 20.6 no iniciada**.
+Estado: **20.1, 20.2, 20.3, 20.4, 20.5 y 20.6 completadas / Gates aprobados. 20.7 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -223,6 +223,8 @@ La UI no calcula remaining, status, required contribution, overdue ni otras sem�
 **Gate 20.5:** Plan conserva paridad completa y consume exclusivamente read models/selectors existentes.
 
 ## 20.6 — Reportes + sistema de gráficos
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-6.md](phase-20-6.md). Quality checks `36670721688`: 495/495 tests, build y browser E2E con Reportes/gráficos + offline verdes.
 
 Rediseñar Reportes conservando toda la capacidad analítica.
 
