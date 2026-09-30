@@ -17,7 +17,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
-- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1 completada / Gate aprobado.
+- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.2 completadas / Gates aprobados.
 - **20.8 — Information Design + Deterministic Insights:** planificada.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-20.7.5.2 — Loans + Net Worth correctness
+20.7.5.3 — Debt model normalization
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
@@ -45,8 +45,8 @@ Baseline técnico actual:
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
-505/505 tests
-Quality checks 36745462982 ✅
+511/511 tests
+Quality checks 36758265316 (attempt 2) ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
@@ -62,7 +62,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Mov
 | 20.5 — Plan Prisma | **Completado / Gate aprobado** | [phase-20-5.md](phase-20-5.md) |
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
-| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1 completada / Gate aprobado** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
+| 20.7.5 — Semantic Integrity & Security Hardening | **En curso — 20.7.5.1–20.7.5.2 completadas / Gates aprobados** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | Planificada | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |

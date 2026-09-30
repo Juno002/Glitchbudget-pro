@@ -2968,6 +2968,27 @@ No migrar ni “arreglar” préstamos antes de cerrar esta definición.
 
 ### 20.7.5.2 — Loans + Net Worth correctness
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+511/511 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36758265316 (attempt 2) ✅
+```
+
+Resultado de cierre:
+
+- `loan` permanece como compatibilidad histórica, no como feature operativa nueva;
+- saldo compatible = `max(0, principal + openingAdjustment - pagos registrados)`;
+- todo saldo positivo de préstamo entra en pasivos y reduce patrimonio, incluso si `status = closed`;
+- pagos de préstamo reducen efectivo y pasivo en igual magnitud, sin alterar patrimonio;
+- préstamos históricos quedan separados de tarjetas operativas y visibles solo en modo lectura;
+- sin cambios de schema, migración ni formato de backup.
+
 Aplicar el contrato anterior para que ninguna deuda persistida/restaurada pueda inflar o distorsionar patrimonio.
 
 Si `loan` continúa soportado:

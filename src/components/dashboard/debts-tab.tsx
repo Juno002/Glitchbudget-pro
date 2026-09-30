@@ -1,7 +1,7 @@
 'use client';
 
 import { AccountSelect } from './account-select';
-import { selectActiveDebts, selectCardReadModel } from '@/domain/ledger';
+import { selectActiveCreditCards, selectCardReadModel, selectLoanCompatibilityBalance } from '@/domain/ledger';
 import { localDate } from '@/lib/finance-calculations';
 import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -28,7 +28,8 @@ export default function DebtsTab() {
   const [paymentAmount, setPaymentAmount] = useState('');
   const [accountId, setAccountId] = useState('');
 
-  const activeDebts = selectActiveDebts(debts || []);
+  const activeCards = selectActiveCreditCards(debts || []);
+  const historicalLoans = (debts || []).filter(debt => debt.type === 'loan');
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,7 +128,7 @@ export default function DebtsTab() {
         </Dialog>
       </div>
 
-      {activeDebts.length === 0 ? (
+      {activeCards.length === 0 ? (
         <div className="rounded-[var(--radius-card)] border border-dashed px-4 py-10 text-center">
           <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-medium mb-1">Aún no tienes tarjetas</h3>
@@ -135,7 +136,7 @@ export default function DebtsTab() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {activeDebts.map(debt => {
+          {activeCards.map(debt => {
             const {
               signedBalance: currentDebt,
               isSurplus,
@@ -250,6 +251,39 @@ export default function DebtsTab() {
             );
           })}
         </div>
+      )}
+
+      {historicalLoans.length > 0 && (
+        <section className="space-y-3" aria-labelledby="historical-loans-title">
+          <div>
+            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Compatibilidad histórica</p>
+            <h3 id="historical-loans-title" className="mt-1 font-display text-lg font-normal tracking-[-0.02em]">Préstamos importados</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Se conservan solo para lectura y para que el patrimonio refleje el pasivo histórico correctamente.
+            </p>
+          </div>
+          <div className="grid gap-3">
+            {historicalLoans.map(debt => {
+              const balance = selectLoanCompatibilityBalance(debt, debtPayments || [], localDate());
+              return (
+                <div key={debt.id} className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-medium">{debt.name}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {debt.status === 'closed' ? 'Histórico cerrado' : 'Histórico importado'} · solo lectura
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-muted-foreground">Saldo compatible</p>
+                      <p className="font-mono text-base font-semibold">{money(balance)}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
     </div>
   );
