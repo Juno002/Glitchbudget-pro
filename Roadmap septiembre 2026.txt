@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: planificada / no iniciada.** Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: en curso.** 20.7.5.1 completada / Gate aprobado; próxima intervención autorizada: 20.7.5.2. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -2914,6 +2914,18 @@ Durante 20.7.5:
 - no se introduce red para FX, seguridad ni análisis.
 
 ### 20.7.5.1 — Debt semantics audit
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+505/505 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36745462982 ✅
+```
 
 Auditar como mínimo:
 
