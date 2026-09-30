@@ -367,10 +367,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
-      <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto overflow-x-hidden p-0 sm:max-w-[440px]">
-        <DialogHeader className="sr-only">
-          <DialogDescription>Registra un movimiento con el flujo rápido. Los campos secundarios están en Más detalles.</DialogDescription>
-          <DialogTitle>{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
+      <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto overflow-x-hidden p-0 sm:max-w-[500px]" data-global-composer="prisma">
+        <DialogHeader className="border-b border-border/70 px-6 pb-4 pt-5 text-left">
+          <DialogDescription className="text-[9px] font-bold uppercase tracking-[0.16em]">Acción global</DialogDescription>
+          <DialogTitle className="font-display text-2xl font-normal tracking-[-0.03em]">{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
         </DialogHeader>
 
         <fieldset disabled={isSaving || saved} className="contents">
@@ -381,7 +381,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             transition={{ duration: 0.18 }}
             className={cn(
               'flex flex-col items-center gap-2 px-6 py-7 transition-colors',
-              txType === 'expense' ? 'bg-[hsl(var(--bad)_/_0.08)]' : 'bg-[hsl(var(--primary)_/_0.08)]',
+              txType === 'expense' ? 'bg-[hsl(var(--brand-coral)/0.09)]' : txType === 'income' ? 'bg-[hsl(var(--brand-mint)/0.10)]' : 'bg-[hsl(var(--brand-lavender)/0.10)]',
             )}
           >
             <label htmlFor="quick-add-amount" className="text-xs text-muted-foreground">
@@ -403,7 +403,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 onChange={event => setAmount(event.target.value)}
                 disabled={saved}
                 placeholder="0.00"
-                className="w-[190px] border-none bg-transparent text-center text-4xl font-bold tabular-nums outline-none placeholder:text-muted-foreground/30"
+                className="w-[220px] border-none bg-transparent text-center font-display text-[2.75rem] font-normal tracking-[-0.05em] tabular-nums outline-none placeholder:text-muted-foreground/30"
               />
             </div>
           </motion.div>
@@ -417,7 +417,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             />
           )}
 
-          <div className="space-y-4 px-6 py-5">
+          <div className="space-y-5 px-6 py-5">
             <div data-quick-add-step="type" className="space-y-2">
               <span className="text-sm font-medium">Tipo de movimiento</span>
               <div className="grid grid-cols-3 gap-2" aria-label="Tipo de movimiento">
@@ -433,8 +433,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                     aria-pressed={txType === type}
                     onClick={() => setMovementType(type)}
                     className={cn(
-                      'flex min-h-12 flex-col items-center justify-center gap-1 rounded-lg border px-2 py-2 text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                      txType === type ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/30',
+                      'flex min-h-12 flex-col items-center justify-center gap-1 rounded-[var(--radius-interactive)] border px-2 py-2 text-xs font-semibold transition-[background-color,border-color,color,transform] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98]',
+                      txType === type ? 'border-primary/35 bg-primary/10 text-primary shadow-[var(--shadow-control)]' : 'border-border bg-card text-muted-foreground hover:bg-muted/35',
                     )}
                   >
                     <Icon className="h-4 w-4" aria-hidden="true" />
@@ -474,7 +474,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   aria-label="Categoría"
                   value={categoryId}
                   onChange={event => setCategoryId(event.target.value)}
-                  className="h-11 w-full rounded-lg border border-input bg-background px-3 text-sm"
+                  className="h-11 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3 text-sm shadow-[var(--shadow-control)]"
                 >
                   <option value="">Selecciona una categoría</option>
                   {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -482,12 +482,12 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
               </label>
             )}
 
-            <details open={isEditing} className="group rounded-lg border">
-              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 py-2 text-sm font-medium">
+            <details open={isEditing} className="group rounded-[var(--radius-card)] border bg-card shadow-[var(--shadow-control)]" data-quick-add-details="prisma">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-semibold">
                 Más detalles
                 <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" aria-hidden="true" />
               </summary>
-              <div className="space-y-4 border-t p-3">
+              <div className="space-y-4 border-t border-border/70 p-4">
                 <label className="block space-y-1 text-sm">
                   <span className="text-muted-foreground">Fecha</span>
                   <Input type="date" aria-label="Fecha del movimiento" value={date} onChange={event => { if (event.target.value) setDate(event.target.value); }} />
@@ -670,7 +670,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   </AlertDialog>
                 )}
                 <Button
-                  className="h-12 flex-1 text-base font-semibold"
+                  className="h-12 flex-1 text-base font-semibold shadow-[var(--shadow-control)]"
                   disabled={!canSave}
                   onClick={handleSave}
                 >
@@ -686,7 +686,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.18 }}
-                className="flex items-center justify-center py-4"
+                className="flex items-center justify-center rounded-[var(--radius-interactive)] bg-[hsl(var(--brand-mint)/0.10)] py-4"
               >
                 <p className="text-sm text-muted-foreground">
                   {txType === 'expense' ? 'Gasto registrado' : txType === 'income' ? 'Ingreso registrado' : 'Transferencia registrada'}
