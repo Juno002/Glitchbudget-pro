@@ -77,7 +77,7 @@ Prisma = lenguaje visual / branding
 GlitchBudget Engine = única fuente financiera
 ```
 
-Sonidos, animaciones y gráficos forman parte de la paridad protegida. **Prisma es ya el producto visible**; Modo Prisma es el tema claro principal y Modo Neón el tema oscuro principal. El motor financiero continúa siendo GlitchBudget Engine. La extensión 20.8–20.10 trabaja información, acabado premium y consolidación del repositorio sin reescribir el motor.
+Sonidos, animaciones y gráficos forman parte de la paridad protegida. **Prisma es ya el producto visible**; Modo Prisma es el tema claro principal y Modo Neón el tema oscuro principal. El motor financiero continúa siendo GlitchBudget Engine. 20.7.5 endurece integridad semántica/seguridad antes de que 20.8–20.10 trabajen información, acabado premium y consolidación del repositorio.
 
 ## Fases completadas
 
