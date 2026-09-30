@@ -1,11 +1,23 @@
-import type { Debt } from '@/domain/models';
+import type { CreditCardDebt, Debt } from '@/domain/models';
 import { db } from '@/lib/db';
 
-export async function createDebt(
-  debt: Omit<Debt, 'id' | 'createdAt'>,
-): Promise<Debt> {
-  const next: Debt = {
-    ...debt,
+export interface CreateCreditCardInput {
+  name: string;
+  creditLimit: number;
+  apr: number;
+  minPayment: number;
+  status: Debt['status'];
+  openingAdjustment?: number;
+  billingCycleDay?: number;
+  paymentDueDay?: number;
+}
+
+export async function createCreditCard(input: CreateCreditCardInput): Promise<CreditCardDebt> {
+  const { creditLimit, ...rest } = input;
+  const next: CreditCardDebt = {
+    ...rest,
+    type: 'credit_card',
+    principal: creditLimit,
     id: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
   };
