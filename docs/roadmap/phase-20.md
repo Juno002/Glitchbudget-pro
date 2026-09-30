@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1, 20.2, 20.3 y 20.4 completadas / Gates aprobados. 20.5 no iniciada**.
+Estado: **20.1, 20.2, 20.3, 20.4 y 20.5 completadas / Gates aprobados. 20.6 no iniciada**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -204,6 +204,8 @@ Preservar:
 **Gate 20.4:** cualquier movimiento creado desde la nueva UI sigue la misma ruta command/service/domain/persistence existente.
 
 ## 20.5 — Plan Prisma
+
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-5.md](phase-20-5.md). Quality checks `36661934533`: 489/489 tests, build y browser E2E responsive/offline verdes.
 
 Migrar visualmente:
 
