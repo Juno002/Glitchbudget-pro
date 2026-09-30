@@ -73,15 +73,15 @@ function BudgetItem({
   };
 
   return (
-    <motion.article initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.16 }} className="space-y-3 rounded-xl border p-4">
+    <motion.article initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.16 }} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-budget-row="prisma">
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <h3 className="flex min-w-0 items-center gap-2 font-medium"><category.icon className="h-5 w-5 shrink-0 text-muted-foreground" />{category.name}</h3>
+        <h3 className="flex min-w-0 items-center gap-2 font-display text-lg font-normal tracking-[-0.02em]"><category.icon className="h-5 w-5 shrink-0 text-muted-foreground" />{category.name}</h3>
         <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setEditing(value => !value)} aria-label={'Editar límite de ' + category.name}>{editing ? 'Cancelar' : 'Editar límite'}</Button>
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-5">
-        <div><span className="block text-xs text-muted-foreground">Límite</span><strong className="tabular-nums">{money(currentPlan)}</strong></div>
-        <div><span className="block text-xs text-muted-foreground">Gastado</span><strong className="tabular-nums">{money(spent)}</strong></div>
-        <div><span className="block text-xs text-muted-foreground">Restante</span><strong className={cn('tabular-nums', remaining < 0 && 'text-bad')}>{money(remaining)}</strong></div>
+        <div><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Límite</span><strong className="mt-1 block font-display text-lg font-normal tabular-nums">{money(currentPlan)}</strong></div>
+        <div><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gastado</span><strong className="mt-1 block font-display text-lg font-normal tabular-nums">{money(spent)}</strong></div>
+        <div><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Restante</span><strong className={cn('mt-1 block font-display text-lg font-normal tabular-nums', remaining < 0 && 'text-bad')}>{money(remaining)}</strong></div>
         <div><span className="block text-xs text-muted-foreground">Porcentaje</span><strong className="tabular-nums">{currentPlan > 0 ? percentage + '%' : '—'}</strong></div>
         <div className="col-span-2 lg:col-span-1"><span className="block text-xs text-muted-foreground">Estado</span><StatusBadge status={statusTone} label={STATUS_LABELS[budgetStatus]} /></div>
       </div>
@@ -127,13 +127,13 @@ function NewBudgetDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-dashed text-sm font-semibold text-primary hover:bg-primary/10">
+        <button className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-interactive)] border border-dashed text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
           <Plus className="h-4 w-4" /> Nuevo presupuesto
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
-          <DialogTitle>Añadir presupuesto</DialogTitle>
+          <DialogTitle className="font-display text-2xl font-normal">Añadir presupuesto</DialogTitle>
           <DialogDescription>Asigna un límite a una categoría para el rango seleccionado.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -142,7 +142,7 @@ function NewBudgetDialog({
             <select
               value={selectedCatId}
               onChange={event => setSelectedCatId(event.target.value)}
-              className="h-11 w-full rounded-md border border-input bg-background px-3"
+              className="h-11 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 shadow-[var(--shadow-control)]"
             >
               <option value="">Selecciona una categoría</option>
               {inactiveInfo.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -155,7 +155,7 @@ function NewBudgetDialog({
           <button
             disabled={!selectedCatId || !(parseFloat(amount) > 0) || saving}
             onClick={() => void handleSave()}
-            className="h-11 w-full rounded-md bg-primary/10 font-semibold text-primary disabled:opacity-50"
+            className="h-11 w-full rounded-[var(--radius-interactive)] bg-primary font-semibold text-primary-foreground shadow-[var(--shadow-control)] disabled:opacity-50"
           >
             {saving ? 'Guardando…' : 'Guardar presupuesto'}
           </button>
@@ -207,13 +207,13 @@ export default function PlanningTab() {
   const monthlyTotals = getTotals(currentMonth);
 
   return (
-    <div className="space-y-6 pb-24 md:pb-8">
-      <PageHeader title="Plan" description={<>Presupuestos, metas y movimientos planificados · {formatPeriodRange(currentPeriod)}</>} />
+    <div className="space-y-7 pb-24 md:pb-8" data-plan-prisma="true">
+      <PageHeader title={<><span>Plan</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} description={<>Presupuestos, metas y movimientos planificados · <strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong></>} />
 
       <Tabs value={planningTab} onValueChange={value => setPlanningTab(value as typeof planningTab)} className="w-full">
-        <TabsList className="mb-6 flex w-full justify-start gap-1 overflow-x-auto pb-2 sm:justify-center sm:pb-0">
+        <TabsList className="mb-6 grid h-auto w-full grid-cols-3 gap-1 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-card)]" data-plan-navigation="prisma">
           {PLAN_SECTIONS.map(section => (
-            <TabsTrigger key={section.value} value={section.value} className="shrink-0 whitespace-nowrap text-xs">
+            <TabsTrigger key={section.value} value={section.value} className="min-h-10 whitespace-nowrap rounded-[var(--radius-interactive)] text-xs font-semibold">
               {section.label}
             </TabsTrigger>
           ))}
@@ -225,20 +225,20 @@ export default function PlanningTab() {
 
         <TabsContent value="budgets" className="space-y-4">
           {budgetPeriodKind === 'monthly' && (
-            <div className="space-y-2 rounded-xl border p-4">
-              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                <p>Ingreso previsto: <strong>{money(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></p>
-                <p>Ingresos registrados: <strong>{money(monthlyTotals.recordedIncome)}</strong></p>
-                <p>Margen del período tras reservas: <strong>{money(monthlyTotals.monthlyPlanningMargin)}</strong></p>
+            <div className="space-y-3 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-plan-monthly-summary="prisma">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3"><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Ingreso previsto</span><strong className="mt-1 block font-display text-lg font-normal">{money(monthlyAmount(baseIncome.freq, baseIncome.amount))}</strong></div>
+                <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3"><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Ingresos registrados</span><strong className="mt-1 block font-display text-lg font-normal">{money(monthlyTotals.recordedIncome)}</strong></div>
+                <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3"><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Margen tras reservas</span><strong className="mt-1 block font-display text-lg font-normal">{money(monthlyTotals.monthlyPlanningMargin)}</strong></div>
               </div>
               <p className="text-xs text-muted-foreground">Este margen pertenece al período financiero mensual. Los presupuestos semanales, anuales y únicos mantienen su propio rango.</p>
             </div>
           )}
 
-          <Card>
+          <Card className="border bg-card shadow-[var(--shadow-card)]" data-plan-budgets="prisma">
             <CardHeader className="space-y-4">
               <div>
-                <CardTitle>Presupuestos 2.0</CardTitle>
+                <CardTitle className="font-display text-2xl font-normal">Presupuestos</CardTitle>
                 <CardDescription>Define cuánto quieres gastar por categoría y sigue tu progreso.</CardDescription>
               </div>
 
@@ -253,7 +253,7 @@ export default function PlanningTab() {
                 <div className="space-y-3">{[...Array(4)].map((_, index) => <Skeleton key={index} className="h-36 w-full rounded-xl" />)}</div>
               ) : (
                 <>
-                  <div className="space-y-3">
+                  <div className="grid gap-3 xl:grid-cols-2">
                     {displayedCategories.map(categoryId => {
                       const detail = budgetDetails.find(item => item.categoryId === categoryId);
                       return (
@@ -272,13 +272,13 @@ export default function PlanningTab() {
                   </div>
 
                   {active.length === 0 && !showAll && (
-                    <div className="rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground">
+                    <div className="rounded-[var(--radius-card)] border border-dashed p-5 text-center text-sm text-muted-foreground">
                       No hay límites configurados en este rango. Añade un presupuesto o muestra todas las categorías.
                     </div>
                   )}
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" className="min-h-11 rounded-md border px-3 text-sm" onClick={() => setShowAll(value => !value)}>
+                    <button type="button" className="min-h-11 rounded-[var(--radius-interactive)] border px-3 text-sm font-medium transition-colors hover:bg-muted/35" onClick={() => setShowAll(value => !value)}>
                       {showAll ? 'Ocultar categorías sin presupuesto' : 'Mostrar todas las categorías'}
                     </button>
                   </div>
@@ -290,7 +290,7 @@ export default function PlanningTab() {
         </TabsContent>
 
         <TabsContent value="subscriptions" className="space-y-4">
-          <Card><CardContent className="pt-6"><SubscriptionsManager /></CardContent></Card>
+          <Card className="border bg-card shadow-[var(--shadow-card)]" data-plan-planned="prisma"><CardContent className="p-5 sm:p-6"><SubscriptionsManager /></CardContent></Card>
         </TabsContent>
       </Tabs>
     </div>

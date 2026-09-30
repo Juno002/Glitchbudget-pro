@@ -2735,6 +2735,18 @@ Conservar sonidos de movimiento, animaciones, budget warning y rutas command/ser
 
 ## 20.5 — Plan Prisma
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-5.md`.
+
+Quality gate de cierre:
+
+```text
+489/489 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36661934533 ✅
+```
+
 Migrar:
 
 - Presupuestos;

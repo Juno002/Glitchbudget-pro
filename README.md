@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 29 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. **20.1, 20.2, 20.3 y 20.4 están completadas con sus Gates aprobados**; 20.5 — Plan Prisma — es la siguiente etapa.
+> **Estado del proyecto — 29 sep 2026:** Fases 0–19.5 completadas. Fase 20 — **Modo Prisma / transformación visual y branding** iniciada. **20.1, 20.2, 20.3, 20.4 y 20.5 están completadas con sus Gates aprobados**; 20.6 — Reportes + sistema de gráficos — es la siguiente etapa.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
@@ -98,14 +98,14 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente al cerrar Fase 20.4:
+Baseline vigente al cerrar Fase 20.5:
 
-- **483/483 tests**;
+- **489/489 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
-- E2E: verificar shell + Home Prisma → compositor Prisma → crear ingreso/gasto → verificar Movimientos Prisma y filtros → recargar offline desde service worker;
-- Quality checks **36660263082** verdes en el PR #47.
+- E2E: verificar shell + Home Prisma → compositor/Movimientos Prisma → crear ingreso/gasto → recorrer Presupuestos/Metas/Planificados → recargar offline desde service worker;
+- Quality checks **36661934533** verdes en el PR #48.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
@@ -164,6 +164,7 @@ Documentación de ejecución:
 - [Gate 20.2 — design system, temas y shell](docs/roadmap/phase-20-2.md)
 - [Gate 20.3 — Resumen / Home Prisma](docs/roadmap/phase-20-3.md)
 - [Gate 20.4 — Movimientos + compositor global Prisma](docs/roadmap/phase-20-4.md)
+- [Gate 20.5 — Plan Prisma](docs/roadmap/phase-20-5.md)
 
 Fase 20 mantiene **GlitchBudget Engine** como único motor financiero y utiliza el repositorio Prisma únicamente como referencia visual. El producto visible pasará a llamarse **Prisma** al aprobar el Gate 20.7. Ese cambio es branding: identificadores persistentes como `GlitchBudgetDB` no se renombran solo por estética.
 
