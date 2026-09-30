@@ -45,8 +45,8 @@ Baseline técnico actual:
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
-505/505 tests
-Quality checks 36745462982 ✅
+511/511 tests
+Quality checks 36758265316 (attempt 2) ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
