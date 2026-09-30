@@ -539,6 +539,18 @@ Crear fixtures deterministas para:
 - backup histórico con `loan`;
 - net worth antes/después de pagos.
 
+#### Resultado de implementación
+
+- `src/domain/ledger.ts` añade `selectLoanCompatibilityBalance()` con el contrato congelado en 20.7.5.1.
+- `selectPosition()` agrega los saldos compatibles de `loan` a `liabilities` y por tanto a `netWorth`, sin sintetizar intereses desde APR.
+- Un préstamo `closed` con saldo histórico positivo sigue contando como pasivo hasta que pagos registrados lo lleven a cero.
+- Un sobrepago histórico se limita a cero y nunca convierte el préstamo en activo.
+- `src/components/dashboard/debts-tab.tsx` usa `selectActiveCreditCards()` para acciones operativas y presenta los `loan` importados en una superficie separada de solo lectura.
+- `tests/phase-20-7-5-2-loan-net-worth.test.ts` cubre saldo activo/parcial/cerrado, sobrepago, tarjeta + préstamo, neutralidad patrimonial de pagos y separación de UI.
+- El test forense de Fase 19.5 fue actualizado para exigir el selector de dominio más estricto `selectActiveCreditCards()` sin relajar la prohibición de lógica financiera en React.
+- Backup histórico con `loan` continúa preservado por el contrato y tests de 20.7.5.1.
+- No hubo cambios de schema Dexie, migraciones ni formato de backup.
+
 **Gate 20.7.5.2:** patrimonio y pasivos cuadran para todos los tipos de deuda que el sistema pueda persistir o restaurar.
 
 ---
