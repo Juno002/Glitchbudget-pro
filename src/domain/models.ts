@@ -143,7 +143,7 @@ export interface Debt {
   id: string;
   name: string;
   type: 'credit_card' | 'loan';
-  principal: number;           // centavos
+  principal: number;           // centavos; campo persistente de compatibilidad, interpretar mediante debt-semantics
   apr: number;                 // 0..1
   minPayment: number;          // centavos
   createdAt: string;           // ISO
@@ -151,6 +151,9 @@ export interface Debt {
   billingCycleDay?: number;    // 1..31 (Día de corte)
   paymentDueDay?: number;      // 1..31 (Día de pago)
 }
+
+export type CreditCardDebt = Debt & { type: 'credit_card' };
+export type HistoricalLoanDebt = Debt & { type: 'loan' };
 
 export interface DebtPayment {
   accountId?: string;

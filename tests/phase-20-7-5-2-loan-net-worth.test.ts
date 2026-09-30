@@ -122,8 +122,8 @@ test('20.7.5.2 cards UI separates historical loans into a read-only compatibilit
   );
 
   assert.match(source, /selectActiveCreditCards/);
-  assert.match(source, /historicalLoans = .*type === 'loan'/);
+  assert.match(source, /historicalLoans = .*isHistoricalLoanDebt/);
   assert.match(source, /Préstamos importados/);
   assert.match(source, /solo lectura/);
-  assert.match(source, /selectLoanCompatibilityBalance/);
+  assert.match(source, /selectHistoricalLoanReadModel/);
 });

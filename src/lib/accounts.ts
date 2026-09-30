@@ -1,6 +1,7 @@
 import { accountFundsWorsen } from '../policies/account-protection';
 import { readFinancialPolicies } from './policy-settings';
 import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectPosition } from '../domain/ledger';
+import { isCreditCardDebt } from '../domain/debt-semantics';
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
@@ -124,12 +125,15 @@ export async function saveTransfer(input: AccountTransfer, editing = false) {
   });
 }
 
-export const debtBalance = (debt: import('./db').Debt, expenses: Expense[], payments: DebtPayment[], through = localDate()) => selectCardSignedBalance(debt, expenses, payments, through);
+export const debtBalance = (debt: import('./db').Debt, expenses: Expense[], payments: DebtPayment[], through = localDate()) => {
+  if (!isCreditCardDebt(debt)) throw new Error('El saldo operativo solo aplica a tarjetas de crédito.');
+  return selectCardSignedBalance(debt, expenses, payments, through);
+};
 export async function reconcileDebt(id: string, balance: number) {
   if (!Number.isSafeInteger(balance)) throw new Error('Introduce un saldo válido.');
   await db.transaction('rw', db.debts, db.expenses, db.debt_payments, async () => {
     const debt = await db.debts.get(id);
-    if (!debt) throw new Error('Tarjeta no encontrada.');
+    if (!debt || !isCreditCardDebt(debt)) throw new Error('Tarjeta no encontrada.');
     const recorded = debtBalance({ ...debt, openingAdjustment: 0 }, await db.expenses.toArray(), await db.debt_payments.toArray());
     const openingAdjustment = balance - recorded;
     if (!Number.isSafeInteger(openingAdjustment)) throw new Error('El saldo supera el monto admitido.');

@@ -90,7 +90,7 @@ export default function ReportsTab() {
     {label:'Cash',value:report.netWorth.cash},
     {label:'Banks',value:report.netWorth.banks},
     {label:'Investments',value:report.netWorth.investments},
-    {label:'Liabilities',value:-report.netWorth.creditCardLiabilities},
+    {label:'Liabilities',value:-report.netWorth.liabilities},
     {label:'Net worth',value:report.netWorth.netWorth},
   ];
   const comparisonChartRows:ReportComparisonChartRow[]=comparisonRows.map(row=>({
@@ -262,13 +262,13 @@ export default function ReportsTab() {
               <MetricCard label="Cash" amount={report.netWorth.cash} tone="neutral" />
               <MetricCard label="Banks" amount={report.netWorth.banks} tone="neutral" />
               <MetricCard label="Investments" amount={report.netWorth.investments} tone="neutral" />
-              <MetricCard label="Credit-card liabilities" amount={report.netWorth.creditCardLiabilities} tone={report.netWorth.creditCardLiabilities>0?'negative':'neutral'} />
+              <MetricCard label="Liabilities" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
               <MetricCard label="Net worth" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
             </div>
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
               <CardHeader>
                 <CardTitle className="font-display text-xl font-normal">Composición registrada</CardTitle>
-                <CardDescription>Activos registrados frente a pasivos de tarjeta y patrimonio neto.</CardDescription>
+                <CardDescription>Activos registrados frente a pasivos registrados y patrimonio neto.</CardDescription>
               </CardHeader>
               <CardContent><ReportValueBars data={netWorthChartRows} signed /></CardContent>
             </Card>

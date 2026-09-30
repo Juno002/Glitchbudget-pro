@@ -1,4 +1,4 @@
-import type { Debt } from './models';
+import type { CreditCardDebt, Debt, HistoricalLoanDebt } from './models';
 
 export type DebtSemanticContract = {
   role: 'supported' | 'historical_compatibility';
@@ -48,4 +48,26 @@ export const DEBT_SEMANTICS: Record<Debt['type'], DebtSemanticContract> = {
 
 export function debtSemanticContract(type: Debt['type']): DebtSemanticContract {
   return DEBT_SEMANTICS[type];
+}
+
+
+/**
+ * Phase 20.7.5.3 compatibility boundary.
+ * Debt.principal remains persisted for backup/schema compatibility, but code
+ * outside this module should consume quantities through explicit meanings.
+ */
+export function isCreditCardDebt(debt: Debt): debt is CreditCardDebt {
+  return debt.type === 'credit_card';
+}
+
+export function isHistoricalLoanDebt(debt: Debt): debt is HistoricalLoanDebt {
+  return debt.type === 'loan';
+}
+
+export function cardCreditLimit(debt: CreditCardDebt): number {
+  return debt.principal;
+}
+
+export function loanOriginalPrincipal(debt: HistoricalLoanDebt): number {
+  return debt.principal;
 }

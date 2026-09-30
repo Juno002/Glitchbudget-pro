@@ -33,7 +33,7 @@ import { friendlyError } from "@/lib/errors";
 import { useFinanceContextData } from '@/hooks/use-finance-context-data';
 import { useBackupManagement, type BackupFile } from '@/hooks/use-backup-management';
 import { initializeSettings, resetPersistedSettings, saveBaseIncomeInput, savePeriodStartDay, updatePersistedSetting, updatePersistedSettings } from '@/lib/settings-service';
-import { createDebt, updateDebt as persistDebt, removeDebt } from '@/lib/debt-service';
+import { createCreditCard, updateDebt as persistDebt, removeDebt, type CreateCreditCardInput } from '@/lib/debt-service';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 import { DEFAULT_SETTINGS, resolveSettings } from "@/lib/settings-read-model";
 
@@ -90,7 +90,7 @@ interface FinanceContextType {
   resetSettings: () => Promise<void>;
   updateSettings: (newSettings: Partial<Settings>) => void;
 
-  addDebt: (debt: Omit<Debt, 'id' | 'createdAt'>) => Promise<boolean>;
+  addCreditCard: (card: CreateCreditCardInput) => Promise<boolean>;
   updateDebt: (debt: Debt) => Promise<boolean>;
   deleteDebt: (id: string) => Promise<boolean>;
   addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => Promise<boolean>;
@@ -531,10 +531,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addDebt = useCallback(async (debt: Omit<Debt, "id" | "createdAt">) => {
+  const addCreditCard = useCallback(async (card: CreateCreditCardInput) => {
     try {
-      await createDebt(debt);
-      toast({ title: 'Deuda registrada' });
+      await createCreditCard(card);
+      toast({ title: 'Tarjeta registrada' });
       return true;
     } catch (e: any) {
       toast({ title: 'Error al registrar', description: friendlyError(e), variant: 'destructive' });
@@ -691,7 +691,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     prepareBudgetPeriod,
     resetSettings,
     updateSettings,
-    addDebt,
+    addCreditCard,
     updateDebt,
     deleteDebt,
     addDebtPayment,
@@ -734,7 +734,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
-    addDebt, updateDebt, deleteDebt, addDebtPayment,
+    addCreditCard, updateDebt, deleteDebt, addDebtPayment,
     addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
     getMonthlyAverages, getDisposable, getTotals, getPosition, getReportSnapshot, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,

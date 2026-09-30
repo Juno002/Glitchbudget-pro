@@ -70,7 +70,7 @@ export function selectHomeReadModel(input: HomeReadModelInput) {
     position:{
       liquidAssets:input.report.netWorth.liquidAssets,
       investments:input.report.netWorth.investments,
-      liabilities:input.report.netWorth.creditCardLiabilities,
+      liabilities:input.report.netWorth.liabilities,
       netWorth:input.report.netWorth.netWorth,
     },
     budget:{

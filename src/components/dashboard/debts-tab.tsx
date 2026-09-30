@@ -1,7 +1,8 @@
 'use client';
 
 import { AccountSelect } from './account-select';
-import { selectActiveCreditCards, selectCardReadModel, selectLoanCompatibilityBalance } from '@/domain/ledger';
+import { selectActiveCreditCards, selectCardReadModel, selectHistoricalLoanReadModel } from '@/domain/ledger';
+import { isHistoricalLoanDebt } from '@/domain/debt-semantics';
 import { localDate } from '@/lib/finance-calculations';
 import { useRef, useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
@@ -18,41 +19,40 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 export default function DebtsTab() {
   const money = usePrivateCurrency();
-  const { debts, expenses, debtPayments, addDebt, deleteDebt, addDebtPayment } = useFinances();
+  const { debts, expenses, debtPayments, addCreditCard, deleteDebt, addDebtPayment } = useFinances();
   const savingRef = useRef(false);
   const [saving, setSaving] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [newDebt, setNewDebt] = useState({ name: '', principal: '', billingDay: '15', paymentDay: '30' });
+  const [newCard, setNewCard] = useState({ name: '', creditLimit: '', billingDay: '15', paymentDay: '30' });
 
   const [paymentDebtId, setPaymentDebtId] = useState<string | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
   const [accountId, setAccountId] = useState('');
 
   const activeCards = selectActiveCreditCards(debts || []);
-  const historicalLoans = (debts || []).filter(debt => debt.type === 'loan');
+  const historicalLoans = (debts || []).filter(isHistoricalLoanDebt);
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (savingRef.current) return;
-    const limitCents = toCents(newDebt.principal);
-    if (!newDebt.name || limitCents <= 0) return;
+    const limitCents = toCents(newCard.creditLimit);
+    if (!newCard.name || limitCents <= 0) return;
     savingRef.current = true;
     setSaving(true);
-    const success = await addDebt({
-      name: newDebt.name,
-      type: 'credit_card',
-      principal: limitCents,
+    const success = await addCreditCard({
+      name: newCard.name,
+      creditLimit: limitCents,
       apr: 0,
       minPayment: 0,
       status: 'active',
-      billingCycleDay: parseInt(newDebt.billingDay),
-      paymentDueDay: parseInt(newDebt.paymentDay),
+      billingCycleDay: parseInt(newCard.billingDay),
+      paymentDueDay: parseInt(newCard.paymentDay),
     });
     savingRef.current = false;
     setSaving(false);
     if (!success) return;
     setIsAddOpen(false);
-    setNewDebt({ name: '', principal: '', billingDay: '15', paymentDay: '30' });
+    setNewCard({ name: '', creditLimit: '', billingDay: '15', paymentDay: '30' });
   };
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
@@ -96,16 +96,16 @@ export default function DebtsTab() {
             <form onSubmit={handleAddSubmit} className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label>Nombre de la Tarjeta</Label>
-                <Input value={newDebt.name} onChange={e => setNewDebt({...newDebt, name: e.target.value})} placeholder="Ej. Visa Platinum" required />
+                <Input value={newCard.name} onChange={e => setNewCard({...newCard, name: e.target.value})} placeholder="Ej. Visa Platinum" required />
               </div>
               <div className="space-y-2">
                 <Label>Límite Aprobado (RD$)</Label>
-                <Input type="number" min="0.01" step="0.01" value={newDebt.principal} onChange={e => setNewDebt({...newDebt, principal: e.target.value})} placeholder="0.00" required />
+                <Input type="number" min="0.01" step="0.01" value={newCard.creditLimit} onChange={e => setNewCard({...newCard, creditLimit: e.target.value})} placeholder="0.00" required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1">Día de Corte <Popover><PopoverTrigger><HelpCircle className="w-3 h-3 text-muted-foreground"/></PopoverTrigger><PopoverContent className="text-xs w-48">Día del mes en que te facturan tus consumos.</PopoverContent></Popover></Label>
-                  <Select value={newDebt.billingDay} onValueChange={v => setNewDebt({ ...newDebt, billingDay: v })}>
+                  <Select value={newCard.billingDay} onValueChange={v => setNewCard({ ...newCard, billingDay: v })}>
                     <SelectTrigger><SelectValue/></SelectTrigger>
                     <SelectContent>
                       {Array.from({length: 31}, (_, i) => i + 1).map(d => <SelectItem key={d} value={d.toString()}>{d}</SelectItem>)}
@@ -114,7 +114,7 @@ export default function DebtsTab() {
                 </div>
                 <div className="space-y-2">
                   <Label>Día de Pago</Label>
-                  <Select value={newDebt.paymentDay} onValueChange={v => setNewDebt({ ...newDebt, paymentDay: v })}>
+                  <Select value={newCard.paymentDay} onValueChange={v => setNewCard({ ...newCard, paymentDay: v })}>
                     <SelectTrigger><SelectValue/></SelectTrigger>
                     <SelectContent>
                       {Array.from({length: 31}, (_, i) => i + 1).map(d => <SelectItem key={d} value={d.toString()}>{d}</SelectItem>)}
@@ -264,7 +264,7 @@ export default function DebtsTab() {
           </div>
           <div className="grid gap-3">
             {historicalLoans.map(debt => {
-              const balance = selectLoanCompatibilityBalance(debt, debtPayments || [], localDate());
+              const { originalPrincipal, compatibilityBalance } = selectHistoricalLoanReadModel(debt, debtPayments || [], localDate());
               return (
                 <div key={debt.id} className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
                   <div className="flex items-start justify-between gap-4">
@@ -274,9 +274,15 @@ export default function DebtsTab() {
                         {debt.status === 'closed' ? 'Histórico cerrado' : 'Histórico importado'} · solo lectura
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-muted-foreground">Saldo compatible</p>
-                      <p className="font-mono text-base font-semibold">{money(balance)}</p>
+                    <div className="grid shrink-0 gap-2 text-right">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Principal original</p>
+                        <p className="font-mono text-sm">{money(originalPrincipal)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Saldo compatible</p>
+                        <p className="font-mono text-base font-semibold">{money(compatibilityBalance)}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
