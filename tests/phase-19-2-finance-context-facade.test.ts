@@ -24,6 +24,6 @@ test('finance context composes dedicated persistence hooks and services', () => 
   assert.match(source, /initializeSettings/);
   assert.match(source, /updatePersistedSetting/);
   assert.match(source, /resetPersistedSettings/);
-  assert.match(source, /createDebt/);
+  assert.match(source, /createCreditCard/);
   assert.match(source, /removeDebt/);
 });
