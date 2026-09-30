@@ -285,7 +285,7 @@ export default function SummaryTab() {
               label="Deuda total"
               amount={home.position.liabilities}
               tone={home.position.liabilities>0?'negative':'neutral'}
-              supporting="Pasivo real de tarjetas registradas."
+              supporting="Pasivos registrados, incluidas tarjetas y compatibilidad histórica."
               icon={CreditCard}
               variant="warm"
             />
