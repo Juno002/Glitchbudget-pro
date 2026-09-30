@@ -150,7 +150,7 @@ const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const outgoingTables = [...accountTables, db.categories, db.recurrents, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   centsSchema.parse(payment.amount);
-  fields.date.parse(payment.date);
+  payment = { ...payment, date: fields.date.parse(payment.date) };
   await db.transaction('rw', outgoingTables, async () => {
     const debt = await db.debts.get(payment.debtId);
     if (!debt || debt.status !== 'active') throw new Error('Selecciona una tarjeta activa.');

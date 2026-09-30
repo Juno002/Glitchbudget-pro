@@ -4,10 +4,11 @@ import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-pla
 import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
 import { migrateGoalRecords } from '../domain/goals';
 import { normalizeCurrencyCode } from '../domain/currency';
+import { normalizeFinancialDate } from '../domain/financial-date';
 
 import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category, Investment } from '../domain/models';
 
-export const CURRENT_DB_SCHEMA_VERSION = 14;
+export const CURRENT_DB_SCHEMA_VERSION = 15;
 export type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Investment } from '../domain/models';
 
 export class GlitchBudgetDB extends Dexie {
@@ -31,6 +32,13 @@ export class GlitchBudgetDB extends Dexie {
   constructor(name = 'GlitchBudgetDB') {
     super(name);
     this.version(CURRENT_DB_SCHEMA_VERSION).stores({
+      debt_payments: 'id, debtId, date, accountId',
+    }).upgrade(async tx => {
+      await tx.table('debt_payments').toCollection().modify(payment => {
+        payment.date = normalizeFinancialDate(payment.date);
+      });
+    });
+    this.version(14).stores({
       accounts: 'id, type',
       investments: 'id, &accountId, type, status, maturityDate',
     });

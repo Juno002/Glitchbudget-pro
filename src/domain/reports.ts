@@ -23,7 +23,7 @@ function daysInMonth(year:number, month:number) {
   return [4,6,9,11].includes(month) ? 30 : 31;
 }
 function parseDate(value:string): CivilDate {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.slice(0,10));
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) throw new Error('Fecha inválida.');
   const result = { year:Number(match[1]), month:Number(match[2]), day:Number(match[3]) };
   if (result.month < 1 || result.month > 12 || result.day < 1 || result.day > daysInMonth(result.year,result.month)) throw new Error('Fecha inválida.');

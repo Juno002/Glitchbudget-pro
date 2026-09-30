@@ -94,10 +94,10 @@ test('20.7.5.3 React surfaces consume explicit card/loan read models and general
   assert.doesNotMatch(reports, /creditCardLiabilities|Credit-card liabilities|pasivos de tarjeta/);
 });
 
-test('20.7.5.3 keeps persistence and backup versions unchanged', () => {
-  const db = readFileSync(new URL('../src/lib/db.ts', import.meta.url), 'utf8');
+test('20.7.5.3 keeps the ambiguous debt field behind compatibility boundaries without changing backup format', () => {
+  const models = readFileSync(new URL('../src/domain/models.ts', import.meta.url), 'utf8');
   const backup = readFileSync(new URL('../src/lib/backup-json.ts', import.meta.url), 'utf8');
 
-  assert.match(db, /CURRENT_DB_SCHEMA_VERSION = 14/);
+  assert.match(models, /principal: number;.*campo persistente de compatibilidad/);
   assert.match(backup, /CURRENT_BACKUP_FORMAT_VERSION = 13/);
 });

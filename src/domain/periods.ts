@@ -40,8 +40,7 @@ function parseMonthId(id: string): { year: number; month: number } {
 }
 
 function parseDate(value: string): { year: number; month: number; day: number } {
-  const date = value.slice(0, 10);
-  const match = ISO_DATE.exec(date);
+  const match = ISO_DATE.exec(value);
   if (!match) throw new Error('Fecha inválida.');
   const year = Number(match[1]);
   const month = Number(match[2]);
@@ -122,14 +121,13 @@ export function periodContaining(value: string, settings: PeriodSettings = {}): 
   const startDay = normalizePeriodStartDay(settings.periodStartDay);
   if (startDay === 1) return periodForId(calendarId, settings);
   const currentAnchor = anchorForMonth(calendarId, startDay);
-  const id = value.slice(0, 10) >= currentAnchor ? shiftPeriodId(calendarId, 1) : calendarId;
+  const id = value >= currentAnchor ? shiftPeriodId(calendarId, 1) : calendarId;
   return periodForId(id, settings);
 }
 
 export function contains(range: DateRange, value: string): boolean {
-  const date = value.slice(0, 10);
-  parseDate(date);
-  return date >= range.start && date <= range.end;
+  parseDate(value);
+  return value >= range.start && value <= range.end;
 }
 
 export function previousComparablePeriod(period: PeriodRange, settings: PeriodSettings = {}): PeriodRange {
@@ -164,7 +162,7 @@ export function budgetPeriodContaining(
   settings: PeriodSettings = {},
   oneTime?: DateRange,
 ): BudgetPeriodRange {
-  const date = value.slice(0, 10);
+  const date = value;
   parseDate(date);
 
   if (kind === 'monthly') {

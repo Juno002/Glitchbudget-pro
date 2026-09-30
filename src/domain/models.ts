@@ -159,7 +159,7 @@ export interface DebtPayment {
   accountId?: string;
   id: string;
   debtId: string;
-  date: string;                // ISO
+  date: string;                // YYYY-MM-DD local financial date
   amount: number;              // centavos in the account/base currency
   note?: string;
   currency?: string;

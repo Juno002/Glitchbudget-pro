@@ -5,7 +5,7 @@ export function selectAccountEntries(account: Account, data: AccountSnapshot, th
   const entries = [
     ...data.incomes.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.amount, description: r.description || 'Ingreso', kind: 'income' })),
     ...data.expenses.filter(r => r.accountId === account.id && r.paymentMethod !== 'credit').map(r => ({ id: r.id, date: r.date, amount: -r.amount, description: r.concept || 'Gasto', kind: 'expense' })),
-    ...data.payments.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date.slice(0, 10), amount: -r.amount, description: r.note || 'Pago de tarjeta', kind: 'payment' })),
+    ...data.payments.filter(r => r.accountId === account.id).map(r => ({ id: r.id, date: r.date, amount: -r.amount, description: r.note || 'Pago de tarjeta', kind: 'payment' })),
     ...data.transfers.filter(r => r.fromAccountId === account.id || r.toAccountId === account.id).map(r => ({ id: r.id, date: r.date, amount: r.fromAccountId === account.id ? -r.amount : r.amount, description: r.note || 'Transferencia entre cuentas', kind: 'transfer' })),
   ];
   return entries.filter(r => r.date >= account.startDate && r.date <= through).sort((a,b) => b.date.localeCompare(a.date) || a.id.localeCompare(b.id));
@@ -16,7 +16,7 @@ export function selectAccountBalance(account: Account, data: AccountSnapshot, th
 }
 export function selectCardSignedBalance(debt: Debt, expenses: Expense[], payments: DebtPayment[], through: string) {
   if (!isCreditCardDebt(debt)) throw new Error('El saldo de tarjeta requiere una tarjeta de crédito.');
-  return (debt.openingAdjustment ?? 0) + expenses.filter(e => e.debtId === debt.id && e.paymentMethod === 'credit' && e.date <= through).reduce((s,e) => s + e.amount, 0) - payments.filter(p => p.debtId === debt.id && p.date.slice(0,10) <= through).reduce((s,p) => s + p.amount, 0);
+  return (debt.openingAdjustment ?? 0) + expenses.filter(e => e.debtId === debt.id && e.paymentMethod === 'credit' && e.date <= through).reduce((s,e) => s + e.amount, 0) - payments.filter(p => p.debtId === debt.id && p.date <= through).reduce((s,p) => s + p.amount, 0);
 }
 
 /**
@@ -29,7 +29,7 @@ export function selectCardSignedBalance(debt: Debt, expenses: Expense[], payment
 export function selectLoanCompatibilityBalance(debt: Debt, payments: DebtPayment[], through: string) {
   if (!isHistoricalLoanDebt(debt)) throw new Error('El saldo compatible de préstamo requiere un préstamo histórico.');
   const paid = payments
-    .filter(payment => payment.debtId === debt.id && payment.date.slice(0, 10) <= through)
+    .filter(payment => payment.debtId === debt.id && payment.date <= through)
     .reduce((sum, payment) => sum + payment.amount, 0);
   return Math.max(0, loanOriginalPrincipal(debt) + (debt.openingAdjustment ?? 0) - paid);
 }

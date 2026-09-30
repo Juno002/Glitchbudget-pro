@@ -35,7 +35,7 @@ test('18.1 separates backup format, Dexie schema and app version', async () => {
   const isolated = new GlitchBudgetDB('phase18-version-contract');
   try {
     assert.equal(CURRENT_BACKUP_FORMAT_VERSION, 13);
-    assert.equal(CURRENT_DB_SCHEMA_VERSION, 14);
+    assert.equal(CURRENT_DB_SCHEMA_VERSION, 15);
     assert.equal(isolated.verno, CURRENT_DB_SCHEMA_VERSION);
     assert.equal(CURRENT_APP_VERSION, packageInfo.version);
   } finally {
@@ -92,7 +92,7 @@ test('18.1 preserves legacy JSON v12 import compatibility', async () => {
   await assert.doesNotReject(importDataJSON(JSON.stringify(legacyV12)));
   const roundTrip = JSON.parse(await exportDataJSON());
   assert.equal(roundTrip.v, 13);
-  assert.equal(roundTrip.schemaVersion, 14);
+  assert.equal(roundTrip.schemaVersion, 15);
   assert.equal(roundTrip.appVersion, CURRENT_APP_VERSION);
 });
 
@@ -104,7 +104,7 @@ test('18.1 encrypted backup automatically inherits the new internal JSON metadat
   const payload = JSON.parse(decrypted);
 
   assert.equal(payload.v, 13);
-  assert.equal(payload.schemaVersion, 14);
+  assert.equal(payload.schemaVersion, 15);
   assert.equal(payload.appVersion, CURRENT_APP_VERSION);
   assert.ok(payload.exportedAt);
 });
