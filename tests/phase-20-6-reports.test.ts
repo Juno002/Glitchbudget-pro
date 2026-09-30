@@ -52,8 +52,7 @@ test('20.6 Reports keeps visual charts paired with exact tables or metric cards'
 });
 
 test('20.6 report UI introduces no Prisma demo finance data or direct database access', () => {
-  const source = read('src/components/dashboard/reports-tab.tsx') + '
-' + read('src/components/dashboard/charts/report-charts.tsx');
+  const source = read('src/components/dashboard/reports-tab.tsx') + '\n' + read('src/components/dashboard/charts/report-charts.tsx');
   assert.doesNotMatch(source, /@\/lib\/db|Dexie|IndexedDB|db\./i);
   for (const demo of ['Alex','Internet hogar','Netflix','8.4%','12.6%','30,000']) assert.equal(source.includes(demo), false, demo);
 });
