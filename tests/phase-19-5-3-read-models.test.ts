@@ -25,6 +25,7 @@ import {
 import { evaluateAchievementEligibility } from '../src/domain/achievements';
 import type {
   Account,
+  CreditCardDebt,
   Debt,
   Expense,
   Goal,
@@ -113,7 +114,7 @@ test('goal read model centralizes remaining, legacy progress, suggested contribu
 });
 
 test('ledger read models centralize credit utilization and unassigned movement classification', () => {
-  const debt: Debt = {
+  const debt: CreditCardDebt = {
     id:'card-1',
     name:'Card',
     type:'credit_card',
