@@ -58,7 +58,7 @@ test('20.7.5.1 freezes credit-card and loan meanings without treating loan as a 
     ['restore', 'export', 'view_read_only_history'],
   );
   assert.match(DEBT_SEMANTICS.loan.netWorthImpact, /liability/i);
-  assert.match(DEBT_SEMANTICS.loan.statusRule, /never hides/i);
+  assert.match(DEBT_SEMANTICS.loan.statusRule, /remains a liability/i);
 });
 
 test('20.7.5.1 legacy loan survives v4 import and current export without being coerced to a card', async () => {
