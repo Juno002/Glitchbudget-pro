@@ -2,10 +2,14 @@ import type { Debt } from './models';
 
 export type DebtSemanticContract = {
   role: 'supported' | 'historical_compatibility';
-  principalMeaning: string;
-  canonicalBalance: string;
+  principalMeaning: 'approved_credit_limit' | 'original_principal';
+  balanceFormula:
+    | 'opening_adjustment_plus_credit_purchases_minus_payments'
+    | 'principal_plus_opening_adjustment_minus_payments_clamped_at_zero';
+  balanceDescription: string;
   reducingMovements: string;
   netWorthImpact: string;
+  statusRule: string;
   allowedActions: readonly string[];
   uiRepresentation: string;
   backupCompatibility: string;
@@ -18,23 +22,27 @@ export type DebtSemanticContract = {
 export const DEBT_SEMANTICS: Record<Debt['type'], DebtSemanticContract> = {
   credit_card: {
     role: 'supported',
-    principalMeaning: 'approved credit limit; never an asset and never the outstanding balance',
-    canonicalBalance: 'openingAdjustment + linked credit purchases - linked debt payments, through the requested date; negative means cardholder surplus',
-    reducingMovements: 'DebtPayment rows linked by debtId reduce the signed balance; refunds/reversals require an explicit supported ledger movement rather than reinterpreting principal',
-    netWorthImpact: 'positive signed balance is a liability; negative signed balance is a positive card balance asset; approved limit never enters net worth',
-    allowedActions: ['create', 'record_credit_purchase', 'record_payment', 'reconcile', 'close_or_preserve_history'],
-    uiRepresentation: 'Tarjeta: show pending balance or balance in favor plus available limit; never present approved limit as owned money',
-    backupCompatibility: 'preserve all card fields, linked expenses, payments and openingAdjustment on export/restore',
+    principalMeaning: 'approved_credit_limit',
+    balanceFormula: 'opening_adjustment_plus_credit_purchases_minus_payments',
+    balanceDescription: 'Signed balance = openingAdjustment + linked credit purchases - linked debt payments through the requested date. A negative value is cardholder surplus.',
+    reducingMovements: 'DebtPayment rows linked by debtId reduce the signed balance. Credit-card purchases increase it; principal never does.',
+    netWorthImpact: 'Positive signed balance is a liability. Negative signed balance is a positive card balance asset. Approved credit limit never enters net worth.',
+    statusRule: 'Status controls whether new activity is allowed; closing a card does not erase its historical signed balance.',
+    allowedActions: ['create', 'record_credit_purchase', 'record_payment', 'reconcile', 'preserve_history'],
+    uiRepresentation: 'Operational credit card with pending balance or balance in favor plus available limit; approved limit is never presented as owned money.',
+    backupCompatibility: 'Preserve card fields, linked expenses, linked payments and openingAdjustment across export/restore.',
   },
   loan: {
     role: 'historical_compatibility',
-    principalMeaning: 'historical outstanding principal at the debt baseline; unlike credit_card it is not a credit limit',
-    canonicalBalance: 'max(0, principal + openingAdjustment - linked debt payments) through the requested date; credit-card purchases never increase a loan',
-    reducingMovements: 'only DebtPayment rows linked by debtId reduce the loan in the current persisted model',
-    netWorthImpact: 'active positive canonical balance is a liability and reduces net worth; closed loan contributes zero liability but its history is preserved',
+    principalMeaning: 'original_principal',
+    balanceFormula: 'principal_plus_opening_adjustment_minus_payments_clamped_at_zero',
+    balanceDescription: 'Compatibility balance = max(0, original principal + any preserved historical openingAdjustment - linked historical debt payments through the requested date). No interest is synthesized from APR and credit-card purchases never increase a loan.',
+    reducingMovements: 'Only historical DebtPayment rows linked by debtId reduce the compatibility balance in the persisted model.',
+    netWorthImpact: 'Any positive compatibility balance is a liability and reduces net worth. Status alone never hides a remaining balance.',
+    statusRule: 'Loan status is lifecycle metadata only; a closed row with a positive computed balance remains a liability until the historical data reconciles it to zero.',
     allowedActions: ['restore', 'export', 'view_read_only_history'],
-    uiRepresentation: 'Imported loan must remain identifiable as a historical loan and read-only; it must not be rendered or operated on as a credit card',
-    backupCompatibility: 'preserve loan row, status, principal, openingAdjustment and linked payments exactly enough for backward-compatible round-trip',
+    uiRepresentation: 'Imported loan remains identifiable as a historical loan and read-only. It must not be rendered or operated on as a credit card.',
+    backupCompatibility: 'Preserve loan type, principal, status, APR, minimum payment, openingAdjustment and linked payments across backward-compatible round-trip.',
   },
 };
 
