@@ -85,7 +85,7 @@ test('Net Worth uses the same ledger selector and includes investments without t
   assert.equal(report.investments,60_000);
   assert.equal(report.liquidAssets,340_000);
   // Card opening debt 10k + purchase 20k - payment 15k = 15k liability.
-  assert.equal(report.creditCardLiabilities,15_000);
+  assert.equal(report.liabilities,15_000);
   assert.equal(report.netWorth,385_000);
 });
 
