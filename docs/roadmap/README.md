@@ -21,6 +21,22 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
 
+## Próxima intervención autorizada
+
+```text
+20.8.1 — Preflight de información + regresión de categorías
+```
+
+La secuencia pendiente está cerrada por el roadmap canónico:
+
+```text
+20.8.1 → 20.8.8
+20.9.1 → 20.9.9
+20.10.1 → 20.10.7
+```
+
+No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero `Roadmap septiembre 2026.txt` con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
+
 Baseline técnico actual:
 
 ```text
