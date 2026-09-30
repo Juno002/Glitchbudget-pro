@@ -380,6 +380,45 @@ async function main() {
       'Movimientos Prisma',
     );
 
+    if (!await client.evaluate(clickButtonExpression('Plan'))) {
+      throw new Error('No se pudo abrir Plan.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-plan-prisma="true"]'))
+        && Boolean(document.querySelector('[data-plan-navigation="prisma"]'))`,
+      'Plan Prisma',
+    );
+
+    if (!await client.evaluate(clickButtonExpression('Presupuestos'))) {
+      throw new Error('No se pudo abrir Presupuestos.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-plan-budgets="prisma"]'))
+        && Boolean(document.querySelector('[data-budget-period-controls="prisma"]'))`,
+      'Presupuestos Prisma',
+    );
+
+    if (!await client.evaluate(clickButtonExpression('Metas'))) {
+      throw new Error('No se pudo abrir Metas.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-plan-goals="prisma"]'))`,
+      'Metas Prisma',
+    );
+
+    if (!await client.evaluate(clickButtonExpression('Planificados'))) {
+      throw new Error('No se pudo abrir Planificados.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-plan-planned="prisma"]'))
+        && Boolean(document.querySelector('[data-plan-planned-manager="prisma"]'))`,
+      'Planificados Prisma',
+    );
+
     const externalRequests = requests.filter(url => {
       try {
         const parsed = new URL(url);
@@ -417,7 +456,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + Prisma Plan + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }
