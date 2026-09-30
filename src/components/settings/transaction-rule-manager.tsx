@@ -130,10 +130,10 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
     && Boolean(categoryId || necessity);
 
   return (
-    <div className="space-y-5">
-      <div className="rounded-xl border p-4 space-y-4">
+    <div className="space-y-5" data-rules-prisma="true">
+      <div className="space-y-4 rounded-[var(--radius-card)] border bg-card p-5 shadow-[var(--shadow-card)]">
         <div>
-          <h3 className="font-semibold">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Automatización local</p><h3 className="mt-1 font-display text-xl font-normal">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             Por defecto las reglas solo sugieren clasificación. Puedes habilitar aplicación automática de forma explícita en una regla concreta.
           </p>
@@ -168,7 +168,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
               aria-label="Categoría sugerida"
               value={categoryId}
               onChange={event => setCategoryId(event.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              className="flex h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 py-2 text-sm shadow-[var(--shadow-control)]"
             >
               <option value="">Sin categoría</option>
               {categoryOptions.map(option => (
@@ -195,7 +195,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
             <span className="block text-xs text-muted-foreground">La necesidad solo puede aplicarse a gastos.</span>
           </label>
 
-          <label className="flex items-start gap-3 rounded-lg border p-3 text-sm md:col-span-2">
+          <label className="flex items-start gap-3 rounded-[var(--radius-interactive)] border bg-muted/25 p-3 text-sm md:col-span-2">
             <input
               type="checkbox"
               checked={applyAutomatically}
@@ -225,14 +225,14 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
 
       <div className="space-y-3">
         <div>
-          <h3 className="font-semibold">Reglas locales</h3>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Orden de aplicación</p><h3 className="mt-1 font-display text-xl font-normal">Reglas locales</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             El orden se conserva y también es el orden en que Quick Add presenta coincidencias.
           </p>
         </div>
 
         {rules.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
+          <div className="rounded-[var(--radius-card)] border border-dashed p-5 text-sm text-muted-foreground">
             Aún no hay reglas. Crea una para recibir sugerencias locales en Quick Add.
           </div>
         ) : rules.map((rule, index) => {
@@ -245,7 +245,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
           const outputs = [category, necessityLabel].filter(Boolean).join(' · ');
 
           return (
-            <div key={rule.id} className="rounded-xl border p-4">
+            <div key={rule.id} className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
