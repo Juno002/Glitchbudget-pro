@@ -557,6 +557,18 @@ Crear fixtures deterministas para:
 
 ### 20.7.5.3 — Debt model normalization
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+516/516 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36762375604 ✅
+```
+
 #### Objetivo
 
 Eliminar la ambigüedad de mantenimiento causada por usar `Debt.principal` con significados distintos.
@@ -603,6 +615,18 @@ Los componentes no deben volver a usar un campo ambiguo directamente para decidi
 - utilización;
 - saldo;
 - principal pendiente.
+
+#### Resultado de implementación
+
+- `src/domain/models.ts` deriva `CreditCardDebt` y `HistoricalLoanDebt` sin alterar la forma persistida.
+- `src/domain/debt-semantics.ts` concentra la frontera de compatibilidad con `cardCreditLimit()`, `loanOriginalPrincipal()` y type guards explícitos.
+- `src/domain/ledger.ts` consume esos significados y devuelve read models con `creditLimit`, `originalPrincipal`, `compatibilityBalance` y demás cantidades inequívocas.
+- El flujo de alta operativa usa `CreateCreditCardInput.creditLimit`; React ya no construye una tarjeta mediante `principal`.
+- `reconcileDebt()` y el helper legado de saldo rechazan filas `loan` antes de aplicar semántica de tarjeta.
+- El agregado de Reportes se renombra de `creditCardLiabilities` a `liabilities`, y Home/Reportes dejan de etiquetar como “tarjetas” un valor que también puede contener préstamos históricos.
+- `tests/phase-20-7-5-3-debt-normalization.test.ts` cubre cantidades discriminadas, read models, agregado tarjeta + préstamo, superficies React y estabilidad de versiones.
+- Los gates históricos afectados se actualizaron únicamente para exigir la API más estricta.
+- Persistencia sin cambios: Dexie v14, Backup JSON v13, encrypted envelope v1.
 
 **Gate 20.7.5.3:** el significado de cada cantidad de deuda es inequívoco fuera de la capa de compatibilidad.
 

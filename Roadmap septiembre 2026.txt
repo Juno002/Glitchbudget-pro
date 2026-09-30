@@ -3024,6 +3024,28 @@ Fixtures mínimos:
 
 ### 20.7.5.3 — Debt model normalization
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+516/516 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36762375604 ✅
+```
+
+Resultado de cierre:
+
+- `Debt.principal` permanece únicamente como campo persistente de compatibilidad;
+- `CreditCardDebt` y `HistoricalLoanDebt` discriminan cada variante fuera de persistencia;
+- `cardCreditLimit()` y `loanOriginalPrincipal()` exponen significados explícitos;
+- read models de tarjeta/préstamo ya no exponen una cantidad ambigua llamada `principal`;
+- creación operativa de tarjeta usa `creditLimit` y la capa de servicio traduce a persistencia;
+- Home/Reportes usan `liabilities` para el agregado tarjeta + préstamo histórico;
+- sin cambios de schema Dexie, migraciones ni formato de backup.
+
 Eliminar la ambigüedad de `Debt.principal`.
 
 Problema:
