@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-20.7.5.2 — Loans + Net Worth correctness
+20.7.5.3 — Debt model normalization
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
