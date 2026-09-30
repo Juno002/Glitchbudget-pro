@@ -16,14 +16,32 @@ export function selectAccountBalance(account: Account, data: AccountSnapshot, th
 export function selectCardSignedBalance(debt: Debt, expenses: Expense[], payments: DebtPayment[], through: string) {
   return (debt.openingAdjustment ?? 0) + expenses.filter(e => e.debtId === debt.id && e.paymentMethod === 'credit' && e.date <= through).reduce((s,e) => s + e.amount, 0) - payments.filter(p => p.debtId === debt.id && p.date.slice(0,10) <= through).reduce((s,p) => s + p.amount, 0);
 }
+
+/**
+ * Compatibility balance for historical loan rows.
+ *
+ * Phase 20.7.5.1 froze loan.principal as original principal, not a credit limit.
+ * The persisted model has no canonical interest accrual schedule, so we preserve
+ * only recorded principal/opening adjustment minus recorded debt payments.
+ */
+export function selectLoanCompatibilityBalance(debt: Debt, payments: DebtPayment[], through: string) {
+  const paid = payments
+    .filter(payment => payment.debtId === debt.id && payment.date.slice(0, 10) <= through)
+    .reduce((sum, payment) => sum + payment.amount, 0);
+  return Math.max(0, debt.principal + (debt.openingAdjustment ?? 0) - paid);
+}
+
 export function selectPosition(accounts: Account[], debts: Debt[], data: AccountSnapshot, through: string) {
   const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const investmentAssets = accounts.filter(a => a.type === 'investment').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const balances = debts.filter(d => d.type === 'credit_card').map(d => ({...d, signedBalance: selectCardSignedBalance(d,data.expenses,data.payments,through)}));
-  const liabilities = balances.reduce((sum,d) => sum+Math.max(0,d.signedBalance),0);
+  const loanBalances = debts.filter(d => d.type === 'loan').map(d => ({...d, compatibilityBalance: selectLoanCompatibilityBalance(d,data.payments,through)}));
+  const cardLiabilities = balances.reduce((sum,d) => sum+Math.max(0,d.signedBalance),0);
+  const loanLiabilities = loanBalances.reduce((sum,d) => sum+d.compatibilityBalance,0);
+  const liabilities = cardLiabilities + loanLiabilities;
   const cardPositiveBalance = balances.reduce((sum,d) => sum+Math.max(0,-d.signedBalance),0);
-  return { cash, bank, investmentAssets, liquidAssets: cash+bank, liabilities, cardPositiveBalance, netWorth: cash+bank+investmentAssets+cardPositiveBalance-liabilities, balances };
+  return { cash, bank, investmentAssets, liquidAssets: cash+bank, liabilities, cardPositiveBalance, netWorth: cash+bank+investmentAssets+cardPositiveBalance-liabilities, balances, loanBalances };
 }
 /** Borrowing headroom, never part of liquid assets or net worth. */
 export function selectCardAvailableLimit(limit: number, signedBalance: number) {
