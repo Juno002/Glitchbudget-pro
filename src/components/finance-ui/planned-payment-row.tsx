@@ -29,10 +29,10 @@ export function PlannedPaymentRow({
   };
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-[var(--radius-interactive)] border bg-background/55 p-3 transition-colors hover:bg-muted/25 sm:flex-row sm:items-center sm:justify-between" data-planned-payment-row="prisma">
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-medium">{title}</span>
+          <span className="truncate font-semibold">{title}</span>
           {kindLabel ? <span className="text-xs text-muted-foreground">{kindLabel}</span> : null}
           <StatusBadge status={status} />
         </div>
