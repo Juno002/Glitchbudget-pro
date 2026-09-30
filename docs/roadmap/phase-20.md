@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **Fase 20 completada. 20.1–20.7 completadas / Gates aprobados**.
+Estado: **20.1–20.7 completadas / Gates aprobados. Extensión final 20.8–20.10 planificada por decisión posterior del 30 sep 2026.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -379,9 +379,25 @@ Encrypted envelope v1
 
 Cualquier necesidad de cambiar schema durante una etapa visual se considera una señal de alerta y debe detener la implementación para revisión.
 
-## Resultado final
+## Extensión final después de 20.7
 
-Gate 20.7 aprobado. Fase 20 completada.
+Gate 20.7 permanece aprobado y constituye el **baseline visual/branding estable**. Posteriormente se decidió extender Fase 20 con tres etapas finales, sin reabrir ni invalidar 20.1–20.7:
+
+- [20.8 — Information Design + Deterministic Insights](phase-20-8.md)
+- [20.9 — Premium UI Polish](phase-20-9.md)
+- [20.10 — Repository Consolidation + Product README](phase-20-10.md)
+
+La secuencia obligatoria es:
+
+```text
+20.8 información/insights
+→ 20.9 premium polish
+→ 20.10 consolidación final
+```
+
+No saltar directamente a limpieza de ramas o README antes de cerrar 20.8 y 20.9.
+
+### Baseline cerrado en 20.7
 
 Al completar 20.7:
 
