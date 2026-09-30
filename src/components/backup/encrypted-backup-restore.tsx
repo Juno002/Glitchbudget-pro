@@ -120,9 +120,9 @@ export default function EncryptedBackupRestore() {
           if (!open && !busy) reset();
         }}
       >
-        <AlertDialogContent aria-busy={busy}>
+        <AlertDialogContent aria-busy={busy} data-encrypted-restore="prisma">
           <AlertDialogHeader>
-            <AlertDialogTitle>Restaurar backup cifrado</AlertDialogTitle>
+            <AlertDialogTitle className="font-display text-2xl font-normal">Restaurar backup cifrado</AlertDialogTitle>
             <AlertDialogDescription>
               Primero se autenticará, descifrará y validará <span className="font-medium break-all">{file?.name}</span>.
               Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes.

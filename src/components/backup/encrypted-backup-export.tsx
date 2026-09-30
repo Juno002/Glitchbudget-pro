@@ -100,7 +100,7 @@ export default function EncryptedBackupExport() {
   }
 
   return (
-    <form onSubmit={submit} className="w-full rounded-xl border p-4 space-y-4">
+    <form onSubmit={submit} className="w-full space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-encrypted-export="prisma">
       <div className="flex items-start gap-3">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
