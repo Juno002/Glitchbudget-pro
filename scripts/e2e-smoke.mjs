@@ -309,7 +309,9 @@ async function main() {
         const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
         return sidebar && mobileNav
           && getComputedStyle(sidebar).display !== 'none'
-          && getComputedStyle(mobileNav).display === 'none';
+          && getComputedStyle(mobileNav).display === 'none'
+          && sidebar.innerText.includes('Prisma')
+          && !sidebar.innerText.includes('GlitchBudget Pro');
       })()`,
       'shell desktop',
     );
@@ -339,10 +341,12 @@ async function main() {
         const sidebar = document.querySelector('[data-shell-sidebar="desktop"]');
         const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
         const mobileFab = document.querySelector('[data-shell-fab="mobile"]');
-        return sidebar && mobileNav && mobileFab
+        const mobileBrand = document.querySelector('a[aria-label="Prisma"]');
+        return sidebar && mobileNav && mobileFab && mobileBrand
           && getComputedStyle(sidebar).display === 'none'
           && getComputedStyle(mobileNav).display !== 'none'
-          && getComputedStyle(mobileFab).display !== 'none';
+          && getComputedStyle(mobileFab).display !== 'none'
+          && mobileBrand.textContent?.includes('Prisma');
       })()`,
       'shell móvil',
     );
@@ -388,9 +392,50 @@ async function main() {
       `Boolean(document.querySelector('[data-movements-prisma="true"]'))
         && Boolean(document.querySelector('[data-movement-filter-bar="primary"]'))
         && Boolean(document.querySelector('[data-movement-filter-panel="advanced"]'))
-        && Boolean(document.querySelector('[data-movement-history="list"]'))`,
-      'Movimientos Prisma',
+        && Boolean(document.querySelector('[data-movement-history="list"]'))
+        && Boolean(document.querySelector('[data-accounts-prisma="true"]'))
+        && Boolean(document.querySelector('[data-investments-prisma="true"]'))`,
+      'Movimientos + cuentas + inversiones Prisma',
     );
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Ver logros"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir Logros.');
+    await waitFor(client, `Boolean(document.querySelector('[data-achievements-prisma="true"]'))`, 'Logros Prisma');
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Ajustes"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir Ajustes.');
+    await waitFor(client, `Boolean(document.querySelector('[data-settings-prisma="true"]'))`, 'Ajustes Prisma');
+
+    if (!await client.evaluate(activateTabExpression('Categorías'))) throw new Error('No se pudo abrir Categorías.');
+    await waitFor(client, `document.querySelectorAll('[data-category-manager="prisma"]').length >= 2`, 'Categorías Prisma');
+
+    if (!await client.evaluate(activateTabExpression('Privacidad y seguridad'))) throw new Error('No se pudo abrir Privacidad y seguridad.');
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-app-lock-settings="prisma"]'))
+        && Boolean(document.querySelector('[data-auto-lock-settings="prisma"]'))`,
+      'Seguridad Prisma',
+    );
+
+    if (!await client.evaluate(activateTabExpression('Datos y backups'))) throw new Error('No se pudo abrir Datos y backups.');
+    await waitFor(client, `Boolean(document.querySelector('[data-persistent-storage-settings="prisma"]'))`, 'Datos Prisma');
+
+    if (!await client.evaluate(clickButtonExpression('Copias de Seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
+    await waitFor(client, `Boolean(document.querySelector('[data-backups-prisma="true"]'))`, 'Backups Prisma');
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
 
     if (!await client.evaluate(clickButtonExpression('Plan'))) {
       throw new Error('No se pudo abrir Plan.');
@@ -512,7 +557,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: responsive shell + Prisma Home + Prisma Movimientos/composer + Prisma Plan + Prisma Reports/charts + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }
