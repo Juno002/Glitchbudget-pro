@@ -35,9 +35,9 @@ export default function IncomeCategoryManager() {
     }
 
     return (
-        <Card>
+        <Card className="border bg-card shadow-[var(--shadow-card)]" data-category-manager="prisma">
             <CardHeader>
-                <CardTitle>🏷️ Gestión de categorías de ingresos</CardTitle>
+                <CardTitle className="font-display text-xl font-normal">Categorías de ingresos</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-2 items-end">
@@ -52,7 +52,7 @@ export default function IncomeCategoryManager() {
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto">
-                        <Button onClick={handleAddCategory} className="flex-1 md:w-auto bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20">➕ Agregar</Button>
+                        <Button onClick={handleAddCategory} className="flex-1 rounded-[var(--radius-interactive)] md:w-auto">➕ Agregar</Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="outline" className="w-full md:w-auto">🔄 Restablecer</Button>
