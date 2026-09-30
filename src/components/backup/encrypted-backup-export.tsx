@@ -66,7 +66,7 @@ export default function EncryptedBackupExport() {
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = `glitchbudget-encrypted-backup-${localDateStamp()}.gbenc`;
+      anchor.download = `prisma-encrypted-backup-${localDateStamp()}.gbenc`;
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
@@ -74,7 +74,7 @@ export default function EncryptedBackupExport() {
 
       toast({
         title: 'Backup cifrado exportado',
-        description: 'Guarda también la contraseña: no se almacena en GlitchBudget.',
+        description: 'Guarda también la contraseña: no se almacena en Prisma.',
       });
       close();
     } catch (cause) {

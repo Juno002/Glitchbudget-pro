@@ -136,7 +136,7 @@ export function useBackupManagement(
       const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
       const anchor = document.createElement('a');
       anchor.href = URL.createObjectURL(blob);
-      anchor.download = `glitchbudget-backup-${localDate()}.json`;
+      anchor.download = `prisma-backup-${localDate()}.json`;
       anchor.click();
       URL.revokeObjectURL(anchor.href);
       toast({ title: 'Exportación completada' });
