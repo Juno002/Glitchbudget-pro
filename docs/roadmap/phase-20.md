@@ -486,6 +486,18 @@ Tests de contrato: `tests/phase-20-7-5-1-debt-semantics.test.ts`.
 
 ### 20.7.5.2 — Loans + Net Worth correctness
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+511/511 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36758265316 (attempt 2) ✅
+```
+
 #### Objetivo
 
 Aplicar el contrato decidido en 20.7.5.1 para que ninguna deuda persistida pueda producir un patrimonio incorrecto.
