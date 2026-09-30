@@ -137,6 +137,18 @@ function clickButtonExpression(label) {
   })()`;
 }
 
+function activateTabExpression(label) {
+  return `(() => {
+    const tab = [...document.querySelectorAll('[role="tab"]')]
+      .find(node => node.textContent?.trim() === ${JSON.stringify(label)}
+        && node.getAttribute('aria-disabled') !== 'true');
+    if (!(tab instanceof HTMLElement)) return false;
+    tab.focus();
+    tab.click();
+    return true;
+  })()`;
+}
+
 function setControlExpression(selector, value) {
   return `(() => {
     const control = document.querySelector(${JSON.stringify(selector)});
@@ -390,7 +402,7 @@ async function main() {
       'Plan Prisma',
     );
 
-    if (!await client.evaluate(clickButtonExpression('Presupuestos'))) {
+    if (!await client.evaluate(activateTabExpression('Presupuestos'))) {
       throw new Error('No se pudo abrir Presupuestos.');
     }
     await waitFor(
@@ -400,7 +412,7 @@ async function main() {
       'Presupuestos Prisma',
     );
 
-    if (!await client.evaluate(clickButtonExpression('Metas'))) {
+    if (!await client.evaluate(activateTabExpression('Metas'))) {
       throw new Error('No se pudo abrir Metas.');
     }
     await waitFor(
@@ -409,7 +421,7 @@ async function main() {
       'Metas Prisma',
     );
 
-    if (!await client.evaluate(clickButtonExpression('Planificados'))) {
+    if (!await client.evaluate(activateTabExpression('Planificados'))) {
       throw new Error('No se pudo abrir Planificados.');
     }
     await waitFor(
