@@ -1,5 +1,6 @@
 import type { Account, Income, Expense, DebtPayment, AccountTransfer, CreditCardDebt, Debt, HistoricalLoanDebt } from './models';
 import { cardCreditLimit, isCreditCardDebt, isHistoricalLoanDebt, loanOriginalPrincipal } from './debt-semantics';
+import { normalizeCurrencyCode } from './currency';
 export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
 export function selectAccountEntries(account: Account, data: AccountSnapshot, through: string) {
   const entries = [
@@ -34,7 +35,21 @@ export function selectLoanCompatibilityBalance(debt: Debt, payments: DebtPayment
   return Math.max(0, loanOriginalPrincipal(debt) + (debt.openingAdjustment ?? 0) - paid);
 }
 
+/**
+ * Position is a single-currency aggregate. Supported persistence/service paths
+ * keep every account in the configured base currency; this guard makes that
+ * precondition executable so future FX work cannot silently add nominal values.
+ */
+export function requireSinglePositionCurrency(accounts: Account[]) {
+  const currencies = new Set(accounts.map(account => normalizeCurrencyCode(account.currency)));
+  if (currencies.size > 1) {
+    throw new Error('La posición financiera no puede sumar cuentas en monedas diferentes sin conversión explícita.');
+  }
+  return currencies.values().next().value as string | undefined;
+}
+
 export function selectPosition(accounts: Account[], debts: Debt[], data: AccountSnapshot, through: string) {
+  requireSinglePositionCurrency(accounts);
   const cash = accounts.filter(a => a.type === 'cash').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const bank = accounts.filter(a => a.type === 'bank').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
   const investmentAssets = accounts.filter(a => a.type === 'investment').reduce((sum,a) => sum+selectAccountBalance(a,data,through),0);
