@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1, 20.2, 20.3, 20.4, 20.5 y 20.6 completadas / Gates aprobados. 20.7 no iniciada**.
+Estado: **Fase 20 completada. 20.1–20.7 completadas / Gates aprobados**.
 
 Referencia visual congelada al iniciar la fase:
 
@@ -262,6 +262,8 @@ No se permite:
 
 ## 20.7 — Superficies secundarias + branding Prisma + gate final
 
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-7.md](phase-20-7.md). Quality checks `36675832852` y `36675835726`: 502/502 tests, build y browser E2E final con branding Prisma, superficies secundarias y offline verdes.
+
 Completar el rediseño de:
 
 - cuentas;
@@ -377,7 +379,9 @@ Encrypted envelope v1
 
 Cualquier necesidad de cambiar schema durante una etapa visual se considera una señal de alerta y debe detener la implementación para revisión.
 
-## Resultado esperado
+## Resultado final
+
+Gate 20.7 aprobado. Fase 20 completada.
 
 Al completar 20.7:
 
