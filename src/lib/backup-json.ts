@@ -9,7 +9,7 @@ import { accountSchema, legacyAccountSchema, phase11AccountSchema, transferSchem
 import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
-import { normalizeFinancialDate } from '../domain/financial-date';
+import { normalizeFinancialDate } from './financial-date';
 import {
   exportLocalAutomation,
   normalizeLocalAutomationBackup,

@@ -10,7 +10,7 @@ export { recordedExpenseForMonth, recordedCategories } from '../domain/metrics';
 export {
   localFinancialDate as localDate,
   isCanonicalFinancialDate as isValidDate,
-} from '../domain/financial-date';
+} from './financial-date';
 
 /** @deprecated Use explicitly named domain metrics in new consumers. */
 export function calculateRecordedTotals(data: FinanceSnapshot, month: string) {

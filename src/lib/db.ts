@@ -4,7 +4,7 @@ import { migrateActualExpense, migrateRecurringRule } from '../domain/actual-pla
 import { reconstructCategories, withoutLegacyCategories } from '../domain/categories';
 import { migrateGoalRecords } from '../domain/goals';
 import { normalizeCurrencyCode } from '../domain/currency';
-import { normalizeFinancialDate } from '../domain/financial-date';
+import { normalizeFinancialDate } from './financial-date';
 
 import type { Settings, Period, Income, Expense, Plan, Goal, GoalContribution, Budget, RecurringRule, PlannedOccurrence, Debt, DebtPayment, FxRate, Account, AccountTransfer, Category, Investment } from '../domain/models';
 

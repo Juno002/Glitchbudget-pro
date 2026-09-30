@@ -27,7 +27,7 @@ async function legacy(name:string){const old=new Dexie(name);old.version(8).stor
  await old.table('recurrents').add({id:'rec',type:'income',title:'Renta',categoryId:'solo-recurrente',amount:100,freq:'monthly',startDate:'2026-09-01',active:true});return old;}
 test('v8 to v9 preserves IDs, references, independent order, icons and inferred scopes',async()=>{
  const name='phase4-migration-'+crypto.randomUUID();const old=await legacy(name);const original=await old.table('incomes').toArray();old.close();const current=new GlitchBudgetDB(name);
- try{await current.open();assert.equal(current.verno, 14);const rows=await current.categories.toArray();
+ try{await current.open();assert.equal(current.verno, 15);const rows=await current.categories.toArray();
  assert.deepEqual(activeCategories(rows,'expense').map(c=>c.id),['otros','alimentacion','comida-trabajo']);
  assert.deepEqual(activeCategories(rows,'income').slice(0,2).map(c=>c.id),['salary','otros']);
  assert.equal(rows.find(c=>c.id==='comida-trabajo')?.type,'both');assert.equal(rows.find(c=>c.id==='comida-trabajo')?.iconName,'coffee');

@@ -90,7 +90,7 @@ test('Dexie v12 upgrades direct account balances and movements to the configured
   const current = new GlitchBudgetDB(name);
   try {
     await current.open();
-    assert.equal(current.verno, 14);
+    assert.equal(current.verno, 15);
     assert.equal((await current.accounts.get('legacy-cash'))?.currency, 'DOP');
     assert.deepEqual(
       (({currency,fxRate,amountBase}) => ({currency,fxRate,amountBase}))((await current.incomes.get('legacy-income'))!),

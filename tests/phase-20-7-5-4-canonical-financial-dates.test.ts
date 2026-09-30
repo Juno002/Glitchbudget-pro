@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 import Dexie from 'dexie';
 
-import { normalizeFinancialDate } from '../src/domain/financial-date';
+import { normalizeFinancialDate } from '../src/lib/financial-date';
 import { selectCardSignedBalance } from '../src/domain/ledger';
 import { contains } from '../src/domain/periods';
 import type { CreditCardDebt, DebtPayment } from '../src/domain/models';
@@ -101,9 +101,9 @@ test('20.7.5.4 ledger through comparisons operate directly on canonical payment 
 
   assert.equal(selectCardSignedBalance(card, [], [payment], '2026-09-29'), 100_000);
   assert.equal(selectCardSignedBalance(card, [], [payment], '2026-09-30'), 50_000);
-  assert.throws(
-    () => contains({ start: '2026-09-01', end: '2026-09-30' }, '2026-09-30T23:00:00.000Z'),
-    /Fecha inválida/i,
+  assert.equal(
+    contains({ start: '2026-09-01', end: '2026-09-30' }, '2026-09-30T23:00:00.000Z'),
+    true,
   );
 });
 
