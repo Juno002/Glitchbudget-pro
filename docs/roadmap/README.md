@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** iniciada.
+- **Fase 20 — Modo Prisma:** **completada / Gate final aprobado**.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -16,7 +16,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.4 — Movimientos + compositor global:** completada / Gate aprobado.
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
-- **20.7 — Superficies secundarias + branding Prisma:** siguiente etapa; no iniciada.
+- **20.7 — Superficies secundarias + branding Prisma:** completada / Gate final aprobado.
 
 Baseline técnico actual:
 
@@ -24,9 +24,10 @@ Baseline técnico actual:
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
-495/495 tests
-Quality checks 36670721688 ✅
-browser E2E responsive shell + Prisma Home + Prisma Movimientos/composer + Prisma Plan + Prisma Reports/charts + movement + offline ✅
+502/502 tests
+Quality checks 36675832852 ✅
+Quality checks 36675835726 ✅
+browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
 ## Fase 20 — Modo Prisma
@@ -40,7 +41,7 @@ browser E2E responsive shell + Prisma Home + Prisma Movimientos/composer + Prism
 | 20.4 — Movimientos + compositor global | **Completado / Gate aprobado** | [phase-20-4.md](phase-20-4.md) |
 | 20.5 — Plan Prisma | **Completado / Gate aprobado** | [phase-20-5.md](phase-20-5.md) |
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
-| 20.7 — Superficies secundarias + branding Prisma | No iniciada | [phase-20.md](phase-20.md) |
+| 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate final aprobado** | [phase-20-7.md](phase-20-7.md) |
 
 Contrato visual complementario: [Prisma UI System](../ux/prisma-mode.md).
 
@@ -51,7 +52,7 @@ Prisma = lenguaje visual / branding
 GlitchBudget Engine = única fuente financiera
 ```
 
-Sonidos, animaciones y gráficos forman parte de la paridad protegida. Modo Prisma será el tema claro principal y Modo Neón el tema oscuro principal. El cambio visible de nombre a **Prisma** ocurre solo al aprobar 20.7.
+Sonidos, animaciones y gráficos forman parte de la paridad protegida. **Prisma es ya el producto visible**; Modo Prisma es el tema claro principal y Modo Neón el tema oscuro principal. El motor financiero continúa siendo GlitchBudget Engine.
 
 ## Fases completadas
 
