@@ -13,7 +13,8 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - Contrato visual + inventario de paridad: **completado**.
 - **20.2 — Design system + temas + shell:** completada / Gate aprobado.
 - **20.3 — Resumen / Home Prisma:** completada / Gate aprobado.
-- **20.4 — Movimientos + compositor global:** siguiente etapa; no iniciada.
+- **20.4 — Movimientos + compositor global:** completada / Gate aprobado.
+- **20.5 — Plan Prisma:** siguiente etapa; no iniciada.
 
 Baseline técnico actual:
 
@@ -21,9 +22,9 @@ Baseline técnico actual:
 Dexie v14
 Backup JSON v13
 Encrypted envelope v1
-477/477 tests
-Quality checks 36650050876 ✅
-browser E2E responsive shell + Prisma Home + movement + offline ✅
+483/483 tests
+Quality checks 36660263082 ✅
+browser E2E responsive shell + Prisma Home + Prisma Movimientos/composer + movement + offline ✅
 ```
 
 ## Fase 20 — Modo Prisma
@@ -34,7 +35,7 @@ browser E2E responsive shell + Prisma Home + movement + offline ✅
 | Preflight técnico de 20.1 | **Completado** | [phase-20-1-preflight.md](phase-20-1-preflight.md) |
 | 20.2 — Design system + temas + shell | **Completado / Gate aprobado** | [phase-20-2.md](phase-20-2.md) |
 | 20.3 — Resumen / Home Prisma | **Completado / Gate aprobado** | [phase-20-3.md](phase-20-3.md) |
-| 20.4 — Movimientos + compositor global | No iniciada | [phase-20.md](phase-20.md) |
+| 20.4 — Movimientos + compositor global | **Completado / Gate aprobado** | [phase-20-4.md](phase-20-4.md) |
 | 20.5 — Plan Prisma | No iniciada | [phase-20.md](phase-20.md) |
 | 20.6 — Reportes + sistema de gráficos | No iniciada | [phase-20.md](phase-20.md) |
 | 20.7 — Superficies secundarias + branding Prisma | No iniciada | [phase-20.md](phase-20.md) |

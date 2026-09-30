@@ -24,11 +24,13 @@ export function PageHeader({
 }
 
 export function SectionHeader({
+  eyebrow,
   title,
   description,
   actions,
   className,
 }: {
+  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
@@ -37,6 +39,7 @@ export function SectionHeader({
   return (
     <div className={cn('flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between', className)}>
       <div className="min-w-0">
+        {eyebrow ? <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</div> : null}
         <h2 className="font-headline text-[length:var(--text-section-title)] font-normal tracking-[-0.02em]">{title}</h2>
         {description ? <div className="mt-1 text-sm text-muted-foreground">{description}</div> : null}
       </div>

@@ -21,14 +21,14 @@ export function QuickAddTemplateSelector({
   if (templates.length === 0) return null;
 
   return (
-    <div className="border-b px-6 py-3">
+    <div className="border-b border-border/70 bg-muted/25 px-6 py-3" data-quick-add-templates="prisma">
       <div className="flex items-center gap-2">
         <label htmlFor="quick-add-template" className="sr-only">Usar plantilla</label>
         <select
           id="quick-add-template"
           value={selectedTemplateId}
           onChange={event => onSelect(event.target.value)}
-          className="h-10 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+          className="h-10 min-w-0 flex-1 rounded-[var(--radius-interactive)] border border-input bg-card px-3 text-sm shadow-[var(--shadow-control)]"
         >
           <option value="">Usar plantilla…</option>
           {templates.map(template => <option key={template.id} value={template.id}>{template.name}</option>)}
@@ -61,7 +61,7 @@ export function TransactionRuleSuggestions({
   return (
     <>
       {automaticRuleId && automaticRuleSuggestion && (
-        <div className="rounded-lg border bg-muted/20 p-3 text-xs" aria-label="Regla aplicada automáticamente">
+        <div className="rounded-[var(--radius-interactive)] border border-[hsl(var(--brand-mint)/0.28)] bg-[hsl(var(--brand-mint)/0.09)] p-3 text-xs" aria-label="Regla aplicada automáticamente">
           <p className="font-medium">Aplicado automáticamente · {automaticRuleSuggestion.ruleName}</p>
           <p className="mt-1 text-muted-foreground">
             Solo rellenó la clasificación de Quick Add. Puedes cambiar estos campos antes de guardar.
@@ -70,7 +70,7 @@ export function TransactionRuleSuggestions({
       )}
 
       {hasAutomaticConflict && (
-        <div className="rounded-lg border bg-muted/20 p-3 text-xs" role="status">
+        <div className="rounded-[var(--radius-interactive)] border border-[hsl(var(--brand-gold)/0.35)] bg-[hsl(var(--brand-gold)/0.09)] p-3 text-xs" role="status">
           <p className="font-medium">Varias reglas automáticas coinciden</p>
           <p className="mt-1 text-muted-foreground">
             No se aplicó ninguna automáticamente. Elige una sugerencia manualmente.
@@ -79,7 +79,7 @@ export function TransactionRuleSuggestions({
       )}
 
       {ruleSuggestions.length > 0 && (
-        <div className="space-y-2 rounded-lg border bg-muted/20 p-3" aria-label="Sugerencias de reglas">
+        <div className="space-y-2 rounded-[var(--radius-interactive)] border bg-muted/25 p-3" aria-label="Sugerencias de reglas" data-rule-suggestions="prisma">
           <div>
             <p className="text-sm font-medium">Sugerencias de reglas</p>
             <p className="text-xs text-muted-foreground">Nada cambia hasta que aceptes una sugerencia.</p>
@@ -92,7 +92,7 @@ export function TransactionRuleSuggestions({
               ? NECESSITY_LABELS[match.suggestion.necessity]
               : null;
             return (
-              <div key={match.ruleId} className="rounded-md border bg-background p-3">
+              <div key={match.ruleId} className="rounded-[var(--radius-interactive)] border bg-card p-3 shadow-[var(--shadow-control)]">
                 <p className="text-xs font-medium">{match.ruleName}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {[suggestedCategory && `Categoría: ${suggestedCategory}`, suggestedNecessity && `Necesidad: ${suggestedNecessity}`].filter(Boolean).join(' · ')}
@@ -126,7 +126,7 @@ export function QuickAddTemplateSave({
   onSave: () => void;
 }) {
   return (
-    <div className="space-y-2 border-t pt-4">
+    <div className="space-y-2 border-t border-border/70 pt-4" data-template-save="prisma">
       <span className="text-sm font-medium">Plantilla</span>
       <p className="text-xs text-muted-foreground">Guarda estos valores para reutilizarlos. La fecha siempre se restablece al día en que uses la plantilla.</p>
       <div className="flex gap-2">

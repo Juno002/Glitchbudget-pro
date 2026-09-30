@@ -76,21 +76,21 @@ export default function DebtsTab() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto pb-24">
+    <div className="mx-auto max-w-2xl space-y-6 pb-8" data-cards-prisma="true">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Tarjetas</h2>
-          <p className="text-sm text-muted-foreground mt-1">Gestiona los límites de tus deudas activas</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Crédito</p><h2 className="mt-1 font-display text-xl font-normal tracking-[-0.025em]">Tarjetas</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Límites, saldo pendiente y pagos registrados.</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={open => { if (!savingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-[hsl(var(--secondary))]/20 text-[hsl(var(--secondary))] hover:bg-[hsl(var(--secondary))]/30">
+            <Button size="sm" variant="outline">
               <Plus className="w-4 h-4 mr-2" /> Nueva Tarjeta
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Añadir Tarjeta de Crédito</DialogTitle>
+              <DialogTitle className="font-display text-2xl font-normal">Añadir tarjeta de crédito</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleAddSubmit} className="space-y-4 pt-4">
               <div className="space-y-2">
@@ -128,7 +128,7 @@ export default function DebtsTab() {
       </div>
 
       {activeDebts.length === 0 ? (
-        <div className="text-center py-12 px-4 rounded-xl border border-dashed border-black/10 dark:border-white/10">
+        <div className="rounded-[var(--radius-card)] border border-dashed px-4 py-10 text-center">
           <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-medium mb-1">Aún no tienes tarjetas</h3>
           <p className="text-sm text-muted-foreground">Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente.</p>
@@ -145,11 +145,11 @@ export default function DebtsTab() {
             } = selectCardReadModel(debt, expenses || [], debtPayments || [], localDate());
 
             return (
-              <div key={debt.id} className="relative overflow-hidden w-full backdrop-blur-md bg-[rgba(255,255,255,0.03)] border border-black/10 dark:border-white/10 rounded-[20px] p-5">
+              <div key={debt.id} className="relative w-full overflow-hidden rounded-[var(--radius-card)] border bg-card p-5 shadow-[var(--shadow-control)]">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                      <CreditCard className="w-5 h-5 text-secondary" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--brand-lavender)/0.12)]">
+                      <CreditCard className="h-5 w-5 text-[hsl(var(--brand-lavender))]" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg leading-tight">{debt.name}</h3>
@@ -180,13 +180,13 @@ export default function DebtsTab() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-black/5 dark:bg-white/5 border border-[rgba(255,255,255,0.04)] rounded-xl p-3">
+                  <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3">
                     <p className="text-xs text-muted-foreground mb-1">Disponible para Uso</p>
                     <p className="text-xl font-bold font-mono tracking-tight text-primary">
                       {money(availableLimit)}
                     </p>
                   </div>
-                  <div className={cn("border rounded-xl p-3 transition-colors", isSurplus ? "bg-good/5 border-good/20" : "bg-black/5 dark:bg-white/5 border-[rgba(255,255,255,0.04)]")}>
+                  <div className={cn("rounded-[var(--radius-interactive)] border p-3 transition-colors", isSurplus ? "bg-good/5 border-good/20" : "border-transparent bg-muted/45")}>
                     <p className="text-xs text-muted-foreground mb-1">{isSurplus ? 'Saldo a Favor' : 'Saldo pendiente'}</p>
                     <p className={cn("text-xl font-bold font-mono tracking-tight", isSurplus ? "text-good" : (currentDebt === 0 ? "text-muted-foreground" : "text-bad"))}>
                       {money(absoluteDebt)}
@@ -199,7 +199,7 @@ export default function DebtsTab() {
                     <span className="text-muted-foreground">Uso del límite base</span>
                     <span className="font-mono">{isSurplus ? '0' : percentUsed.toFixed(1)}%</span>
                   </div>
-                  <div className="w-full bg-black/10 dark:bg-white/10 h-2 rounded-full overflow-hidden">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div 
                       className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-bad" : percentUsed > 50 ? "bg-warning" : "bg-good")}
                       style={{ width: `${percentUsed}%` }}
@@ -214,13 +214,13 @@ export default function DebtsTab() {
                   else setPaymentDebtId(null);
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="w-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 hover:bg-black/10 dark:hover:bg-white/10 text-foreground transition-all">
+                    <Button className="w-full" variant="outline">
                       Registrar Pago / Abono
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Abonar a {debt.name}</DialogTitle>
+                      <DialogTitle className="font-display text-2xl font-normal">Abonar a {debt.name}</DialogTitle>
                     </DialogHeader>
                     {isSurplus ? (
                        <div className="bg-primary/10 p-3 rounded-md mb-2 flex items-start gap-2">
