@@ -43,6 +43,7 @@ test('20.5 goals render canonical goal read models and preserve contribution sem
 
 test('20.5 Planificados use the canonical planned-payments read model and preserve lifecycle actions', () => {
   const planned = read('src/components/dashboard/subscriptions-manager.tsx');
+  const upcoming = read('src/domain/upcoming.ts');
   assert.match(planned, /data-plan-planned-manager="prisma"/);
   assert.match(planned, /selectPlannedPaymentsManagerReadModel/);
   assert.match(planned, /confirmPlannedOccurrenceItem/);
@@ -50,8 +51,8 @@ test('20.5 Planificados use the canonical planned-payments read model and preser
   assert.match(planned, /addRecurringRule/);
   assert.match(planned, /updateRecurringRule/);
   for (const label of ['Vencidos','Hoy','Mañana','Próximos 7 días','Después']) assert.ok(planned.includes(label), label);
-  assert.match(planned, /confirmed/);
-  assert.match(planned, /skipped/);
+  assert.match(planned, /status=\{occurrence\.status\}/);
+  assert.match(upcoming, /row\.status === 'confirmed' \|\| row\.status === 'skipped'/);
 });
 
 test('20.5 planning surfaces introduce no direct Dexie/IndexedDB access or Prisma demo finance data', () => {
