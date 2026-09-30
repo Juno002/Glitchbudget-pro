@@ -495,21 +495,13 @@ export default function SummaryTab() {
         />
       </div>
 
-      {preferences.visibleOrder.map(id=>{
-        const layoutClass =
-          id==='budget' || id==='upcoming'
-            ? 'min-w-0'
-            : id==='goals' || id==='investments'
-              ? 'min-w-0'
-              : '';
-        return <div key={id} className={layoutClass}>{modules[id]}</div>;
-      })}
-
-      <div
-        aria-hidden="true"
-        data-home-layout="paired-panels"
-        className="hidden"
-      />
+      <div className="grid gap-4 lg:grid-cols-2" data-home-layout="module-grid">
+        {preferences.visibleOrder.map(id=>(
+          <div key={id} className={cn('min-w-0',id==='position' && 'lg:col-span-2')}>
+            {modules[id]}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
