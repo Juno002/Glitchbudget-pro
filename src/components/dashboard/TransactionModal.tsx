@@ -4,7 +4,7 @@ import { AccountSelect } from './account-select';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { cn, toCents } from '@/lib/utils';
+import { cn, currencyInputLabel, toCents } from '@/lib/utils';
 import type { Expense, Income } from '@/domain/models';
 import { selectActiveCreditCards } from '@/domain/ledger';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -48,6 +48,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     expenseCategories, incomeCategories,
     debts: allDebts,
     accounts,
+    currency,
     addAccountTransfer,
   } = useFinances();
 
@@ -73,6 +74,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [dismissedRuleIds, setDismissedRuleIds] = useState<string[]>([]);
   const [storedRules, setStoredRules] = useState<TransactionRule[]>([]);
   const [automaticRuleId, setAutomaticRuleId] = useState<string | null>(null);
+  const [categoryEditedManually, setCategoryEditedManually] = useState(false);
+  const [necessityEditedManually, setNecessityEditedManually] = useState(false);
 
   const [templates, setTemplates] = useState<QuickAddTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
@@ -95,6 +98,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setTemplateName('');
     setDismissedRuleIds([]);
     setAutomaticRuleId(null);
+    setCategoryEditedManually(false);
+    setNecessityEditedManually(false);
 
     if (mode === 'edit' && editingExpense) {
       setTxType('expense');
@@ -179,14 +184,19 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAutomaticRuleId(null);
       return;
     }
-    if (automaticRuleSuggestion.suggestion.categoryId) {
-      setCategoryId(automaticRuleSuggestion.suggestion.categoryId);
+    const applyCategory = Boolean(automaticRuleSuggestion.suggestion.categoryId) && !categoryEditedManually;
+    const applyNecessity = txType === 'expense'
+      && Boolean(automaticRuleSuggestion.suggestion.necessity)
+      && !necessityEditedManually;
+
+    if (applyCategory) {
+      setCategoryId(automaticRuleSuggestion.suggestion.categoryId!);
     }
-    if (txType === 'expense' && automaticRuleSuggestion.suggestion.necessity) {
-      setNecessity(automaticRuleSuggestion.suggestion.necessity);
+    if (applyNecessity) {
+      setNecessity(automaticRuleSuggestion.suggestion.necessity!);
     }
-    setAutomaticRuleId(automaticRuleSuggestion.ruleId);
-  }, [automaticRuleSuggestion, txType]);
+    setAutomaticRuleId(applyCategory || applyNecessity ? automaticRuleSuggestion.ruleId : null);
+  }, [automaticRuleSuggestion, txType, categoryEditedManually, necessityEditedManually]);
 
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
   const hasAccountForActual = !!accountId || isEditing;
@@ -207,6 +217,8 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setCategoryId('');
     setDismissedRuleIds([]);
     setAutomaticRuleId(null);
+    setCategoryEditedManually(false);
+    setNecessityEditedManually(false);
     setSubmitError(null);
     if (type === 'transfer') {
       setPaymentMethod('cash');
@@ -229,6 +241,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setAccountId(method === 'credit' ? '' : (templateAccount || ''));
     setToAccountId(template.type === 'transfer' && templateDestination !== templateAccount ? templateDestination : '');
     setCategoryId(template.type === 'transfer' ? '' : templateCategory);
+    setCategoryEditedManually(template.type !== 'transfer' && Boolean(templateCategory));
     setConcept(template.concept || '');
     setExpenseSubtype(template.expenseSubtype || 'Variable');
     setIncomeSubtype(template.incomeSubtype || 'extra');
@@ -236,6 +249,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setDebtId(method === 'credit' ? activeDebt : '');
     setTransferNote(template.transferNote || '');
     setNecessity(template.type === 'expense' ? (template.necessity || '') : '');
+    setNecessityEditedManually(template.type === 'expense' && Boolean(template.necessity));
     setLabelsInput((template.labels || []).join(', '));
     setDate(localDate());
     setSelectedTemplateId(template.id);
@@ -287,8 +301,15 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   };
 
   const acceptRuleSuggestion = (match: RuleMatch) => {
-    if (match.suggestion.categoryId) setCategoryId(match.suggestion.categoryId);
-    if (txType === 'expense' && match.suggestion.necessity) setNecessity(match.suggestion.necessity);
+    if (match.suggestion.categoryId) {
+      setCategoryId(match.suggestion.categoryId);
+      setCategoryEditedManually(true);
+    }
+    if (txType === 'expense' && match.suggestion.necessity) {
+      setNecessity(match.suggestion.necessity);
+      setNecessityEditedManually(true);
+    }
+    setAutomaticRuleId(null);
     dismissRuleSuggestion(match.ruleId);
   };
 
@@ -299,12 +320,13 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setSubmitError(null);
     try {
       const numAmount = Number(amount);
+      const amountCents = toCents(numAmount);
       let success: boolean;
       if (txType === 'transfer') {
         success = await addAccountTransfer({
           fromAccountId: accountId,
           toAccountId,
-          amount: toCents(numAmount),
+          amount: amountCents,
           date,
           note: transferNote,
         });
@@ -312,7 +334,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         const fields = {
           accountId: paymentMethod === 'credit' ? undefined : accountId || undefined,
           concept,
-          amount: numAmount,
+          amount: amountCents,
           categoryId,
           date,
           nature: expenseSubtype,
@@ -328,7 +350,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         const fields = {
           accountId: accountId || undefined,
           description: concept,
-          amount: numAmount,
+          amount: amountCents,
           categoryId,
           date,
           type: incomeSubtype,
@@ -390,7 +412,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 : (isEditing ? 'Editando movimiento' : 'Monto')}
             </label>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-medium">RD$</span>
+              <span className="text-lg font-medium">{currencyInputLabel(currency)}</span>
               <input
                 id="quick-add-amount"
                 type="number"
@@ -473,7 +495,11 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 <select
                   aria-label="Categoría"
                   value={categoryId}
-                  onChange={event => setCategoryId(event.target.value)}
+                  onChange={event => {
+                    setCategoryId(event.target.value);
+                    setCategoryEditedManually(true);
+                    setAutomaticRuleId(null);
+                  }}
                   className="h-11 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3 text-sm shadow-[var(--shadow-control)]"
                 >
                   <option value="">Selecciona una categoría</option>
@@ -535,7 +561,11 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                         <select
                           aria-label="Necesidad"
                           value={necessity}
-                          onChange={event => setNecessity(event.target.value as typeof necessity)}
+                          onChange={event => {
+                            setNecessity(event.target.value as typeof necessity);
+                            setNecessityEditedManually(true);
+                            setAutomaticRuleId(null);
+                          }}
                           className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                         >
                           <option value="">Sin clasificar</option>
