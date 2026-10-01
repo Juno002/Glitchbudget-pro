@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.4 completadas / Gates aprobados; 20.9.5 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.5 completadas / Gates aprobados; 20.9.6 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -184,6 +184,31 @@ Advertencias financieras/destructivas importantes no deben quedar escondidas exc
 **Gate 20.9.4:** ayuda contextual consistente y accesible.
 
 ## 20.9.5 — Achievement toast / feedback celebratorio
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+615/615 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36897118568 ✅
+```
+
+Resultado:
+
+- superficie elevada opaca + jerarquía título/descripción/XP;
+- CTA y cierre accesibles;
+- motion rápido con reduced motion preservado;
+- sonido y confetti preservados;
+- posición mobile-safe hasta md;
+- E2E real a 700 px verifica separación respecto a bottom nav;
+- mismo contrato para Prisma y Neón.
+
+Evidencia: [phase-20-9-5.md](phase-20-9-5.md).
 
 Rehacer la notificación de logros para corregir la legibilidad observada.
 
