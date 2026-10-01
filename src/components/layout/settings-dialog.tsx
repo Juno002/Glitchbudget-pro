@@ -236,7 +236,7 @@ export function SettingsDialog() {
           <TabsContent value="automation" className="space-y-6">
             <SectionHeader
               title="Automatización"
-              description="Flujo local del roadmap: Plantillas → Filtros guardados → Reglas. Cada capa conserva una responsabilidad distinta."
+              description="Flujo local: Plantillas → Filtros guardados → Reglas. Cada capa conserva una responsabilidad distinta."
             />
 
             <div className="grid gap-3 md:grid-cols-3" data-local-automation-order="templates-saved-filters-rules">
