@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **en curso — 20.10.1–20.10.2 completadas / Gates aprobados; 20.10.3 es la próxima intervención autorizada**.
+Estado: **en curso — 20.10.1–20.10.3 completadas / Gates aprobados; 20.10.4 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -64,6 +64,12 @@ Para cualquier rama no contenida completamente en main:
 
 ## 20.10.3 — Unificación controlada en main
 
+**Estado: completada / Gate aprobado.**
+
+20.10.2 confirmó **0 trabajo vigente pendiente de integrar**. Se verificó `main` `e8ca8f5d4ccbb37fcf296c1ae0aa8c2e8c96a9b0` como línea funcional autosuficiente y se cerraron sin merge las PR históricas #35 y #7. Después de esa consolidación quedan **0 PRs abiertas**; ninguna rama fue eliminada.
+
+Evidencia completa: [phase-20-10-3.md](phase-20-10-3.md).
+
 Integrar solo el trabajo único que siga siendo válido.
 
 Después:
@@ -73,7 +79,7 @@ Después:
 - ninguna rama funciona como fuente paralela de verdad;
 - roadmap/documentación histórica puede permanecer como archivos, no como ramas activas.
 
-**Gate 20.10.3:** main es autosuficiente.
+**Gate 20.10.3:** aprobado. main es autosuficiente; 20.10.4 queda habilitada.
 
 ## 20.10.4 — Gate completo sobre main
 
