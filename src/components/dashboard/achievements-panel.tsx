@@ -133,7 +133,7 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
         <motion.button
           type="button"
           whileHover={isUnlocked ? { scale: 1.05, y: -2 } : {}}
-          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-300 focus:outline-none"
+          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-[var(--motion-control)] focus:outline-none"
           style={{
             background: isUnlocked ? tier.bg : 'rgba(255,255,255,0.02)',
             borderColor: isUnlocked ? tier.border : 'rgba(255,255,255,0.04)',
