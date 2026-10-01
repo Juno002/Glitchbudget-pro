@@ -7,6 +7,7 @@ import { useCategoryResolver } from '@/hooks/use-categories';
 import { cn, currencyInputLabel, toCents } from '@/lib/utils';
 import type { Expense, Income } from '@/domain/models';
 import { selectActiveCreditCards } from '@/domain/ledger';
+import { shouldApplyAutomaticRuleField } from '@/domain/transaction-rule-precedence';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
@@ -184,10 +185,14 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setAutomaticRuleId(null);
       return;
     }
-    const applyCategory = Boolean(automaticRuleSuggestion.suggestion.categoryId) && !categoryEditedManually;
-    const applyNecessity = txType === 'expense'
-      && Boolean(automaticRuleSuggestion.suggestion.necessity)
-      && !necessityEditedManually;
+    const applyCategory = shouldApplyAutomaticRuleField(
+      categoryEditedManually,
+      automaticRuleSuggestion.suggestion.categoryId,
+    );
+    const applyNecessity = txType === 'expense' && shouldApplyAutomaticRuleField(
+      necessityEditedManually,
+      automaticRuleSuggestion.suggestion.necessity,
+    );
 
     if (applyCategory) {
       setCategoryId(automaticRuleSuggestion.suggestion.categoryId!);
