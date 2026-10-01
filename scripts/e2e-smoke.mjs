@@ -650,6 +650,53 @@ async function main() {
 
     if (!await client.evaluate(activateTabExpression('Categorías'))) throw new Error('No se pudo abrir Categorías.');
     await waitFor(client, `document.querySelectorAll('[data-category-manager="prisma"]').length >= 2`, 'Categorías Prisma');
+    await waitFor(
+      client,
+      `(() => {
+        const managers = [...document.querySelectorAll('[data-category-manager="prisma"]')];
+        return managers.length === 2 && managers.every(manager => {
+          const buttons = [...manager.querySelectorAll('button')];
+          const add = buttons.find(button => button.textContent?.trim() === 'Agregar');
+          const reset = buttons.find(button => button.textContent?.trim() === 'Restablecer');
+          return add instanceof HTMLButtonElement
+            && reset instanceof HTMLButtonElement
+            && Boolean(add.querySelector('svg'))
+            && Boolean(reset.querySelector('svg'))
+            && !manager.textContent?.includes('➕')
+            && !manager.textContent?.includes('🔄');
+        });
+      })()`,
+      'iconografía funcional de categorías',
+    );
+
+    // Phase 20.9.9: switch through both premium themes using the real Settings controls.
+    if (!await client.evaluate(activateTabExpression('Apariencia'))) throw new Error('No se pudo abrir Apariencia.');
+    if (!await client.evaluate(`(() => {
+      const radio = document.querySelector('#theme-dark');
+      if (!(radio instanceof HTMLElement)) return false;
+      radio.click();
+      return true;
+    })()`)) throw new Error('No se pudo activar Neón oscuro.');
+    await waitFor(
+      client,
+      `document.documentElement.classList.contains('dark')
+        && !document.documentElement.classList.contains('light')
+        && document.documentElement.scrollWidth <= window.innerWidth + 1`,
+      'tema Neón oscuro real',
+    );
+    if (!await client.evaluate(`(() => {
+      const radio = document.querySelector('#theme-light');
+      if (!(radio instanceof HTMLElement)) return false;
+      radio.click();
+      return true;
+    })()`)) throw new Error('No se pudo restaurar Prisma claro.');
+    await waitFor(
+      client,
+      `document.documentElement.classList.contains('light')
+        && !document.documentElement.classList.contains('dark')
+        && document.documentElement.scrollWidth <= window.innerWidth + 1`,
+      'tema Prisma claro real',
+    );
 
     if (!await client.evaluate(activateTabExpression('Privacidad y seguridad'))) throw new Error('No se pudo abrir Privacidad y seguridad.');
     await waitFor(
@@ -870,7 +917,7 @@ async function main() {
       'recarga offline desde service worker',
     );
 
-    process.stdout.write('E2E smoke passed: Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement mutation + navigation + offline reload.\n');
+    process.stdout.write('E2E smoke passed: Prisma branding + premium-theme interaction + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement mutation + navigation + offline reload.\n');
   } finally {
     await cleanup();
   }
