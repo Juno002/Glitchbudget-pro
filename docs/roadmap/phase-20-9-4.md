@@ -61,7 +61,7 @@ static output / connect-src 'none' ✅
 Quality checks 36893491408 ✅
 ```
 
-No hubo findings sustantivos de review sobre el HEAD validado. El único status externo rojo fue Vercel por cuota diaria, fuera del gate funcional.
+El review posterior al primer gate detectó dos P2 y ambos quedaron resueltos antes del merge: el popover de medallas conserva espacio explícito para el botón de cierre incluso con `tailwind-merge`, y el provider activo del sidebar ya no fuerza `delayDuration={0}`, por lo que consume el delay compartido de 250 ms. El único status externo rojo restante fue Vercel por cuota diaria, fuera del gate funcional.
 
 ## Gate
 
