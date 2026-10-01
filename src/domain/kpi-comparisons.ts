@@ -121,14 +121,17 @@ function positionAt(input: PositionKpiSnapshotInput, through: string) {
 /**
  * Canonical period-over-period comparisons for the position KPIs used by
  * Resumen/Reportes. Values come directly from the canonical ledger position;
- * UI consumers must not reconstruct these deltas.
+ * UI consumers must not reconstruct these deltas. currentThrough lets Home
+ * compare the position actually visible today while preserving the period
+ * metadata used for the comparison.
  */
 export function selectPositionKpiComparisons(
   input: PositionKpiSnapshotInput,
   currentPeriod: DateRange,
   comparablePeriod: DateRange | null,
+  currentThrough = currentPeriod.end,
 ): PositionKpiComparisons {
-  const current = positionAt(input, currentPeriod.end);
+  const current = positionAt(input, currentThrough);
 
   if (comparablePeriod === null) {
     return {
