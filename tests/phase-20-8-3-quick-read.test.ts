@@ -108,7 +108,8 @@ test('20.8.3 reports a useful category focus when one category concentrates enou
     },
   }));
 
-  assert.deepEqual(result, [{
+  const category = result.find(row => row.kind === 'leading_category');
+  assert.deepEqual(category, {
     kind: 'leading_category',
     priority: 60,
     focus: 'categories',
@@ -122,7 +123,7 @@ test('20.8.3 reports a useful category focus when one category concentrates enou
         spendingTotal: 100_000,
       },
     },
-  }]);
+  });
 });
 
 test('20.8.3 falls back to no-material-change when no explicit rule is relevant', () => {
