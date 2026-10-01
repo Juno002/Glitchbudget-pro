@@ -39,7 +39,7 @@ export default function BottomNav() {
               onClick={() => setActiveTab(item.value)}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-[var(--radius-interactive)] px-1 py-2 text-[10px] font-semibold transition-[background-color,color,transform] duration-[var(--motion-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset active:scale-[0.98]",
+                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-[var(--radius-interactive)] px-1 py-2 text-[10px] font-semibold transition-[background-color,color,transform] duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset active:scale-[0.98] active:duration-[var(--motion-press)]",
                 isActive
                   ? "bg-accent text-accent-foreground"
                   : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
