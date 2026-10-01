@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.7 y 20.7.5 completadas; 20.8 en curso; 20.9–20.10 planificadas.
+- **Fase 20 — Modo Prisma:** 20.1–20.8 completadas / Gates aprobados; 20.9–20.10 planificadas.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -18,20 +18,19 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
 - **20.7.5 — Semantic Integrity & Security Hardening:** completada / Gate aprobado; 20.7.5.1–20.7.5.9 cerradas.
-- **20.8 — Information Design + Deterministic Insights:** en curso; 20.8.1–20.8.7 completadas / Gates aprobados.
+- **20.8 — Information Design + Deterministic Insights:** completada / Gate aprobado; 20.8.1–20.8.8 cerradas.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
 
 ## Próxima intervención autorizada
 
 ```text
-20.8.8 — Gate final 20.8
+20.9.1 — Auditoría visual y de consistencia
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```
@@ -44,7 +43,7 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-580/580 tests
+585/585 tests
 Ledger benchmark: 50k position 32.22 ms / histories 23.68 ms median
 Golden reconciliation: net worth 1.205m / spending 90k / cash flow 340k
 Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
@@ -55,8 +54,9 @@ Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.8.5 Home reduced permanent copy without losing decision-critical context ✅
 20.8.6 Reports editorial hierarchy + deterministic Quick Read placement ✅
 20.8.7 accessible progressive disclosure + contextual copy contract ✅
-Quality checks 36839469668 ✅
-browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
+20.8.8 final Information Design gate + mobile Reports geometry/overflow regression ✅
+Quality checks 36882536925 ✅
+browser E2E Prisma branding + secondary surfaces + responsive shell + Home desktop/mobile + Movimientos/composer + Plan + Reports desktop/mobile/charts + movement + offline ✅
 ```
 
 ## Fase 20 — Modo Prisma
@@ -72,7 +72,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Mov
 | 20.6 — Reportes + sistema de gráficos | **Completado / Gate aprobado** | [phase-20-6.md](phase-20-6.md) |
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
 | 20.7.5 — Semantic Integrity & Security Hardening | **Completada / Gate aprobado — 20.7.5.1–20.7.5.9** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
-| 20.8 — Information Design + Deterministic Insights | **En curso — 20.8.1–20.8.7 completadas / Gates aprobados** | [phase-20-8.md](phase-20-8.md) |
+| 20.8 — Information Design + Deterministic Insights | **Completada / Gate aprobado — 20.8.1–20.8.8** | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |
 
