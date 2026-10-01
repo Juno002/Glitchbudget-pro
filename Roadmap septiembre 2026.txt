@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: en curso.** 20.10.1–20.10.4 completadas / Gates aprobados; próxima intervención autorizada: 20.10.5. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: en curso.** 20.10.1–20.10.5 completadas / Gates aprobados; próxima intervención autorizada: 20.10.6. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4529,6 +4529,10 @@ Verificar también:
 
 ### 20.10.5 — Eliminación de ramas remotas
 
+**Estado: completada / Gate aprobado.**
+
+20.10.4 dejó `main` verde. La limpieza elimina todas las refs remotas distintas de `main` y verifica que el resultado final sea exactamente una rama. Evidencia: `docs/roadmap/phase-20-10-5.md`.
+
 Solo después del gate anterior:
 
 - eliminar ramas fusionadas;
@@ -4557,7 +4561,7 @@ nueva tarea
 → borrar rama
 ```
 
-**Gate 20.10.5:** repositorio remoto con una única rama permanente: `main`.
+**Gate 20.10.5:** aprobado cuando la ejecución post-merge confirma exactamente una rama remota: `main`. 20.10.6 es la próxima intervención autorizada.
 
 ### 20.10.6 — README final estrictamente de producto
 
