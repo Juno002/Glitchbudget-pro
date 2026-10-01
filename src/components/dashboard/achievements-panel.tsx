@@ -157,7 +157,7 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
       </PopoverTrigger>
       <PopoverContent
         side="top"
-        className="w-56 space-y-1.5 p-3"
+        className="w-56 space-y-1.5 p-3 pr-12"
         showCloseButton
         closeLabel={'Cerrar detalles de '+def.title}
         data-achievement-popover={def.id}
