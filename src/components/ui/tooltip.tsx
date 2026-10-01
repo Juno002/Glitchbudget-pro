@@ -5,7 +5,17 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-const TooltipProvider = TooltipPrimitive.Provider
+const TooltipProvider = ({
+  delayDuration = 250,
+  skipDelayDuration = 100,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Provider>) => (
+  <TooltipPrimitive.Provider
+    delayDuration={delayDuration}
+    skipDelayDuration={skipDelayDuration}
+    {...props}
+  />
+)
 
 const Tooltip = TooltipPrimitive.Root
 
@@ -14,13 +24,14 @@ const TooltipTrigger = TooltipPrimitive.Trigger
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>
->(({ className, sideOffset = 4, ...props }, ref) => (
+>(({ className, sideOffset = 6, collisionPadding = 8, ...props }, ref) => (
   <TooltipPrimitive.Portal>
     <TooltipPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
+      collisionPadding={collisionPadding}
       className={cn(
-        "z-50 max-w-[85vw] overflow-hidden rounded-[10px] border border-border bg-white/95 dark:bg-[rgba(20,20,20,0.95)] backdrop-blur-xl px-3 py-1.5 text-sm text-[rgba(255,255,255,0.9)] shadow-[0_4px_24px_rgba(0,0,0,0.4)] duration-[var(--motion-menu)] animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-50 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-[var(--radius-interactive)] border border-[var(--border-subtle)] bg-[hsl(var(--surface-elevated))] px-3 py-2 text-xs leading-relaxed text-popover-foreground shadow-[var(--shadow-popover)] duration-[var(--motion-menu)] animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         className
       )}
       {...props}
