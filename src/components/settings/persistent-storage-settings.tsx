@@ -25,11 +25,11 @@ const copy: Record<Exclude<ViewState, 'checking' | 'requesting'>, {
   },
   unsupported: {
     title: 'Persistencia no disponible',
-    description: 'Este navegador no expone el control de persistencia. Mantén backups externos periódicos.',
+    description: 'Este navegador no expone el control de persistencia. Mantén copias de seguridad externas periódicas.',
   },
   error: {
     title: 'No se pudo comprobar la persistencia',
-    description: 'Tus datos no se modificaron. Puedes volver a intentarlo o continuar usando backups externos.',
+    description: 'Tus datos no se modificaron. Puedes volver a intentarlo o continuar usando copias de seguridad externas.',
   },
 };
 
@@ -81,7 +81,7 @@ export default function PersistentStorageSettings() {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Esta protección depende del navegador y no sustituye un backup descargado fuera del sitio.
+        Esta protección depende del navegador y no sustituye una copia de seguridad descargada fuera del sitio.
       </p>
     </section>
   );
