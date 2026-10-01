@@ -22,7 +22,7 @@ import { reassignBudgetLimit, saveBudgetLimits } from '../src/lib/budget-service
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { readAccountSnapshot } from '../src/lib/accounts';
 import { selectPosition } from '../src/domain/ledger';
-import { saveExpense } from '../src/lib/transaction-service';
+import { saveExpense } from './helpers/major-unit-transaction-writes';
 import { savePlans } from '../src/lib/category-service';
 import { BudgetWarning } from '../src/policies/budget-overspending';
 import { selectPeriodMetrics } from '../src/domain/metrics';
