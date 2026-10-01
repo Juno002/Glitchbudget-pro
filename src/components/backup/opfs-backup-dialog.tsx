@@ -113,7 +113,7 @@ export default function OpfsBackupDialog() {
     } catch (error) {
       resetPendingImport();
       toast({
-        title: 'Backup no válido',
+        title: 'Copia no válida',
         description: error instanceof Error ? error.message : 'No se pudo validar el archivo.',
         variant: 'destructive',
       });
@@ -193,7 +193,7 @@ export default function OpfsBackupDialog() {
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
           <DialogDescription>
-            Tus datos están en este navegador. Puedes descargar el JSON normal o crear un backup cifrado opcional. Las copias locales del navegador siguen sin cifrar y se eliminan al borrar los datos del sitio.
+            Tus datos están en este navegador. Puedes descargar el JSON normal o crear una copia cifrada opcional. Las copias locales del navegador siguen sin cifrar y se eliminan al borrar los datos del sitio.
           </DialogDescription>
         </DialogHeader>
         
