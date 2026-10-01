@@ -436,6 +436,35 @@ async function main() {
       'Home Prisma móvil',
     );
 
+    // Phase 20.9.8: the global composer must remain contained on mobile and request a decimal keyboard.
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('[data-shell-fab="mobile"]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+      button.click();
+      return true;
+    })()`)) {
+      throw new Error('No se pudo abrir el compositor desde el FAB móvil.');
+    }
+    await waitFor(
+      client,
+      `(() => {
+        const dialog = document.querySelector('[data-global-composer="prisma"]');
+        const amount = document.querySelector('[aria-label="Monto"]');
+        if (!(dialog instanceof HTMLElement) || !(amount instanceof HTMLInputElement)) return false;
+        const rect = dialog.getBoundingClientRect();
+        const style = getComputedStyle(dialog);
+        return rect.top >= -1
+          && rect.bottom <= window.innerHeight + 1
+          && rect.left >= -1
+          && rect.right <= window.innerWidth + 1
+          && style.overflowY === 'auto'
+          && amount.inputMode === 'decimal';
+      })()`,
+      'compositor móvil contenido + teclado decimal',
+    );
+    await client.evaluate(`document.querySelector('[data-global-composer="prisma"] [data-dialog-close="true"]')?.click()`);
+    await waitFor(client, `!document.querySelector('[data-global-composer="prisma"]')`, 'cierre compositor móvil');
+
     if (!await client.evaluate(`(() => {
       const trigger = document.querySelector('[aria-label="Qué significa Disponible líquido"]');
       if (!(trigger instanceof HTMLButtonElement)) return false;
@@ -557,8 +586,36 @@ async function main() {
       return true;
     })()`)) throw new Error('No se pudo abrir Logros.');
     await waitFor(client, `Boolean(document.querySelector('[data-achievements-prisma="true"]'))`, 'Logros Prisma');
+
+    // Phase 20.9.8: the formerly invisible BadgeCard focus must be visibly rendered for keyboard users.
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Tab', code:'Tab' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Tab', code:'Tab' });
+    if (!await client.evaluate(`(() => {
+      const badge = document.querySelector('[data-achievement-badge]');
+      if (!(badge instanceof HTMLButtonElement)) return false;
+      badge.focus();
+      return document.activeElement === badge;
+    })()`)) throw new Error('No se pudo enfocar una medalla de Logros.');
+    await waitFor(
+      client,
+      `(() => {
+        const badge = document.querySelector('[data-achievement-badge]');
+        if (!(badge instanceof HTMLButtonElement) || document.activeElement !== badge) return false;
+        const style = getComputedStyle(badge);
+        return badge.matches(':focus-visible') && style.boxShadow !== 'none';
+      })()`,
+      'focus visible de BadgeCard',
+    );
+
     await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
 
     if (!await client.evaluate(`(() => {
       const button = document.querySelector('button[aria-label="Ajustes"]');
@@ -567,6 +624,22 @@ async function main() {
       return true;
     })()`)) throw new Error('No se pudo abrir Ajustes.');
     await waitFor(client, `Boolean(document.querySelector('[data-settings-prisma="true"]'))`, 'Ajustes Prisma');
+    await waitFor(
+      client,
+      `(() => {
+        const dialog = document.querySelector('[data-settings-prisma="true"]');
+        if (!(dialog instanceof HTMLElement)) return false;
+        const rect = dialog.getBoundingClientRect();
+        const style = getComputedStyle(dialog);
+        return rect.top >= -1
+          && rect.bottom <= window.innerHeight + 1
+          && rect.left >= -1
+          && rect.right <= window.innerWidth + 1
+          && style.overflowY === 'auto'
+          && document.documentElement.scrollWidth <= window.innerWidth + 1;
+      })()`,
+      'Ajustes móvil contenido y desplazable',
+    );
 
     if (!await client.evaluate(activateTabExpression('Categorías'))) throw new Error('No se pudo abrir Categorías.');
     await waitFor(client, `document.querySelectorAll('[data-category-manager="prisma"]').length >= 2`, 'Categorías Prisma');
@@ -588,6 +661,18 @@ async function main() {
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
+      'retorno desktop después de Ajustes',
+    );
 
     if (!await client.evaluate(clickButtonExpression('Plan'))) {
       throw new Error('No se pudo abrir Plan.');
