@@ -1,6 +1,6 @@
 # Fase 20.9.5 — Achievement toast / feedback celebratorio
 
-Estado: **en validación**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -59,6 +59,20 @@ Ninguno.
 
 No cambia semántica financiera, schema, migraciones, backup, persistencia ni red.
 
+## Quality gate aprobado
+
+```text
+615/615 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36897118568 ✅
+```
+
+El P2 del review sobre 640–767 px quedó corregido antes del cierre y protegido por E2E a 700×844.
+
 ## Gate
 
-Pendiente de Quality checks sobre el HEAD final, review y reconciliación documental antes de autorizar 20.9.6.
+**Aprobado.** 20.9.5 queda cerrada. Una vez fusionada esta reconciliación y verificado `main`, la siguiente intervención autorizada es **20.9.6 — Idioma visible único**.
