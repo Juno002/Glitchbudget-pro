@@ -75,14 +75,14 @@ test('20.9.4 destructive consequences stay in visible AlertDialog descriptions',
   assert.match(composer, /<AlertDialogDescription>[\s\S]*eliminar/i);
 });
 
-test('20.9.4 badge details use the shared dismissible popover without consuming the 20.9.8 focus fix', () => {
+test('20.9.4 badge details keep the shared dismissible popover after the 20.9.8 focus fix', () => {
   const achievements = source('src/components/dashboard/achievements-panel.tsx');
 
   assert.match(achievements, /showCloseButton/);
   assert.match(achievements, /Cerrar detalles de '\+def\.title/);
   assert.match(achievements, /data-achievement-popover=\{def\.id\}/);
   assert.match(achievements, /className="w-56 space-y-1\.5 p-3 pr-12"/);
-  assert.match(achievements, /focus:outline-none/);
+  assert.match(achievements, /focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2/);
 });
 
 test('20.9.4 active sidebar provider does not override the shared tooltip delay', () => {
