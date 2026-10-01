@@ -79,7 +79,8 @@ test('20.9.7 error and disabled states do not simulate latency or invent another
   assert.match(plan, /FeedbackMessage tone="error"/);
   assert.match(reportRange, /FeedbackMessage tone="error"/);
   assert.match(button, /disabled:pointer-events-none disabled:opacity-50 disabled:active:scale-100/);
-  assert.match(plan, /disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100/);
+  assert.match(plan, /<Button[\s\S]*disabled=\{!selectedCatId \|\| !\(parseFloat\(amount\) > 0\) \|\| saving\}/);
+  assert.doesNotMatch(plan, /disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100/);
   assert.match(toast, /success: "success group border-good\/30"/);
   assert.match(toast, /warning: "warning group border-warning\/40"/);
   assert.match(toast, /destructive: "destructive group border-bad\/40"/);
