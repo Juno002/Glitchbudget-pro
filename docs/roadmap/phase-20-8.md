@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1 completada / Gate aprobado; 20.8.2 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.2 completadas / Gates aprobados; 20.8.3 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -62,6 +62,30 @@ Antes de cambiar Home o Reportes:
 **Gate 20.8.1:** inventario cerrado y categorías default protegidas por test, sin reparación especulativa.
 
 ## 20.8.2 — Contrato canónico de comparaciones de KPI
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+547/547 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36819113232 ✅
+```
+
+Resultado:
+
+- `compareKpi()` define una semántica única para períodos, valores, delta absoluto, porcentaje y estado;
+- estados canónicos: `comparable`, `zero_previous` y `no_previous_base`;
+- `selectPositionKpiComparisons()` cubre líquido, net worth, deuda e inversiones desde `selectPosition()`;
+- Net Worth de Reportes reutiliza este contrato y deja de tener semántica paralela;
+- el módulo KPI no depende en runtime de Reportes, evitando ciclo de dominio;
+- no se añadieron fórmulas comparativas en React ni cambios de persistencia/backup/red/UI.
+
+Evidencia: [phase-20-8-2.md](phase-20-8-2.md).
 
 Definir read models/selectors para comparar, como mínimo:
 
