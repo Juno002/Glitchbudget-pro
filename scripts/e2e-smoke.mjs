@@ -565,7 +565,7 @@ async function main() {
       'Seguridad Prisma',
     );
 
-    if (!await client.evaluate(activateTabExpression('Datos y backups'))) throw new Error('No se pudo abrir Datos y backups.');
+    if (!await client.evaluate(activateTabExpression('Datos y copias'))) throw new Error('No se pudo abrir Datos y copias.');
     await waitFor(client, `Boolean(document.querySelector('[data-persistent-storage-settings="prisma"]'))`, 'Datos Prisma');
 
     if (!await client.evaluate(clickButtonExpression('Copias de Seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
