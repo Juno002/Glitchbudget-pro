@@ -1,6 +1,6 @@
 # Fase 20.9.3 — Superficies, textura y profundidad
 
-Estado: **en validación**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -61,6 +61,20 @@ Esos puntos permanecen en 20.9.4–20.9.8 según el inventario aprobado.
 
 Ninguno. No cambia semántica financiera, schema, migraciones, backup, persistencia ni red.
 
+## Quality gate aprobado
+
+```text
+602/602 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36891760591 ✅
+```
+
+El browser gate confirmó resolución diferenciada de profundidad en Prisma y Neón y restauró la clase de tema original después de la comprobación.
+
 ## Gate
 
-Pendiente de Quality checks sobre el HEAD final y reconciliación documental antes de autorizar 20.9.4.
+**Aprobado.** 20.9.3 queda cerrada. Una vez fusionada esta reconciliación y verificado `main`, la siguiente intervención autorizada es **20.9.4 — Tooltips, popovers y dialogs**.
