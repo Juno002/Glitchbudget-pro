@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { MOTION_SECONDS } from '@/lib/motion';
 import { PageHeader, StatusBadge } from '@/components/finance-ui';
 import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
 import { useTabs } from '@/contexts/tabs-context';
@@ -73,7 +74,7 @@ function BudgetItem({
   };
 
   return (
-    <motion.article initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.16 }} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-budget-row="prisma">
+    <motion.article initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} transition={{ duration:MOTION_SECONDS.content }} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-budget-row="prisma">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h3 className="flex min-w-0 items-center gap-2 font-display text-lg font-normal tracking-[-0.02em]"><category.icon className="h-5 w-5 shrink-0 text-muted-foreground" />{category.name}</h3>
         <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setEditing(value => !value)} aria-label={'Editar límite de ' + category.name}>{editing ? 'Cancelar' : 'Editar límite'}</Button>
