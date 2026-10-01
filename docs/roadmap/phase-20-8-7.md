@@ -1,6 +1,6 @@
 # Fase 20.8.7 — Progressive disclosure y copy contextual
 
-Estado: **completada técnicamente / Gate aprobado; cierre documental en curso**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -59,6 +59,6 @@ Merge commit:
 
 ## Gate 20.8.7
 
-**Aprobado técnicamente.** La reducción de ruido no reduce comprensión ni accesibilidad.
+**Aprobado.** La reducción de ruido no reduce comprensión ni accesibilidad.
 
-El siguiente paso autorizado solo después de reconciliar el estado de este cierre en el roadmap canónico, `docs/roadmap/phase-20.md`, `docs/roadmap/phase-20-8.md` y `docs/roadmap/README.md` es **20.8.8 — Gate final 20.8**.
+Con este cierre reconciliado en el roadmap canónico y los índices de Fase 20, la próxima intervención autorizada es **20.8.8 — Gate final 20.8**.

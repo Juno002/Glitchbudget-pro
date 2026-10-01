@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 completada / Gate aprobado con 20.7.5.1–20.7.5.9 cerradas. 20.8 en curso con 20.8.1–20.8.4 completadas / Gates aprobados; 20.8.5 es la próxima intervención autorizada. 20.9 y 20.10 permanecen planificadas.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 completada / Gate aprobado con 20.7.5.1–20.7.5.9 cerradas. 20.8 en curso con 20.8.1–20.8.7 completadas / Gates aprobados; 20.8.8 es la próxima intervención autorizada. 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 

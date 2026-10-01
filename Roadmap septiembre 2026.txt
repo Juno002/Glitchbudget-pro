@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1–20.8.6 completadas / Gates aprobados; próxima intervención autorizada: 20.8.7. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: en curso.** 20.8.1–20.8.7 completadas / Gates aprobados; próxima intervención autorizada: 20.8.8. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3822,6 +3822,29 @@ La Lectura rápida complementa el análisis; nunca sustituye el dato exacto.
 **Gate 20.8.6:** Reportes interpreta y jerarquiza sin perder ninguna capacidad analítica.
 
 ### 20.8.7 — Progressive disclosure + copy contextual
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+580/580 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36839469668 ✅
+```
+
+Resultado de implementación:
+
+- definiciones estables de KPI permanecen detrás de popovers activados mediante controles accesibles;
+- consecuencias financieras que cambian interpretación permanecen visibles fuera del disclosure;
+- Reportes conserva comparación, tablas y detalle exacto;
+- Home y Reportes quedan protegidos contra significado requerido dependiente solo de hover;
+- sin fórmulas financieras nuevas, acceso directo a Dexie, red, schema, migraciones ni cambios de backup.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-7.md`.
 
 Aplicar una regla única a todo el copy:
 
@@ -4343,7 +4366,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.7 → 20.8.8
+20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```

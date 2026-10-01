@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.6 completadas / Gates aprobados; 20.8.7 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.7 completadas / Gates aprobados; 20.8.8 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -303,6 +303,29 @@ Preservar:
 **Gate 20.8.6:** Reportes interpreta y jerarquiza sin perder ninguna capacidad analítica.
 
 ## 20.8.7 — Progressive disclosure y copy contextual
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+580/580 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36839469668 ✅
+```
+
+Resultado:
+
+- definiciones estables de KPI permanecen detrás de popovers accesibles por teclado y toque;
+- consecuencias financieras relevantes permanecen visibles fuera del disclosure;
+- Reportes conserva comparación, tablas y detalle exacto;
+- tests protegen Home y Reportes frente a significado requerido dependiente solo de hover;
+- no se añadieron fórmulas financieras, Dexie directo, red, schema, migraciones ni cambios de backup.
+
+Evidencia: [phase-20-8-7.md](phase-20-8-7.md).
 
 Aplicar una regla consistente:
 
