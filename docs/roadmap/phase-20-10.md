@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **en curso — 20.10.1–20.10.3 completadas / Gates aprobados; 20.10.4 es la próxima intervención autorizada**.
+Estado: **en curso — 20.10.1–20.10.4 completadas / Gates aprobados; 20.10.5 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -83,6 +83,12 @@ Después:
 
 ## 20.10.4 — Gate completo sobre main
 
+**Estado: completada / Gate aprobado.**
+
+`main` `473850b2291218195aa936f73a59ed09568ebae2` pasó Quality checks `36923309003`: check, benchmark, build y E2E verdes. El gate ejecutable cubre backup round-trip, offline, CSP `connect-src 'none'`, Resumen, Movimientos, Plan, Reportes/Lectura rápida, Prisma/Neón, App Lock, backups, categorías default, idioma y achievement toast.
+
+Evidencia completa: [phase-20-10-4.md](phase-20-10-4.md).
+
 Antes de borrar ramas:
 
 ```text
@@ -108,7 +114,7 @@ Verificar también:
 - idioma;
 - achievement toast.
 
-**Gate 20.10.4:** main verde y funcional por sí solo.
+**Gate 20.10.4:** aprobado. main verde y funcional por sí solo; 20.10.5 queda habilitada.
 
 ## 20.10.5 — Eliminación de ramas remotas
 
