@@ -367,7 +367,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen && !savingRef.current) onClose(); }}>
-      <DialogContent className="max-h-[calc(100dvh-1rem)] overflow-y-auto overflow-x-hidden p-0 sm:max-w-[500px]" data-global-composer="prisma">
+      <DialogContent className="overflow-x-hidden p-0 sm:max-w-[500px]" data-global-composer="prisma">
         <DialogHeader className="border-b border-border/70 px-6 pb-4 pt-5 text-left">
           <DialogDescription className="text-[9px] font-bold uppercase tracking-[0.16em]">Acción global</DialogDescription>
           <DialogTitle className="font-display text-2xl font-normal tracking-[-0.03em]">{isEditing ? 'Editar movimiento' : 'Nuevo movimiento'}</DialogTitle>
@@ -581,7 +581,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                               type="button"
                               aria-pressed={paymentMethod === 'cash'}
                               onClick={() => { setPaymentMethod('cash'); setDebtId(''); if (!accountId) setAccountId(defaultCashId); }}
-                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm', paymentMethod === 'cash' && 'border-primary/40 bg-primary/10 text-primary')}
+                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2', paymentMethod === 'cash' && 'border-primary/40 bg-primary/10 text-primary')}
                             >
                               <Banknote className="h-4 w-4" /> Efectivo / banco
                             </button>
@@ -590,7 +590,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                               disabled={debts.length === 0}
                               aria-pressed={paymentMethod === 'credit'}
                               onClick={() => { setPaymentMethod('credit'); setDebtId(debtId || debts[0]?.id || ''); }}
-                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm disabled:opacity-50', paymentMethod === 'credit' && 'border-primary/40 bg-primary/10 text-primary')}
+                              className={cn('flex min-h-11 items-center justify-center gap-2 rounded-md border text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50', paymentMethod === 'credit' && 'border-primary/40 bg-primary/10 text-primary')}
                             >
                               <CreditCard className="h-4 w-4" /> Tarjeta
                             </button>
@@ -664,7 +664,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
+                        <AlertDialogAction variant="destructive" onClick={handleDelete}>Eliminar</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

@@ -94,7 +94,7 @@ export function SettingsDialog() {
           {isWorking ? <Loader className="animate-spin" /> : <Settings className="h-4 w-4" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-4xl" data-settings-prisma="true">
+      <DialogContent className="sm:max-w-4xl" data-settings-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Ajustes</DialogTitle>
           <DialogDescription>Preferencias, categorías, privacidad y datos en un solo lugar.</DialogDescription>
@@ -132,7 +132,7 @@ export function SettingsDialog() {
                 aria-label="Día inicial del período"
                 value={periodStartDay}
                 onChange={e => void setPeriodStartDay(Number(e.target.value))}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 {Array.from({ length:31 }, (_, index) => index + 1).map(day => (
                   <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
@@ -163,7 +163,7 @@ export function SettingsDialog() {
                 aria-label="Al exceder un presupuesto"
                 value={budgetOverspendingBehavior}
                 onChange={e => setBudgetOverspendingBehavior(e.target.value as 'allow'|'warn'|'block')}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="allow">Permitir</option>
                 <option value="warn">Pedir confirmación</option>
@@ -174,15 +174,15 @@ export function SettingsDialog() {
             <div className="space-y-3">
               <h3 className="font-semibold">Cierre de período</h3>
               <RadioGroup value={rolloverStrategy} onValueChange={value => setRolloverStrategy(value as typeof rolloverStrategy)} className="grid gap-3 md:grid-cols-3">
-                <Label htmlFor="roll-reset" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+                <Label htmlFor="roll-reset" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Resetear</div>
                   <p className="mt-2 text-xs text-muted-foreground">Empieza el siguiente período con los límites base.</p>
                 </Label>
-                <Label htmlFor="roll-surplus" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+                <Label htmlFor="roll-surplus" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="accumulate_surplus" id="roll-surplus" /><Plus className="h-4 w-4" /> Acumular sobrante</div>
                   <p className="mt-2 text-xs text-muted-foreground">Suma lo no gastado al siguiente período.</p>
                 </Label>
-                <Label htmlFor="roll-debt" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+                <Label htmlFor="roll-debt" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                   <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="accumulate_debt" id="roll-debt" /><Minus className="h-4 w-4" /> Acumular exceso</div>
                   <p className="mt-2 text-xs text-muted-foreground">Resta el exceso del límite base siguiente.</p>
                 </Label>
@@ -193,7 +193,7 @@ export function SettingsDialog() {
               <h3 className="font-semibold">Ingreso previsto</h3>
               <p className="text-xs text-muted-foreground">Es una previsión de planificación; no se convierte en ingreso registrado.</p>
               <div className="grid max-w-xl gap-3 sm:grid-cols-2">
-                <select value={baseFreq} onChange={e => setBaseFreq(e.target.value as typeof baseFreq)} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <select value={baseFreq} onChange={e => setBaseFreq(e.target.value as typeof baseFreq)} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                   <option value="mensual">Mensual</option>
                   <option value="quincenal">Quincenal</option>
                   <option value="semanal">Semanal</option>
@@ -325,13 +325,13 @@ export function SettingsDialog() {
           <TabsContent value="appearance" className="space-y-5">
             <SectionHeader title="Apariencia" description="Los temas cambian presentación, no jerarquía ni funcionalidad." />
             <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-3">
-              <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+              <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="dark" id="theme-dark" /><Moon className="h-4 w-4" /> Neón oscuro</div>
               </Label>
-              <Label htmlFor="theme-light" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+              <Label htmlFor="theme-light" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="light" id="theme-light" /><Sun className="h-4 w-4" /> Prisma claro</div>
               </Label>
-              <Label htmlFor="theme-serious" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+              <Label htmlFor="theme-serious" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="serious" id="theme-serious" /><Briefcase className="h-4 w-4" /> Minimalista legado</div>
               </Label>
             </RadioGroup>

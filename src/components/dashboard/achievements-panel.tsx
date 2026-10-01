@@ -135,6 +135,7 @@ function XPBar({
   title: string;
 }) {
   const pct = Math.min(100, Math.round((currentXP / Math.max(1, nextXP)) * 100));
+  const reducedMotion = useReducedMotion();
 
   return (
     <div className="flex items-center gap-3">
@@ -162,7 +163,7 @@ function XPBar({
             style={{ background: 'linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)))' }}
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={reducedMotion ? { duration: 0 } : { duration: MOTION_SECONDS.content, ease: 'easeOut' }}
           />
         </div>
       </div>
@@ -173,6 +174,7 @@ function XPBar({
 // --- Badge Card with Popover ---
 function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boolean }) {
   const tier = TIER_COLORS[def.tier];
+  const reducedMotion = useReducedMotion();
   const tierName = { bronze: 'Bronce', silver: 'Plata', gold: 'Oro', diamond: 'Diamante' }[def.tier];
 
   return (
@@ -180,13 +182,15 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
       <PopoverTrigger asChild>
         <motion.button
           type="button"
-          whileHover={isUnlocked ? { scale: 1.05, y: -2 } : {}}
-          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-[var(--motion-control)] focus:outline-none"
+          whileHover={!reducedMotion && isUnlocked ? { scale: 1.03, y: -1 } : {}}
+          whileTap={!reducedMotion ? { scale: 0.98 } : {}}
+          data-achievement-badge={def.id}
+          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           style={{
             background: isUnlocked ? tier.bg : 'rgba(255,255,255,0.02)',
             borderColor: isUnlocked ? tier.border : 'rgba(255,255,255,0.04)',
             boxShadow: isUnlocked ? `0 4px 20px ${tier.glow}` : 'none',
-            opacity: isUnlocked ? 1 : 0.35,
+            opacity: isUnlocked ? 1 : 0.62,
             filter: isUnlocked ? 'none' : 'grayscale(1)',
           }}
         >
