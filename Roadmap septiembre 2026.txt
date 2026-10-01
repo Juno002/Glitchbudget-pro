@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.8 completadas / Gates aprobados; próxima intervención autorizada: 20.9.9. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: completada / Gate aprobado.** 20.9.1–20.9.9 cerradas; próxima intervención autorizada: 20.10.1. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4343,6 +4343,33 @@ Revisar:
 
 ### 20.9.9 — Pixel / interaction sweep + Gate 20.9
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+640/640 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36915706293 ✅
+```
+
+Resultado:
+
+- la iconografía funcional residual de Categorías sustituye `➕/🔄` por `Plus/RotateCcw` de Lucide sin tocar emoji celebratorio de Logros;
+- `TransactionRow`, cuentas, inversiones y Ajustes cierran excepciones locales de radius, skeleton y estados pressed/focus contra los tokens compartidos;
+- acciones raw restantes de Plan vuelven al primitive `Button`, preservando el contrato común de hover/press/focus/disabled;
+- el sweep conserva la jerarquía de 20.8: no reestructura Resumen ni Reportes y no añade features;
+- el browser E2E recorre Resumen → Movimientos → compositor → Plan → Reportes → Logros → Ajustes → backups → App Lock en desktop/móvil;
+- el mismo E2E activa **Neón oscuro** y **Prisma claro** mediante los controles reales de Ajustes y valida la iconografía funcional normalizada;
+- tests históricos se reconciliaron para proteger el primitive `Button` actual en lugar de exigir markup raw obsoleto;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-9.md`.
+
 Recorrido final:
 
 ```text
@@ -4375,7 +4402,7 @@ npm run build
 npm run test:e2e
 ```
 
-**Gate 20.9:** UI premium cerrada sin cambios de semántica financiera.
+**Gate 20.9:** aprobado. UI premium cerrada sin cambios de semántica financiera.
 
 ---
 
