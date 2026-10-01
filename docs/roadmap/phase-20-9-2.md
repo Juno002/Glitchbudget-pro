@@ -1,6 +1,6 @@
 # Fase 20.9.2 — Motion tokens ultra rápidos
 
-Estado: **en validación**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -45,6 +45,20 @@ Ninguno.
 
 No se modifica semántica financiera, schema, migraciones, backup, persistencia, red ni contenido de producto.
 
+## Quality gate aprobado
+
+```text
+597/597 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36890383021 ✅
+```
+
+Los dos P1 del review inicial quedaron resueltos antes del cierre: Sheet/AlertDialog consumen `--motion-dialog` y los controles primarios del shell consumen `--motion-control` con feedback `--motion-press`.
+
 ## Gate
 
-Pendiente de Quality checks sobre el HEAD final de 20.9.2 y de reconciliación documental antes de autorizar 20.9.3.
+**Aprobado.** 20.9.2 queda cerrada. Una vez fusionada esta reconciliación y verificado `main` post-merge, la siguiente intervención autorizada es **20.9.3 — Superficies, textura y profundidad**.
