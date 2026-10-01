@@ -75,7 +75,7 @@ export default function EncryptedBackupRestore() {
       setPreview(result);
     } catch (cause) {
       setPreview(null);
-      setError(cause instanceof Error ? cause.message : 'No se pudo validar el backup cifrado.');
+      setError(cause instanceof Error ? cause.message : 'No se pudo validar la copia cifrada.');
     } finally {
       setPreviewing(false);
     }
@@ -122,7 +122,7 @@ export default function EncryptedBackupRestore() {
       >
         <AlertDialogContent aria-busy={busy} data-encrypted-restore="prisma">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-display text-2xl font-normal">Restaurar backup cifrado</AlertDialogTitle>
+            <AlertDialogTitle className="font-display text-2xl font-normal">Restaurar copia cifrada</AlertDialogTitle>
             <AlertDialogDescription>
               Primero se autenticará, descifrará y validará <span className="font-medium break-all">{file?.name}</span>.
               Tus datos actuales no se reemplazarán hasta que revises el resumen y confirmes.
@@ -131,7 +131,7 @@ export default function EncryptedBackupRestore() {
           </AlertDialogHeader>
 
           <label className="space-y-2 text-sm">
-            <span className="font-medium">Contraseña del backup</span>
+            <span className="font-medium">Contraseña de la copia</span>
             <Input
               type="password"
               autoComplete="current-password"
@@ -167,7 +167,7 @@ export default function EncryptedBackupRestore() {
             ) : (
               <Button type="button" disabled={busy || !password} onClick={review}>
                 {previewing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileKey2 className="mr-2 h-4 w-4" />}
-                {previewing ? 'Validando…' : 'Revisar backup'}
+                {previewing ? 'Validando…' : 'Revisar copia'}
               </Button>
             )}
           </AlertDialogFooter>
