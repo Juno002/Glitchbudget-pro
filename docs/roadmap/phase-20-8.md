@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.5 completadas / Gates aprobados; 20.8.6 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.6 completadas / Gates aprobados; 20.8.7 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -248,6 +248,32 @@ No eliminar información necesaria para entender una consecuencia financiera.
 **Gate 20.8.5:** menos texto permanente, igual o mayor capacidad de decisión.
 
 ## 20.8.6 — Reportes: nueva jerarquía editorial
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+576/576 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36826235113 ✅
+```
+
+Resultado:
+
+- Lectura rápida determinista abre Reportes y reutiliza `report.quickRead`;
+- Spending funciona como hero analítico sin recalcular métricas;
+- Comparison aparece antes de categorías/naturaleza;
+- categorías y naturaleza conservan gráficos y tablas exactas;
+- Cash Flow y Net Worth mantienen métricas, gráficos y advertencias;
+- Largest transactions se mueve a Detalle exacto después de Net Worth;
+- rangos y seguimiento secundario de presupuestos permanecen disponibles;
+- sin cambios de dominio, persistencia, schema, backup, red ni fórmulas financieras.
+
+Evidencia: [phase-20-8-6.md](phase-20-8-6.md).
 
 Recomponer Reportes siguiendo una lectura descendente:
 
