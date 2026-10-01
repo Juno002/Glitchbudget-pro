@@ -167,7 +167,7 @@ export function parseEncryptedBackupEnvelopeText(text: string): EncryptedBackupE
 
   const row = raw as Partial<EncryptedBackupEnvelopeV1>;
   if (row.format !== ENCRYPTED_BACKUP_FORMAT) {
-    throw new Error('El archivo no es una copia cifrada compatible de GlitchBudget.');
+    throw new Error('El archivo no es una copia cifrada compatible de Prisma.');
   }
   if (row.version !== ENCRYPTED_BACKUP_VERSION) {
     throw new Error('La versión de la copia cifrada no es compatible.');
