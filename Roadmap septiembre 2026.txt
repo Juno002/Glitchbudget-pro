@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1 completada / Gate aprobado y 20.8.2 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.2 completadas / Gates aprobados y 20.8.3 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1 completada / Gate aprobado; próxima intervención autorizada: 20.8.2. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: en curso.** 20.8.1–20.8.2 completadas / Gates aprobados; próxima intervención autorizada: 20.8.3. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3535,6 +3535,34 @@ Antes de tocar Home o Reportes:
 **Gate 20.8.1:** inventario informativo cerrado y categorías por defecto protegidas por test, sin introducir reparación especulativa.
 
 ### 20.8.2 — Contrato canónico de comparaciones KPI
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+547/547 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36819113232 ✅
+```
+
+Resultado de cierre:
+
+- `compareKpi()` centraliza período actual/comparable, valores, delta absoluto, delta porcentual y estado;
+- `comparable`, `zero_previous` y `no_previous_base` distinguen base normal, valor anterior cero y ausencia real de base;
+- un valor anterior de 0 conserva delta absoluto pero no inventa porcentaje;
+- ausencia de período/base devuelve previous y deltas como `null`;
+- `selectPositionKpiComparisons()` cubre disponible líquido, patrimonio neto, deuda total e inversiones;
+- los cuatro valores provienen directamente del ledger canónico mediante `selectPosition()`;
+- Reportes reutiliza el mismo contrato para la comparación existente de Net Worth;
+- se eliminó la dependencia circular runtime entre `reports.ts` y `kpi-comparisons.ts`;
+- cero cálculos comparativos financieros nuevos en React;
+- sin cambios de schema, migración, backup, persistencia, red, UI visual ni 20.8.3.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-2.md`.
 
 Definir una única semántica comparativa reutilizable para, como mínimo:
 
@@ -4208,7 +4236,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.2 → 20.8.8
+20.8.3 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```

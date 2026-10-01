@@ -1,6 +1,7 @@
 import type { Account, AccountTransfer, Debt, DebtPayment, Expense, Income } from './models';
 import { selectPosition } from './ledger';
 import { contains, type DateRange } from './periods';
+import { compareKpi } from './kpi-comparisons';
 
 export type ReportRangePreset = '7d' | '30d' | '3m' | '6m' | '1y' | 'custom';
 
@@ -181,6 +182,7 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
   const previousSpending=selectSpendingReport(input.expenses,previousRange);
   const previousCashFlow=selectCashFlowReport(input,previousRange);
   const previousNetWorth=selectNetWorthReport(input,previousRange.end);
+  const netWorthComparison=compareKpi(range,previousRange,netWorth.netWorth,previousNetWorth.netWorth);
 
   return {
     range,
@@ -192,7 +194,7 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
       spending:{current:spending.total,previous:previousSpending.total,difference:spending.total-previousSpending.total,percentChange:pctChange(spending.total,previousSpending.total)},
       income:{current:cashFlow.income,previous:previousCashFlow.income,difference:cashFlow.income-previousCashFlow.income,percentChange:pctChange(cashFlow.income,previousCashFlow.income)},
       netCashFlow:{current:cashFlow.netCashFlow,previous:previousCashFlow.netCashFlow,difference:cashFlow.netCashFlow-previousCashFlow.netCashFlow,percentChange:pctChange(cashFlow.netCashFlow,previousCashFlow.netCashFlow)},
-      netWorth:{current:netWorth.netWorth,previous:previousNetWorth.netWorth,difference:netWorth.netWorth-previousNetWorth.netWorth,percentChange:pctChange(netWorth.netWorth,previousNetWorth.netWorth)},
+      netWorth:{current:netWorthComparison.current,previous:netWorthComparison.previous,difference:netWorthComparison.absoluteDelta,percentChange:netWorthComparison.percentageDelta,status:netWorthComparison.status},
     },
   };
 }
