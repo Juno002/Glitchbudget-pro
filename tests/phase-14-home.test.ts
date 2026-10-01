@@ -91,8 +91,8 @@ test('Home UI contains at most the five roadmap modules and removes old dashboar
   assert.equal((ui.match(/HomeSection id="/g)||[]).length,5);
   assert.doesNotMatch(ui,/Movimientos recientes/);
   assert.doesNotMatch(ui,/Preferencia de ahorro sugerido/);
-  assert.match(ui,/Personalizar Home/);
-  assert.match(ui,/Sección inicial al abrir Home/);
+  assert.match(ui,/Personalizar Resumen/);
+  assert.match(ui,/Sección inicial al abrir Resumen/);
 });
 
 test('Home consumes the shared Reports selector and does not import ledger formulas directly', () => {
