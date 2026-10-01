@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.6 completadas / Gates aprobados y 20.8.7 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`. La secuencia posterior 20.8 quedó completada y 20.9 continúa según su estado canónico más abajo.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.6 completadas / Gates aprobados; próxima intervención autorizada: 20.9.7. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.7 completadas / Gates aprobados; próxima intervención autorizada: 20.9.8. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4247,6 +4247,33 @@ No traducir marcas, formatos técnicos o IDs persistentes únicamente por estét
 **Gate 20.9.6:** ninguna superficie mezcla idiomas sin una razón explícitamente documentada.
 
 ### 20.9.7 — Estados y feedback
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+628/628 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36906036426 ✅
+```
+
+Resultado:
+
+- Alert/FeedbackMessage unifican neutral, success, warning y error con semántica ARIA consistente;
+- Skeleton usa radio/tone común, reduced motion y estado de carga no interactivo;
+- empty states de tarjetas y copias locales reutilizan `EmptyState`;
+- confirmaciones destructivas de metas, tarjetas, copias y borrado total usan la variante destructiva común de AlertDialog;
+- Plan y Reportes reutilizan feedback de error en lugar de estilos ad hoc;
+- disabled preserva el contrato común de Button y evita feedback de press;
+- el smoke E2E reintenta únicamente el arranque de Chromium para eliminar falsos rojos de infraestructura sin reducir cobertura;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-7.md`.
 
 Unificar visual y conductualmente:
 

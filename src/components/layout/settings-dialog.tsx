@@ -315,7 +315,7 @@ export function SettingsDialog() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleClearData} className="bg-destructive text-destructive-foreground">Borrar</AlertDialogAction>
+                    <AlertDialogAction variant="destructive" onClick={handleClearData}>Borrar</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

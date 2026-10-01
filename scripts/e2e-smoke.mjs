@@ -256,27 +256,41 @@ async function main() {
   };
   failOnEarlyExit(server, 'static server');
 
+  const launchChrome = async () => {
+    let lastError;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      chrome = spawn(chromeBinary(), [
+        '--headless=new',
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-background-networking',
+        '--disable-component-update',
+        '--disable-default-apps',
+        '--disable-sync',
+        '--metrics-recording-only',
+        '--no-first-run',
+        '--no-default-browser-check',
+        `--remote-debugging-port=${DEBUG_PORT}`,
+        `--user-data-dir=${path.join(userDataDir, 'chrome-' + attempt)}`,
+        'about:blank',
+      ], { stdio: ['ignore', 'pipe', 'pipe'] });
+      failOnEarlyExit(chrome, 'chrome');
+      try {
+        await waitForHttp(DEBUG_URL + '/json/version', 30_000);
+        return;
+      } catch (error) {
+        lastError = error;
+        await stop(chrome);
+        chrome = undefined;
+        if (attempt < 2) await delay(500);
+      }
+    }
+    throw lastError;
+  };
+
   try {
     await waitForHttp(APP_URL);
-
-    chrome = spawn(chromeBinary(), [
-      '--headless=new',
-      '--no-sandbox',
-      '--disable-gpu',
-      '--disable-background-networking',
-      '--disable-component-update',
-      '--disable-default-apps',
-      '--disable-sync',
-      '--metrics-recording-only',
-      '--no-first-run',
-      '--no-default-browser-check',
-      `--remote-debugging-port=${DEBUG_PORT}`,
-      `--user-data-dir=${userDataDir}`,
-      'about:blank',
-    ], { stdio: ['ignore', 'pipe', 'pipe'] });
-    failOnEarlyExit(chrome, 'chrome');
-
-    await waitForHttp(DEBUG_URL + '/json/version');
+    await launchChrome();
     const targetResponse = await fetch(
       DEBUG_URL + '/json/new?' + encodeURIComponent(APP_URL),
       { method: 'PUT' },

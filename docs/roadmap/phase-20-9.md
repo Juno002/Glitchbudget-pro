@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.6 completadas / Gates aprobados; 20.9.7 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.7 completadas / Gates aprobados; 20.9.8 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -284,6 +284,33 @@ No traducir marcas, formatos técnicos ni nombres persistentes por estética.
 **Gate 20.9.6:** ninguna superficie mezcla idiomas sin una razón documentada.
 
 ## 20.9.7 — Estados y feedback
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+628/628 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36906036426 ✅
+```
+
+Resultado:
+
+- `FeedbackMessage` establece neutral/success/warning/error sobre el primitive Alert;
+- Toast comparte las mismas variantes semánticas y superficie elevada;
+- Skeleton reduce agresividad visual y respeta reduced motion;
+- EmptyState sustituye estados vacíos ad hoc restantes auditados en tarjetas y copias locales;
+- AlertDialogAction admite `variant="destructive"` y las confirmaciones destructivas auditadas dejan de duplicar clases;
+- estados disabled mantienen el contrato común y no conservan press feedback;
+- Plan y Reportes usan el feedback de error compartido;
+- el E2E conserva toda su cobertura y solo reintenta el arranque de Chromium cuando el puerto CDP no aparece;
+- no se tocaron dominio financiero, Dexie, backup, migraciones ni red.
+
+Evidencia: [phase-20-9-7.md](phase-20-9-7.md).
 
 Unificar:
 

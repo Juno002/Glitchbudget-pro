@@ -44,6 +44,7 @@ import CsvBackupDialog from './csv-backup-dialog';
 import EncryptedBackupExport from './encrypted-backup-export';
 import EncryptedBackupRestore from './encrypted-backup-restore';
 import { previewDataJSON, type BackupImportPreview } from '@/lib/backup-json';
+import { EmptyState } from '@/components/finance-ui';
 
 export default function OpfsBackupDialog() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -230,8 +231,8 @@ export default function OpfsBackupDialog() {
         <ScrollArea className="mt-2 h-64 rounded-[var(--radius-card)] border bg-muted/15">
             <div className="p-4">
                 {isWorking && backupFiles.length === 0 ? (
-                    <div className="flex justify-center items-center h-full">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <div role="status" aria-label="Cargando copias locales" className="flex h-full items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />
                     </div>
                 ) : backupFiles.length > 0 ? (
                     <ul className="space-y-2">
@@ -276,7 +277,7 @@ export default function OpfsBackupDialog() {
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
                                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDelete(file.name)} className="bg-destructive text-destructive-foreground">Eliminar</AlertDialogAction>
+                                        <AlertDialogAction variant="destructive" onClick={() => handleDelete(file.name)}>Eliminar</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
@@ -287,7 +288,7 @@ export default function OpfsBackupDialog() {
                     </ul>
                 ) : (
                     <div className="text-center py-10">
-                        <p className="text-muted-foreground">No hay copias de seguridad locales.</p>
+                        <EmptyState className="min-h-28" title="Sin copias locales" description="Crea una copia local o importa un archivo para empezar." />
                         <p className="text-sm text-muted-foreground">Crea tu primera copia para empezar.</p>
                     </div>
                 )}

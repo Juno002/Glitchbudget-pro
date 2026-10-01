@@ -87,7 +87,7 @@ export default function GoalsManager() {
           {metrics.status === 'active' && <ContributeDialog goal={goal} model={metrics} />}
           <Button variant="ghost" size="icon" aria-label={'Editar meta ' + goal.name} onClick={() => { setEditing(goal); form.reset({name:goal.name,target:goal.target/100,date:goal.date || '',quota:goal.quota/100}); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
           <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" aria-label={'Eliminar meta ' + goal.name}><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
-            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Eliminar {goal.name}?</AlertDialogTitle><AlertDialogDescription>Se eliminarán la meta y sus reservas de planificación. El efectivo, las cuentas y los movimientos reales conservarán sus saldos.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={() => deleteGoal(goal.id)}>Eliminar meta</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>¿Eliminar {goal.name}?</AlertDialogTitle><AlertDialogDescription>Se eliminarán la meta y sus reservas de planificación. El efectivo, las cuentas y los movimientos reales conservarán sus saldos.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction variant="destructive" onClick={() => deleteGoal(goal.id)}>Eliminar meta</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
           </AlertDialog>
         </div>
       </article>;

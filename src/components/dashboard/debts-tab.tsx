@@ -15,6 +15,7 @@ import { CreditCard, Plus, ShieldCheck, HelpCircle, Trash2 } from 'lucide-react'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { toCents, cn } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { EmptyState } from '@/components/finance-ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export default function DebtsTab() {
@@ -129,11 +130,11 @@ export default function DebtsTab() {
       </div>
 
       {activeCards.length === 0 ? (
-        <div className="rounded-[var(--radius-card)] border border-dashed px-4 py-10 text-center">
-          <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-medium mb-1">Aún no tienes tarjetas</h3>
-          <p className="text-sm text-muted-foreground">Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente.</p>
-        </div>
+        <EmptyState
+          icon={<CreditCard className="h-10 w-10" />}
+          title="Aún no tienes tarjetas"
+          description="Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente."
+        />
       ) : (
         <div className="grid gap-4">
           {activeCards.map(debt => {
@@ -172,7 +173,7 @@ export default function DebtsTab() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => void deleteDebt(debt.id)} className="bg-destructive text-destructive-foreground">
+                        <AlertDialogAction variant="destructive" onClick={() => void deleteDebt(debt.id)}>
                           Eliminar tarjeta
                         </AlertDialogAction>
                       </AlertDialogFooter>

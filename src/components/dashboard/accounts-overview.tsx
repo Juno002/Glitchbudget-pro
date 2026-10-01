@@ -31,7 +31,7 @@ export default function AccountsOverview() {
     resetAccountDraft, openManagement, editAccount, editTransfer,
     submitAccount, submitTransfer, submitCardReconciliation, submitCashOpening,
   } = management;
-  if (!data) return <Skeleton className="h-28 w-full rounded-2xl" />;
+  if (!data) return <Skeleton className="h-28 w-full rounded-[var(--radius-card)]" />;
   const today = localDate();
   const {
     cards,

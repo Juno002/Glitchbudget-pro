@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeader } from '@/components/finance-ui';
 import { cn } from '@/lib/utils';
+import { FeedbackMessage } from '@/components/finance-ui';
 
 const presets: Array<{ value:ReportRangePreset; label:string }> = [
   { value:'7d', label:'7D' },
@@ -71,9 +72,13 @@ export function ReportRangeControls({
           </label>
         </div>
       )}
-      <p className={cn('rounded-[var(--radius-interactive)] bg-muted/25 px-3 py-2 text-xs',rangeError?'text-bad':'text-muted-foreground')} aria-live="polite">
-        {rangeError || 'Actual: '+currentLabel+' · Comparable: '+previousLabel}
-      </p>
+      {rangeError ? (
+        <FeedbackMessage tone="error" description={rangeError} />
+      ) : (
+        <p className={cn('rounded-[var(--radius-interactive)] bg-muted/25 px-3 py-2 text-xs text-muted-foreground')} aria-live="polite">
+          {'Actual: '+currentLabel+' · Comparable: '+previousLabel}
+        </p>
+      )}
     </section>
   );
 }
