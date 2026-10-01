@@ -1,5 +1,9 @@
 # 20.8.1 — Preflight de información y regresión de categorías
 
+**Estado: completada / Gate aprobado.**
+
+Quality checks `36803800520`: **542/542 tests**, benchmark del ledger, build y browser E2E verdes.
+
 Fuente funcional: `Roadmap septiembre 2026.txt`. Apoyo: `docs/roadmap/phase-20-8.md`.
 
 ## Inventario de información visible
@@ -47,7 +51,7 @@ No se añade lógica de reparación ni migración.
 
 ## Gate 20.8.1
 
-El gate queda preparado cuando:
+Gate aprobado. Evidencia cerrada:
 
 - este inventario cubre KPI, explicaciones, badges, comparaciones y gráficos visibles de Resumen/Reportes;
 - el test específico protege categorías default de instalación limpia;
