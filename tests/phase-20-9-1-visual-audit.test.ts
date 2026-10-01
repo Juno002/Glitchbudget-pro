@@ -47,8 +47,9 @@ test('20.9.1 visual audit includes every protected visible surface family', () =
 
 test('20.9.1 assigns priorities and an explicit owner to all later premium-polish stages', () => {
   for (const priority of ['P0', 'P1', 'P2']) assert.ok(audit.includes(priority));
+  const ownerLines = audit.split('\n').filter(line => line.includes('Dueño:')).join('\n');
   for (let stage = 2; stage <= 9; stage += 1) {
-    assert.ok(audit.includes(`20.9.${stage}`), `missing owner 20.9.${stage}`);
+    assert.ok(ownerLines.includes(`20.9.${stage}`), `missing explicit owner 20.9.${stage}`);
   }
 });
 
@@ -56,6 +57,14 @@ test('20.9.1 removes theme-scope ambiguity without changing compatibility', () =
   assert.ok(audit.includes('Prisma + Neón') && audit.includes('dos objetivos premium'));
   assert.ok(audit.includes('Minimalista legado') && audit.includes('compatibilidad'));
   assert.match(audit, /no tercer destino de paridad premium/i);
+});
+
+test('20.9.1 records confirmed focus and functional-icon inconsistencies', () => {
+  assert.match(audit, /defecto confirmado:[\s\S]*BadgeCard/i);
+  assert.match(audit, /remediación obligatoria de 20\.9\.8/i);
+  assert.ok(audit.includes('➕ Agregar'));
+  assert.ok(audit.includes('🔄 Restablecer'));
+  assert.match(audit, /inconsistencia funcional confirmada frente al sistema Lucide/i);
 });
 
 test('20.9.1 remains an inventory gate rather than a component-fix iteration', () => {
