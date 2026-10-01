@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.3 completadas / Gates aprobados; próxima intervención autorizada: 20.9.4. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.4 completadas / Gates aprobados; próxima intervención autorizada: 20.9.5. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4074,6 +4074,34 @@ Evitar glassmorphism excesivo o transparencias que hagan competir el fondo con e
 **Gate 20.9.3:** jerarquía espacial coherente en Modo Prisma y Modo Neón.
 
 ### 20.9.4 — Tooltips, popovers y dialogs
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+609/609 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36893491408 ✅
+```
+
+Resultado:
+
+- Tooltip elimina el contraste heredado inválido y usa superficie/texto/sombra semánticos;
+- delays, offsets y collision padding quedan explícitos;
+- Popover limita ancho al viewport y admite cierre contextual táctil con foco visible;
+- ayuda KPI de Home muestra título + explicación breve y conserva advertencias financieras fuera del popover;
+- detalles de medallas reutilizan el mismo dismiss sin consumir la corrección de focus reservada a 20.9.8;
+- Dialog normaliza título, header, footer y botón de cierre etiquetado con foco visible;
+- AlertDialog mantiene Cancelar/Confirmar y consecuencias destructivas visibles sin cierre ambiguo;
+- E2E abre/cierra la ayuda de Disponible líquido en desktop y móvil y verifica containment;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-4.md`.
 
 Normalizar:
 
@@ -4437,7 +4465,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.4 → 20.9.9
+20.9.5 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
