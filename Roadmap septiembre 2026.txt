@@ -4638,7 +4638,7 @@ Después de este punto:
 
 **Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
 
-# Post-roadmap — Hardening técnico de Prisma
+## Post-roadmap — Hardening técnico de Prisma
 
 **Estado: en curso.** El roadmap funcional 0–20.10 permanece cerrado. Esta sección no crea una Fase 20.11 ni una Fase 21: registra únicamente trabajo de hardening posterior al cierre, aprobado explícitamente después de la auditoría externa sobre `main`.
 
@@ -9318,7 +9318,7 @@ Después de este punto:
 
 **Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
 
- y locale hardcodeados donde contradigan `settings.currency` / `settings.locale`; usar una única frontera de formato.
+# y locale hardcodeados donde contradigan `settings.currency` / `settings.locale`; usar una única frontera de formato.
 - **A6:** una categoría o necesidad elegida manualmente no puede volver a ser sobrescrita por una regla automática al editar el concepto.
 - añadir tests de comportamiento/regresión que ejerzan estos contratos.
 
@@ -9414,7 +9414,7 @@ documentar evidencia
 → proponer modificación explícita de esta sección
 ```
 
-### Regla de autoridad y no invención del roadmap
+## Regla de autoridad y no invención del roadmap
 
 A partir de este punto:
 
