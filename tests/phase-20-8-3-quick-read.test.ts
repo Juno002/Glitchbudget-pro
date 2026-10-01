@@ -163,6 +163,52 @@ test('20.8.3 handles zero previous cash flow without manufacturing a percentage'
   assert.equal(result[0]?.copy.params.current, -25_000);
 });
 
+
+test('20.8.3 treats spending that starts from a real zero base as a new increase without inventing a percentage', () => {
+  const result = selectReportQuickRead(baseInput({
+    spending: {
+      total: 30_000,
+      categories: [
+        { categoryId: 'a', value: 10_000 },
+        { categoryId: 'b', value: 10_000 },
+        { categoryId: 'c', value: 10_000 },
+      ],
+    },
+    comparison: {
+      spending: { current: 30_000, previous: 0, difference: 30_000, percentChange: null },
+      netCashFlow: { current: 100_000, previous: 100_000, difference: 0, percentChange: 0 },
+      netWorth: { current: 1_000_000, previous: 1_000_000, difference: 0, percentChange: 0, status: 'comparable' },
+    },
+  }));
+
+  assert.equal(result[0]?.kind, 'spending_above_previous');
+  assert.equal(result[0]?.direction, 'new');
+  assert.equal(result[0]?.copy.params.percentageDelta, null);
+  assert.equal(result.some(row => row.kind === 'no_material_change'), false);
+});
+
+test('20.8.3 applies the leading-category threshold before rounding the display share', () => {
+  const result = selectReportQuickRead(baseInput({
+    spending: {
+      total: 40_000,
+      categories: [
+        { categoryId: 'almost', value: 13_999 },
+        { categoryId: 'b', value: 13_500 },
+        { categoryId: 'c', value: 12_501 },
+      ],
+    },
+    comparison: {
+      spending: { current: 40_000, previous: 40_000, difference: 0, percentChange: 0 },
+      netCashFlow: { current: 100_000, previous: 100_000, difference: 0, percentChange: 0 },
+      netWorth: { current: 1_000_000, previous: 1_000_000, difference: 0, percentChange: 0, status: 'comparable' },
+    },
+  }));
+
+  assert.equal(Math.round((13_999 / 40_000) * 10_000) / 100, 35);
+  assert.equal(result.some(row => row.kind === 'leading_category'), false);
+  assert.equal(result[0]?.kind, 'spending_near_previous');
+});
+
 test('20.8.3 canonical Reports snapshot includes the deterministic quick read', () => {
   const input: ReportsSnapshotInput = {
     accounts: [
