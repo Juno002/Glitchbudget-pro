@@ -161,7 +161,7 @@ export function useBackupManagement(
       setDataVersion(version => version + 1);
       toast({
         title: 'Datos restaurados',
-        description: 'El dashboard se actualizará automáticamente.',
+        description: 'El Resumen se actualizará automáticamente.',
       });
       return true;
     } catch (error) {
@@ -188,13 +188,13 @@ export function useBackupManagement(
       );
       setDataVersion(version => version + 1);
       toast({
-        title: 'Backup cifrado restaurado',
+        title: 'Copia cifrada restaurada',
         description: 'El archivo se autenticó, descifró e importó localmente.',
       });
       return true;
     } catch (error) {
       toast({
-        title: 'No se pudo restaurar el backup cifrado',
+        title: 'No se pudo restaurar la copia cifrada',
         description: friendlyError(error),
         variant: 'destructive',
       });
