@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { millisecondsUntilNextFinancialDay } from '@/domain/app-lifecycle';
+import { millisecondsUntilNextFinancialDay } from '@/lib/financial-clock';
 import { localDate } from '@/lib/finance-calculations';
 
 export function useFinancialToday(): string {

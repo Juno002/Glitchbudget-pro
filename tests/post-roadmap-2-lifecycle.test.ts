@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
   loadableContentState,
-  millisecondsUntilNextFinancialDay,
   resolveVisualTheme,
 } from '../src/domain/app-lifecycle';
+import { millisecondsUntilNextFinancialDay } from '../src/lib/financial-clock';
 
 const source = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 
