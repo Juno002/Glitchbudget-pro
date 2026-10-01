@@ -151,7 +151,7 @@ export default function EncryptedBackupRestore() {
             <BackupPreviewSummary preview={preview} />
           ) : (
             <p className="text-xs text-muted-foreground">
-              Contraseña incorrecta, archivo alterado o formato incompatible se rechazan antes de cualquier restore destructivo.
+              Contraseña incorrecta, archivo alterado o formato incompatible se rechazan antes de cualquier restauración destructiva.
             </p>
           )}
 
