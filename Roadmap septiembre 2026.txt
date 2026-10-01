@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: en curso.** 20.7.5.1–20.7.5.8 completadas / Gates aprobados; próxima intervención autorizada: 20.7.5.9. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas; próxima intervención autorizada: 20.8.1. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3374,6 +3374,34 @@ Puede hacerse reconciliación manual adicional con datos reales fuera del repo, 
 **Gate 20.7.5.8:** invariantes principales cuadran contra resultados esperados independientes.
 
 ### 20.7.5.9 — Final hardening gate
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+540/540 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36797160206 ✅
+```
+
+Resultado de cierre:
+
+- contratos de deuda/loan, net worth, fecha financiera y moneda permanecen congelados y cubiertos;
+- Dexie permanece en v15 y Backup JSON en v13;
+- encrypted backup permanece en envelope v1, PBKDF2-HMAC-SHA-256 310k + AES-256-GCM;
+- migraciones históricas y backup legacy siguen cubiertos por fixtures ejecutables;
+- benchmark 1k/10k/50k permanece integrado en Quality checks;
+- golden reconciliation independiente sigue verde sin cambios de fórmulas productivas;
+- salida estática mantiene `connect-src 'none'` y E2E offline;
+- los guards forenses mantienen lógica financiera/Dexie fuera de React;
+- el test-manifiesto final enlaza estas evidencias para impedir regresiones silenciosas;
+- el informe obligatorio de 11 puntos queda en `docs/roadmap/phase-20-7-5-9.md`.
+
+**Gate 20.7.5:** aprobado. Semantic Integrity & Security Hardening queda cerrado y habilita 20.8.1.
 
 Requerido:
 
@@ -4155,7 +4183,6 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7

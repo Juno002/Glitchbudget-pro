@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.8 completadas / Gates aprobados; 20.7.5.9 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 completada / Gate aprobado con 20.7.5.1–20.7.5.9 cerradas; 20.8.1 es la próxima intervención autorizada. 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -1005,6 +1005,19 @@ Puede hacerse una reconciliación temporal con datos reales del usuario fuera de
 
 ### 20.7.5.9 — Final hardening gate
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+540/540 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36797160206 ✅
+```
+
 #### Objetivo
 
 Cerrar la fase solo cuando las correcciones semánticas, seguridad, compatibilidad y rendimiento estén reconciliadas.
@@ -1050,7 +1063,17 @@ Documentar:
 10. golden datasets añadidos;
 11. riesgos conocidos restantes.
 
-**Gate 20.7.5:** integridad semántica cerrada antes de permitir 20.8.
+#### Resultado de implementación
+
+- `tests/phase-20-7-5-9-final-hardening.test.ts` congela versiones, contratos y la cadena de evidencia de 20.7.5.
+- Se verifican explícitamente deuda histórica, fechas, moneda única, Dexie v15, Backup JSON v13 y encrypted envelope v1.
+- Las migraciones v6/v7, backup v4, migración temporal v14→v15 y encrypted-v1 round-trip permanecen en la suite.
+- Benchmark y golden reconciliation permanecen conectados al gate normal.
+- Los guards local-only, `connect-src 'none'`, React/Dexie y dominio React-free continúan activos.
+- No se añadió lógica financiera, schema, migración, formato de backup, red, FX ni feature nueva.
+- Informe final obligatorio de 11 puntos: [phase-20-7-5-9.md](phase-20-7-5-9.md).
+
+**Gate 20.7.5:** aprobado. Integridad semántica/security cerrada; 20.8.1 queda habilitada.
 
 ### Fuera de alcance
 
