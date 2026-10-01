@@ -80,7 +80,20 @@ export function selectReportQuickRead(input: ReportQuickReadInput): QuickReadIns
   const candidates: QuickReadInsight[] = [];
   const spending = input.comparison.spending;
 
-  if (spending.previous !== 0 && spending.percentChange !== null) {
+  if (spending.previous === 0 && spending.current > 0) {
+    candidates.push(candidate(
+      'spending_above_previous',
+      90,
+      'spending',
+      'new',
+      {
+        current: spending.current,
+        previous: spending.previous,
+        absoluteDelta: spending.difference,
+        percentageDelta: null,
+      },
+    ));
+  } else if (spending.previous !== 0 && spending.percentChange !== null) {
     const magnitude = Math.abs(spending.percentChange);
     if (magnitude <= QUICK_READ_THRESHOLDS.spendingNearPercent) {
       candidates.push(candidate(
@@ -154,8 +167,10 @@ export function selectReportQuickRead(input: ReportQuickReadInput): QuickReadIns
 
   const leadingCategory = input.spending.categories[0];
   if (leadingCategory && input.spending.total > 0) {
+    const reachesThreshold =
+      leadingCategory.value * 100 >= QUICK_READ_THRESHOLDS.leadingCategorySharePercent * input.spending.total;
     const sharePercent = Math.round((leadingCategory.value / input.spending.total) * 10_000) / 100;
-    if (sharePercent >= QUICK_READ_THRESHOLDS.leadingCategorySharePercent) {
+    if (reachesThreshold) {
       candidates.push(candidate(
         'leading_category',
         60,
