@@ -46,7 +46,7 @@ export function useBackupManagement(
     try {
       const jsonString = await exportDataJSON();
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const name = `glitchbudget-backup-${timestamp}.json`;
+      const name = `prisma-backup-${timestamp}.json`;
       await opfsWrite(name, jsonString);
       toast({ title: 'Copia de seguridad creada', description: name });
       const backups = await opfsList();

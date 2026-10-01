@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **en curso — 20.10.1–20.10.5 completadas / Gates aprobados; 20.10.6 es la próxima intervención autorizada**.
+Estado: **completada — 20.10.1–20.10.7 cerradas / Gate final aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -148,6 +148,8 @@ No volver a acumular ramas de fases cerradas.
 
 ## 20.10.6 — README final estrictamente de producto
 
+**Estado: completada / Gate aprobado.** Evidencia: [phase-20-10-6.md](phase-20-10-6.md).
+
 Rehacer `README.md` desde cero como presentación de **Prisma**.
 
 Debe hablar únicamente de la app y sus funciones.
@@ -191,9 +193,11 @@ No debe incluir:
 
 El README no es documentación de proceso ni reporte de desarrollo.
 
-**Gate 20.10.6:** una persona puede entender el producto sin conocer su historia de implementación.
+**Gate 20.10.6:** aprobado. El README final presenta únicamente Prisma como producto.
 
 ## 20.10.7 — Cierre definitivo
+
+**Estado: completada / Gate final aprobado.** Evidencia: [phase-20-10-7.md](phase-20-10-7.md).
 
 Verificar:
 
@@ -208,3 +212,6 @@ gate completo verde
 ```
 
 Después de este punto, cualquier trabajo nuevo empieza desde `main` y crea una rama temporal solo si hace falta.
+
+
+**Gate 20.10.7:** aprobado. Fase 20.10 y el roadmap vigente quedan cerrados. La rama de cierre es temporal y debe eliminarse inmediatamente después de integrarse en `main`.

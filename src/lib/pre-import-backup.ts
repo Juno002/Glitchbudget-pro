@@ -36,7 +36,7 @@ export async function createPreImportSafetyBackup(
 
   try {
     const json = await deps.exportDataJSON();
-    const name = `glitchbudget-pre-import-${backupTimestamp(deps.now())}-${deps.id()}.json`;
+    const name = `prisma-pre-import-${backupTimestamp(deps.now())}-${deps.id()}.json`;
     await deps.write(name, json);
     return { status: 'created', name };
   } catch (error) {

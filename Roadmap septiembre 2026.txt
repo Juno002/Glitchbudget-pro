@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: en curso.** 20.10.1–20.10.5 completadas / Gates aprobados; próxima intervención autorizada: 20.10.6. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: completada / Gate 20.10 aprobado.** 20.10.1–20.10.7 cerradas. No quedan intervenciones pendientes en el roadmap vigente. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4565,6 +4565,8 @@ nueva tarea
 
 ### 20.10.6 — README final estrictamente de producto
 
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-10-6.md`.
+
 Rehacer `README.md` desde cero como presentación de **Prisma**.
 
 Debe hablar únicamente de la app y sus funciones.
@@ -4609,9 +4611,11 @@ No debe incluir:
 
 El README final es documentación de producto, no documentación de proceso.
 
-**Gate 20.10.6:** una persona puede entender Prisma sin conocer su historia de implementación.
+**Gate 20.10.6:** aprobado. `README.md` es exclusivamente documentación de producto y puede entenderse sin conocer la historia de implementación.
 
 ### 20.10.7 — Cierre definitivo
+
+**Estado: completada / Gate final aprobado.** Evidencia: `docs/roadmap/phase-20-10-7.md`.
 
 Verificar:
 
@@ -4632,7 +4636,7 @@ Después de este punto:
 - la rama es temporal;
 - se elimina después del merge.
 
-**Gate 20.10.7:** cierre definitivo del roadmap vigente.
+**Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
 
 ### Regla de autoridad y no invención del roadmap
 
@@ -4642,18 +4646,17 @@ A partir de este punto:
 Roadmap septiembre 2026.txt = única fuente de verdad
 ```
 
-Las únicas etapas pendientes autorizadas son:
+El roadmap vigente está **cerrado**.
 
 ```text
-20.9.7 → 20.9.9
-20.10.1 → 20.10.7
+etapas pendientes autorizadas = ninguna
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna microintervención adicional fuera de las enumeradas arriba.
+No existe ninguna microintervención adicional autorizada después de 20.10.7.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 

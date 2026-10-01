@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-09-28):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las reglas financieras, de jerarquía y metadata posteriores quedan supersedidas por Fases 9–15. Fase 15 añade necessity/labels y filtros locales guardados sin cambiar fórmulas financieras ni el esquema Dexie. Para el estado canónico actual, consultar [phase-9.md](roadmap/phase-9.md), [phase-10.md](roadmap/phase-10.md), [phase-11.md](roadmap/phase-11.md), [phase-12.md](roadmap/phase-12.md), [phase-13.md](roadmap/phase-13.md), [phase-14.md](roadmap/phase-14.md) y [phase-15.md](roadmap/phase-15.md).
+> **Nota de vigencia (2026-10-01):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las afirmaciones sobre capacidades, versiones o límites describen el momento en que fueron escritas salvo que indiquen explícitamente estado actual. El producto vigente es Prisma; el esquema actual es Dexie v15, el backup JSON canónico es v13 y existe copia cifrada opcional mediante el envelope v1. Para el estado canónico, consultar `Roadmap septiembre 2026.txt` y la documentación de Fase 20.
 
 ## Correcciones de esta revisión
 
@@ -51,7 +51,7 @@ Alcance original: aplicación personal con datos locales, sin sincronización ni
 
 El disponible del mes es una proyección presupuestaria, no patrimonio ni saldo bancario. Desde el 21 de septiembre, «Mi dinero hoy» muestra por separado efectivo, bancos y deuda de tarjetas, con saldos iniciales y movimientos asignados. Las compras con tarjeta no descuentan efectivo hasta registrar el pago. Los gastos fijos son proyecciones mensuales desde su fecha inicial; editar uno afecta esas proyecciones. En las cuentas, cada movimiento registrado se contabiliza una sola vez. Véase accounts.md para el inicio del seguimiento y los respaldos v4.
 
-No hay cifrado de respaldos ni sincronización. Cambiar de origen, navegador o dispositivo cambia el almacenamiento visible. Borrar datos del sitio elimina también las copias OPFS. El respaldo externo JSON es la vía de traslado y recuperación.
+En la revisión original todavía no existía cifrado de copias. Ese límite quedó superado: Prisma ofrece copia cifrada opcional además del JSON normal. Sigue sin existir sincronización financiera remota. Cambiar de origen, navegador o dispositivo cambia el almacenamiento visible. Borrar datos del sitio elimina también las copias OPFS, por lo que conviene conservar una copia externa.
 
 Los puertos locales 9003, 9004, 9005 y 9006 son pruebas con almacenamiento separado. 9003 puede contener un ingreso ficticio y 9006 un presupuesto ficticio de 500. No se usaron datos financieros reales para las pruebas nuevas.
 
@@ -96,3 +96,16 @@ Los diálogos normales y de confirmación se dimensionan con visualViewport (alt
 - **Persistencia tras Fase 15:** Dexie **v14** sin migración; backup canónico **JSON v11**, lectura v3–v10.
 - **Gate Fase 15:** `Quality checks` run `36471585078` verificó **300/300 pruebas**, typecheck, lint, guard local-only y build estático. El manifiesto offline contiene **42 recursos** y cada HTML conserva `connect-src 'none'`.
 - La validación física con teclado virtual y dispositivos Android/iOS continúa siendo parte del QA de release y no se considera resuelta por la emulación de viewport.
+
+
+## Estado actual de referencia — 1 de octubre de 2026
+
+Este bloque evita interpretar snapshots históricos como límites vigentes:
+
+- producto visible: **Prisma**;
+- esquema Dexie: **v15**;
+- backup JSON canónico: **v13**;
+- copia cifrada opcional: **envelope v1** con AES-256-GCM;
+- App Lock y bloqueo automático: disponibles;
+- sincronización financiera remota: **no existe**;
+- las referencias anteriores a Dexie v14 o backups v10/v11 permanecen únicamente como evidencia del estado de aquellas fases.

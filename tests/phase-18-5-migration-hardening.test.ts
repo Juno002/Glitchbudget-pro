@@ -224,7 +224,7 @@ test('18.5 OPFS pre-import safety copy still uses the canonical current JSON and
   assert.equal(result.status, 'created');
   assert.equal(writes.length, 1);
   assert.equal(writes[0].text, current);
-  assert.match(writes[0].name, /^glitchbudget-pre-import-/);
+  assert.match(writes[0].name, /^prisma-pre-import-/);
 
   await assert.rejects(
     createPreImportSafetyBackup({
