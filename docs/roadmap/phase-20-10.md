@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **en curso — 20.10.1 completada / Gate aprobado; 20.10.2 es la próxima intervención autorizada**.
+Estado: **en curso — 20.10.1–20.10.2 completadas / Gates aprobados; 20.10.3 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -46,6 +46,12 @@ No borrar ninguna rama antes de esta clasificación.
 
 ## 20.10.2 — Auditoría de trabajo único
 
+**Estado: completada / Gate aprobado.**
+
+Auditoría post-squash sobre `main` `d1d36d6de08f2ae94ce0aad4403ebf5df6bba4f8`: **44 ramas no contenidas por ancestry, 44 decisiones explícitas, 0 trabajo vigente pendiente de integrar**. No se fusionó código antiguo y no se eliminó ninguna rama.
+
+Evidencia completa: [phase-20-10-2.md](phase-20-10-2.md).
+
 Para cualquier rama no contenida completamente en main:
 
 - comparar contra main;
@@ -54,7 +60,7 @@ Para cualquier rama no contenida completamente en main:
 - no fusionar automáticamente código antiguo solo para “salvarlo”;
 - preservar únicamente trabajo vigente y compatible con el producto final.
 
-**Gate 20.10.2:** no existe trabajo relevante sin decisión explícita.
+**Gate 20.10.2:** aprobado. No existe trabajo relevante sin decisión explícita; 20.10.3 queda habilitada.
 
 ## 20.10.3 — Unificación controlada en main
 
