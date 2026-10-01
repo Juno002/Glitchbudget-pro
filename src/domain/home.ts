@@ -72,8 +72,8 @@ export function selectHomeReadModel(input: HomeReadModelInput) {
       investments:input.report.netWorth.investments,
       liabilities:input.report.netWorth.liabilities,
       netWorth:input.report.netWorth.netWorth,
-      comparisons:input.report.positionComparisons,
     },
+    positionComparisons:input.report.positionComparisons,
     budget:{
       configuredCount:trackedBudgets.length,
       limit:budgetLimit,
