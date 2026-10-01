@@ -15,5 +15,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Ledger performance baseline
+        run: npm run benchmark:ledger
       - run: npm run build
       - run: npm run test:e2e

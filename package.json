@@ -11,7 +11,8 @@
     "test": "tsx --test tests/*.test.ts",
     "check": "npm run check:local && npm run typecheck && npm run lint && npm test",
     "check:local": "node scripts/check-local-only.mjs",
-    "test:e2e": "node scripts/e2e-smoke.mjs"
+    "test:e2e": "node scripts/e2e-smoke.mjs",
+    "benchmark:ledger": "tsx scripts/benchmark-ledger.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
