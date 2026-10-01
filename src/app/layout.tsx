@@ -31,7 +31,6 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   title: 'Prisma',
   description: 'Finanzas personales privadas, con datos guardados en tu dispositivo.',
-  icons: [{ rel: 'icon', url: '/icon-192.png', type: 'image/png' }],
 };
 
 export default function RootLayout({
@@ -50,7 +49,6 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Prisma" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
       <body className={`${dmSans.variable} ${dmSerif.variable} ${dmMono.variable} font-body bg-background text-foreground relative min-h-screen overflow-x-hidden`}>
         <VisibleViewport />
