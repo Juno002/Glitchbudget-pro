@@ -71,7 +71,7 @@ export default function MovementsView() {
   useEffect(()=>{
     setFilters(previous=>({...previous,...filtersForPeriod(currentPeriod)}));
     setSelectedSavedId('');
-  },[currentPeriod.start,currentPeriod.end]);
+  },[currentPeriod]);
 
   useEffect(()=>{
     if(typeof window!=='undefined') setSavedFilters(loadSavedTransactionFilters(window.localStorage));
