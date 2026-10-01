@@ -8,7 +8,8 @@ import { activeCategories, reconstructCategories } from '../src/domain/categorie
 import { resolveCategory } from '../src/lib/categories';
 import { createCategory, updateCategory, archiveCategory, reactivateCategory, savePlans } from '../src/lib/category-service';
 import { saveRecurringRule } from '../src/lib/recurring-rule-service';
-import { saveIncome, saveExpense } from '../src/lib/transaction-service';
+import { saveIncome } from '../src/lib/transaction-service';
+import { saveExpense } from './helpers/major-unit-transaction-writes';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { rollBudgetsIntoMonth } from '../src/lib/budget-rollover';
 import { selectCategorySpending } from '../src/domain/metrics';
