@@ -129,7 +129,7 @@ test('18.3 encrypted UI is explicitly two-step: review then confirm', () => {
   const encrypted = readFileSync(new URL('../src/components/backup/encrypted-backup-restore.tsx', import.meta.url), 'utf8');
 
   assert.match(encrypted, /previewEncryptedBackupText/);
-  assert.match(encrypted, /Revisar backup/);
+  assert.match(encrypted, /Revisar copia/);
   assert.match(encrypted, /BackupPreviewSummary/);
   assert.match(encrypted, /Confirmar y restaurar/);
   assert.match(encrypted, /setPreview\(null\)/);
