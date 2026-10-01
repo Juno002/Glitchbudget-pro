@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: en curso.** 20.7.5.1–20.7.5.7 completadas / Gates aprobados; próxima intervención autorizada: 20.7.5.8. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: en curso.** 20.7.5.1–20.7.5.8 completadas / Gates aprobados; próxima intervención autorizada: 20.7.5.9. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3297,6 +3297,34 @@ No crear caches persistentes como segunda fuente financiera.
 **Gate 20.7.5.7:** baseline reproducible y toda optimización justificada por medición.
 
 ### 20.7.5.8 — Independent financial reconciliation gate
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+536/536 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36796234747 ✅
+```
+
+Resultado de cierre:
+
+- `tests/fixtures/phase-20-7-5-8-golden.json` declara resultados financieros esperados como valores literales;
+- el test no reconstruye las fórmulas productivas para obtener los expected;
+- se cubren saldo inicial, ingreso, gastos cash/banco, compra/pago/saldo a favor de tarjeta, préstamo histórico, transferencias, inversión financiada, presupuesto, meta, planned pending/confirmed y cambio de período;
+- posición final golden: cash 90k, bank 1.15m, inversiones 200k, líquido 1.24m, pasivos 255k, card positive 20k, net worth 1.205m;
+- spending 90k, debt payments 110k y net cash flow 340k cuadran en Reportes;
+- transferencias/inversión cambian ubicación de activos pero mantienen net worth;
+- planning permanece neutral para dinero real;
+- Home y Reportes exponen la misma posición;
+- corte de período día 25 separa correctamente 24/sep de 25/sep;
+- no fue necesario cambiar ninguna fórmula financiera productiva.
+
+Evidencia detallada: `docs/roadmap/phase-20-7-5-8.md`.
 
 Crear datasets golden cuyos resultados esperados se definan independientemente del código productivo.
 
@@ -4127,7 +4155,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.7.5.8 → 20.7.5.9
+20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
