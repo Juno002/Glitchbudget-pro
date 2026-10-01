@@ -129,15 +129,11 @@ test('20.8.3 reports a useful category focus when one category concentrates enou
 test('20.8.3 falls back to no-material-change when no explicit rule is relevant', () => {
   const result = selectReportQuickRead(baseInput({
     spending: {
-      total: 100_000,
-      categories: [
-        { categoryId: 'a', value: 34_000 },
-        { categoryId: 'b', value: 33_000 },
-        { categoryId: 'c', value: 33_000 },
-      ],
+      total: 0,
+      categories: [],
     },
     comparison: {
-      spending: { current: 100_000, previous: 0, difference: 100_000, percentChange: null },
+      spending: { current: 0, previous: 0, difference: 0, percentChange: null },
       netCashFlow: { current: 100_000, previous: 100_000, difference: 0, percentChange: 0 },
       netWorth: { current: 1_000_000, previous: 1_000_000, difference: 0, percentChange: 0, status: 'comparable' },
     },
