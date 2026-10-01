@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.8 completadas / Gates aprobados; 20.9–20.10 planificadas.
+- **Fase 20 — Modo Prisma:** 20.1–20.8 completadas / Gates aprobados; 20.9 en curso con 20.9.1 cerrada; 20.10 planificada.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -19,19 +19,19 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
 - **20.7.5 — Semantic Integrity & Security Hardening:** completada / Gate aprobado; 20.7.5.1–20.7.5.9 cerradas.
 - **20.8 — Information Design + Deterministic Insights:** completada / Gate aprobado; 20.8.1–20.8.8 cerradas.
-- **20.9 — Premium UI Polish:** planificada.
+- **20.9 — Premium UI Polish:** en curso; 20.9.1 completada / Gate aprobado.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
 
 ## Próxima intervención autorizada
 
 ```text
-20.9.1 — Auditoría visual y de consistencia
+20.9.2 — Motion tokens ultra rápidos
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.9.1 → 20.9.9
+20.9.2 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
@@ -43,7 +43,7 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-585/585 tests
+591/591 tests
 Ledger benchmark: 50k position 32.22 ms / histories 23.68 ms median
 Golden reconciliation: net worth 1.205m / spending 90k / cash flow 340k
 Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
@@ -55,7 +55,8 @@ Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.8.6 Reports editorial hierarchy + deterministic Quick Read placement ✅
 20.8.7 accessible progressive disclosure + contextual copy contract ✅
 20.8.8 final Information Design gate + mobile Reports geometry/overflow regression ✅
-Quality checks 36882536925 ✅
+20.9.1 prioritized visual consistency audit + explicit owners 20.9.2–20.9.9 ✅
+Quality checks 36886044970 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home desktop/mobile + Movimientos/composer + Plan + Reports desktop/mobile/charts + movement + offline ✅
 ```
 
@@ -73,7 +74,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home deskt
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
 | 20.7.5 — Semantic Integrity & Security Hardening | **Completada / Gate aprobado — 20.7.5.1–20.7.5.9** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | **Completada / Gate aprobado — 20.8.1–20.8.8** | [phase-20-8.md](phase-20-8.md) |
-| 20.9 — Premium UI Polish | Planificada | [phase-20-9.md](phase-20-9.md) |
+| 20.9 — Premium UI Polish | **En curso — 20.9.1 completada / Gate aprobado** | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |
 
 Contrato visual complementario: [Prisma UI System](../ux/prisma-mode.md).
