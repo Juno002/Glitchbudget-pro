@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **planificada / no iniciada**.
+Estado: **en curso — 20.8.1 completada / Gate aprobado; 20.8.2 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -25,6 +25,29 @@ Mismos datos = mismo insight.
 No hay LLM, red, prompt ni comportamiento probabilístico.
 
 ## 20.8.1 — Preflight de información y regresión de categorías
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+542/542 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36803800520 ✅
+```
+
+Resultado:
+
+- inventario visible de Resumen y Reportes documentado en [phase-20-8-1.md](phase-20-8-1.md);
+- copy clasificado como imprescindible, contextual o redundante;
+- candidatos a progressive disclosure definidos sin cambiar todavía la UI;
+- instalación limpia exige todos los defaults de `categorySeeds`;
+- categorías custom históricas y built-ins archivadas continúan preservadas;
+- no se introduce rutina de reparación especulativa;
+- sin fórmulas financieras nuevas, schema, migración, backup ni red.
 
 Antes de cambiar Home o Reportes:
 
