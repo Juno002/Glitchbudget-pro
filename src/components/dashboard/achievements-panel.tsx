@@ -3,12 +3,14 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useAchievements } from '@/hooks/use-achievements';
 import { getAchievementDef, TIER_COLORS, type AchievementDef } from '@/lib/achievements';
 import { playAchievementUnlock } from '@/lib/sounds';
 import { triggerConfetti } from '@/lib/confetti';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { MOTION_SECONDS } from '@/lib/motion';
 
 // --- Achievement Toast (unlocked pop-up, rendered globally) ---
 function AchievementToast({
@@ -19,55 +21,101 @@ function AchievementToast({
   onDismiss: () => void;
 }) {
   const tier = TIER_COLORS[achievement.tier];
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     const timer = setTimeout(onDismiss, 4500);
     return () => clearTimeout(timer);
   }, [onDismiss]);
 
+  const initial = reducedMotion
+    ? { opacity: 0 }
+    : { opacity: 0, y: 14, scale: 0.985 };
+  const exit = reducedMotion
+    ? { opacity: 0 }
+    : { opacity: 0, y: 8, scale: 0.99 };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 60, scale: 0.8, filter: 'blur(8px)' }}
-      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-      exit={{ opacity: 0, y: -20, scale: 0.9, filter: 'blur(4px)' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      initial={initial}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={exit}
+      transition={reducedMotion
+        ? { duration: 0 }
+        : { duration: MOTION_SECONDS.dialog, ease: 'easeOut' }}
       role="status"
       aria-live="polite"
-      className="pointer-events-auto w-full max-w-sm min-w-0"
+      aria-atomic="true"
+      data-achievement-toast="true"
+      data-achievement-tier={achievement.tier}
+      className="pointer-events-auto w-full min-w-0 max-w-[26rem]"
     >
       <div
-        className="relative flex items-center gap-3 pl-4 pr-12 py-4 rounded-2xl border backdrop-blur-xl max-h-[calc(100dvh-12rem)] overflow-y-auto"
-        style={{
-          background: `linear-gradient(135deg, ${tier.bg}, rgba(0,0,0,0.7))`,
-          borderColor: tier.border,
-          boxShadow: `0 8px 40px ${tier.glow}, 0 0 0 1px ${tier.border}`,
-        }}
+        data-achievement-toast-surface="true"
+        className="relative max-h-[calc(100dvh-11rem)] overflow-y-auto rounded-[var(--radius-modal)] border border-[var(--border-strong)] bg-[hsl(var(--surface-elevated))] p-4 pr-12 text-popover-foreground shadow-[var(--shadow-modal)] sm:p-5 sm:pr-14 md:max-h-[calc(100dvh-3rem)]"
       >
-        <motion.div
-          initial={{ rotateY: 180, scale: 0 }}
-          animate={{ rotateY: 0, scale: 1 }}
-          transition={{ delay: 0.15, type: 'spring', stiffness: 400, damping: 15 }}
-          className="text-3xl shrink-0"
-        >
-          {achievement.icon}
-        </motion.div>
-        <div className="flex-1 min-w-0">
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 w-1"
+          style={{ backgroundColor: tier.text }}
+        />
+
+        <div className="flex items-start gap-3 pl-1">
           <div
-            className="text-[10px] uppercase tracking-[0.15em] font-bold"
-            style={{ color: tier.text }}
+            data-achievement-toast-icon="true"
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-[var(--radius-interactive)] border text-2xl"
+            style={{
+              backgroundColor: tier.bg,
+              borderColor: tier.border,
+            }}
+            aria-hidden="true"
           >
-            ¡Logro Desbloqueado!
+            {achievement.icon}
           </div>
-          <div className="text-sm font-semibold text-white break-words">{achievement.title}</div>
-          <div className="text-xs text-white/75 leading-relaxed break-words">{achievement.description}</div>
-        </div>
-        <div className="shrink-0 text-right">
-          <div className="text-xs font-bold" style={{ color: tier.text }}>
-            +{achievement.xp} XP
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              Logro desbloqueado
+            </p>
+            <p className="mt-1 break-words font-display text-lg font-normal leading-tight tracking-[-0.025em] text-foreground">
+              {achievement.title}
+            </p>
+            <p className="mt-1 break-words text-xs leading-relaxed text-muted-foreground">
+              {achievement.description}
+            </p>
+
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+              <span
+                className="inline-flex min-h-8 items-center rounded-full border px-2.5 text-xs font-bold tabular-nums text-foreground"
+                style={{
+                  backgroundColor: tier.bg,
+                  borderColor: tier.border,
+                }}
+              >
+                +{achievement.xp} XP
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onDismiss}
+                data-achievement-toast-action="dismiss"
+                className="h-8 px-2.5 text-xs"
+              >
+                Listo
+              </Button>
+            </div>
           </div>
         </div>
-        <button type="button" onClick={onDismiss} aria-label="Cerrar aviso de logro" className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full text-white/75 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-          <X className="h-4 w-4" />
+
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Cerrar aviso de logro"
+          data-achievement-toast-close="true"
+          className="absolute right-1.5 top-1.5 inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-interactive)] text-muted-foreground transition-colors duration-[var(--motion-control)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
     </motion.div>
@@ -279,8 +327,8 @@ export function AchievementToastLayer() {
   if (!mounted) return null;
   // Keep viewport positioning separate from Framer Motion transforms.
   return createPortal(
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(10rem+env(safe-area-inset-bottom))] z-[100] flex justify-center px-4 sm:bottom-24">
-    <AnimatePresence mode="wait">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(10rem+env(safe-area-inset-bottom))] z-[100] flex justify-center px-3 md:bottom-6 md:px-6">
+    <AnimatePresence initial={false} mode="wait">
       {newlyUnlocked.length > 0 &&
         (() => {
           const def = getAchievementDef(newlyUnlocked[0]);
