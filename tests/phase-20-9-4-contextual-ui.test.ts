@@ -81,7 +81,14 @@ test('20.9.4 badge details use the shared dismissible popover without consuming 
   assert.match(achievements, /showCloseButton/);
   assert.match(achievements, /Cerrar detalles de '\+def\.title/);
   assert.match(achievements, /data-achievement-popover=\{def\.id\}/);
+  assert.match(achievements, /className="w-56 space-y-1\.5 p-3 pr-12"/);
   assert.match(achievements, /focus:outline-none/);
+});
+
+test('20.9.4 active sidebar provider does not override the shared tooltip delay', () => {
+  const sidebar = source('src/components/ui/sidebar.tsx');
+  assert.match(sidebar, /<TooltipProvider>/);
+  assert.doesNotMatch(sidebar, /delayDuration=\{0\}/);
 });
 
 test('20.9.4 browser smoke covers contextual help in desktop and mobile viewports', () => {
