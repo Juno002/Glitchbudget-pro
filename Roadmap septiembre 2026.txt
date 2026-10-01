@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.2 completadas / Gates aprobados y 20.8.3 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.3 completadas / Gates aprobados y 20.8.4 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1–20.8.2 completadas / Gates aprobados; próxima intervención autorizada: 20.8.3. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: en curso.** 20.8.1–20.8.3 completadas / Gates aprobados; próxima intervención autorizada: 20.8.4. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3590,6 +3590,35 @@ La UI solo representa el resultado.
 **Gate 20.8.2:** comparaciones canónicas, testeadas y reutilizables; cero cálculo comparativo exclusivo de UI.
 
 ### 20.8.3 — Motor local de Lectura rápida
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+555/555 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36820237031 ✅
+```
+
+Resultado de cierre:
+
+- `src/domain/report-insights.ts` crea una capa editorial determinista sobre métricas canónicas;
+- `selectReportsSnapshot()` adjunta `quickRead` sin recalcular dinero ni leer movimientos crudos;
+- umbrales explícitos: spending cerca <= 5%, cash flow significativo >= 15%, net worth significativo >= 5%, categoría dominante >= 35%;
+- máximo de 3 insights;
+- prioridad estable: cash flow 100, spending 90, net worth 80, categoría 60, spending cercano 40, fallback 10;
+- copy expresado como `key + params`, no texto libre generado;
+- reglas cubren spending arriba/abajo/cerca del período comparable, cambio de cash flow, cambio de net worth, categoría dominante y ausencia de cambio material;
+- no se inventa promedio reciente multiperíodo porque el snapshot actual no lo expone;
+- no hay diagnóstico, predicción, causalidad, LLM, reloj, aleatoriedad, red, Dexie ni React en el motor;
+- mismo snapshot produce exactamente la misma Lectura rápida;
+- sin cambios de schema, migración, backup, persistencia, UI visual ni 20.8.4.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-3.md`.
 
 Construir una capa determinista de insights para Reportes que seleccione observaciones útiles a partir de métricas ya calculadas.
 
@@ -4236,7 +4265,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.3 → 20.8.8
+20.8.4 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```
