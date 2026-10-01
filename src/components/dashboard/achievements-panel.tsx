@@ -155,7 +155,13 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
           )}
         </motion.button>
       </PopoverTrigger>
-      <PopoverContent side="top" className="w-56 p-3 space-y-1.5" sideOffset={6}>
+      <PopoverContent
+        side="top"
+        className="w-56 space-y-1.5 p-3"
+        showCloseButton
+        closeLabel={'Cerrar detalles de '+def.title}
+        data-achievement-popover={def.id}
+      >
         <div className="flex items-center gap-2">
           <span className="text-xl">{def.icon}</span>
           <div className="flex-1 min-w-0">
