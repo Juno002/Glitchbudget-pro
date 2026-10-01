@@ -17,7 +17,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.5 — Plan Prisma:** completada / Gate aprobado.
 - **20.6 — Reportes + sistema de gráficos:** completada / Gate aprobado.
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
-- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.6 completadas / Gates aprobados.
+- **20.7.5 — Semantic Integrity & Security Hardening:** en curso; 20.7.5.1–20.7.5.7 completadas / Gates aprobados.
 - **20.8 — Information Design + Deterministic Insights:** planificada.
 - **20.9 — Premium UI Polish:** planificada.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
@@ -25,13 +25,13 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-20.7.5.7 — Ledger performance baseline
+20.7.5.8 — Independent financial reconciliation gate
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.7.5.7 → 20.7.5.9
+20.7.5.8 → 20.7.5.9
 20.8.1 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
@@ -46,7 +46,8 @@ Dexie v15
 Backup JSON v13
 Encrypted envelope v1
 530/530 tests
-Quality checks 36784502529 ✅
+Ledger benchmark: 50k position 32.22 ms / histories 23.68 ms median
+Quality checks 36795170833 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
