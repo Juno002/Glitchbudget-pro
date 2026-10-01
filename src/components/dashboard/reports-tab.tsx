@@ -128,15 +128,15 @@ export default function ReportsTab() {
   }));
   const cashFlowChartRows:ReportChartRow[]=[
     {label:'Ingresos',value:report.cashFlow.income},
-    {label:'Cash expenses',value:report.cashFlow.cashExpenses},
+    {label:'Gastos en efectivo',value:report.cashFlow.cashExpenses},
     {label:'Pagos de deuda',value:report.cashFlow.debtPayments},
     {label:'Flujo neto',value:report.cashFlow.netCashFlow},
   ];
   const netWorthChartRows:ReportChartRow[]=[
-    {label:'Cash',value:report.netWorth.cash},
-    {label:'Banks',value:report.netWorth.banks},
-    {label:'Investments',value:report.netWorth.investments},
-    {label:'Liabilities',value:-report.netWorth.liabilities},
+    {label:'Efectivo',value:report.netWorth.cash},
+    {label:'Bancos',value:report.netWorth.banks},
+    {label:'Inversiones',value:report.netWorth.investments},
+    {label:'Pasivos',value:-report.netWorth.liabilities},
     {label:'Patrimonio neto',value:report.netWorth.netWorth},
   ];
   const comparisonChartRows:ReportComparisonChartRow[]=comparisonRows.map(row=>({
