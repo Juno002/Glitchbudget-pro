@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.7 completadas / Gates aprobados; 20.9.8 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.8 completadas / Gates aprobados; 20.9.9 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -328,6 +328,35 @@ Evitar skeletons agresivos o feedback que parezca latencia artificial.
 **Gate 20.9.7:** todos los estados pertenecen al mismo sistema visual.
 
 ## 20.9.8 — Mobile, touch, focus y accesibilidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+635/635 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36912136865 ✅
+```
+
+Resultado:
+
+- safe-area y visual viewport forman un contrato común para dialogs/sheets;
+- dialogs se centran en el rectángulo seguro incluso con insets horizontales asimétricos;
+- sheets aplican safe-area por geometría y preservan padding propio de consumidores;
+- touch targets coarse-pointer alcanzan 44 px sin alterar el tamaño visual de radio/checkbox/switch;
+- formularios móviles usan teclado apropiado y tamaño de texto seguro durante foco;
+- focus visible de `BadgeCard` queda realmente renderizado y separado del glow de logro;
+- select/dropdown/cards seleccionables usan estados de foco y contraste semánticos;
+- reduced motion cubre las animaciones revisadas de Logros;
+- E2E verifica compositor móvil, Ajustes móvil y ring de foco específico;
+- los tres findings del review posterior se corrigieron antes del gate final;
+- dominio financiero, Dexie, backup, migraciones, persistencia y red permanecen intactos.
+
+Evidencia: [phase-20-9-8.md](phase-20-9-8.md).
 
 Revisar:
 
