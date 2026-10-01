@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.6 completadas / Gates aprobados; 20.7.5.7 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.7 completadas / Gates aprobados; 20.7.5.8 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -840,6 +840,19 @@ No subir iteraciones a un número arbitrario sin benchmark.
 
 ### 20.7.5.7 — Ledger performance baseline
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+530/530 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36795170833 ✅
+```
+
 #### Objetivo
 
 Medir antes de optimizar.
@@ -885,7 +898,18 @@ Posibles estrategias solo si son necesarias:
 
 No introducir caches persistentes que creen una segunda fuente financiera.
 
-**Gate 20.7.5.7:** existe baseline reproducible y cualquier optimización está justificada por medición.
+#### Resultado de implementación
+
+- `scripts/benchmark-ledger.mjs` genera datasets deterministas de 1k/10k/50k movimientos con 8 cuentas e ingresos/gastos/pagos/transferencias.
+- Se miden por separado `selectPosition()` y el historial agregado de las 8 cuentas.
+- La workflow de Quality checks ejecuta `npm run benchmark:ledger` como paso informativo, sin thresholds de tiempo frágiles.
+- Medianas CI: 1k = 0.59/0.51 ms; 10k = 5.66/6.10 ms; 50k = 32.22/23.68 ms para posición/historial respectivamente.
+- El crecimiento observado no justifica una optimización arquitectónica: a 50k ambas lecturas permanecen en decenas de milisegundos en el entorno CI.
+- No se introduce cache persistente, índice materializado, schema nuevo ni segunda fuente financiera.
+- La memoria no se congela como métrica de gate porque `process.memoryUsage()` en runners compartidos sería demasiado ruidoso; no se añadió duplicación persistente.
+- Evidencia reproducible: [phase-20-7-5-7.md](phase-20-7-5-7.md).
+
+**Gate 20.7.5.7:** existe baseline reproducible y no se optimiza sin evidencia de una degradación que justifique mayor complejidad.
 
 ---
 
