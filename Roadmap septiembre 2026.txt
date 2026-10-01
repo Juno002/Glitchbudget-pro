@@ -4638,6 +4638,4782 @@ Después de este punto:
 
 **Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
 
+# Post-roadmap — Hardening técnico de Prisma
+
+**Estado: en curso.** El roadmap funcional 0–20.10 permanece cerrado. Esta sección no crea una Fase 20.11 ni una Fase 21: registra únicamente trabajo de hardening posterior al cierre, aprobado explícitamente después de la auditoría externa sobre `main`.
+
+## Objetivo
+
+Corregir bugs reproducibles y deuda técnica que pueda afectar coherencia, estabilidad, navegabilidad, rendimiento o mantenibilidad del producto final sin reabrir el alcance funcional original.
+
+Reglas:
+
+- la fuente de verdad sigue siendo `Roadmap septiembre 2026.txt`;
+- ejecutar las intervenciones estrictamente en orden;
+- una sola rama temporal por intervención;
+- validar antes del merge;
+- merge a `main`;
+- borrar inmediatamente la rama temporal;
+- no introducir features nuevas mientras una corrección pueda resolverse manteniendo el contrato actual;
+- mantener GlitchBudget Engine como núcleo interno y Prisma como producto visible;
+- no cambiar schema, migraciones o formatos persistentes salvo necesidad demostrada y aprobada;
+- no introducir backend, sincronización financiera remota, telemetría ni APIs financieras/FX.
+
+Secuencia autorizada:
+
+```text
+Post-roadmap 1
+→ Post-roadmap 2
+→ Post-roadmap 3
+→ Post-roadmap 4
+→ Post-roadmap 5
+```
+
+## Post-roadmap 1 — Corrección funcional crítica: períodos, dinero y reglas
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **A1:** cambiar tema/políticas u otros ajustes no debe reiniciar el período seleccionado; solo el montaje y un cambio real de `periodStartDay` pueden recalcular el período actual.
+- **A2:** Movimientos debe usar exactamente el rango financiero de `currentPeriod`, no un mes calendario duplicado.
+- **B1:** eliminar la ambigüedad pesos/centavos de las APIs de escritura. Las fronteras deben expresar claramente unidades monetarias y convertir a centavos una sola vez.
+- **B2:** eliminar `RD
+
+# GLITCHBUDGET PRO — ROADMAP 
+
+## Instrucción inicial para Codex:
+
+> **Do not implement this roadmap in one pass. Work strictly phase by phase. Before modifying a phase, inspect the current implementation and its tests. Preserve all existing user data through explicit Dexie migrations. Never reset the database as a migration strategy. Do not use the README as the functional specification. Do not introduce a backend, cloud synchronization, remote AI, analytics, advertising, remote financial APIs, or any mechanism that sends user financial data off-device. Prefer extending or migrating the working system over rewriting it. At the end of every phase, run all checks, verify backup compatibility and offline behavior, report architectural concerns, and STOP for review before beginning the next phase.**
+
+
+## Objetivo del producto
+
+GlitchBudget Pro es una aplicación financiera **personal, local-first y offline-capable**.
+
+La aplicación debe permitir administrar cuentas, movimientos, tarjetas, presupuestos, planificación, metas, inversiones y análisis **sin transmitir información financiera fuera del dispositivo**.
+
+No implementar:
+
+- cuentas de usuario de GlitchBudget;
+- backend de aplicación;
+- sincronización bancaria;
+- sincronización cloud;
+- IA remota;
+- telemetría financiera;
+- publicidad;
+- servicios de terceros que reciban movimientos, saldos, categorías, metas o inversiones;
+- cotizaciones o tipos de cambio obtenidos automáticamente desde Internet;
+- Web Push dependiente de servidor;
+- colaboración o cuentas compartidas.
+
+La PWA puede descargar/actualizar sus **archivos estáticos** desde su origen de distribución. Eso no autoriza a transmitir datos financieros.
+
+**El código actual de `main` es la fuente de verdad. El README está desactualizado y no debe utilizarse como especificación.**
+
+---
+
+# Arquitectura objetivo
+
+Antes de seguir añadiendo funciones, el código debe evolucionar hacia cuatro capas:
+
+```text
+UI
+ ↓
+Application services / commands
+ ↓
+Domain calculations / selectors
+ ↓
+Dexie / local persistence
+```
+
+Reglas:
+
+```text
+UI ≠ reglas financieras
+UI ≠ acceso directo a Dexie
+
+Dexie ≠ cálculos financieros
+
+Domain ≠ React
+Domain ≠ navegador
+Domain ≠ red
+```
+
+Los cálculos de saldo, presupuesto, deuda, cash flow, metas e inversiones deben poder probarse como funciones puras.
+
+No hacer un rewrite completo. Migrar gradualmente el código existente hacia esta estructura.
+
+---
+
+# Invariantes financieros
+
+Estas reglas deben quedar documentadas y probadas **antes de añadir nuevas funciones**.
+
+```text
+Ingreso
+→ aumenta una cuenta
+→ cuenta como ingreso
+
+Gasto con efectivo/banco
+→ reduce una cuenta
+→ cuenta como gasto
+
+Compra con tarjeta
+→ aumenta gasto
+→ aumenta pasivo
+→ NO reduce efectivo todavía
+
+Pago de tarjeta
+→ reduce una cuenta
+→ reduce pasivo
+→ NO vuelve a contar como gasto
+
+Transferencia
+→ reduce una cuenta
+→ aumenta otra
+→ NO cambia patrimonio
+→ NO es ingreso
+→ NO es gasto
+
+Presupuesto
+→ planificación
+→ NO mueve dinero
+
+Pago planificado
+→ planificación
+→ NO mueve dinero hasta confirmarse
+
+Meta
+→ seguimiento/reserva
+→ NO altera patrimonio por sí sola
+
+Inversión financiada desde una cuenta
+→ mueve patrimonio líquido a patrimonio invertido
+→ NO es gasto
+
+Rendimiento proyectado
+→ estimación
+→ NO se convierte automáticamente en patrimonio real
+```
+
+Además, todos los importes monetarios almacenados deben seguir usando **enteros en unidades mínimas** —centavos actualmente— y nunca `float` para dinero almacenado.
+
+---
+
+# FASE 0 — Congelar una línea base segura
+
+**No empezar ninguna feature nueva todavía.**
+
+1. Crear un tag/commit que represente el estado estable previo al roadmap.
+2. Ejecutar y dejar verdes:
+   - typecheck;
+   - lint;
+   - tests;
+   - build.
+3. Crear fixtures de bases antiguas para probar migraciones.
+4. Crear como mínimo un fixture compatible con el backup JSON v4 actual.
+5. Añadir pruebas de round-trip:
+
+```text
+export
+→ borrar DB de prueba
+→ import
+→ mismos datos
+→ mismos saldos derivados
+```
+
+6. Documentar explícitamente las invariantes anteriores.
+
+### Gate 0
+
+No pasar de fase hasta poder demostrar:
+
+```text
+npm run check ✅
+build ✅
+backup v4 → restore ✅
+balances before == balances after ✅
+```
+
+---
+
+# FASE 1 — Eliminar completamente IA y runtime remoto
+
+Actualmente siguen existiendo:
+
+```text
+src/app/api/ai-insight
+src/app/api/ai-insight-monthly
+src/app/api/ai-insight-transaction
+```
+
+y aún quedan estados como `insight` / `isFetchingInsight` en `TransactionModal.tsx`, aunque parte de la UI de IA esté desactivada.
+
+Eliminar todo.
+
+También eliminar:
+
+- variables de entorno asociadas;
+- llamadas;
+- código muerto;
+- prompts;
+- documentación;
+- dependencias que queden sin uso.
+
+### Convertir la aplicación en frontend estático
+
+Una vez eliminadas las rutas API:
+
+- estudiar `output: 'export'` de Next;
+- adaptar el sistema PWA/precache al output estático;
+- eliminar dependencia de un runtime Next de servidor;
+- sustituir App Hosting backend por simple distribución de archivos estáticos cuando corresponda.
+
+La aplicación instalada debe seguir funcionando sin conexión.
+
+### Auditoría de red
+
+Revisar todo el proyecto buscando:
+
+```text
+fetch
+XMLHttpRequest
+WebSocket
+EventSource
+sendBeacon
+remote URLs
+analytics
+SDKs externos
+```
+
+Eliminar usos innecesarios.
+
+Eliminar también los `remotePatterns` de imágenes externas de `next.config.ts` si realmente no se utilizan.
+
+Crear un check de CI que impida introducir accidentalmente endpoints/API/analytics en el futuro.
+
+### Gate 1
+
+Durante operaciones financieras normales:
+
+```text
+Create transaction
+Edit transaction
+Delete transaction
+Create account
+Transfer
+Create budget
+Create goal
+Backup
+Reports
+```
+
+no debe producirse ninguna transmisión de datos del usuario.
+
+---
+
+# FASE 2 — Crear el núcleo financiero canónico
+
+Esta es probablemente **la fase más importante de todo el roadmap**.
+
+Actualmente hay cálculos repartidos entre:
+
+```text
+finance-context.tsx
+finance-calculations.ts
+accounts.ts
+transaction-service.ts
+budget-rollover.ts
+varios componentes
+```
+
+Crear un dominio financiero central.
+
+Por ejemplo:
+
+```text
+src/domain/
+  money.ts
+  dates.ts
+  ledger.ts
+  accounts.ts
+  liabilities.ts
+  periods.ts
+  budgets.ts
+  goals.ts
+  recurrence.ts
+  investments.ts
+  reports.ts
+```
+
+No es obligatorio usar exactamente esos nombres, pero sí separar responsabilidades.
+
+## 2.1 Definir métricas distintas
+
+No utilizar palabras ambiguas como simplemente `balance`.
+
+Definir al menos:
+
+### Liquid position
+
+```text
+cash + bank accounts
+```
+
+### Net worth
+
+```text
+assets - liabilities
+```
+
+### Spending
+
+Compras/gastos realizados, incluyendo compras a crédito.
+
+### Cash flow
+
+```text
+cash income
+- cash expenses
+- debt payments
+```
+
+Las transferencias quedan fuera.
+
+### Available to plan
+
+Concepto de planificación:
+
+```text
+income/capacity
+- commitments
+- reserved budget
+- goal allocations
+```
+
+No confundirlo con saldo bancario.
+
+Esto evitará que Home, Reports y Accounts terminen mostrando números diferentes con el mismo nombre.
+
+---
+
+# FASE 3 — Corregir el ledger actual antes de ampliarlo
+
+## 3.1 Nuevos ingresos
+
+Actualmente `saveIncome()` asigna automáticamente una nueva entrada a Efectivo.
+
+Cambiar esto.
+
+Si el usuario selecciona:
+
+```text
+Qik
+APAP
+Efectivo
+```
+
+el ingreso debe afectar esa cuenta.
+
+Efectivo solo debe ser el default, no una obligación.
+
+## 3.2 Eliminaciones
+
+Actualmente la eliminación de ingresos pasa por el servicio financiero, pero `deleteExpense` puede borrar directamente desde `finance-context.tsx`.
+
+Toda modificación financiera debe pasar por comandos transaccionales comunes:
+
+```text
+create
+update
+delete
+```
+
+para que las mismas invariantes se cumplan siempre.
+
+## 3.3 Strict Mode
+
+Actualmente mezcla dos problemas:
+
+```text
+¿puedo dejar una cuenta negativa?
+```
+
+y:
+
+```text
+¿estoy superando lo que había planificado?
+```
+
+Separarlos.
+
+Por ejemplo:
+
+```text
+preventNegativeAccountBalance
+budgetOverspendingBehavior
+```
+
+El segundo podría ser:
+
+```text
+allow
+warn
+block
+```
+
+No utilizar una sola bandera para ambos conceptos.
+
+## 3.4 Integridad histórica
+
+Las entidades utilizadas por transacciones no deberían desaparecer destructivamente.
+
+Preferir:
+
+```text
+Account → archive
+Category → archive
+Credit card → close
+Investment → close
+Recurring rule → deactivate
+```
+
+en lugar de borrar referencias históricas.
+
+---
+
+# FASE 4 — Normalizar categorías antes de Rules/Reports/Templates
+
+Actualmente las categorías predeterminadas están en `categories.ts`, mientras la configuración mantiene arrays de strings y custom icons.
+
+Eso funcionó bien para empezar, pero se volverá frágil con:
+
+- renombrado;
+- categorías archivadas;
+- templates;
+- filtros;
+- reglas;
+- análisis históricos.
+
+Migrar a categorías con identidad estable:
+
+```ts
+Category {
+  id
+  name
+  type: income | expense | both
+  icon
+  archived
+}
+```
+
+Un rename cambia `name`, **no `id`**.
+
+Migrar todas las referencias actuales preservando los IDs existentes.
+
+Los defaults pueden seguir creándose automáticamente.
+
+### Gate 4
+
+Renombrar una categoría no debe modificar ni perder la categorización histórica.
+
+---
+
+# FASE 5 — Resolver definitivamente Actual vs Planned
+
+Actualmente hay una superposición importante.
+
+`Expense` puede ser `Fijo` y tener `frequency`, mientras existe además `Recurring`.
+
+Eso debe desaparecer antes de mejorar Planned Payments.
+
+Una transacción real representa **algo que ocurrió**.
+
+Nunca debe representar implícitamente:
+
+> “y repite este gasto todos los meses para siempre”.
+
+Por tanto:
+
+```text
+Expense
+= hecho real
+
+RecurringRule
+= intención futura
+```
+
+`Fijo / Variable / Ocasional` puede conservarse como **clasificación del gasto**, pero `frequency` no debe hacer aparecer gastos futuros dentro del ledger real.
+
+Eliminar gradualmente `expenseForMonth()` como mecanismo que replica gastos fijos hacia meses posteriores.
+
+---
+
+# FASE 6 — Construir un motor de períodos antes de Budgets 2.0
+
+Actualmente muchos sitios utilizan:
+
+```ts
+date.slice(0, 7)
+```
+
+y `month: YYYY-MM`.
+
+Eso funciona únicamente mientras todo significa “mes calendario”.
+
+Antes de permitir:
+
+```text
+Weekly
+Monthly
+Yearly
+One-Time
+Financial month starting on day 25
+```
+
+crear un motor común:
+
+```ts
+DateRange {
+  start
+  end
+}
+```
+
+con funciones como:
+
+```text
+periodContaining(date, settings)
+previousComparablePeriod(period)
+nextPeriod(period)
+contains(period, date)
+```
+
+Los reportes y presupuestos nuevos deben trabajar con rangos de fecha, no con substring de `YYYY-MM`.
+
+### Importante
+
+`Income.month` y `Expense.month` son derivables desde `date`.
+
+No tienen que eliminarse inmediatamente del DB si complicaría la migración, pero **deben dejar de ser fuente de verdad**.
+
+Lo mismo aplica a `Period` si deja de aportar información útil.
+
+### Gate 6
+
+Cambiar el inicio del período de:
+
+```text
+1
+```
+
+a:
+
+```text
+25
+```
+
+debe producir correctamente:
+
+```text
+25 agosto → 24 septiembre
+```
+
+en todos los cálculos que utilicen el nuevo motor.
+
+---
+
+# FASE 7 — Motor real de Planned Payments
+
+Reemplazar la actual lógica de “una suscripción ya registrada en este mes” por ocurrencias reales.
+
+Actualmente esa regla mensual también impediría manejar correctamente recurrencias semanales/quincenales.
+
+Modelo conceptual:
+
+```ts
+RecurringRule {
+  id
+  direction
+  title
+  amount
+  categoryId
+  defaultAccountId?
+  cadence
+  startDate
+  endDate?
+  active
+  ...
+}
+```
+
+y:
+
+```ts
+PlannedOccurrence {
+  id
+  ruleId
+  scheduledDate
+  status: pending | confirmed | skipped
+  transactionId?
+}
+```
+
+La combinación:
+
+```text
+ruleId + scheduledDate
+```
+
+debe ser única.
+
+Así:
+
+```text
+Netflix · Sep 28 · Pending
+```
+
+puede pasar a:
+
+```text
+Netflix · Sep 28 · Confirmed → Expense abc123
+```
+
+Confirmarlo dos veces debe ser imposible.
+
+### Weekly / Biweekly
+
+Debe basarse en intervalos reales desde la fecha de inicio, no:
+
+```text
+4.33 por mes
+```
+
+### Día 29–31
+
+Definir una sola política.
+
+Recomendación:
+
+> si el mes no contiene ese día, utilizar su último día válido.
+
+Documentarlo y probarlo.
+
+### Upcoming
+
+Generar localmente:
+
+```text
+Today
+Tomorrow
+Next 7 days
+Later
+```
+
+No necesita servidor.
+
+---
+
+# FASE 7.5 — UX Architecture & Design System
+
+Esta fase ocurre **después del motor de recurrencias/Planned Payments y antes de Quick Add 2.0**.
+
+El objetivo no es rediseñar visualmente toda la aplicación todavía. Es definir una arquitectura de interacción y un sistema visual estable para que las siguientes fases no creen pantallas incompatibles entre sí.
+
+No implementar features nuevas en esta fase salvo los cambios mínimos necesarios para establecer los patrones.
+
+---
+
+## 7.5.1 — Definir la arquitectura de información
+
+Mantener cuatro áreas principales:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+```
+
+No añadir nuevas pestañas principales para:
+
+```text
+Cuentas
+Tarjetas
+Metas
+Inversiones
+Suscripciones
+Ajustes
+```
+
+Esas funciones deben vivir dentro de las cuatro áreas principales o en navegación secundaria.
+
+### Responsabilidad de cada área
+
+**Resumen**
+
+Debe responder:
+
+```text
+¿Cuánto tengo?
+¿Cuánto debo?
+¿Cuánto puedo gastar?
+¿Qué viene próximamente?
+¿Qué requiere atención?
+```
+
+No debe convertirse en una colección de reportes.
+
+**Movimientos**
+
+Debe ser la fuente principal para consultar actividad financiera real:
+
+```text
+Ingresos
+Gastos
+Transferencias
+Pagos de deuda
+```
+
+y posteriormente:
+
+```text
+búsqueda
+filtros
+edición
+agrupación por fecha
+```
+
+**Plan**
+
+Contendrá:
+
+```text
+Presupuestos
+Metas
+Planificados
+```
+
+No mezclar movimientos realizados con planificación.
+
+**Reportes**
+
+Contendrá análisis histórico y comparaciones:
+
+```text
+Spending
+Cash flow
+Net worth
+Comparisons
+Trends
+```
+
+---
+
+# 7.5.2 — Unificar navegación móvil y escritorio
+
+Actualmente existen diferencias de nomenclatura como:
+
+```text
+Dashboard
+vs
+Resumen
+```
+
+Eliminar esas inconsistencias.
+
+Usar las mismas etiquetas conceptuales en todas las plataformas:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+```
+
+Los iconos pueden adaptarse, pero los nombres no deben cambiar según viewport.
+
+### Mobile
+
+Mantener Bottom Navigation.
+
+Máximo:
+
+```text
+4 destinos
+```
+
+No añadir un quinto destino únicamente porque aparezca una feature nueva.
+
+### Desktop
+
+Las mismas cuatro áreas pueden seguir como tabs o navegación equivalente.
+
+La navegación debe conservar el estado activo de forma predecible.
+
+---
+
+# 7.5.3 — Simplificar el Header
+
+El header actual acumula:
+
+```text
+logo
+nuevo movimiento
+selector de período
+este mes
+logros
+ajustes
+```
+
+En móvil resulta demasiado denso.
+
+Rediseñar responsabilidades.
+
+### Mobile
+
+El header debería priorizar aproximadamente:
+
+```text
+GlitchBudget
+Período/contexto si es relevante
+Ajustes
+```
+
+La acción **Nuevo movimiento** debe salir del header y convertirse en una acción principal persistente.
+
+Preferencia:
+
+```text
+Floating Action Button
+```
+
+o equivalente claramente accesible.
+
+### Desktop
+
+Puede existir una acción visible de Nuevo Movimiento sin saturar el header.
+
+---
+
+# 7.5.4 — Acción principal global: Nuevo Movimiento
+
+Crear un patrón único para iniciar:
+
+```text
+Gasto
+Ingreso
+Transferencia
+```
+
+Debe ser accesible desde cualquier sección principal.
+
+La UX no debe obligar al usuario a entrar primero en Movimientos.
+
+La acción debe abrir siempre el mismo compositor.
+
+---
+
+# 7.5.5 — Jerarquía definitiva de Resumen
+
+Resumen no debe intentar mostrar todo.
+
+Orden recomendado:
+
+```text
+1. Posición financiera
+2. Presupuesto disponible
+3. Próximos pagos
+4. Metas / inversiones relevantes
+5. Movimientos recientes
+```
+
+### Posición financiera
+
+Debe diferenciar visualmente:
+
+```text
+Disponible líquido
+Deuda
+Patrimonio neto
+```
+
+No presentar crédito disponible como dinero propio.
+
+### Budget
+
+Debe priorizar:
+
+```text
+Remaining
+```
+
+sobre gráficos decorativos.
+
+Ejemplo:
+
+```text
+Te quedan RD$ 18,400
+de RD$ 30,000 presupuestados
+```
+
+### Upcoming
+
+Mostrar únicamente eventos próximos relevantes.
+
+Ejemplo:
+
+```text
+Internet
+Mañana
+RD$ 1,500
+```
+
+### Goals / Investments
+
+Mostrar solo elementos que aporten información accionable.
+
+Ejemplo:
+
+```text
+Meta vehículo
+Necesitas RD$ 30,000 este mes
+```
+
+o:
+
+```text
+Certificado
+Vence en 74 días
+```
+
+### Recent activity
+
+Mostrar pocos movimientos recientes con acceso a “Ver todos”.
+
+---
+
+# 7.5.6 — Mover gráficos analíticos fuera de Home
+
+Los donuts actuales de:
+
+```text
+Gastos por categoría
+Ingresos por categoría
+```
+
+deben migrar progresivamente a Reportes.
+
+Home debe ser principalmente:
+
+```text
+status + action
+```
+
+Reportes debe ser:
+
+```text
+analysis + exploration
+```
+
+Evitar duplicar los mismos gráficos en ambas áreas.
+
+---
+
+# 7.5.7 — Patrón de Detail Screen
+
+Definir un patrón común antes de Accounts, Investments, Goals, etc.
+
+Una pantalla de detalle debe tener:
+
+```text
+Title
+Primary metric
+Secondary status
+Relevant actions
+History/detail
+```
+
+Ejemplo cuenta:
+
+```text
+Qik
+
+RD$ 24,350
++RD$ 2,100 this period
+
+[Transferir]
+[Conciliar]
+
+Movimientos recientes
+```
+
+Ejemplo inversión:
+
+```text
+Certificado APAP
+
+RD$ 50,000 principal
+RD$ 52,XXX estimated maturity
+
+[Registrar actualización]
+[Ver detalles]
+
+Vence en 74 días
+```
+
+No crear una UX completamente distinta para cada entidad.
+
+---
+
+# 7.5.8 — Separar View Mode de Management Mode
+
+No mezclar en la misma superficie principal:
+
+```text
+ver saldo
+editar saldo inicial
+crear cuenta
+conciliar
+eliminar
+transferir
+```
+
+Las acciones frecuentes deben estar visibles.
+
+Las acciones administrativas deben aparecer como:
+
+```text
+Manage
+Edit
+More
+Settings
+```
+
+Ejemplo:
+
+```text
+Cuenta
+ ├─ Ver saldo
+ ├─ Ver movimientos
+ ├─ Transferir
+ └─ Más
+     ├─ Conciliar
+     ├─ Editar nombre
+     ├─ Ajustar saldo inicial
+     └─ Archivar
+```
+
+---
+
+# 7.5.9 — Estructura de Plan
+
+Dentro de Plan usar exactamente tres conceptos:
+
+```text
+Presupuestos
+Metas
+Planificados
+```
+
+Eliminar “Suscripciones” como concepto principal de navegación una vez que Planned Payments sea más general.
+
+Una suscripción es solamente un tipo de planificación recurrente.
+
+---
+
+# 7.5.10 — Estados visuales para Planned Payments
+
+Definir componentes reutilizables para:
+
+```text
+Pending
+Confirmed
+Skipped
+Overdue
+```
+
+Cada estado debe tener:
+
+- texto;
+- icono o tratamiento visual;
+- no depender exclusivamente del color.
+
+Ejemplo:
+
+```text
+Netflix
+RD$ 450
+Sep 28
+
+Pending
+
+[Confirmar]
+[Omitir]
+```
+
+Después:
+
+```text
+Confirmed
+Sep 28
+→ Ver movimiento
+```
+
+---
+
+# 7.5.11 — Quick Add: Progressive Disclosure
+
+Definir el patrón antes de implementar Quick Add 2.0.
+
+Nivel principal:
+
+```text
+Monto
+
+Gasto | Ingreso | Transferencia
+
+Cuenta
+
+Categoría
+
+Guardar
+```
+
+Segundo nivel:
+
+```text
+Más detalles
+```
+
+puede contener:
+
+```text
+Fecha
+Nota
+Naturaleza
+Método de pago
+Tarjeta
+Recurrencia/template
+```
+
+No mostrar campos que no aplican.
+
+Ejemplo:
+
+```text
+Transferencia
+```
+
+no debe mostrar categoría de gasto.
+
+```text
+Compra con tarjeta
+```
+
+no debe pedir cuenta bancaria de origen.
+
+---
+
+# 7.5.12 — Sistema de métricas
+
+Crear componentes reutilizables para datos financieros.
+
+Por ejemplo:
+
+```text
+MetricCard
+MoneyValue
+DeltaValue
+ProgressMetric
+StatusBadge
+```
+
+Reglas:
+
+- números monetarios con cifras tabulares;
+- formato consistente de moneda;
+- signos `+` / `−` cuando representen variación;
+- no depender solo de verde/rojo;
+- etiquetas explícitas.
+
+Evitar que cada pantalla construya su propia tarjeta financiera.
+
+---
+
+# 7.5.13 — Vocabulario financiero consistente
+
+Crear un glosario UX.
+
+No utilizar dos palabras diferentes para el mismo concepto.
+
+Ejemplo recomendado:
+
+```text
+Saldo
+Disponible
+Gastado
+Restante
+Ingreso
+Gasto
+Transferencia
+Deuda
+Patrimonio neto
+Planificado
+Confirmado
+Meta
+Aporte
+Inversión
+```
+
+Evitar ambigüedades como usar:
+
+```text
+Balance
+Disponible
+Margen
+```
+
+indistintamente para métricas diferentes.
+
+El nombre mostrado debe corresponder exactamente con la definición del domain layer.
+
+---
+
+# 7.5.14 — Settings deja de ser Dropdown
+
+El engranaje debe abrir una pantalla/panel de Ajustes estructurado.
+
+Secciones:
+
+```text
+General
+Finanzas
+Categorías
+Privacidad y seguridad
+Datos y backups
+Apariencia
+Acerca de
+```
+
+### General
+
+```text
+Moneda base
+Período inicial
+Preferencias generales
+```
+
+### Finanzas
+
+```text
+Ingreso previsto
+Rollover
+Evitar saldo negativo
+Comportamiento al exceder presupuesto
+```
+
+### Privacidad y seguridad
+
+```text
+Ocultar importes
+Bloqueo de aplicación
+Auto-lock
+```
+
+### Datos y backups
+
+```text
+Exportar
+Importar
+Backups
+Borrar datos
+```
+
+No esconder acciones destructivas junto a preferencias cotidianas sin separación.
+
+---
+
+# 7.5.15 — Hide Balances global
+
+Añadir al sistema de diseño un estado:
+
+```text
+balancesHidden
+```
+
+Cuando esté activo:
+
+```text
+RD$ 24,350
+```
+
+se convierte en algo como:
+
+```text
+••••••
+```
+
+Debe aplicarse consistentemente a:
+
+```text
+Home
+Accounts
+Cards
+Goals
+Investments
+Reports
+```
+
+No ocultar necesariamente porcentajes si no revelan importe sensible, pero definir comportamiento consistente.
+
+Debe ser una acción rápida y reversible.
+
+---
+
+# 7.5.16 — Gamificación
+
+Mantenerla, pero como capa secundaria.
+
+Eliminar referencias antiguas como:
+
+```text
+Desbloqueo I.A.
+```
+
+Patrón recomendado:
+
+```text
+achievement unlocked
+→ toast discreto
+→ disponible después en Logros
+```
+
+No insertar banners persistentes que empujen hacia abajo la información financiera principal.
+
+Los logros no deben bloquear ni interrumpir una operación.
+
+---
+
+# 7.5.17 — Empty states
+
+Cada módulo debe tener un empty state útil.
+
+No solamente:
+
+```text
+No hay datos
+```
+
+Sino:
+
+```text
+Aún no tienes metas
+
+Crea una meta para calcular cuánto necesitas ahorrar cada mes.
+
+[Crear meta]
+```
+
+Lo mismo para:
+
+```text
+cuentas
+presupuestos
+planificados
+inversiones
+reportes sin datos
+```
+
+---
+
+# 7.5.18 — Loading y feedback
+
+Definir comportamientos comunes:
+
+### Loading
+
+Preferir skeleton cuando la estructura ya se conoce.
+
+### Save
+
+Evitar múltiples submits.
+
+Estados:
+
+```text
+Guardar
+Guardando…
+Guardado
+```
+
+### Success
+
+Usar toast o feedback inline breve.
+
+### Error
+
+Debe decir:
+
+```text
+qué ocurrió
+qué puede hacer el usuario
+```
+
+No mostrar errores técnicos de Dexie directamente.
+
+---
+
+# 7.5.19 — Acciones destructivas
+
+Confirmación obligatoria para:
+
+```text
+Eliminar movimiento
+Eliminar todos los datos
+Eliminar/archivar entidades con impacto histórico
+Restaurar backup que sobrescriba datos
+```
+
+No confirmar acciones reversibles o de bajo impacto innecesariamente.
+
+Siempre explicar el efecto.
+
+Ejemplo:
+
+```text
+Eliminar esta transferencia actualizará ambas cuentas.
+```
+
+---
+
+# 7.5.20 — Accesibilidad
+
+Mínimos obligatorios:
+
+- target táctil suficiente en móvil;
+- labels accesibles;
+- navegación con teclado en desktop;
+- focus visible;
+- `aria-label` cuando el icono no tenga texto;
+- contraste correcto;
+- no comunicar estados solamente mediante color;
+- respetar `prefers-reduced-motion`;
+- cantidades legibles con tamaños de fuente razonables;
+- dialogs con foco gestionado correctamente.
+
+---
+
+# 7.5.21 — Responsive rules
+
+Definir breakpoints y comportamiento explícito.
+
+### Mobile
+
+Priorizar una sola columna.
+
+Evitar tablas horizontales para información cotidiana.
+
+### Tablet/Desktop
+
+Permitir:
+
+```text
+summary cards side-by-side
+charts in grid
+master/detail where useful
+```
+
+No simplemente escalar componentes móviles.
+
+---
+
+# 7.5.22 — Motion
+
+Mantener el carácter visual de GlitchBudget, pero reducir animación funcionalmente innecesaria.
+
+Animaciones permitidas principalmente para:
+
+```text
+open/close
+state transition
+successful action
+achievement
+chart transition
+```
+
+Evitar animar continuamente métricas financieras o elementos decorativos.
+
+---
+
+# 7.5.23 — Temas
+
+Mantener:
+
+```text
+Neón Oscuro
+Claro
+Minimalista
+```
+
+pero todos deben utilizar exactamente la misma estructura UX.
+
+No permitir que un tema altere:
+
+```text
+jerarquía
+navegación
+orden de información
+funcionalidad
+```
+
+Solo presentación.
+
+---
+
+# 7.5.24 — Design tokens
+
+Centralizar:
+
+```text
+spacing
+radius
+surface hierarchy
+border strength
+typography scale
+money typography
+status semantics
+animation duration
+```
+
+Evitar nuevos valores arbitrarios por componente.
+
+Definir al menos niveles:
+
+```text
+page
+section
+card
+interactive surface
+modal
+```
+
+---
+
+# 7.5.25 — Componentes base a estabilizar
+
+Antes de las siguientes fases, disponer de patrones reutilizables equivalentes a:
+
+```text
+PageHeader
+SectionHeader
+MetricCard
+MoneyValue
+ProgressMetric
+StatusBadge
+EmptyState
+DetailHeader
+ActionMenu
+FilterChip
+TransactionRow
+PlannedPaymentRow
+```
+
+No es obligatorio que esos sean los nombres exactos.
+
+No construir un “design system” gigantesco; extraer únicamente elementos que realmente se repetirán.
+
+---
+
+# 7.5.26 — Prototipos estructurales antes de implementar
+
+Antes de Quick Add 2.0, crear wireframes simples o estructura JSX sin lógica nueva para:
+
+```text
+Resumen
+Quick Add
+Movimientos
+Plan
+Account Detail
+Settings
+```
+
+Evaluar:
+
+```text
+qué aparece primero
+qué es secundario
+qué está oculto
+cuántos taps requiere la acción principal
+```
+
+No invertir tiempo todavía en pixel-perfect.
+
+---
+
+# 7.5.27 — Métricas UX objetivo
+
+Usar estas como restricciones, no como analytics remota.
+
+### Registrar gasto cotidiano
+
+Objetivo:
+
+```text
+Open Quick Add
+→ amount
+→ account/category if necessary
+→ save
+```
+
+Sin navegar por múltiples páginas.
+
+### Consultar saldo de una cuenta
+
+```text
+Resumen
+→ account
+```
+
+máximo unas pocas interacciones.
+
+### Confirmar pago planificado
+
+```text
+Resumen/Plan
+→ Confirm
+```
+
+sin volver a introducir todos sus datos.
+
+### Ver por qué cambió el dinero
+
+```text
+Account Detail
+→ movement history
+```
+
+sin pasar por Reportes.
+
+---
+
+# 7.5.28 — Lo que NO se copiará de Wallet
+
+Documentar explícitamente para evitar scope creep:
+
+```text
+No giant configurable dashboard by default
+No bank sync UX
+No cloud account flows
+No Premium upsells
+No receipt system yet
+No warranty fields
+No loyalty cards
+No location metadata
+No investment market feeds
+No huge transaction metadata form
+```
+
+Ideas tomadas conceptualmente:
+
+```text
+amount-first entry
+progressive disclosure
+planned → confirmed
+remaining budget
+actionable goals
+useful period controls
+deep reports
+```
+
+No copiar su estructura visual.
+
+---
+
+# Gate 7.5
+
+No pasar a Quick Add 2.0 hasta que exista acuerdo sobre:
+
+```text
+Navigation map
+Home hierarchy
+Plan hierarchy
+Settings hierarchy
+Quick Add information hierarchy
+Detail-screen pattern
+Financial vocabulary
+Status vocabulary
+Responsive behavior
+Privacy visibility behavior
+```
+
+Y Codex debe entregar:
+
+```text
+1. Proposed navigation structure
+2. Components/patterns to reuse
+3. Existing components to keep
+4. Existing components to simplify
+5. Existing components to retire
+6. Mobile behavior
+7. Desktop behavior
+8. Accessibility considerations
+9. Screens affected by later phases
+10. Any UX decision that would constrain the domain model
+```
+
+**No comenzar Quick Add 2.0 hasta revisar este entregable.**
+
+---
+
+# FASE 8 — Quick Add 2.0
+
+No reconstruir `TransactionModal` desde cero.
+
+**Ya es bastante amount-first.**
+
+Mejorarlo sobre la arquitectura nueva.
+
+Flujo principal:
+
+```text
+Amount
+↓
+Expense / Income / Transfer
+↓
+Account
+↓
+Category
+↓
+Save
+```
+
+Agregar Transfer al mismo compositor.
+
+Valores comunes preseleccionados.
+
+Mover información secundaria a:
+
+```text
+More details
+```
+
+Mantener:
+
+- fecha;
+- concepto/nota;
+- naturaleza;
+- método de pago;
+- tarjeta cuando aplique.
+
+No meter veinte campos de Wallet.
+
+### Templates
+
+Después de que Quick Add esté estable:
+
+```text
+Save as template
+```
+
+Ejemplo:
+
+```text
+Bus
+DOP 35
+Expense
+Transportation
+Cash
+```
+
+Todo local.
+
+---
+
+# FASE 9 — Budgets 2.0
+
+Solo ahora ampliar el sistema de presupuestos.
+
+Debe mostrar siempre:
+
+```text
+Limit
+Spent
+Remaining
+Percentage
+Status
+```
+
+Ejemplo:
+
+```text
+DOP 5,000 limit
+DOP 1,200 spent
+DOP 3,800 remaining
+24%
+On track
+```
+
+Después implementar sobre el Period Engine:
+
+```text
+Weekly
+Monthly
+Yearly
+One-Time
+```
+
+No introducir cuatro implementaciones diferentes.
+
+El rollover también debe trabajar sobre el nuevo concepto de período.
+
+Las transferencias entre presupuestos **no son transferencias de dinero real**.
+
+---
+
+# FASE 10 — Goals 2.0
+
+Primero corregir el modelo.
+
+Actualmente existe:
+
+```text
+Goal.saved
+```
+
+y además:
+
+```text
+GoalContribution[]
+```
+
+Son dos fuentes potenciales del mismo dato.
+
+Elegir una sola fuente de verdad.
+
+Recomendación:
+
+```text
+saved = sum(contributions)
+```
+
+y no almacenarlo independientemente salvo que exista una razón de rendimiento muy clara.
+
+Mostrar:
+
+```text
+Target
+Saved
+Remaining
+Progress %
+Deadline
+Required monthly contribution
+```
+
+El aporte mensual requerido debe utilizar el Period Engine.
+
+### Importante
+
+Una aportación a una meta **no mueve automáticamente dinero de una cuenta**.
+
+Posteriormente puede permitirse:
+
+```text
+Goal linked to savings account
+```
+
+pero vincular no debe duplicar el saldo.
+
+---
+
+# FASE 11 — Currency foundation
+
+Antes de Investments, limpiar la infraestructura existente de currencies/FX.
+
+Actualmente existen campos de moneda y `FxRate`, pero los balances de cuenta trabajan fundamentalmente con montos directos.
+
+Definir:
+
+```text
+Account.currency
+Base currency
+```
+
+Migración actual:
+
+```text
+existing accounts → DOP
+```
+
+o a la moneda base configurada.
+
+Los movimientos de una cuenta normalmente utilizan su moneda.
+
+No obtener FX remotamente.
+
+Si posteriormente se soportan transferencias entre monedas:
+
+```text
+manual exchange rate
+```
+
+Hasta entonces se puede impedir una transferencia cross-currency que no tenga información suficiente.
+
+---
+
+# FASE 12 — Investments 1.0
+
+Ahora sí.
+
+Extender el concepto de cuenta con:
+
+```text
+investment
+```
+
+o una abstracción equivalente de activo no líquido.
+
+La ventaja es enorme:
+
+```text
+Banco → Certificado
+```
+
+puede ser una transferencia patrimonial:
+
+```text
+Bank -50,000
+Investment +50,000
+Net worth unchanged
+```
+
+en vez de fingir que invertir DOP 50,000 fue un gasto.
+
+Crear una entidad Investment asociada al activo.
+
+```ts
+Investment {
+  id
+  accountId
+  type
+  name
+  institution?
+  openedAt
+  maturityDate?
+  principal
+  annualRate?
+  compoundingMethod?
+  notes?
+  status
+}
+```
+
+## Investments 1.0 debe cubrir
+
+- certificado financiero;
+- depósito a plazo;
+- inversión con rendimiento conocido.
+
+Mostrar:
+
+```text
+Principal
+Rate
+Opening date
+Maturity
+Elapsed %
+Days remaining
+Estimated maturity value
+Estimated interest
+```
+
+Todo calculado localmente.
+
+### Existing vs New investment
+
+Debe existir diferencia entre:
+
+**Ya la tenía cuando empecé a usar GlitchBudget**
+
+```text
+Opening balance = current tracked value
+```
+
+y:
+
+**La acabo de abrir usando dinero de una cuenta registrada**
+
+```text
+Opening balance = 0
+Bank → Investment transfer
+```
+
+para evitar doble contabilización.
+
+### Proyecciones
+
+El rendimiento futuro es:
+
+```text
+ESTIMATED
+```
+
+No debe sumarse silenciosamente al patrimonio real.
+
+### Investments 1.1
+
+Más adelante:
+
+- valor introducido manualmente;
+- historial de valoraciones;
+- renovación;
+- vencimiento;
+- retiro;
+- interés realmente acreditado.
+
+Sin APIs de mercado.
+
+---
+
+# FASE 13 — Reports 2.0
+
+Ahora tenemos:
+
+- ledger confiable;
+- períodos confiables;
+- categorías estables;
+- liabilities;
+- planning;
+- investments.
+
+Solo entonces hacer Reports 2.0.
+
+Crear selectors comunes.
+
+## Spending
+
+```text
+Total spent
+Trend
+Categories
+Largest transactions
+Fixed / Variable / Occasional
+```
+
+Opcionalmente añadir una segunda dimensión:
+
+```text
+Must
+Need
+Want
+```
+
+pero separada de categoría.
+
+## Cash Flow
+
+```text
+Income
+Cash expenses
+Debt payments
+Net cash flow
+```
+
+## Net Worth
+
+```text
+Cash
+Banks
+Investments
+Credit-card liabilities
+Net worth
+```
+
+## Comparison
+
+```text
+Current period
+vs
+previous comparable period
+```
+
+## Ranges
+
+```text
+7D
+30D
+3M
+6M
+1Y
+Custom
+```
+
+**Home y Reports deben consumir exactamente los mismos selectors.**
+
+Nunca duplicar fórmulas entre componentes.
+
+---
+
+# FASE 14 — Home 2.0
+
+Después de Reports, no antes.
+
+Home debe ser un **read model**, no otro lugar con cálculos propios.
+
+Responder rápidamente:
+
+```text
+¿Cuánto tengo?
+¿Cuánto debo?
+¿Cuánto puedo gastar?
+¿Qué viene próximamente?
+¿Hay algo que requiera atención?
+```
+
+Máximo aproximado de módulos principales:
+
+```text
+Accounts / position
+Budget
+Upcoming
+Goals
+Investments
+```
+
+Puede permitirse personalización local:
+
+```text
+show/hide
+reorder
+default opening section
+```
+
+Pero evitar el Home interminable de Wallet.
+
+---
+
+# FASE 15 — Transaction Metadata + filtros
+
+Solo cuando categorías/reportes estén estabilizados.
+
+Añadir selectivamente:
+
+```text
+necessity: must | need | want
+labels
+```
+
+y filtros:
+
+```text
+account
+category
+date
+amount
+necessity
+label
+type
+```
+
+Permitir guardar filtros localmente.
+
+No añadir todavía:
+
+- ubicación;
+- garantías;
+- loyalty cards;
+- receipts;
+
+porque implican nuevas necesidades de almacenamiento y backup.
+
+Si algún día queremos receipts, primero debe existir una estrategia para archivos OPFS + export/import + cifrado.
+
+---
+
+# FASE 16 — Automatización local
+
+Orden:
+
+```text
+Templates
+↓
+Saved filters
+↓
+Rules
+```
+
+Rules deterministas.
+
+Ejemplo:
+
+```text
+Description contains "Spotify"
+→ Entertainment
+→ Want
+```
+
+Primera versión preferiblemente **sugiere** la clasificación.
+
+Después puede existir una opción explícita:
+
+```text
+Apply automatically
+```
+
+No utilizar IA.
+
+No transmitir descripciones.
+
+---
+
+# FASE 17 — Seguridad y privacidad local
+
+Separar correctamente dos problemas.
+
+## Privacy from servers
+
+Ya garantizada por arquitectura.
+
+## Privacy from someone using the device
+
+Añadir:
+
+```text
+Hide amounts
+App lock
+Auto-lock
+```
+
+Si se usa PIN/biometría, no afirmar que eso cifra Dexie si solo bloquea la UI.
+
+### Backup cifrado
+
+Añadir export opcional cifrado mediante Web Crypto y autenticación criptográfica.
+
+Formato versionado.
+
+```text
+GlitchBudget encrypted backup
+version
+KDF metadata
+salt
+nonce
+ciphertext
+```
+
+Contraseña nunca enviada ni almacenada remotamente.
+
+El backup JSON normal puede seguir disponible si el usuario lo solicita.
+
+---
+
+# FASE 18 — Backup 2.0 y migraciones permanentes
+
+Cada nueva tabla debe incluirse automáticamente en:
+
+```text
+export
+import
+restore
+validation
+migration tests
+```
+
+El backup debe llevar:
+
+```text
+schemaVersion
+appVersion
+exportedAt
+```
+
+Antes de importar:
+
+```text
+4 accounts
+423 transactions
+7 budgets
+3 goals
+2 cards
+1 investment
+```
+
+y solicitar confirmación.
+
+Hacer backup local automático antes de una importación destructiva cuando OPFS esté disponible.
+
+Nunca hacer una migración que resuelva incompatibilidades mediante:
+
+```text
+db.clear()
+```
+
+o recreando desde cero la DB del usuario.
+
+---
+
+# FASE 19 — Technical-debt closure
+
+No esperar al final para empezar a refactorizar, pero aquí se remata.
+
+Objetivos:
+
+### `finance-context.tsx`
+
+Actualmente ronda 34 KB y hace demasiadas cosas.
+
+Debe acabar principalmente como composición/fachada de hooks, no como motor financiero completo.
+
+### UI
+
+Eliminar accesos directos a:
+
+```ts
+db.*
+```
+
+desde componentes.
+
+Por ejemplo, `accounts-overview.tsx` actualmente consulta Dexie directamente. Migrarlo a queries/services.
+
+Añadir ESLint `no-restricted-imports` para evitar que nuevos componentes importen la DB directamente.
+
+### Componentes grandes
+
+Dividir por responsabilidad cuando sean tocados:
+
+```text
+TransactionModal
+GoalsManager
+ReportsTab
+AccountsOverview
+```
+
+No dividir solo para obtener archivos pequeños; dividir donde existan responsabilidades independientes.
+
+---
+
+# FASE 19.5 — Residual architecture cleanup / Prisma Engine Gate
+
+Esta fase ocurre **después de cerrar la Fase 19** y antes de considerar estable el núcleo reutilizable.
+
+La Fase 19 elimina la deuda técnica estructural conocida. La Fase 19.5 debe asumir que pueden quedar residuos pequeños o indirectos y realizar una auditoría exhaustiva de frontera entre UI, aplicación, dominio y persistencia.
+
+Objetivo:
+
+```text
+dejar el núcleo financiero de GlitchBudget reutilizable por una interfaz distinta
+sin depender de componentes React, decisiones visuales ni acceso a persistencia desde UI
+```
+
+No añadir features nuevas durante esta fase.
+
+## 19.5.1 — Auditoría completa de la capa visual
+
+Revisar, como mínimo:
+
+```text
+src/components/**
+src/hooks/**
+src/contexts/**
+src/app/**
+```
+
+Buscar cualquier resto de:
+
+- cálculos financieros;
+- invariantes o reglas de negocio;
+- clasificación financiera;
+- construcción de read models financieros;
+- decisiones de dominio basadas en saldo, deuda, presupuesto, metas, inversiones o recurrencias;
+- acceso directo a Dexie;
+- mutaciones directas de datos financieros;
+- transformaciones que determinen el significado financiero de una entidad.
+
+La auditoría no debe limitarse a archivos ya conocidos en Fase 19.
+
+## 19.5.2 — Cero acceso financiero directo a Dexie desde UI
+
+Después de esta fase, los componentes visuales no deben ejecutar:
+
+```ts
+db.*
+useLiveQuery(() => db.*)
+```
+
+para leer o modificar datos financieros.
+
+Mover esos accesos a queries, repositories, application services o fachadas apropiadas.
+
+Los hooks y contexts de React tampoco deben convertirse en una vía alternativa para esconder acceso directo a persistencia financiera.
+
+Excepciones de persistencia puramente visual/local —por ejemplo preferencias de apariencia— deben quedar explícitamente documentadas y no contener datos ni reglas financieras.
+
+## 19.5.3 — Cero cálculos financieros canónicos en componentes
+
+Extraer de UI cualquier cálculo que determine o derive conceptos como:
+
+```text
+liquid position
+net worth
+spending
+cash flow
+available to plan
+budget spent / remaining / status
+debt / available credit
+goal progress / required contribution
+investment current value / projection
+period deficit / surplus
+planned-payment status
+```
+
+La UI puede convertir un valor ya calculado en una representación visual —por ejemplo ancho de una barra, coordenadas SVG o formato de moneda—, pero no debe decidir el significado financiero de ese valor.
+
+Ejemplo:
+
+```text
+Permitido en UI:
+percentForProgressBar = clamp(domainPercentage)
+
+No permitido en UI:
+remaining = budgetLimit - spending
+```
+
+## 19.5.4 — Read models reutilizables
+
+Las pantallas complejas deben consumir read models/selectores ya resueltos.
+
+En particular, revisar que superficies como:
+
+```text
+Resumen
+Movimientos
+Plan
+Reportes
+Cuentas
+Metas
+Inversiones
+Planificados
+```
+
+no reconstruyan por su cuenta relaciones entre ingresos, gastos, transferencias, pagos de deuda, aportes, cuentas o saldos iniciales.
+
+Cuando una pantalla necesite una vista compuesta, crear una query/selector/read model reutilizable independiente de React.
+
+## 19.5.5 — `finance-context` como fachada, no motor
+
+Verificar nuevamente `finance-context.tsx` después de la Fase 19.
+
+Debe limitarse principalmente a:
+
+- composición de estado React;
+- exposición de commands/queries;
+- coordinación de interacción;
+- adaptación mínima para la UI.
+
+No debe contener:
+
+- fórmulas financieras;
+- reglas de negocio;
+- consultas Dexie que pertenezcan a repositories/queries;
+- validaciones financieras canónicas;
+- construcción de reportes;
+- lógica propia de presupuestos, metas, deuda o inversiones.
+
+Si alguna de esas responsabilidades permanece, extraerla antes de cerrar 19.5.
+
+## 19.5.6 — Reglas automáticas para impedir regresiones
+
+Añadir o endurecer checks estáticos.
+
+Como mínimo:
+
+- `no-restricted-imports` para impedir importar `@/lib/db` o Dexie desde componentes;
+- regla equivalente para impedir `db.*` en UI;
+- pruebas o checks que fallen si selectores/servicios de dominio empiezan a depender de React;
+- búsqueda automatizada de accesos de persistencia financiera dentro de `src/components`, `src/hooks`, `src/contexts` y `src/app`.
+
+El objetivo es que la separación no dependa de disciplina manual futura.
+
+## 19.5.7 — Auditoría de residuos pequeños
+
+Revisar explícitamente lógica que puede parecer inocente por ocupar una sola línea, incluyendo:
+
+- `reduce()` de importes;
+- `limit - spent`;
+- `income - expenses`;
+- porcentajes con semántica financiera;
+- detección de estados como `over`, `completed`, `overdue`, `deficit` o `surplus`;
+- selección automática de cuenta/categoría basada en reglas financieras;
+- combinación de entidades de varias tablas para crear un movimiento o métrica;
+- validaciones monetarias que deberían pertenecer a commands/domain.
+
+No conservar una regla en UI únicamente porque sea pequeña.
+
+## Gate 19.5 — Prisma Engine Gate
+
+La fase solo se considera cerrada cuando se puede afirmar y demostrar:
+
+```text
+UI ≠ reglas financieras
+UI ≠ acceso financiero directo a Dexie
+React ≠ requisito del dominio
+Persistencia ≠ cálculo financiero
+```
+
+Además:
+
+- todos los cálculos financieros canónicos tienen una fuente de dominio única;
+- todas las mutaciones financieras pasan por commands/services;
+- las pantallas consumen queries/selectores/read models;
+- los tests del dominio pueden ejecutarse sin montar React;
+- cambiar completamente la interfaz no exige copiar fórmulas ni reglas desde componentes;
+- una interfaz nueva, como Prisma, puede reutilizar el núcleo sin importar componentes de GlitchBudget.
+
+Ejercicio obligatorio de cierre:
+
+Seleccionar al menos tres flujos representativos:
+
+```text
+crear gasto
+consultar Resumen
+consultar Plan o Reportes
+```
+
+y trazar para cada uno la ruta completa:
+
+```text
+UI
+→ command/query
+→ domain
+→ repository/persistence
+```
+
+No debe existir un atajo desde UI a Dexie ni una fórmula financiera exclusiva de la pantalla.
+
+Documentar cualquier excepción deliberada. Si una excepción contiene semántica financiera, **no cerrar la fase**.
+
+# FASE 20 — Modo Prisma / transformación visual y branding
+
+Estado: **20.1 en curso — preflight técnico completado; contrato visual e inventario de paridad pendientes**.
+
+## Objetivo
+
+Transformar la interfaz de GlitchBudget en el producto visual **Prisma** sin sustituir, duplicar ni reinterpretar el motor financiero cerrado en Fase 19.5.
+
+La referencia visual inicial queda congelada en:
+
+```text
+Juno002/Prisma
+main @ dc4310040f42cefd74cf41bad75152902e549c24
+```
+
+El repositorio Prisma funciona únicamente como referencia de apariencia. No son fuente canónica:
+
+- su dominio;
+- sus commands;
+- su Dexie DB;
+- su backup;
+- su servidor;
+- sus cálculos financieros;
+- sus cifras demo;
+- su roadmap técnico.
+
+La dirección obligatoria es:
+
+```text
+Prisma visual language
+→ GlitchBudget UI
+→ existing queries/read models/commands
+→ GlitchBudget Engine
+→ Dexie/local persistence
+```
+
+## Invariantes de Fase 20
+
+Durante toda la fase:
+
+- GlitchBudget Engine sigue siendo la única fuente de verdad financiera;
+- no se fusionan los motores de ambos repositorios;
+- no se cambia semántica financiera para adaptar una pantalla;
+- no se introduce Dexie directo en UI;
+- no se eliminan funciones existentes por razones estéticas;
+- sonidos y animaciones se conservan;
+- los gráficos se conservan y pueden rediseñarse/recolocarse, no desaparecer por defecto;
+- Modo Prisma es el tema claro principal;
+- Modo Neón se conserva como tema oscuro principal;
+- ambos temas usan los mismos datos, commands, queries y métricas;
+- el cambio de nombre visible a Prisma ocurre al final, en 20.7;
+- branding no implica renombrar automáticamente `GlitchBudgetDB`, claves persistentes, IDs o formatos de backup.
+
+La persistencia prevista permanece:
+
+```text
+Dexie v14
+Backup JSON v13
+Encrypted envelope v1
+```
+
+Si una etapa puramente visual parece requerir una migración financiera o cambio de schema, detenerse y revisar antes de implementar.
+
+### Preflight técnico de 20.1 — completado
+
+Antes del inventario visual se ejecutó un hardening técnico para proteger la transición de interfaz:
+
+- awareness y solicitud explícita de browser persistent storage mediante `navigator.storage.persisted()` / `persist()`;
+- suite determinista de propiedades del ledger con 1 200 escenarios generados;
+- browser E2E real sobre la build estática: crear ingreso, crear gasto, verificar Movimientos y recargar offline desde el service worker;
+- el E2E falla ante requests HTTP(S) a un origen externo durante el recorrido.
+
+Evidencia:
+
+```text
+PR #42
+merge addb91ccd93207f64cfbf8c6a3f883f01dec3be7
+Quality checks 36617612176
+463/463 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+```
+
+Este preflight no cerró por sí solo 20.1. El contrato visual, inventario completo de superficies, matriz de paridad e inventario protegido de gráficos/sonidos/animaciones se cerraron posteriormente en el Gate 20.1.
+
+No hubo cambio de schema, formato de backup ni semántica financiera.
+
+## 20.1 — Contrato visual + inventario de paridad
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-1.md`.
+
+
+
+Crear la matriz completa:
+
+```text
+superficie GlitchBudget
+→ destino visual Prisma
+→ read model / command existente
+→ funciones protegidas
+```
+
+Inventariar explícitamente:
+
+- sonidos;
+- animaciones;
+- gráficos;
+- microinteracciones;
+- estados loading/empty/error;
+- capacidades mobile/desktop;
+- texto que puede reducirse sin ocultar significado.
+
+Marcar como prohibido portar desde Prisma:
+
+```text
+domain/**
+application/**
+persistence/**
+server/**
+cálculos financieros de Home.tsx
+datos financieros hardcoded
+```
+
+**Gate 20.1:** ninguna capacidad existente queda sin destino o marcada para eliminación implícita.
+
+## 20.2 — Design system + temas + shell
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-2.md`.
+
+Quality gate de cierre:
+
+```text
+472/472 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36645087940 ✅
+```
+
+Construir:
+
+- tokens;
+- tipografía;
+- spacing;
+- cards;
+- iconografía;
+- sidebar;
+- navegación móvil;
+- header;
+- FAB/global action;
+- Modo Prisma claro;
+- Modo Neón oscuro.
+
+Preservar hide amounts, App Lock, Auto-lock, reduced motion, sonidos y microanimaciones.
+
+**Gate 20.2:** cambiar tema o shell no altera ningún dato ni comportamiento financiero.
+
+## 20.3 — Resumen / Home Prisma
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-3.md`.
+
+Quality gate de cierre:
+
+```text
+477/477 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36650050876 ✅
+```
+
+Migrar Resumen sobre los read models existentes.
+
+Conservar:
+
+- posición financiera;
+- presupuesto;
+- próximos;
+- metas;
+- inversiones;
+- señales de atención;
+- personalización de Home;
+- visualizaciones útiles.
+
+**Gate 20.3:** paridad funcional completa y cero fórmulas financieras nuevas en UI.
+
+## 20.4 — Movimientos + compositor global
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-4.md`.
+
+Quality gate de cierre:
+
+```text
+483/483 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36660263082 ✅
+```
+
+Migrar:
+
+- historial;
+- búsqueda;
+- filtros;
+- saved filters;
+- metadata;
+- cuentas/tarjetas como gestión secundaria;
+- Quick Add;
+- Templates;
+- Rules;
+- gasto/ingreso/transferencia;
+- dialogs y confirmaciones.
+
+Conservar sonidos de movimiento, animaciones, budget warning y rutas command/service existentes.
+
+**Gate 20.4:** crear/editar/eliminar movimientos sigue atravesando el mismo motor financiero.
+
+## 20.5 — Plan Prisma
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-5.md`.
+
+Quality gate de cierre:
+
+```text
+489/489 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36661934533 ✅
+```
+
+Migrar:
+
+- Presupuestos;
+- Metas;
+- Planificados;
+- períodos;
+- recurrencias;
+- aportes;
+- estados pending/confirmed/skipped/overdue.
+
+La UI no reconstruye remaining, status, required contribution, overdue ni semántica equivalente.
+
+**Gate 20.5:** Plan conserva paridad y consume selectors/read models canónicos.
+
+## 20.6 — Reportes + sistema de gráficos
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-6.md`.
+
+Quality gate de cierre:
+
+```text
+495/495 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36670721688 ✅
+```
+
+Rediseñar Reportes conservando:
+
+- Spending;
+- Cash Flow;
+- Net Worth;
+- comparación de períodos;
+- distribución por categoría;
+- naturaleza del gasto;
+- 7D / 30D / 3M / 6M / 1Y / Custom;
+- gráficos reales existentes.
+
+Regla:
+
+```text
+minimalismo ≠ menos información financiera
+```
+
+Los componentes gráficos pueden transformar métricas en representación visual, pero no recalcular significado financiero.
+
+**Gate 20.6:** paridad analítica completa; ninguna cifra real proviene de hardcodes Prisma.
+
+## 20.7 — Superficies secundarias + branding Prisma + gate final
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-7.md`.
+
+Quality gate de cierre:
+
+```text
+502/502 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36675832852 ✅
+Quality checks 36675835726 ✅
+```
+
+**Baseline visual/branding hasta 20.7: completado y aprobado.**
+
+El 30 sep 2026 se amplía Fase 20 con una etapa intermedia de hardening (20.7.5) y tres etapas finales (20.8–20.10). 20.7 no se reabre: permanece como baseline estable.
+
+Completar:
+
+- cuentas;
+- tarjetas/deuda;
+- inversiones;
+- categorías;
+- Ajustes;
+- seguridad;
+- backup/restore;
+- logros;
+- dialogs/utilidades;
+- estados vacíos/error/loading;
+- mobile/detail views.
+
+Después ejecutar el cambio de branding visible:
+
+```text
+GlitchBudget → Prisma
+```
+
+Cambiar nombre visible, logo, títulos, metadata, PWA labels, copy y documentación de producto donde sea seguro.
+
+No renombrar por branding identificadores persistentes si existe riesgo de pérdida o duplicación de datos.
+
+### Gate 20.7 — Prisma Visual/Branding Gate
+
+Debe demostrarse:
+
+```text
+Prisma = producto visible
+GlitchBudget Engine = único motor financiero
+Modo Prisma = tema claro principal
+Modo Neón = tema oscuro principal
+```
+
+Y además:
+
+- paridad funcional completa;
+- sonidos conservados;
+- animaciones conservadas;
+- gráficos conservados/rediseñados;
+- cero cálculos financieros nuevos en UI;
+- cero Dexie directo en UI;
+- backup/migraciones intactos;
+- offline intacto;
+- cero tráfico financiero de red;
+- mobile y desktop revisados;
+- ningún dato hardcoded de la maqueta Prisma presentado como dato real.
+
+Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostrar paridad.
+
+## 20.7.5 — Semantic Integrity & Security Hardening
+
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`. La secuencia posterior 20.8 quedó completada y 20.9 continúa según su estado canónico más abajo.
+
+Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
+
+Ocurre después del baseline visual/branding aprobado en 20.7 y **antes de 20.8**.
+
+### Objetivo
+
+Cerrar ambigüedades semánticas, temporales, criptográficas y de escalabilidad del núcleo **antes de construir comparaciones e insights sobre esos datos**.
+
+Regla central:
+
+```text
+no construir insights sobre semántica financiera ambigua
+```
+
+### Hallazgos que justifican la fase
+
+- el modelo persistente admite `Debt.type = 'loan'`;
+- `selectPosition()` incorpora actualmente pasivos de tarjetas, no préstamos;
+- la UI crea tarjetas, pero backups históricos pueden restaurar `loan`;
+- `Debt.principal` tiene significado distinto según tipo;
+- `DebtPayment.date` mezcla contrato legado ISO datetime con flujo actual local `YYYY-MM-DD`;
+- el contrato de moneda está protegido hoy, pero debe quedar congelado antes de nuevas comparaciones;
+- encrypted backup v1 requiere revisión de endurecimiento con compatibilidad hacia atrás;
+- `selectAccountEntries()` debe medirse con volúmenes grandes antes de optimizar;
+- se necesita un gate de reconciliación financiera con datasets golden independientes.
+
+### Invariantes protegidas
+
+Durante 20.7.5:
+
+- dinero persistido sigue en enteros de unidades menores;
+- compra con tarjeta = gasto + pasivo, sin reducir efectivo;
+- pago de tarjeta = reduce efectivo + pasivo, sin duplicar gasto;
+- transferencia = neutral para ingreso/gasto y patrimonio;
+- planificación no mueve dinero;
+- inversión financiada desde cuenta = líquido → inversión, no gasto;
+- rendimiento proyectado no entra automáticamente en patrimonio;
+- UI no define fórmulas financieras canónicas;
+- UI no accede directamente a Dexie;
+- backups existentes siguen siendo legibles;
+- offline y `connect-src 'none'` permanecen;
+- no se introduce red para FX, seguridad ni análisis.
+
+### 20.7.5.1 — Debt semantics audit
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+505/505 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36745462982 ✅
+```
+
+Auditar como mínimo:
+
+- modelos;
+- ledger;
+- debt service;
+- account/debt services;
+- transaction service;
+- backup/import;
+- Debt UI;
+- migraciones;
+- fixtures históricos;
+- tests de deuda.
+
+Responder formalmente:
+
+1. si `loan` es feature vigente, incompleta o compatibilidad histórica;
+2. cómo se calcula su saldo;
+3. qué significa `principal` por tipo;
+4. qué movimientos reducen cada deuda;
+5. cómo impacta Home/Reportes/net worth;
+6. qué ocurre al importar un `loan`;
+7. qué datos históricos deben preservarse.
+
+Entregable:
+
+```text
+tipo de deuda
+→ significado de campos
+→ saldo canónico
+→ impacto en net worth
+→ acciones permitidas
+→ representación UI
+→ compatibilidad backup
+```
+
+No migrar ni “arreglar” préstamos antes de cerrar esta definición.
+
+**Gate 20.7.5.1:** contrato de deuda explícito, documentado y testeado.
+
+### 20.7.5.2 — Loans + Net Worth correctness
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+511/511 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36758265316 (attempt 2) ✅
+```
+
+Resultado de cierre:
+
+- `loan` permanece como compatibilidad histórica, no como feature operativa nueva;
+- saldo compatible = `max(0, principal + openingAdjustment - pagos registrados)`;
+- todo saldo positivo de préstamo entra en pasivos y reduce patrimonio, incluso si `status = closed`;
+- pagos de préstamo reducen efectivo y pasivo en igual magnitud, sin alterar patrimonio;
+- préstamos históricos quedan separados de tarjetas operativas y visibles solo en modo lectura;
+- sin cambios de schema, migración ni formato de backup.
+
+Aplicar el contrato anterior para que ninguna deuda persistida/restaurada pueda inflar o distorsionar patrimonio.
+
+Si `loan` continúa soportado:
+
+- fuente canónica de saldo;
+- pagos;
+- pasivo;
+- impacto en net worth;
+- estado activo/cerrado.
+
+Si queda como compatibilidad histórica:
+
+- no tratarlo como tarjeta;
+- no ocultarlo silenciosamente de pasivos;
+- no permitir acciones incompatibles;
+- conservar export/restore;
+- definir representación segura o migración explícita.
+
+Fixtures mínimos:
+
+- tarjeta sin saldo;
+- tarjeta con compra;
+- tarjeta con pago;
+- saldo a favor;
+- préstamo activo;
+- préstamo parcialmente pagado;
+- préstamo cerrado;
+- tarjeta + préstamo;
+- backup histórico con `loan`;
+- net worth antes/después de pagos.
+
+**Gate 20.7.5.2:** patrimonio y pasivos cuadran para todos los tipos de deuda persistibles/restaurables.
+
+### 20.7.5.3 — Debt model normalization
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+516/516 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36762375604 ✅
+```
+
+Resultado de cierre:
+
+- `Debt.principal` permanece únicamente como campo persistente de compatibilidad;
+- `CreditCardDebt` y `HistoricalLoanDebt` discriminan cada variante fuera de persistencia;
+- `cardCreditLimit()` y `loanOriginalPrincipal()` exponen significados explícitos;
+- read models de tarjeta/préstamo ya no exponen una cantidad ambigua llamada `principal`;
+- creación operativa de tarjeta usa `creditLimit` y la capa de servicio traduce a persistencia;
+- Home/Reportes usan `liabilities` para el agregado tarjeta + préstamo histórico;
+- sin cambios de schema Dexie, migraciones ni formato de backup.
+
+Eliminar la ambigüedad de `Debt.principal`.
+
+Problema:
+
+```text
+credit_card.principal ≈ límite aprobado
+loan.principal        ≈ principal original
+```
+
+Preferir primero:
+
+- read models discriminados;
+- helpers/selectors con nombres explícitos;
+- tipos derivados discriminados;
+- evitar que UI consuma directamente un campo ambiguo.
+
+Si hace falta modificar persistencia:
+
+- migración Dexie explícita;
+- versionada;
+- fixtures antiguos;
+- compatibilidad de backup;
+- sin `db.clear()`;
+- sin recrear base.
+
+**Gate 20.7.5.3:** cada cantidad de deuda tiene significado inequívoco fuera de compatibilidad histórica.
+
+### 20.7.5.4 — Canonical financial dates
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+522/522 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36764771406 (attempt 2) ✅
+```
+
+Resultado de cierre:
+
+- fecha financiera canónica = `YYYY-MM-DD` local, sin hora ni zona;
+- `DebtPayment.date` queda documentado y persistido como fecha financiera local;
+- `normalizeFinancialDate()` concentra la compatibilidad con ISO datetime legacy fuera de `src/domain`;
+- Dexie sube a v15 con migración explícita de `debt_payments.date` legacy a fecha local;
+- restore JSON normaliza pagos legacy antes de persistirlos y export vuelve a emitir date-only;
+- Backup JSON permanece en v13 y conserva compatibilidad histórica;
+- nuevos pagos rechazan datetime y solo aceptan fecha canónica;
+- el ledger deja de depender de `.slice(0,10)` para pagos;
+- tests cubren UTC−4 alrededor de medianoche, restore legacy, migración v14→v15, pago nuevo y comparación `through`.
+
+Contrato objetivo para nuevos movimientos:
+
+```text
+fecha financiera = YYYY-MM-DD local
+```
+
+Revisar y normalizar:
+
+- comentarios/tipos legacy;
+- pagos de deuda;
+- imports con ISO datetime;
+- migraciones;
+- comparaciones `through`;
+- ordenamiento;
+- `.slice(0,10)` dispersos.
+
+Normalización legacy debe ocurrir en un punto canónico, no repartida entre selectores.
+
+Tests:
+
+- UTC−4 cerca de medianoche;
+- datetime UTC con día distinto;
+- date-only canónica;
+- restore legacy;
+- pago creado por UI;
+- comparación temporal.
+
+**Gate 20.7.5.4:** ninguna operación financiera nueva cambia de día por UTC implícito.
+
+### 20.7.5.5 — Currency invariant defense
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+526/526 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36776913726 ✅
+```
+
+Resultado de cierre:
+
+- `selectPosition()` declara y ejecuta su precondición de posición en una sola moneda;
+- `requireSinglePositionCurrency()` normaliza códigos antes de comparar y rechaza datasets heterogéneos;
+- un fixture adversarial DOP + USD demuestra que no se pueden sumar importes nominales silenciosamente;
+- datasets homogéneos y posición vacía siguen siendo válidos;
+- las restricciones existentes de cuentas/transferencias/restore en moneda base permanecen intactas;
+- no se implementa FX ni multi-moneda real;
+- sin cambios de schema, migraciones, backup, red ni UI.
+
+Preservar y endurecer el contrato actual:
+
+- cuentas operativas en moneda base;
+- cuentas extranjeras rechazadas en el flujo soportado;
+- transferencias cross-currency bloqueadas sin conversión;
+- restore incompatible bloqueado;
+- movimientos normalizados a cuenta/base;
+- sin FX remoto.
+
+Añadir un fixture adversarial con monedas mezcladas para impedir que una futura feature FX permita sumas nominales accidentales.
+
+No implementar multi-moneda real aquí.
+
+**Gate 20.7.5.5:** ningún camino soportado puede sumar monedas distintas como equivalentes.
+
+### 20.7.5.6 — Encrypted Backup v2 assessment
+
+**Estado: completada / Gate aprobado como assessment.**
+
+Quality gate de cierre:
+
+```text
+530/530 tests
+npm run check ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36784502529 ✅
+```
+
+Decisión de cierre:
+
+- no introducir envelope v2 todavía;
+- encrypted backup v1 permanece como formato de export e import vigente;
+- PBKDF2-HMAC-SHA-256 permanece en 310 000 iteraciones hasta contar con benchmark físico-móvil representativo;
+- OWASP 600 000 se usa como referencia de endurecimiento para PBKDF2 password hashing, no como mandato directo para cifrado de backups;
+- NIST SP 800-132 continúa siendo la referencia directamente aplicable a derivación de claves para almacenamiento y su revisión memory-hard sigue pendiente;
+- benchmark reproducible de desktop/Web Crypto compara 310k vs 600k sin modificar producción;
+- presupuesto de latencia <= 750 ms / revisión a 1 000 ms queda documentado como objetivo interno del proyecto, no como estándar externo;
+- v1 conserva salt/nonce aleatorios, AES-256-GCM, AAD autenticado, error común para contraseña incorrecta/tamper y arquitectura local-only;
+- sin cambios de schema, migraciones, Backup JSON, red, UI ni persistencia financiera.
+
+Evidencia detallada: `docs/roadmap/phase-20-7-5-6.md`.
+
+Baseline:
+
+```text
+PBKDF2-HMAC-SHA-256
+310 000 iteraciones
+AES-256-GCM
+salt aleatorio
+nonce aleatorio
+AAD autenticado
+envelope v1
+contraseña mínima 8 caracteres
+```
+
+Trabajo:
+
+1. contrastar parámetros con guía de seguridad vigente;
+2. benchmark desktop/móvil;
+3. fijar presupuesto de latencia aceptable;
+4. evaluar mayor coste KDF y política de contraseña;
+5. diseñar v2 solo si existe una mejora concreta.
+
+Si existe v2:
+
+- export nuevo puede usar v2;
+- import sigue leyendo v1;
+- v1 no se reescribe automáticamente;
+- error de contraseña/manipulación no filtra información útil;
+- AAD mantiene metadata autenticada;
+- contraseña nunca se almacena ni transmite.
+
+No fijar un número arbitrario de iteraciones sin benchmark.
+
+**Gate 20.7.5.6:** decisión documentada y, si procede, v2 compatible hacia atrás.
+
+### 20.7.5.7 — Ledger performance baseline
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+530/530 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36795170833 ✅
+```
+
+Baseline CI reproducible:
+
+| Movimientos | Posición mediana | Historial 8 cuentas mediana |
+| ---: | ---: | ---: |
+| 1 000 | 0.59 ms | 0.51 ms |
+| 10 000 | 5.66 ms | 6.10 ms |
+| 50 000 | 32.22 ms | 23.68 ms |
+
+Decisión de cierre:
+
+- existe baseline determinista para 1k/10k/50k movimientos;
+- el benchmark cubre ingresos, gastos, pagos, transferencias, varias cuentas, posición e historial;
+- CI registra tiempos sin convertirlos en thresholds frágiles;
+- a 50k movimientos ambos caminos medidos permanecen en decenas de milisegundos en CI;
+- no hay evidencia suficiente para introducir cache, índice materializado ni segunda fuente financiera;
+- no se optimiza de forma especulativa;
+- futuras optimizaciones deberán demostrar mejora contra este baseline.
+
+Evidencia detallada: `docs/roadmap/phase-20-7-5-7.md`.
+
+Medir antes de optimizar.
+
+Benchmark determinista como mínimo:
+
+- 1 000 movimientos;
+- 10 000 movimientos;
+- 50 000 movimientos;
+- varias cuentas;
+- ingresos/gastos/pagos/transferencias;
+- posición;
+- historial por cuenta.
+
+Regla:
+
+```text
+sin degradación medible
+→ no optimizar
+
+degradación medible
+→ optimización mínima y testeada
+```
+
+Posibles optimizaciones solo si se justifican:
+
+- agrupar una vez por `accountId`;
+- índices/read models intermedios;
+- evitar filtrar el mismo snapshot N veces.
+
+No crear caches persistentes como segunda fuente financiera.
+
+**Gate 20.7.5.7:** baseline reproducible y toda optimización justificada por medición.
+
+### 20.7.5.8 — Independent financial reconciliation gate
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+536/536 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36796234747 ✅
+```
+
+Resultado de cierre:
+
+- `tests/fixtures/phase-20-7-5-8-golden.json` declara resultados financieros esperados como valores literales;
+- el test no reconstruye las fórmulas productivas para obtener los expected;
+- se cubren saldo inicial, ingreso, gastos cash/banco, compra/pago/saldo a favor de tarjeta, préstamo histórico, transferencias, inversión financiada, presupuesto, meta, planned pending/confirmed y cambio de período;
+- posición final golden: cash 90k, bank 1.15m, inversiones 200k, líquido 1.24m, pasivos 255k, card positive 20k, net worth 1.205m;
+- spending 90k, debt payments 110k y net cash flow 340k cuadran en Reportes;
+- transferencias/inversión cambian ubicación de activos pero mantienen net worth;
+- planning permanece neutral para dinero real;
+- Home y Reportes exponen la misma posición;
+- corte de período día 25 separa correctamente 24/sep de 25/sep;
+- no fue necesario cambiar ninguna fórmula financiera productiva.
+
+Evidencia detallada: `docs/roadmap/phase-20-7-5-8.md`.
+
+Crear datasets golden cuyos resultados esperados se definan independientemente del código productivo.
+
+Principio:
+
+```text
+expected financial outcome
+≠
+copiar la fórmula de producción dentro del test
+```
+
+Casos mínimos:
+
+- saldo inicial;
+- ingreso;
+- gasto efectivo;
+- gasto bancario;
+- compra tarjeta;
+- pago tarjeta;
+- saldo a favor;
+- transferencia;
+- inversión financiada;
+- préstamo según 20.7.5.1;
+- presupuesto;
+- pago planificado;
+- meta;
+- cambio de período.
+
+Cuadrar cuando aplique:
+
+- efectivo;
+- bancos;
+- inversiones;
+- líquido;
+- pasivos;
+- net worth;
+- spending;
+- debt payments;
+- cash flow;
+- neutralidad de transferencias;
+- neutralidad de planning;
+- Home;
+- Reportes.
+
+Puede hacerse reconciliación manual adicional con datos reales fuera del repo, pero nunca subir información financiera personal a fixtures.
+
+**Gate 20.7.5.8:** invariantes principales cuadran contra resultados esperados independientes.
+
+### 20.7.5.9 — Final hardening gate
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+540/540 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36797160206 ✅
+```
+
+Resultado de cierre:
+
+- contratos de deuda/loan, net worth, fecha financiera y moneda permanecen congelados y cubiertos;
+- Dexie permanece en v15 y Backup JSON en v13;
+- encrypted backup permanece en envelope v1, PBKDF2-HMAC-SHA-256 310k + AES-256-GCM;
+- migraciones históricas y backup legacy siguen cubiertos por fixtures ejecutables;
+- benchmark 1k/10k/50k permanece integrado en Quality checks;
+- golden reconciliation independiente sigue verde sin cambios de fórmulas productivas;
+- salida estática mantiene `connect-src 'none'` y E2E offline;
+- los guards forenses mantienen lógica financiera/Dexie fuera de React;
+- el test-manifiesto final enlaza estas evidencias para impedir regresiones silenciosas;
+- el informe obligatorio de 11 puntos queda en `docs/roadmap/phase-20-7-5-9.md`.
+
+**Gate 20.7.5:** aprobado. Semantic Integrity & Security Hardening queda cerrado y habilita 20.8.1.
+
+Requerido:
+
+```text
+npm run check
+npm run build
+npm run test:e2e
+```
+
+Además validar:
+
+- deuda/loan;
+- net worth;
+- fechas local/legacy;
+- moneda;
+- backup JSON round-trip;
+- encrypted backup v1;
+- v2 si fue aprobado;
+- migraciones antiguas;
+- golden reconciliation;
+- benchmark;
+- offline;
+- `connect-src 'none'`;
+- cero fórmulas financieras nuevas en UI;
+- cero Dexie directo en UI.
+
+Entrega obligatoria:
+
+1. archivos cambiados;
+2. decisión final sobre `loan`;
+3. semántica final de deuda;
+4. contrato final de fechas;
+5. cambios de schema;
+6. migraciones;
+7. formatos de backup soportados;
+8. parámetros criptográficos vigentes;
+9. benchmark;
+10. datasets golden;
+11. riesgos restantes.
+
+**Gate 20.7.5:** integridad semántica cerrada antes de permitir 20.8.
+
+### Fuera de alcance de 20.7.5
+
+No añadir:
+
+- préstamos nuevos en UI salvo que el audit demuestre que son una feature vigente que necesita representación correcta;
+- multi-moneda real;
+- sincronización bancaria;
+- APIs FX;
+- servidor;
+- IA;
+- cambios visuales de 20.8/20.9;
+- optimizaciones sin benchmark.
+
+---
+
+## 20.8 — Information Design + Deterministic Insights
+
+**Estado: completada / Gate 20.8 aprobado.** 20.8.1–20.8.8 cerradas; próxima intervención autorizada: 20.9.1. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+
+### Objetivo
+
+Hacer que Prisma **diga más con menos**.
+
+La app debe pasar de explicar cada cifra a jerarquizar, comparar e interpretar métricas ya canónicas, sin introducir IA remota, generación libre de texto ni nuevas fórmulas financieras en React.
+
+Contrato:
+
+```text
+datos canónicos
+→ selector/read model
+→ comparación o regla determinista
+→ prioridad
+→ insight parametrizado
+→ UI
+```
+
+Mismos datos deben producir el mismo resultado.
+
+No hay:
+
+- LLM;
+- prompts;
+- red;
+- inferencia probabilística;
+- texto libre generado;
+- causalidad inventada.
+
+### 20.8.1 — Preflight de información + regresión de categorías
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+542/542 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36803800520 ✅
+```
+
+Resultado de cierre:
+
+- `docs/roadmap/phase-20-8-1.md` congela el inventario visible de Resumen y Reportes;
+- cada KPI, explicación, badge, comparación y gráfico queda clasificado como imprescindible, contextual o redundante;
+- la regla de disclosure distingue información de decisión, definición contextual y duplicación;
+- `tests/phase-20-8-1-information-preflight.test.ts` protege que una instalación limpia exponga todas las categorías default;
+- referencias personalizadas históricas se conservan archivadas en vez de reactivarse;
+- una categoría built-in omitida explícitamente por estado legacy permanece archivada;
+- no se añadió reparación especulativa, fórmula financiera, schema, migración, backup ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-1.md`.
+
+Antes de tocar Home o Reportes:
+
+- inventariar cada KPI visible;
+- inventariar explicaciones, badges, ayudas, gráficos y acciones;
+- clasificar cada texto como:
+  - imprescindible;
+  - contextual;
+  - redundante;
+- decidir qué información puede pasar a popover/tooltip sin perder significado;
+- identificar qué advertencias deben permanecer siempre visibles;
+- añadir un contrato de regresión que garantice que una instalación limpia contiene las categorías por defecto;
+- comprobar que categorías personalizadas, archivadas o renombradas siguen protegidas;
+- no añadir una rutina automática de “reparación de categorías” mientras el bug de desaparición no pueda reproducirse.
+
+**Gate 20.8.1:** inventario informativo cerrado y categorías por defecto protegidas por test, sin introducir reparación especulativa.
+
+### 20.8.2 — Contrato canónico de comparaciones KPI
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+547/547 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36819113232 ✅
+```
+
+Resultado de cierre:
+
+- `compareKpi()` centraliza período actual/comparable, valores, delta absoluto, delta porcentual y estado;
+- `comparable`, `zero_previous` y `no_previous_base` distinguen base normal, valor anterior cero y ausencia real de base;
+- un valor anterior de 0 conserva delta absoluto pero no inventa porcentaje;
+- ausencia de período/base devuelve previous y deltas como `null`;
+- `selectPositionKpiComparisons()` cubre disponible líquido, patrimonio neto, deuda total e inversiones;
+- los cuatro valores provienen directamente del ledger canónico mediante `selectPosition()`;
+- Reportes reutiliza el mismo contrato para la comparación existente de Net Worth;
+- se eliminó la dependencia circular runtime entre `reports.ts` y `kpi-comparisons.ts`;
+- cero cálculos comparativos financieros nuevos en React;
+- sin cambios de schema, migración, backup, persistencia, red, UI visual ni 20.8.3.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-2.md`.
+
+Definir una única semántica comparativa reutilizable para, como mínimo:
+
+- disponible líquido;
+- patrimonio neto;
+- deuda total;
+- inversiones.
+
+Cada comparación debe declarar:
+
+```text
+valor actual
+valor anterior
+período actual
+período comparable
+delta absoluto
+delta porcentual cuando sea matemáticamente válido
+estado cuando no exista base comparable
+```
+
+La semántica debe vivir en dominio/read models/selectors, no en componentes React.
+
+La UI solo representa el resultado.
+
+**Gate 20.8.2:** comparaciones canónicas, testeadas y reutilizables; cero cálculo comparativo exclusivo de UI.
+
+### 20.8.3 — Motor local de Lectura rápida
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+557/557 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36821019073 ✅
+```
+
+Resultado de cierre:
+
+- `src/domain/report-insights.ts` crea una capa editorial determinista sobre métricas canónicas;
+- `selectReportsSnapshot()` adjunta `quickRead` sin recalcular dinero ni leer movimientos crudos;
+- umbrales explícitos: spending cerca <= 5%, cash flow significativo >= 15%, net worth significativo >= 5%, categoría dominante >= 35%;
+- máximo de 3 insights;
+- prioridad estable: cash flow 100, spending 90, net worth 80, categoría 60, spending cercano 40, fallback 10;
+- copy expresado como `key + params`, no texto libre generado;
+- reglas cubren spending arriba/abajo/cerca del período comparable, incluido 0 → gasto positivo sin porcentaje fabricado, cambio de cash flow, cambio de net worth, categoría dominante y ausencia de cambio material;
+- no se inventa promedio reciente multiperíodo porque el snapshot actual no lo expone;
+- no hay diagnóstico, predicción, causalidad, LLM, reloj, aleatoriedad, red, Dexie ni React en el motor;
+- el umbral de categoría se evalúa sobre la proporción real antes de redondear;
+- mismo snapshot produce exactamente la misma Lectura rápida;
+- sin cambios de schema, migración, backup, persistencia, UI visual ni 20.8.4.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-3.md`.
+
+Construir una capa determinista de insights para Reportes que seleccione observaciones útiles a partir de métricas ya calculadas.
+
+Puede expresar, cuando los datos lo soporten:
+
+- gasto por debajo/encima/cerca del promedio reciente;
+- categoría con mayor movimiento;
+- cambio significativo de cash flow;
+- variación destacable de patrimonio;
+- ausencia de cambios relevantes;
+- siguiente área útil para explorar.
+
+Reglas obligatorias:
+
+- solo métricas/read models canónicos;
+- umbrales explícitos;
+- prioridad estable;
+- copy parametrizado;
+- máximo de información breve;
+- no diagnosticar;
+- no predecir;
+- no inventar motivos;
+- no convertir correlación en causalidad;
+- no usar texto libre probabilístico.
+
+Ejemplo de arquitectura:
+
+```text
+snapshot de Reportes
+→ reglas deterministas
+→ ranking de insights
+→ plantilla parametrizada
+→ Lectura rápida
+```
+
+**Gate 20.8.3:** el mismo snapshot financiero produce exactamente la misma Lectura rápida.
+
+### 20.8.4 — KPI de Resumen: comparar antes que explicar
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+562/562 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36823261725 ✅
+```
+
+Resultado de cierre:
+
+- Resumen muestra nombre → cifra → comparación → señal visual para disponible líquido, patrimonio neto, deuda total e inversiones;
+- `selectReportsSnapshot()` expone las cuatro comparaciones canónicas de posición;
+- el corte `currentThrough` evita incorporar movimientos posteriores a la fecha visible de Home;
+- `home.position` conserva su forma histórica y las comparaciones viven en `home.positionComparisons`;
+- definiciones estables pasan a popover accesible;
+- permanecen visibles las advertencias sobre crédito no incluido, deuda real y rendimientos proyectados no incluidos;
+- porcentaje/delta provienen de dominio; React solo representa el resultado;
+- sin cambios de schema, migración, backup, persistencia, red ni 20.8.5.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-4.md`.
+
+Rediseñar los KPI principales para priorizar:
+
+```text
+nombre
+→ cifra
+→ comparación
+→ señal visual
+```
+
+Ejemplo conceptual:
+
+```text
+Disponible líquido
+RD$49,740
+↑ 8.4% vs. mes anterior
+```
+
+Las definiciones permanentes del tipo “Efectivo + bancos. No incluye crédito disponible” deben migrar a ayuda contextual cuando eso no reduzca seguridad ni comprensión.
+
+Mantener visibles cuando afecten la interpretación:
+
+- efectivo vs. crédito;
+- deuda real;
+- valor real vs. proyectado de inversiones;
+- estados que cambien una decisión financiera.
+
+**Gate 20.8.4:** Home comunica posición y dirección de forma inmediata sin reconstruir significado financiero.
+
+### 20.8.5 — Home: decir más con menos
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+569/569 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36825003818 ✅
+```
+
+Resultado de implementación:
+
+- Resumen elimina copy y etiquetas redundantes sin ocultar consecuencias financieras;
+- Presupuesto prioriza Disponible y mantiene Gastado, Presupuestado, estado y alertas;
+- Próximos solo añade resumen agregado cuando existen vencidos o elementos para hoy;
+- Metas conserva progreso, restante, fecha y aporte requerido con copy más compacto;
+- Inversiones deja de repetir el total ya visible en Posición y prioriza vencimientos/revisión;
+- el badge global de atención desaparece cuando no existe atención real;
+- acciones y acceso a detalle permanecen visibles;
+- sin fórmulas financieras nuevas, schema, migración, backup, red ni cambios de dominio.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-5.md`.
+
+Revisar la composición completa de Resumen.
+
+Objetivos:
+
+- reducir copy permanente que parezca documentación;
+- reforzar jerarquía entre posición, presupuesto, próximos pagos, metas e inversiones;
+- usar comparación, espacio, tipografía y señales visuales para comunicar estado;
+- mantener acciones relevantes visibles;
+- dejar detalles exactos disponibles bajo demanda;
+- evitar cards que expliquen obviedades ya expresadas por su título y cifra.
+
+Regla:
+
+```text
+menos texto permanente
+≠
+menos información útil
+```
+
+No eliminar información necesaria para entender consecuencias financieras.
+
+**Gate 20.8.5:** menor ruido visual con igual o mayor capacidad de decisión.
+
+### 20.8.6 — Reportes: nueva jerarquía editorial
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+576/576 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36826235113 ✅
+```
+
+Resultado de implementación:
+
+- Lectura rápida determinista abre Reportes usando `report.quickRead`;
+- Spending se convierte en hero analítico sin reconstruir métricas;
+- Comparison precede el desglose por categoría/naturaleza;
+- gráficos, tablas, Cash Flow y Net Worth quedan preservados;
+- Largest transactions pasa a Detalle exacto después de Net Worth;
+- todos los rangos y el seguimiento secundario de presupuestos permanecen disponibles;
+- sin cambios de dominio, persistencia, schema, backup, red ni fórmulas financieras nuevas.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-6.md`.
+
+Recomponer Reportes para que la pantalla cuente una historia analítica en lugar de presentar bloques equivalentes.
+
+Orden objetivo:
+
+```text
+Lectura rápida
+→ hero analítico
+→ tendencias / comparaciones
+→ categorías / naturaleza
+→ flujo de caja
+→ patrimonio neto
+→ detalle exacto
+```
+
+Conservar toda la capacidad actual:
+
+- Gastos / Spending;
+- Cash Flow;
+- Net Worth;
+- comparación de períodos;
+- distribución por categoría;
+- naturaleza del gasto;
+- 7D / 30D / 3M / 6M / 1Y / Custom;
+- gráficos reales;
+- tablas/detalles exactos.
+
+La Lectura rápida complementa el análisis; nunca sustituye el dato exacto.
+
+**Gate 20.8.6:** Reportes interpreta y jerarquiza sin perder ninguna capacidad analítica.
+
+### 20.8.7 — Progressive disclosure + copy contextual
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+580/580 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36839469668 ✅
+```
+
+Resultado de implementación:
+
+- definiciones estables de KPI permanecen detrás de popovers activados mediante controles accesibles;
+- consecuencias financieras que cambian interpretación permanecen visibles fuera del disclosure;
+- Reportes conserva comparación, tablas y detalle exacto;
+- Home y Reportes quedan protegidos contra significado requerido dependiente solo de hover;
+- sin fórmulas financieras nuevas, acceso directo a Dexie, red, schema, migraciones ni cambios de backup.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-7.md`.
+
+Aplicar una regla única a todo el copy:
+
+```text
+¿ayuda a decidir ahora?
+→ visible
+
+¿aclara una definición?
+→ popover / tooltip / ayuda contextual
+
+¿es redundante?
+→ eliminar
+
+¿advierte una consecuencia importante?
+→ visible
+```
+
+Restricciones:
+
+- nada esencial puede depender solo de hover;
+- tooltips/popovers deben funcionar con teclado y toque;
+- advertencias destructivas o financieras relevantes no se esconden detrás de una ayuda opcional.
+
+**Gate 20.8.7:** menos ruido sin pérdida de comprensión, seguridad ni accesibilidad.
+
+### 20.8.8 — Gate final 20.8
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate final:
+
+```text
+585/585 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36882536925 ✅
+```
+
+Resultado de cierre:
+
+- Home validado en desktop y viewport móvil;
+- Reportes validado en desktop y viewport móvil, incluyendo visibilidad, geometría usable, charts contenidos y ausencia de overflow horizontal global;
+- comparaciones KPI y Lectura rápida permanecen deterministas;
+- categorías default siguen protegidas en instalación limpia;
+- guard local-only mantiene cero primitivas de red/SDK remotos en la app y el E2E no observa requests externos;
+- no existe LLM ni texto libre probabilístico;
+- React no reconstruye las fórmulas financieras canónicas cubiertas por 20.8;
+- tablas y detalle exacto de Reportes permanecen disponibles;
+- recarga offline desde service worker permanece operativa;
+- migraciones históricas y backup export/import round-trip permanecen verdes;
+- no hubo cambios de schema, migración, formato de backup, persistencia ni fórmula financiera.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-8.md`.
+
+**Gate 20.8:** aprobado. Information Design + Deterministic Insights queda cerrado y 20.9.1 pasa a ser la siguiente intervención autorizada.
+
+### Fuera de alcance de 20.8
+
+No dedicar esta fase a:
+
+- motion polish global;
+- timings premium;
+- textura final;
+- sombras/blur finales;
+- achievement toast;
+- normalización completa de idioma;
+- pixel polish.
+
+Eso pertenece a 20.9.
+
+---
+
+## 20.9 — Premium UI Polish
+
+**Estado: completada / Gate aprobado.** 20.9.1–20.9.9 cerradas; próxima intervención autorizada: 20.10.1. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+
+### Objetivo
+
+Dar a Prisma un acabado de producto premium: rápido, silencioso, coherente y físicamente fluido.
+
+Regla central:
+
+```text
+la app nunca debe animarse más lento de lo que responde
+```
+
+Las animaciones suavizan el cambio; nunca deben bloquear el siguiente input.
+
+### 20.9.1 — Auditoría visual y de consistencia
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+591/591 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36886044970 ✅
+```
+
+Resultado:
+
+- inventario cerrado para radios, bordes, sombras, fondos, overlays, tipografía, iconografía, spacing, densidad, hover, press, focus, disabled, scroll interno y responsive;
+- todas las superficies visibles quedaron clasificadas y priorizadas P0/P1/P2;
+- cada deuda tiene propietario explícito entre 20.9.2 y 20.9.9;
+- Prisma claro y Neón oscuro quedan como objetivos premium; Minimalista legado se preserva solo como compatibilidad;
+- se confirmó como defecto de accesibilidad el focus invisible de `BadgeCard`, con remediación obligatoria en 20.9.8;
+- `➕ Agregar` y `🔄 Restablecer` en gestores de categorías quedaron inventariados como iconografía funcional no-Luicide/Lucide inconsistente para normalización posterior;
+- no se corrigió ningún componente visual en esta intervención;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-1.md`.
+
+**Gate 20.9.1:** inventario visual priorizado y sin zonas ambiguas.
+
+### 20.9.2 — Motion tokens ultra rápidos
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+597/597 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36890383021 ✅
+```
+
+Resultado:
+
+- escala global por intención: press 80 ms, control 110 ms, menu 130 ms, content 150 ms y dialog 170 ms;
+- Button, FAB, bottom nav y sidebar usan control + press explícitos;
+- Dialog, AlertDialog y Sheet comparten timing de dialog;
+- Popover, Tooltip, Select, DropdownMenu y Menubar comparten timing de menu;
+- Accordion, deuda, Plan y tile de Logros abandonan timings heredados 200/300/500 o literales auditados;
+- `src/lib/motion.ts` mantiene paridad JS para consumidores Framer Motion;
+- `prefers-reduced-motion` permanece intacto;
+- animaciones celebratorias específicas de Logros quedan reservadas a 20.9.5;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-2.md`.
+
+Definir timings globales orientativos:
+
+```text
+press feedback       60–90 ms
+controls             90–120 ms
+menus / popovers     100–140 ms
+content transitions  120–160 ms
+dialogs / sheets     140–180 ms
+```
+
+Principios:
+
+- feedback inmediato;
+- sin delays artificiales;
+- preferir opacity/transform;
+- evitar animaciones de layout costosas;
+- no esperar una animación decorativa antes de aceptar el siguiente input;
+- respetar `prefers-reduced-motion`.
+
+**Gate 20.9.2:** navegación y controles se sienten instantáneos en desktop y móvil.
+
+### 20.9.3 — Superficies, textura y profundidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+602/602 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36891760591 ✅
+```
+
+Resultado:
+
+- jerarquía espacial compartida: page < card/panel < elevated < modal/sheet;
+- Card usa surface-card, border-subtle, spacing y shadow semánticos;
+- Dialog/AlertDialog/Sheet usan superficies opacas, backdrop temático y shadow-modal;
+- Popover usa surface-elevated + shadow-popover sin glass generalizado;
+- Tabs abandona fondos/bordes directos por tema;
+- Header y bottom nav conservan blur únicamente mediante `--blur-navigation`;
+- Prisma y Neón resuelven backdrops/sombras distintos y válidos en browser E2E;
+- Minimalista legado conserva compatibilidad sin convertirse en tercer destino premium;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-3.md`.
+
+Pulir de forma coherente:
+
+- cards;
+- panels;
+- sheets;
+- dialogs;
+- backdrops;
+- blur;
+- sombras;
+- separadores;
+- superficies elevadas;
+- contraste entre plano principal y secundario.
+
+Objetivo:
+
+```text
+profundidad suave
++ textura limpia
++ legibilidad alta
+```
+
+Evitar glassmorphism excesivo o transparencias que hagan competir el fondo con el contenido.
+
+**Gate 20.9.3:** jerarquía espacial coherente en Modo Prisma y Modo Neón.
+
+### 20.9.4 — Tooltips, popovers y dialogs
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+610/610 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36894175981 ✅
+```
+
+Resultado:
+
+- Tooltip elimina el contraste heredado inválido y usa superficie/texto/sombra semánticos;
+- delays, offsets y collision padding quedan explícitos;
+- Popover limita ancho al viewport y admite cierre contextual táctil con foco visible;
+- ayuda KPI de Home muestra título + explicación breve y conserva advertencias financieras fuera del popover;
+- detalles de medallas reutilizan el mismo dismiss sin consumir la corrección de focus reservada a 20.9.8;
+- Dialog normaliza título, header, footer y botón de cierre etiquetado con foco visible;
+- AlertDialog mantiene Cancelar/Confirmar y consecuencias destructivas visibles sin cierre ambiguo;
+- E2E abre/cierra la ayuda de Disponible líquido en desktop y móvil y verifica containment;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-4.md`.
+
+Normalizar:
+
+- trigger;
+- posición;
+- padding;
+- iconos;
+- cierre;
+- foco;
+- toque;
+- ancho máximo;
+- contraste;
+- copy breve;
+- comportamiento responsive.
+
+Revisar especialmente las explicaciones movidas desde 20.8.
+
+Advertencias importantes no pueden quedar escondidas exclusivamente en tooltip.
+
+**Gate 20.9.4:** ayuda contextual consistente, accesible y visualmente integrada.
+
+### 20.9.5 — Achievement toast / feedback celebratorio
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+615/615 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36897118568 ✅
+```
+
+Resultado:
+
+- toast reconstruido sobre superficie elevada opaca y legible;
+- jerarquía explícita: logro → título → descripción → XP → CTA;
+- CTA `Listo` + botón cerrar accesible;
+- entrada/salida usa motion tokens y reduced motion elimina transición decorativa;
+- sonido preservado;
+- confetti preservado para gold/diamond y sigue respetando reduced motion;
+- fix de review: el toast permanece por encima de bottom nav durante todo el rango < md;
+- E2E dispara “Primer Ingreso” y valida geometría a 700×844 sin solapamiento con navegación;
+- Prisma y Neón comparten el mismo contrato semántico;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-5.md`.
+
+Rehacer la notificación de logros observada durante la revisión visual.
+
+Problemas a resolver:
+
+- transparencia excesiva;
+- contraste insuficiente;
+- contenido del dashboard compitiendo detrás;
+- jerarquía débil entre título, descripción y XP;
+- CTA poco separado;
+- cierre con poca presencia;
+- adaptación móvil.
+
+Debe mejorar:
+
+- opacidad de fondo;
+- blur controlado;
+- contraste;
+- jerarquía título / descripción / XP / CTA;
+- padding;
+- ancho;
+- botón cerrar;
+- entrada/salida rápida;
+- Modo Prisma;
+- Modo Neón;
+- móvil.
+
+Preservar:
+
+- sonido;
+- confetti;
+- reduced motion.
+
+Criterio:
+
+```text
+el logro debe entenderse de un vistazo
+sin pelear visualmente con el fondo
+```
+
+**Gate 20.9.5:** toast legible y coherente en ambos temas y tamaños.
+
+### 20.9.6 — Idioma visible único
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+622/622 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36900165070 ✅
+```
+
+Resultado:
+
+- Reportes normaliza títulos, métricas, gráficos y naturaleza del gasto al español;
+- copy visible de Home se presenta como Resumen sin renombrar modelos/IDs internos;
+- automatización local muestra Plantillas / Filtros guardados / Reglas / Registro rápido;
+- la fuente `LOCAL_AUTOMATION_LAYERS` queda localizada sin cambiar sus IDs;
+- App lock / Auto-lock pasan a bloqueo de aplicación / bloqueo automático;
+- backup visible pasa a copia / copia de seguridad, incluidos errores propagados y feedback de restauración cifrada;
+- CSV, JSON, OPFS, Dexie y Google Sheets se preservan como formatos/tecnologías/marcas;
+- review P2 de métricas de Reportes, fuente de tarjetas de automatización y errores cifrados quedó resuelto antes del cierre;
+- tests históricos siguen protegiendo estructura/semántica sin congelar copy inglés obsoleto;
+- E2E actualizado a “Datos y copias” pasa completo;
+- sin cambios de semántica financiera, schema, migraciones, formatos persistentes, backup contract, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-6.md`.
+
+Realizar un barrido completo de copy visible.
+
+Idioma final del producto: **español**.
+
+Normalizar términos visibles, por ejemplo:
+
+- Spending → Gastos;
+- Cash Flow → Flujo de caja;
+- Net Worth → Patrimonio neto;
+- Templates → Plantillas;
+- Saved Filters → Filtros guardados;
+- Rules → Reglas.
+
+Los identificadores internos de código pueden permanecer en inglés.
+
+No traducir marcas, formatos técnicos o IDs persistentes únicamente por estética.
+
+**Gate 20.9.6:** ninguna superficie mezcla idiomas sin una razón explícitamente documentada.
+
+### 20.9.7 — Estados y feedback
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+628/628 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36906036426 ✅
+```
+
+Resultado:
+
+- Alert/FeedbackMessage unifican neutral, success, warning y error con semántica ARIA consistente;
+- Skeleton usa radio/tone común, reduced motion y estado de carga no interactivo;
+- empty states de tarjetas y copias locales reutilizan `EmptyState`;
+- confirmaciones destructivas de metas, tarjetas, copias y borrado total usan la variante destructiva común de AlertDialog;
+- Plan y Reportes reutilizan feedback de error en lugar de estilos ad hoc;
+- disabled preserva el contrato común de Button y evita feedback de press;
+- el smoke E2E reintenta únicamente el arranque de Chromium para eliminar falsos rojos de infraestructura sin reducir cobertura;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-7.md`.
+
+Unificar visual y conductualmente:
+
+- loading;
+- skeleton;
+- empty;
+- success;
+- warning;
+- error;
+- disabled;
+- destructive confirmation.
+
+Evitar:
+
+- skeletons agresivos;
+- flashes;
+- feedback que simule latencia;
+- estados que parezcan pertenecer a otra aplicación.
+
+**Gate 20.9.7:** todos los estados forman parte del mismo sistema visual.
+
+### 20.9.8 — Mobile, touch, focus y accesibilidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+635/635 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36912136865 ✅
+```
+
+Resultado:
+
+- `Dialog` y `AlertDialog` se contienen en el viewport visible y centran su geometría dentro del rectángulo seguro incluso con insets horizontales asimétricos;
+- `Sheet` respeta safe areas mediante geometría por lado sin imponer padding, preservando overrides de consumidores como el sidebar móvil `p-0`;
+- controles táctiles relevantes alcanzan un objetivo mínimo de 44 px en punteros coarse sin inflar visualmente checkbox/radio/switch;
+- inputs numéricos solicitan teclado decimal y los PIN mantienen teclado numérico; controles de formulario evitan texto pequeño durante foco móvil;
+- `BadgeCard` corrige el focus invisible: el glow normal se compone mediante `--achievement-glow` y el ring real permanece visible por encima; reduced motion también cubre XP/badges;
+- select/dropdown y cards seleccionables usan focus/contraste semánticos en lugar de colores hardcodeados o dependencia exclusiva de hover;
+- compositor, Ajustes, cuentas, inversiones, backups y App Lock quedan alineados al contrato móvil compartido;
+- E2E valida compositor a 390 px, Ajustes móvil contenido/scrollable y el ring específico de `BadgeCard`, diferenciándolo del glow normal;
+- review posterior corrigió tres bloqueos reales antes del cierre: composición glow/ring, padding de sheets y centrado con safe-area asimétrico;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-8.md`.
+
+Revisar:
+
+- targets táctiles;
+- teclado móvil;
+- safe areas;
+- FAB;
+- scroll de dialogs/sheets;
+- focus ring;
+- navegación por teclado;
+- contraste;
+- reduced motion;
+- información disponible solo por hover.
+
+**Gate 20.9.8:** paridad de calidad, no solo funcionalidad, entre móvil y escritorio.
+
+### 20.9.9 — Pixel / interaction sweep + Gate 20.9
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+640/640 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36915706293 ✅
+```
+
+Resultado:
+
+- la iconografía funcional residual de Categorías sustituye `➕/🔄` por `Plus/RotateCcw` de Lucide sin tocar emoji celebratorio de Logros;
+- `TransactionRow`, cuentas, inversiones y Ajustes cierran excepciones locales de radius, skeleton y estados pressed/focus contra los tokens compartidos;
+- acciones raw restantes de Plan vuelven al primitive `Button`, preservando el contrato común de hover/press/focus/disabled;
+- el sweep conserva la jerarquía de 20.8: no reestructura Resumen ni Reportes y no añade features;
+- el browser E2E recorre Resumen → Movimientos → compositor → Plan → Reportes → Logros → Ajustes → backups → App Lock en desktop/móvil;
+- el mismo E2E activa **Neón oscuro** y **Prisma claro** mediante los controles reales de Ajustes y valida la iconografía funcional normalizada;
+- tests históricos se reconciliaron para proteger el primitive `Button` actual en lugar de exigir markup raw obsoleto;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-9.md`.
+
+Recorrido final:
+
+```text
+Resumen
+→ Movimientos
+→ compositor
+→ Plan
+→ Reportes
+→ Logros
+→ Ajustes
+→ backups
+→ App Lock
+```
+
+Revisar:
+
+- ambos temas;
+- varios tamaños;
+- interacción de mouse;
+- touch;
+- teclado.
+
+No introducir features nuevas en esta microintervención.
+
+Requerido:
+
+```text
+npm run check
+npm run build
+npm run test:e2e
+```
+
+**Gate 20.9:** aprobado. UI premium cerrada sin cambios de semántica financiera.
+
+---
+
+## 20.10 — Repository Consolidation + Product README
+
+**Estado: completada / Gate 20.10 aprobado.** 20.10.1–20.10.7 cerradas. No quedan intervenciones pendientes en el roadmap vigente. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+
+Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
+
+Baseline observado al planificar: **54 ramas remotas**.
+
+### Objetivo
+
+Cerrar el proyecto con una única línea de trabajo permanente:
+
+```text
+main = única rama permanente
+```
+
+Las ramas futuras serán temporales y deberán eliminarse después del merge.
+
+### 20.10.1 — Inventario de ramas
+
+**Estado: completada / Gate aprobado.**
+
+Snapshot verificado contra `main` `32e03190651c77511f24090483993b42f3d4ebb3`:
+
+```text
+84 ramas remotas
+1 main permanente
+39 ramas completamente contenidas en main
+42 ramas históricas/obsoletas divergidas → auditar en 20.10.2
+1 wip/codex-local con commit único → auditar en 20.10.2
+1 rama activa phase-20-10-1-branch-inventory → no borrar todavía
+0 ramas eliminadas
+```
+
+Evidencia detallada: `docs/roadmap/phase-20-10-1.md`.
+
+Enumerar todas las ramas remotas y clasificar cada una como:
+
+- ya contenida en `main`;
+- histórica/obsoleta;
+- contiene commits únicos relevantes;
+- contiene commits únicos obsoletos;
+- rama activa que no debe eliminarse todavía.
+
+No borrar ninguna rama antes de completar esta clasificación.
+
+**Gate 20.10.1:** aprobado. Cada rama tiene destino explícito; ninguna fue eliminada.
+
+### 20.10.2 — Auditoría de trabajo único
+
+**Estado: completada / Gate aprobado.**
+
+Auditoría post-squash sobre `main` `d1d36d6de08f2ae94ce0aad4403ebf5df6bba4f8`: 44 ramas no contenidas por ancestry, 44 decisiones explícitas y **0 trabajo vigente pendiente de integrar**. Las 42 ramas de fases/reconciliación, la rama ya fusionada de 20.10.1 y `wip/codex-local` se clasifican como residuos históricos; no se fusionó ni eliminó ninguna rama.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-2.md`.
+
+Para cualquier rama no contenida completamente en `main`:
+
+- comparar contra `main`;
+- identificar commits únicos;
+- identificar archivos únicos;
+- determinar si representan trabajo vigente no integrado o residuos históricos;
+- no fusionar automáticamente código antiguo solo para “salvarlo”;
+- preservar únicamente trabajo compatible con el producto final.
+
+**Gate 20.10.2:** aprobado. No existe trabajo relevante sin decisión explícita; 20.10.3 es la próxima intervención autorizada.
+
+### 20.10.3 — Unificación controlada en main
+
+**Estado: completada / Gate aprobado.**
+
+20.10.2 confirmó **0 trabajo vigente pendiente de integrar**. `main` `e8ca8f5d4ccbb37fcf296c1ae0aa8c2e8c96a9b0` ya era autosuficiente; 20.10.3 no rescata código antiguo. Se cerraron sin merge las PR históricas #35 (`phase-19-5-prisma-engine-gate`) y #7 (`wip/codex-local`), dejando **0 PRs abiertas** y conservando sus ramas para la limpieza posterior de 20.10.5.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-3.md`.
+
+Integrar únicamente trabajo único que siga siendo válido.
+
+Después:
+
+- `main` contiene todo el producto vigente;
+- ninguna feature depende de otra rama;
+- ninguna rama funciona como fuente paralela de verdad;
+- los documentos históricos pueden seguir existiendo como archivos, no como ramas activas.
+
+**Gate 20.10.3:** aprobado. `main` es autosuficiente; 20.10.4 es la próxima intervención autorizada.
+
+### 20.10.4 — Gate completo sobre main
+
+**Estado: completada / Gate aprobado.**
+
+Baseline verificado: `main` `473850b2291218195aa936f73a59ed09568ebae2`, Quality checks `36923309003` en `success`. El gate ejecutó `npm run check`, benchmark del ledger, `npm run build` y `npm run test:e2e`; el suite cubre backup import/round-trip, offline, `connect-src 'none'`, superficies Prisma, App Lock, backups, idioma y achievement toast. 20.10.4 añade una regresión explícita para categorías default sin cambiar comportamiento del producto.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-4.md`.
+
+Antes de eliminar ramas ejecutar:
+
+```text
+npm run check
+npm run build
+npm run test:e2e
+backup import / round-trip
+offline
+connect-src 'none'
+```
+
+Verificar también:
+
+- Resumen;
+- Movimientos;
+- Plan;
+- Reportes;
+- Lectura rápida;
+- temas Prisma/Neón;
+- App Lock;
+- backups;
+- categorías default;
+- idioma;
+- achievement toast.
+
+**Gate 20.10.4:** aprobado. `main` verde y funcional por sí solo; 20.10.5 es la próxima intervención autorizada.
+
+### 20.10.5 — Eliminación de ramas remotas
+
+**Estado: completada / Gate aprobado.**
+
+20.10.4 dejó `main` verde. La limpieza elimina todas las refs remotas distintas de `main` y verifica que el resultado final sea exactamente una rama. Evidencia: `docs/roadmap/phase-20-10-5.md`.
+
+Solo después del gate anterior:
+
+- eliminar ramas fusionadas;
+- eliminar ramas históricas;
+- eliminar WIP obsoletas;
+- conservar únicamente `main`.
+
+No eliminar `main`.
+
+Si una rama no puede clasificarse con seguridad:
+
+```text
+DETENER
+→ revisar
+→ decidir
+→ continuar
+```
+
+Política posterior:
+
+```text
+nueva tarea
+→ crear rama temporal si hace falta
+→ PR / validación
+→ merge a main
+→ borrar rama
+```
+
+**Gate 20.10.5:** aprobado y verificado. El repositorio remoto contiene exactamente una rama: `main`. 20.10.6 es la próxima intervención autorizada.
+
+### 20.10.6 — README final estrictamente de producto
+
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/phase-20-10-6.md`.
+
+Rehacer `README.md` desde cero como presentación de **Prisma**.
+
+Debe hablar únicamente de la app y sus funciones.
+
+Puede incluir:
+
+- qué es Prisma;
+- qué problema resuelve;
+- Resumen;
+- Movimientos;
+- Plan;
+- Reportes;
+- Lectura rápida;
+- presupuestos;
+- metas;
+- planificados;
+- cuentas;
+- tarjetas/deuda;
+- inversiones;
+- privacidad local;
+- offline;
+- App Lock;
+- backups;
+- Modo Prisma;
+- Modo Neón;
+- sonidos/microinteracciones cuando ayuden a explicar el producto.
+
+No debe incluir:
+
+- roadmap;
+- fases;
+- gates;
+- PRs;
+- commits;
+- SHAs;
+- números de CI;
+- historial de implementación;
+- deuda técnica;
+- instrucciones de producción/build;
+- narrativa de migración GlitchBudget → Prisma;
+- detalles internos que no ayuden a entender el producto.
+
+El README final es documentación de producto, no documentación de proceso.
+
+**Gate 20.10.6:** aprobado. `README.md` es exclusivamente documentación de producto y puede entenderse sin conocer la historia de implementación.
+
+### 20.10.7 — Cierre definitivo
+
+**Estado: completada / Gate final aprobado.** Evidencia: `docs/roadmap/phase-20-10-7.md`.
+
+Verificar:
+
+```text
+main = única rama permanente
+README = documento de producto
+Prisma = branding visible
+GlitchBudget Engine = núcleo interno
+20.8 = aprobado
+20.9 = aprobado
+gate final = verde
+```
+
+Después de este punto:
+
+- todo trabajo nuevo parte de `main`;
+- una rama nueva solo existe si una tarea concreta la necesita;
+- la rama es temporal;
+- se elimina después del merge.
+
+**Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
+
+ y locale hardcodeados donde contradigan `settings.currency` / `settings.locale`; usar una única frontera de formato.
+- **A6:** una categoría o necesidad elegida manualmente no puede volver a ser sobrescrita por una regla automática al editar el concepto.
+- añadir tests de comportamiento/regresión que ejerzan estos contratos.
+
+No incluye refactorización general del contexto ni navegación por URL.
+
+**Gate Post-roadmap 1:**
+
+```text
+cambiar tema/políticas conserva período seleccionado
+Movimientos = mismo rango financiero que Resumen/Reportes
+escrituras monetarias tienen unidades inequívocas
+currency/locale visibles respetan settings
+selección manual vence a automatización
+npm run check
+npm run build
+npm run test:e2e
+```
+
+## Post-roadmap 2 — Ciclo de vida: fecha, carga y tema
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **A3:** una PWA abierta al cruzar medianoche debe actualizar la fecha financiera y volver a materializar/preparar lo que dependa de “hoy”.
+- **A4:** evitar estados vacíos falsos mientras los módulos de Resumen siguen cargando.
+- **A5:** resolver definitivamente `theme: 'system'`: implementar `prefers-color-scheme` correctamente o eliminarlo mediante normalización compatible.
+- tests de comportamiento para rollover de fecha, loading y contrato de tema.
+
+**Gate Post-roadmap 2:** ciclo de fecha determinista, loading coherente, tema sin estado ambiguo y quality gate verde.
+
+## Post-roadmap 3 — Navegación robusta
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C4:** tipar `activeTab` con el dominio de navegación;
+- sincronizar área principal con URL/history;
+- soportar atrás/adelante de navegador/Android dentro de Prisma cuando corresponda;
+- reemplazar carreras `setTimeout + getElementById(...).scrollIntoView` por navegación/focus explícitos y testeables.
+
+**Gate Post-roadmap 3:** navegación principal reversible y deep-linkable sin depender de timing del DOM; quality gate verde.
+
+## Post-roadmap 4 — Rendimiento medido
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C1:** medir en navegador el coste real de `readFinanceContextData`, relecturas Dexie y renders con datasets representativos antes de dividir contextos o introducir selectores.
+- **C2:** medir la lista de Movimientos con historial grande y aplicar paginación progresiva/“Mostrar más” o windowing solo si los datos lo justifican.
+- **C3:** medir el coste de los fondos con blur grande en Android/gama media; sustituirlos por una alternativa estática si hay impacto demostrable.
+- conservar benchmark antes/después.
+
+Datasets de referencia: 5k / 25k / 50k movimientos.
+
+**Gate Post-roadmap 4:** evidencia cuantitativa previa, mejora medible cuando se cambie código y ninguna regresión financiera.
+
+## Post-roadmap 5 — Mantenibilidad, pruebas y pulido
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C5:** reducir repetición de handlers de acciones cuando pueda hacerse sin ocultar semántica ni errores específicos;
+- **E1/E3:** reforzar tests de comportamiento UI y reducir grep-tests a contratos verdaderamente estructurales;
+- extraer un `NativeSelect` si elimina variantes repetidas sin degradar accesibilidad;
+- medir contraste/tamaños de texto pequeños y corregir solo incumplimientos reales;
+- decidir Prettier en un cambio de formato aislado si sigue siendo conveniente;
+- mantener `Must / Need / Want` como decisión de producto salvo cambio explícito;
+- conservar `src/contexts/finance--context.tsx` mientras siga actuando como entrypoint de compatibilidad.
+
+**Gate Post-roadmap 5:** comportamiento preservado, suite menos frágil, deuda repetitiva reducida y quality gate verde.
+
+## Fuera de esta secuencia
+
+Los siguientes puntos NO autorizan cambios dentro de Post-roadmap 1–5:
+
+- **A7:** clamp a cero en préstamos históricos — decisión explícita de compatibilidad read-only.
+- **B3:** importación multimoneda — ya normalizada/rechazada por las fronteras JSON/CSV y cubierta por regresiones.
+- **D1:** PBKDF2-SHA-256 v1 en 310 000 iteraciones — deuda consciente; cualquier v2 exige benchmark móvil físico y lectura retrocompatible de v1.
+- **D2:** CSP por meta / `unsafe-inline` — limitación conocida compatible con el threat model local-only; cualquier endurecimiento requiere una revisión de seguridad separada.
+- `Debt.principal` dual — deuda histórica mitigada por accesores, no urgente.
+- documentación 20.10.6/20.10.7 — cerrada.
+
+Si aparece un bug nuevo reproducible durante estas intervenciones:
+
+```text
+documentar evidencia
+→ decidir si cabe en la intervención actual
+→ si no cabe, no ampliar alcance silenciosamente
+→ proponer modificación explícita de esta sección
+```
+
 ### Regla de autoridad y no invención del roadmap
 
 A partir de este punto:
@@ -4646,17 +9422,17 @@ A partir de este punto:
 Roadmap septiembre 2026.txt = única fuente de verdad
 ```
 
-El roadmap vigente está **cerrado**.
+El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-etapas pendientes autorizadas = ninguna
+intervenciones pendientes autorizadas = Post-roadmap 1 → Post-roadmap 5
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna microintervención adicional autorizada después de 20.10.7.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. Solo existen las intervenciones Post-roadmap 1–5 descritas explícitamente arriba.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 
@@ -4779,6 +9555,8 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 20.9 Premium UI Polish
 ↓
 20.10 Repository Consolidation + Product README
+↓
+Post-roadmap 1–5 Hardening técnico
 ```
 
 
