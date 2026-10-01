@@ -33,7 +33,7 @@ test('16.5 keeps the roadmap order Templates -> Saved filters -> Rules explicit'
   );
   assert.deepEqual(
     LOCAL_AUTOMATION_LAYERS.map(layer => layer.location),
-    ['Quick Add', 'Movimientos', 'Ajustes → Automatización'],
+    ['Registro rápido', 'Movimientos', 'Ajustes → Automatización'],
   );
 });
 
