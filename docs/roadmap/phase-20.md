@@ -2,7 +2,7 @@
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`, Fase 20.
 
-Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.7 completadas / Gates aprobados; 20.7.5.8 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
+Estado: **20.1–20.7 completadas / Gates aprobados. 20.7.5 en curso con 20.7.5.1–20.7.5.8 completadas / Gates aprobados; 20.7.5.9 es la próxima intervención. 20.8, 20.9 y 20.10 permanecen planificadas.**
 
 Referencia visual congelada al iniciar la fase:
 
@@ -915,6 +915,19 @@ No introducir caches persistentes que creen una segunda fuente financiera.
 
 ### 20.7.5.8 — Independent financial reconciliation gate
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate de cierre:
+
+```text
+536/536 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36796234747 ✅
+```
+
 #### Objetivo
 
 Complementar los tests escritos junto con la implementación mediante datasets “golden” cuyos resultados esperados se definan de antemano.
@@ -973,6 +986,18 @@ Puede hacerse una reconciliación temporal con datos reales del usuario fuera de
 - no guardar información personal en tests;
 - no subir extractos reales;
 - no convertir datos personales en dependencia del gate automático.
+
+#### Resultado de implementación
+
+- `tests/fixtures/phase-20-7-5-8-golden.json` conserva el dataset y todos los expected como datos independientes.
+- `tests/phase-20-7-5-8-financial-reconciliation.test.ts` compara esos expected contra ledger, métricas, budgets, goals, planned payments, Home y Reports.
+- El dataset cubre opening balance, ingreso, cash/bank expense, compra/pago/saldo a favor de tarjeta, préstamo histórico, transferencias e inversión financiada.
+- También cubre presupuesto, meta, pending/confirmed planned occurrence y un corte de período el día 25.
+- Transferencias e inversión cambian la composición de activos sin alterar el net worth golden.
+- Planning conserva neutralidad financiera.
+- Home y Reports reconcilian la misma posición y net worth.
+- El motor actual pasó el golden sin modificar fórmulas productivas.
+- Evidencia completa: [phase-20-7-5-8.md](phase-20-7-5-8.md).
 
 **Gate 20.7.5.8:** los principales invariantes cuadran contra resultados esperados independientes del código productivo.
 
