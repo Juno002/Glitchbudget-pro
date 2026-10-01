@@ -54,6 +54,6 @@ export function useBalanceVisibility() {
 
 export function usePrivateCurrency() {
   const { balancesHidden } = useBalanceVisibility();
-  const { currency } = useFinances();
-  return useCallback((amount: number, amountCurrency = currency) => balancesHidden ? '••••••' : formatCurrency(amount, amountCurrency, 'es-DO'), [balancesHidden, currency]);
+  const { currency, locale } = useFinances();
+  return useCallback((amount: number, amountCurrency = currency) => balancesHidden ? '••••••' : formatCurrency(amount, amountCurrency, locale), [balancesHidden, currency, locale]);
 }
