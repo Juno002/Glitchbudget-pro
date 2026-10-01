@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.3 completadas / Gates aprobados; 20.8.4 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.4 completadas / Gates aprobados; 20.8.5 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -161,6 +161,31 @@ Reglas:
 **Gate 20.8.3:** mismo snapshot financiero produce exactamente la misma Lectura rápida.
 
 ## 20.8.4 — KPI de Resumen: comparación antes que explicación
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+562/562 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36823261725 ✅
+```
+
+Resultado:
+
+- cuatro KPI principales usan las comparaciones canónicas de 20.8.2;
+- `currentThrough` conserva la posición real visible hasta hoy;
+- Home mantiene `position` compatible y expone `positionComparisons` aparte;
+- cifra precede comparación y señal visual;
+- definiciones estables viven en popover accesible;
+- crédito no incluido, deuda real y proyección de inversiones siguen explícitos cuando afectan interpretación;
+- React no reconstruye porcentajes ni fórmulas financieras.
+
+Evidencia: [phase-20-8-4.md](phase-20-8-4.md).
 
 Rediseñar los KPI principales para priorizar:
 
