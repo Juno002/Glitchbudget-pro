@@ -1,6 +1,6 @@
 # Fase 20.9.6 — Idioma visible único
 
-Estado: **en validación**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -73,8 +73,30 @@ CSV, JSON, OPFS y Dexie permanecen por ser formatos/tecnologías explícitamente
 
 La única mezcla `cash/bank` visible pasa a “efectivo/banco”.
 
+## Review resuelto
+
+El review de PR detectó tres P2 válidos antes del cierre:
+
+- métricas/chart rows de Reportes todavía en inglés;
+- `LOCAL_AUTOMATION_LAYERS` todavía exponía títulos/localización/descripción en inglés;
+- errores y feedback de backup cifrado propagaban “backup” desde capas inferiores.
+
+Los tres se corrigieron en la misma intervención y quedaron cubiertos por `tests/phase-20-9-6-visible-language.test.ts`.
+
+## Quality gate aprobado
+
+```text
+622/622 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36900165070 ✅
+```
+
+El E2E se actualizó al copy visible “Datos y copias” y pasó completo.
+
 ## Gate
 
-El test de 20.9.6 protege las frases visibles normalizadas y documenta explícitamente las excepciones técnicas permitidas.
-
-Pendiente de Quality checks, review, reconciliación documental, merge y verificación post-merge antes de autorizar 20.9.7.
+**Aprobado.** 20.9.6 queda cerrada. Una vez fusionada esta reconciliación y verificado `main`, la siguiente intervención autorizada es **20.9.7 — Estados y feedback**.
