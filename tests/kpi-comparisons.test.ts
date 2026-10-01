@@ -18,13 +18,23 @@ test('20.8.2 declares periods, values, absolute delta and percentage delta', () 
   });
 });
 
-test('20.8.2 does not invent a percentage when there is no comparable base', () => {
+test('20.8.2 distinguishes a real zero previous value from an absent comparable base', () => {
   assert.deepEqual(compareKpi(currentPeriod, comparablePeriod, 5000, 0), {
     currentPeriod,
     comparablePeriod,
     current: 5000,
     previous: 0,
     absoluteDelta: 5000,
+    percentageDelta: null,
+    status: 'zero_previous',
+  });
+
+  assert.deepEqual(compareKpi(currentPeriod, null, 5000, null), {
+    currentPeriod,
+    comparablePeriod: null,
+    current: 5000,
+    previous: null,
+    absoluteDelta: null,
     percentageDelta: null,
     status: 'no_previous_base',
   });
@@ -64,4 +74,47 @@ test('20.8.2 uses the ledger-backed position selector for the four required KPIs
   assert.equal(result.totalDebt.previous, 4000);
   assert.equal(result.investments.current, 30000);
   assert.equal(result.investments.previous, 30000);
+});
+
+test('20.8.2 exposes an explicit no-base state for all required position KPIs', () => {
+  const input: ReportsSnapshotInput = {
+    accounts: [
+      { id: 'cash', name: 'Cash', type: 'cash', currency: 'DOP', openingBalance: 10000, startDate: '2026-01-01' },
+    ],
+    debts: [],
+    incomes: [],
+    expenses: [],
+    debtPayments: [],
+    transfers: [],
+  };
+
+  const result = selectPositionKpiComparisons(input, currentPeriod, null);
+  for (const comparison of Object.values(result)) {
+    assert.equal(comparison.status, 'no_previous_base');
+    assert.equal(comparison.comparablePeriod, null);
+    assert.equal(comparison.previous, null);
+    assert.equal(comparison.absoluteDelta, null);
+    assert.equal(comparison.percentageDelta, null);
+  }
+});
+
+test('20.8.2 report net-worth comparison reuses the canonical zero-base semantics', async () => {
+  const { selectReportsSnapshot } = await import('../src/domain/reports');
+  const empty: ReportsSnapshotInput = {
+    accounts: [],
+    debts: [],
+    incomes: [],
+    expenses: [],
+    debtPayments: [],
+    transfers: [],
+  };
+  const report = selectReportsSnapshot(empty, currentPeriod);
+
+  assert.deepEqual(report.comparison.netWorth, {
+    current: 0,
+    previous: 0,
+    difference: 0,
+    percentChange: null,
+    status: 'zero_previous',
+  });
 });
