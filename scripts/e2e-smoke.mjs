@@ -593,6 +593,7 @@ async function main() {
     if (!await client.evaluate(`(() => {
       const badge = document.querySelector('[data-achievement-badge]');
       if (!(badge instanceof HTMLButtonElement)) return false;
+      badge.dataset.focusBaselineShadow = getComputedStyle(badge).boxShadow;
       badge.focus();
       return document.activeElement === badge;
     })()`)) throw new Error('No se pudo enfocar una medalla de Logros.');
@@ -602,7 +603,13 @@ async function main() {
         const badge = document.querySelector('[data-achievement-badge]');
         if (!(badge instanceof HTMLButtonElement) || document.activeElement !== badge) return false;
         const style = getComputedStyle(badge);
-        return badge.matches(':focus-visible') && style.boxShadow !== 'none';
+        const ringShadow = style.getPropertyValue('--tw-ring-shadow').trim();
+        const baselineShadow = badge.dataset.focusBaselineShadow || '';
+        const glow = style.getPropertyValue('--achievement-glow').trim();
+        return badge.matches(':focus-visible')
+          && ringShadow.includes('2px')
+          && glow.length > 0
+          && style.boxShadow !== baselineShadow;
       })()`,
       'focus visible de BadgeCard',
     );

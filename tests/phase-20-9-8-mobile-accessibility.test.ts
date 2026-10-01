@@ -18,6 +18,9 @@ test('20.9.8 keeps dialogs inside the visible viewport and device safe areas', (
   assert.match(css, /env\(safe-area-inset-left, 0px\)/);
   assert.match(css, /env\(safe-area-inset-right, 0px\)/);
   assert.match(css, /\.viewport-sheet/);
+  assert.match(css, /left: calc\([\s\S]*safe-area-inset-left[\s\S]*safe-area-inset-right/);
+  assert.match(css, /\.viewport-sheet\[data-sheet-side='left'\]/);
+  assert.doesNotMatch(css, /\.viewport-sheet \{[\s\S]*?padding-(?:top|right|bottom|left):/);
   assert.match(dialog, /viewport-dialog/);
   assert.match(alertDialog, /viewport-dialog/);
   assert.match(sheet, /viewport-sheet/);
@@ -53,6 +56,9 @@ test('20.9.8 fixes the confirmed invisible keyboard focus on achievement badges'
   const achievements = source('src/components/dashboard/achievements-panel.tsx');
 
   assert.match(achievements, /data-achievement-badge=\{def\.id\}/);
+  assert.match(achievements, /shadow-\[var\(--achievement-glow\)\]/);
+  assert.match(achievements, /'--achievement-glow'/);
+  assert.doesNotMatch(achievements, /boxShadow: isUnlocked/);
   assert.match(achievements, /focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2/);
   assert.doesNotMatch(achievements, /BadgeCard[\s\S]*focus:outline-none"/);
   assert.match(achievements, /opacity: isUnlocked \? 1 : 0\.62/);
@@ -88,4 +94,18 @@ test('20.9.8 high-risk mobile dialogs rely on the shared viewport contract', () 
   assert.match(backups, /aria-label=\{'Descargar '\+file\.name\}/);
   assert.match(backups, /aria-label=\{'Restaurar '\+file\.name\}/);
   assert.match(backups, /aria-label=\{'Eliminar '\+file\.name\}/);
+});
+
+test('20.9.8 E2E distinguishes the BadgeCard focus ring from its normal achievement glow', () => {
+  const e2e = source('scripts/e2e-smoke.mjs');
+  const sidebar = source('src/components/ui/sidebar.tsx');
+  const sheet = source('src/components/ui/sheet.tsx');
+
+  assert.match(e2e, /focusBaselineShadow/);
+  assert.match(e2e, /getPropertyValue\('--tw-ring-shadow'\)/);
+  assert.match(e2e, /ringShadow\.includes\('2px'\)/);
+  assert.match(e2e, /style\.boxShadow !== baselineShadow/);
+  assert.match(sidebar, /className="w-\[--sidebar-width\] bg-sidebar p-0/);
+  assert.match(sheet, /data-sheet-side=\{side\}/);
+  assert.match(sheet, /right-4 top-4/);
 });

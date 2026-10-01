@@ -185,14 +185,14 @@ function BadgeCard({ def, isUnlocked }: { def: AchievementDef; isUnlocked: boole
           whileHover={!reducedMotion && isUnlocked ? { scale: 1.03, y: -1 } : {}}
           whileTap={!reducedMotion ? { scale: 0.98 } : {}}
           data-achievement-badge={def.id}
-          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center transition-all duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="relative flex w-full flex-col items-center gap-1 rounded-[var(--radius-interactive)] border p-2.5 text-center shadow-[var(--achievement-glow)] transition-all duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           style={{
             background: isUnlocked ? tier.bg : 'rgba(255,255,255,0.02)',
             borderColor: isUnlocked ? tier.border : 'rgba(255,255,255,0.04)',
-            boxShadow: isUnlocked ? `0 4px 20px ${tier.glow}` : 'none',
+            '--achievement-glow': isUnlocked ? `0 4px 20px ${tier.glow}` : '0 0 #0000',
             opacity: isUnlocked ? 1 : 0.62,
             filter: isUnlocked ? 'none' : 'grayscale(1)',
-          }}
+          } as React.CSSProperties}
         >
           <span className="text-2xl" role="img" aria-label={def.title}>
             {isUnlocked ? def.icon : '🔒'}
