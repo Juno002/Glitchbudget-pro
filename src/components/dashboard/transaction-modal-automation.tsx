@@ -64,7 +64,7 @@ export function TransactionRuleSuggestions({
         <div className="rounded-[var(--radius-interactive)] border border-[hsl(var(--brand-mint)/0.28)] bg-[hsl(var(--brand-mint)/0.09)] p-3 text-xs" aria-label="Regla aplicada automáticamente">
           <p className="font-medium">Aplicado automáticamente · {automaticRuleSuggestion.ruleName}</p>
           <p className="mt-1 text-muted-foreground">
-            Solo rellenó la clasificación de Quick Add. Puedes cambiar estos campos antes de guardar.
+            Solo rellenó la clasificación del registro rápido. Puedes cambiar estos campos antes de guardar.
           </p>
         </div>
       )}
