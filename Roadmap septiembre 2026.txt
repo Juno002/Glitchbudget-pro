@@ -4688,7 +4688,7 @@ No incluye refactorización general del contexto ni navegación por URL.
 
 ## Post-roadmap 2 — Ciclo de vida: fecha, carga y tema
 
-**Estado: pendiente.**
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/post-roadmap-2.md`.
 
 Alcance:
 
@@ -4697,7 +4697,7 @@ Alcance:
 - **A5:** resolver definitivamente `theme: 'system'`: implementar `prefers-color-scheme` correctamente o eliminarlo mediante normalización compatible.
 - tests de comportamiento para rollover de fecha, loading y contrato de tema.
 
-**Gate Post-roadmap 2:** ciclo de fecha determinista, loading coherente, tema sin estado ambiguo y quality gate verde.
+**Gate Post-roadmap 2:** aprobado. La fecha financiera se refresca al cambiar de día, Resumen no muestra vacíos durante carga y `system` sigue `prefers-color-scheme`. Post-roadmap 3 es la próxima intervención autorizada.
 
 ## Post-roadmap 3 — Navegación robusta
 
@@ -4774,7 +4774,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-roadmap 2 → Post-roadmap 5
+intervenciones pendientes autorizadas = Post-roadmap 3 → Post-roadmap 5
 ```
 
 No existe una Fase 20.11.
