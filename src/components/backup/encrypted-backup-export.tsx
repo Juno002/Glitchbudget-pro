@@ -73,12 +73,12 @@ export default function EncryptedBackupExport() {
       URL.revokeObjectURL(url);
 
       toast({
-        title: 'Backup cifrado exportado',
+        title: 'Copia cifrada exportada',
         description: 'Guarda también la contraseña: no se almacena en Prisma.',
       });
       close();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'No se pudo crear el backup cifrado.');
+      setError(cause instanceof Error ? cause.message : 'No se pudo crear la copia cifrada.');
     } finally {
       setBusy(false);
     }
@@ -104,7 +104,7 @@ export default function EncryptedBackupExport() {
       <div className="flex items-start gap-3">
         <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
         <div>
-          <p className="font-medium">Backup cifrado</p>
+          <p className="font-medium">Copia cifrada</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Se cifra localmente con Web Crypto antes de descargarlo. La contraseña no se envía ni se guarda.
           </p>
@@ -138,7 +138,7 @@ export default function EncryptedBackupExport() {
         Mínimo {ENCRYPTED_BACKUP_PASSWORD_MIN_LENGTH} caracteres. Si pierdes la contraseña, el archivo no podrá recuperarse.
       </p>
       <p className="text-xs text-muted-foreground">
-        Guarda la contraseña junto con el archivo. La restauración cifrada está disponible desde la misma sección de backups.
+        Guarda la contraseña junto con el archivo. La restauración cifrada está disponible desde la misma sección de copias de seguridad.
       </p>
 
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
@@ -146,7 +146,7 @@ export default function EncryptedBackupExport() {
       <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={busy}>
           {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LockKeyhole className="mr-2 h-4 w-4" />}
-          {busy ? 'Cifrando…' : 'Crear backup cifrado'}
+          {busy ? 'Cifrando…' : 'Crear copia cifrada'}
         </Button>
         <Button type="button" variant="ghost" disabled={busy} onClick={close}>Cancelar</Button>
       </div>
