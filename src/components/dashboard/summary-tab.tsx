@@ -6,6 +6,7 @@ import {
   ArrowUp,
   ArrowUpRight,
   CreditCard,
+  Info,
   Landmark,
   Settings2,
   TrendingUp,
@@ -27,6 +28,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { localDate } from '@/lib/finance-calculations';
 import { useTabs } from '@/contexts/tabs-context';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
@@ -36,6 +38,7 @@ import { useHomePreferences } from '@/hooks/use-home-preferences';
 import { HOME_MODULES } from '@/lib/home-preferences';
 import { formatPeriodRange } from '@/lib/period-format';
 import { cn } from '@/lib/utils';
+import type { KpiComparison } from '@/domain/kpi-comparisons';
 import type { LucideIcon } from 'lucide-react';
 
 function dateLabel(value:string) {
@@ -128,34 +131,101 @@ function HomeSection({id,children,className}:{id:HomeModuleId;children:ReactNode
   );
 }
 
+function PositionComparison({
+  comparison,
+  featured=false,
+}: {
+  comparison:KpiComparison;
+  featured?:boolean;
+}) {
+  const textClass=featured ? 'text-primary-foreground/85' : 'text-foreground/80';
+  const mutedClass=featured ? 'text-primary-foreground/65' : 'text-muted-foreground';
+
+  if (comparison.status==='no_previous_base') {
+    return <p className={cn('text-xs font-medium',mutedClass)}>Sin base comparable</p>;
+  }
+
+  const delta=comparison.absoluteDelta;
+  if (delta===0) {
+    return <p className={cn('text-xs font-medium',mutedClass)}>Sin cambio vs. período anterior</p>;
+  }
+
+  const Icon=delta>0 ? ArrowUp : ArrowDown;
+  if (comparison.percentageDelta!==null) {
+    return (
+      <p className={cn('inline-flex items-center gap-1 text-xs font-semibold tabular-nums',textClass)}>
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{comparison.percentageDelta.toLocaleString('es-DO',{maximumFractionDigits:2,signDisplay:'always'})}%</span>
+        <span className={mutedClass}>vs. período anterior</span>
+      </p>
+    );
+  }
+
+  return (
+    <div className={cn('inline-flex flex-wrap items-center gap-1 text-xs font-semibold',textClass)}>
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      <MoneyValue
+        amount={delta}
+        showSign
+        className={cn('text-xs font-semibold',featured && '!text-primary-foreground')}
+      />
+      <span className={mutedClass}>vs. período anterior</span>
+    </div>
+  );
+}
+
 function PositionCard({
   label,
   amount,
-  supporting,
+  comparison,
+  help,
+  warning,
   icon:Icon,
   tone='neutral',
   variant='default',
 }: {
   label:string;
   amount:number;
-  supporting:string;
+  comparison:KpiComparison;
+  help:string;
+  warning?:string;
   icon:LucideIcon;
   tone?:MoneyTone;
   variant?:'default'|'featured'|'warm'|'mint';
 }) {
+  const featured=variant==='featured';
   return (
     <Card className={cn(
       'relative overflow-hidden',
-      variant==='featured' && 'border-primary bg-primary text-primary-foreground shadow-[var(--shadow-floating)]',
+      featured && 'border-primary bg-primary text-primary-foreground shadow-[var(--shadow-floating)]',
       variant==='warm' && 'border-[hsl(var(--brand-coral)/0.18)] bg-[hsl(var(--brand-coral)/0.07)]',
       variant==='mint' && 'border-[hsl(var(--brand-mint)/0.22)] bg-[hsl(var(--brand-mint)/0.08)]',
     )}>
       <CardContent className="p-5">
         <div className={cn(
           'flex items-center justify-between gap-3 text-xs font-semibold',
-          variant==='featured' ? 'text-primary-foreground/70' : 'text-muted-foreground',
+          featured ? 'text-primary-foreground/70' : 'text-muted-foreground',
         )}>
-          <span>{label}</span>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span>{label}</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    featured ? 'hover:bg-primary-foreground/10' : 'hover:bg-muted',
+                  )}
+                  aria-label={'Qué significa '+label}
+                >
+                  <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 text-xs leading-relaxed">
+                {help}
+              </PopoverContent>
+            </Popover>
+          </div>
           <Icon className="h-[19px] w-[19px]" aria-hidden="true" />
         </div>
         <MoneyValue
@@ -163,13 +233,18 @@ function PositionCard({
           tone={tone}
           className={cn(
             'mt-4 block font-display text-[1.75rem] leading-none tracking-[-0.04em]',
-            variant==='featured' && '!text-primary-foreground',
+            featured && '!text-primary-foreground',
           )}
         />
-        <p className={cn(
-          'mt-3 text-[11px] leading-relaxed',
-          variant==='featured' ? 'text-primary-foreground/65' : 'text-muted-foreground',
-        )}>{supporting}</p>
+        <div className="mt-3" data-position-comparison={label}>
+          <PositionComparison comparison={comparison} featured={featured} />
+        </div>
+        {warning ? (
+          <p className={cn(
+            'mt-2 text-[11px] leading-relaxed',
+            featured ? 'text-primary-foreground/65' : 'text-muted-foreground',
+          )}>{warning}</p>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -269,31 +344,38 @@ export default function SummaryTab() {
             <PositionCard
               label="Disponible líquido"
               amount={home.position.liquidAssets}
+              comparison={home.position.comparisons.liquidAvailable}
               tone={home.position.liquidAssets<0?'negative':'neutral'}
-              supporting="Efectivo + bancos. No incluye crédito disponible."
+              help="Efectivo + bancos registrados en el ledger."
+              warning="No incluye crédito disponible."
               icon={WalletCards}
               variant="featured"
             />
             <PositionCard
               label="Patrimonio neto"
               amount={home.position.netWorth}
+              comparison={home.position.comparisons.netWorth}
               tone={home.position.netWorth<0?'negative':'neutral'}
-              supporting="Activos reales menos pasivos registrados."
+              help="Activos reales registrados menos pasivos registrados."
               icon={TrendingUp}
             />
             <PositionCard
               label="Deuda total"
               amount={home.position.liabilities}
+              comparison={home.position.comparisons.totalDebt}
               tone={home.position.liabilities>0?'negative':'neutral'}
-              supporting="Pasivos registrados, incluidas tarjetas y compatibilidad histórica."
+              help="Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles."
+              warning="Deuda real registrada."
               icon={CreditCard}
               variant="warm"
             />
             <PositionCard
               label="Inversiones"
               amount={home.position.investments}
+              comparison={home.position.comparisons.investments}
               tone="neutral"
-              supporting="Valor registrado real; sin rendimiento proyectado."
+              help="Valor registrado de los activos de inversión."
+              warning="No incluye rendimiento proyectado."
               icon={Landmark}
               variant="mint"
             />
