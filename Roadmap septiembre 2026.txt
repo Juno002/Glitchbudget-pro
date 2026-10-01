@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.2 completadas / Gates aprobados; próxima intervención autorizada: 20.9.3. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.3 completadas / Gates aprobados; próxima intervención autorizada: 20.9.4. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4019,6 +4019,34 @@ Principios:
 **Gate 20.9.2:** navegación y controles se sienten instantáneos en desktop y móvil.
 
 ### 20.9.3 — Superficies, textura y profundidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+602/602 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36891760591 ✅
+```
+
+Resultado:
+
+- jerarquía espacial compartida: page < card/panel < elevated < modal/sheet;
+- Card usa surface-card, border-subtle, spacing y shadow semánticos;
+- Dialog/AlertDialog/Sheet usan superficies opacas, backdrop temático y shadow-modal;
+- Popover usa surface-elevated + shadow-popover sin glass generalizado;
+- Tabs abandona fondos/bordes directos por tema;
+- Header y bottom nav conservan blur únicamente mediante `--blur-navigation`;
+- Prisma y Neón resuelven backdrops/sombras distintos y válidos en browser E2E;
+- Minimalista legado conserva compatibilidad sin convertirse en tercer destino premium;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-3.md`.
 
 Pulir de forma coherente:
 
@@ -4409,7 +4437,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.3 → 20.9.9
+20.9.4 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
