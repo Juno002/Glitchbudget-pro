@@ -70,7 +70,7 @@ test('Post-roadmap 1 writes actual transactions in cents without hidden x100 con
     accountId: cash.id,
     description: 'Cobro',
     amount: asCents(12_345),
-    categoryId: 'sueldo',
+    categoryId: 'salary',
     date: '2026-10-01',
     type: 'extra',
   });
@@ -79,7 +79,7 @@ test('Post-roadmap 1 writes actual transactions in cents without hidden x100 con
     accountId: cash.id,
     concept: 'Compra',
     amount: asCents(2_500),
-    categoryId: 'alimentacion',
+    categoryId: 'food',
     date: '2026-10-01',
     nature: 'Variable',
     paymentMethod: 'cash',
