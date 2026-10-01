@@ -255,15 +255,15 @@ function PanelHeading({
   title,
   action,
 }: {
-  eyebrow:string;
+  eyebrow?:string;
   title:string;
   action?:ReactNode;
 }) {
   return (
     <div className="flex items-start justify-between gap-3">
       <div>
-        <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
-        <h2 className="mt-1 font-display text-xl font-normal tracking-[-0.025em]">{title}</h2>
+        {eyebrow ? <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p> : null}
+        <h2 className={cn('font-display text-xl font-normal tracking-[-0.025em]',eyebrow && 'mt-1')}>{title}</h2>
       </div>
       {action}
     </div>
@@ -336,7 +336,6 @@ export default function SummaryTab() {
       <HomeSection id="position" className="space-y-3">
         <SectionHeader
           title="Posición financiera"
-          description="Dinero líquido, activos registrados y deuda real."
           actions={<Button type="button" variant="ghost" size="sm" onClick={goToAccounts}>Ver cuentas <ArrowUpRight className="h-4 w-4" /></Button>}
         />
         {loading ? <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{[0,1,2,3].map(i=><Skeleton key={i} className="h-[150px] w-full rounded-[var(--radius-card)]" />)}</div> : (
@@ -388,38 +387,31 @@ export default function SummaryTab() {
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
-              eyebrow="Seguimiento"
               title="Presupuesto disponible"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos <ArrowUpRight className="h-4 w-4" /></Button>}
             />
             {home.budget.configuredCount ? (
-              <div className="mt-6 space-y-5">
+              <div className="mt-5 space-y-4" data-home-budget-summary="decision-first">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground">Te queda</p>
+                    <p className="text-xs font-semibold text-muted-foreground">Disponible</p>
                     <MoneyValue
                       amount={home.budget.remaining}
                       tone={home.budget.remaining<0?'negative':'neutral'}
                       className="mt-1 block font-display text-[2rem] leading-none tracking-[-0.045em]"
                     />
-                    <p className="mt-2 text-xs text-muted-foreground">de {money(home.budget.limit)} presupuestados</p>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Gastado {money(home.budget.spent)} · Presupuestado {money(home.budget.limit)}
+                    </p>
                   </div>
                   <StatusBadge status={budgetStatus.status} label={budgetStatus.label} />
                 </div>
-                <ProgressMetric
-                  label="Uso del presupuesto"
-                  current={home.budget.spent}
-                  total={home.budget.limit}
-                  remaining={home.budget.remaining}
-                  currentLabel="Gastado"
-                  totalLabel="Presupuestado"
-                  status={budgetStatus.status}
-                  statusLabel={home.budget.overCount>0
-                    ? home.budget.overCount+' excedidos'
-                    : home.budget.alertCount>0
-                      ? home.budget.alertCount+' cerca del límite'
-                      : 'Sin alertas'}
-                />
+                {home.budget.overCount>0 || home.budget.alertCount>0 ? (
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 border-t border-border/70 pt-3 text-xs font-medium text-muted-foreground">
+                    {home.budget.overCount>0 ? <span>{home.budget.overCount} {home.budget.overCount===1?'presupuesto excedido':'presupuestos excedidos'}</span> : null}
+                    {home.budget.alertCount>0 ? <span>{home.budget.alertCount} {home.budget.alertCount===1?'presupuesto cerca del límite':'presupuestos cerca del límite'}</span> : null}
+                  </div>
+                ) : null}
               </div>
             ) : (
               <EmptyState
@@ -437,7 +429,6 @@ export default function SummaryTab() {
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
-              eyebrow="Lo que viene"
               title="Próximos pagos"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan <ArrowUpRight className="h-4 w-4" /></Button>}
             />
@@ -457,11 +448,13 @@ export default function SummaryTab() {
                     }}
                   />
                 ))}
-                <div className="flex flex-wrap items-center gap-2 pt-2 text-xs text-muted-foreground">
-                  <span>{home.upcoming.overdueCount>0 ? home.upcoming.overdueCount+' vencidos' : 'Sin pagos vencidos'}</span>
-                  <span aria-hidden="true">·</span>
-                  <span>{home.upcoming.todayCount>0 ? home.upcoming.todayCount+' para hoy' : 'Nada adicional para hoy'}</span>
-                </div>
+                {home.upcoming.overdueCount>0 || home.upcoming.todayCount>0 ? (
+                  <div className="flex flex-wrap items-center gap-2 pt-2 text-xs font-medium text-muted-foreground">
+                    {home.upcoming.overdueCount>0 ? <span>{home.upcoming.overdueCount} vencidos</span> : null}
+                    {home.upcoming.overdueCount>0 && home.upcoming.todayCount>0 ? <span aria-hidden="true">·</span> : null}
+                    {home.upcoming.todayCount>0 ? <span>{home.upcoming.todayCount} para hoy</span> : null}
+                  </div>
+                ) : null}
               </div>
             ) : (
               <EmptyState
@@ -479,7 +472,6 @@ export default function SummaryTab() {
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
-              eyebrow="Objetivos"
               title="Metas relevantes"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas <ArrowUpRight className="h-4 w-4" /></Button>}
             />
@@ -493,7 +485,7 @@ export default function SummaryTab() {
                     total={goal.target}
                     currentLabel="Ahorrado"
                     remaining={remaining}
-                    supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporte mensual requerido: '+money(schedule.requiredMonthly)}
+                    supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporta '+money(schedule.requiredMonthly)+'/mes'}
                     status={schedule.overdue?'danger':'neutral'}
                     statusLabel={goal.date?'Para '+dateLabel(goal.date):'Sin fecha límite'}
                   />
@@ -515,18 +507,18 @@ export default function SummaryTab() {
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
-              eyebrow="Activos no líquidos"
               title="Inversiones"
               action={<Button type="button" variant="ghost" size="sm" onClick={goToInvestments}>Ver inversiones <ArrowUpRight className="h-4 w-4" /></Button>}
             />
             {home.investments.activeCount ? (
-              <div className="mt-5 space-y-5">
-                <div>
-                  <p className="text-xs font-semibold text-muted-foreground">Valor registrado</p>
-                  <MoneyValue amount={home.investments.totalRegistered} className="mt-1 block font-display text-[2rem] leading-none tracking-[-0.045em]" />
-                  <p className="mt-2 text-xs text-muted-foreground">{home.investments.activeCount} inversiones activas · sin proyecciones futuras</p>
-                </div>
-                <div className="space-y-2 border-t border-border/70 pt-4">
+              <div className="mt-5 space-y-3" data-home-investments="action-first">
+                {home.investments.maturedCount>0 ? (
+                  <StatusBadge
+                    status="warning"
+                    label={home.investments.maturedCount===1?'1 inversión requiere revisión':home.investments.maturedCount+' inversiones requieren revisión'}
+                  />
+                ) : null}
+                <div className="space-y-2">
                   {home.investments.rows.map(({investment,projection})=>(
                     <div key={investment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-interactive)] bg-muted/45 px-3 py-3 text-sm">
                       <div>
@@ -557,14 +549,16 @@ export default function SummaryTab() {
   return (
     <div className="space-y-7 pb-24 md:pb-8" data-home-prisma="true">
       <div className="space-y-3">
-        <StatusBadge
-          status={home.attentionCount>0?'warning':'success'}
-          label={home.attentionCount>0 ? home.attentionCount+' elementos requieren atención' : 'Todo está en orden'}
-          className="min-h-7 px-3"
-        />
+        {home.attentionCount>0 ? (
+          <StatusBadge
+            status="warning"
+            label={home.attentionCount+' elementos requieren atención'}
+            className="min-h-7 px-3"
+          />
+        ) : null}
         <PageHeader
           title={<><span>Resumen</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
-          description={<>Tu panorama financiero · <strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong></>}
+          description={<strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong>}
           actions={<HomePreferencesDialog
             visibleOrder={preferences.visibleOrder}
             hidden={preferences.preferences.hidden}
