@@ -62,7 +62,7 @@ body {
 
     --gradient-primary: linear-gradient(135deg, #19453f 0%, #3b7469 100%);
     --gradient-accent: linear-gradient(135deg, #ea6959 0%, #84b6a7 100%);
-    --backdrop: rgba(27,47,43,0.22);
+    --backdrop: rgba(27,47,43,0.34);
 
     --radius: 14px;
     --space-page: 2rem;
@@ -95,6 +95,8 @@ body {
     --surface-card: var(--card);
     --surface-interactive: var(--card);
     --surface-modal: var(--popover);
+    --surface-elevated: var(--popover);
+    --blur-navigation: 18px;
 
     --border-subtle: hsl(var(--border) / 0.65);
     --border-strong: hsl(var(--border) / 1);
@@ -106,8 +108,10 @@ body {
     --status-danger: hsl(var(--bad));
     --status-info: hsl(var(--primary));
 
-    --shadow-card: 0 8px 28px rgba(52,70,62,0.045);
-    --shadow-control: 0 2px 8px rgba(52,70,62,0.055);
+    --shadow-card: 0 8px 28px rgba(52,70,62,0.035);
+    --shadow-control: 0 2px 8px rgba(52,70,62,0.05);
+    --shadow-popover: 0 12px 32px rgba(27,47,43,0.12);
+    --shadow-modal: 0 22px 60px rgba(27,47,43,0.16);
     --shadow-floating: 0 9px 22px rgba(25,69,63,0.18);
     --shadow-floating-strong: 0 12px 30px rgba(25,69,63,0.24);
     --shadow-brand: 0 5px 12px rgba(25,69,63,0.16);
@@ -162,10 +166,12 @@ body {
 
     --gradient-primary: linear-gradient(135deg, #00ff88 0%, #00e5ff 100%);
     --gradient-accent: linear-gradient(135deg, #ff2d78 0%, #00e5ff 100%);
-    --backdrop: rgba(8,8,8,0.85);
+    --backdrop: rgba(8,8,8,0.68);
 
-    --shadow-card: 0 10px 30px rgba(0,0,0,0.28);
-    --shadow-control: 0 2px 10px rgba(0,0,0,0.25);
+    --shadow-card: 0 10px 30px rgba(0,0,0,0.24);
+    --shadow-control: 0 2px 10px rgba(0,0,0,0.22);
+    --shadow-popover: 0 16px 38px rgba(0,0,0,0.5);
+    --shadow-modal: 0 24px 64px rgba(0,0,0,0.62);
     --shadow-floating: 0 0 24px hsl(var(--primary) / 0.18);
     --shadow-floating-strong: 0 0 34px hsl(var(--primary) / 0.28);
     --shadow-brand: 0 0 18px hsl(var(--primary) / 0.15);

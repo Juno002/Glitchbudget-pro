@@ -295,6 +295,39 @@ async function main() {
 
     await waitFor(client, `document.readyState === 'complete' && document.body.innerText.includes('Resumen')`, 'app inicial');
 
+    // Phase 20.9.3: both premium themes must resolve the shared depth system.
+    await waitFor(
+      client,
+      `(() => {
+        const html = document.documentElement;
+        const original = html.className;
+        const snapshot = theme => {
+          html.classList.remove('light', 'dark', 'serious');
+          html.classList.add(theme);
+          const style = getComputedStyle(html);
+          return {
+            backdrop: style.getPropertyValue('--backdrop').trim(),
+            cardShadow: style.getPropertyValue('--shadow-card').trim(),
+            modalShadow: style.getPropertyValue('--shadow-modal').trim(),
+            popoverShadow: style.getPropertyValue('--shadow-popover').trim(),
+            navBlur: style.getPropertyValue('--blur-navigation').trim(),
+          };
+        };
+        const light = snapshot('light');
+        const dark = snapshot('dark');
+        html.className = original;
+        return light.backdrop && dark.backdrop
+          && light.cardShadow && dark.cardShadow
+          && light.modalShadow && dark.modalShadow
+          && light.popoverShadow && dark.popoverShadow
+          && light.navBlur === '18px'
+          && dark.navBlur === '18px'
+          && light.backdrop !== dark.backdrop
+          && light.modalShadow !== dark.modalShadow;
+      })()`,
+      'profundidad Prisma y Neón',
+    );
+
     // Phase 20.2: verify the shared shell at desktop and mobile widths in a real browser.
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 1280,
