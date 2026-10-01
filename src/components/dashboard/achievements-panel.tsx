@@ -52,7 +52,7 @@ function AchievementToast({
     >
       <div
         data-achievement-toast-surface="true"
-        className="relative max-h-[calc(100dvh-11rem)] overflow-y-auto rounded-[var(--radius-modal)] border border-[var(--border-strong)] bg-[hsl(var(--surface-elevated))] p-4 pr-12 text-popover-foreground shadow-[var(--shadow-modal)] sm:max-h-[calc(100dvh-3rem)] sm:p-5 sm:pr-14"
+        className="relative max-h-[calc(100dvh-11rem)] overflow-y-auto rounded-[var(--radius-modal)] border border-[var(--border-strong)] bg-[hsl(var(--surface-elevated))] p-4 pr-12 text-popover-foreground shadow-[var(--shadow-modal)] sm:p-5 sm:pr-14 md:max-h-[calc(100dvh-3rem)]"
       >
         <span
           aria-hidden="true"
@@ -327,7 +327,7 @@ export function AchievementToastLayer() {
   if (!mounted) return null;
   // Keep viewport positioning separate from Framer Motion transforms.
   return createPortal(
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(10rem+env(safe-area-inset-bottom))] z-[100] flex justify-center px-3 sm:bottom-6 sm:px-6">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(10rem+env(safe-area-inset-bottom))] z-[100] flex justify-center px-3 md:bottom-6 md:px-6">
     <AnimatePresence initial={false} mode="wait">
       {newlyUnlocked.length > 0 &&
         (() => {
