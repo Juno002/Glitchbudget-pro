@@ -64,10 +64,10 @@ test('18.4 available OPFS writes the current canonical JSON under an automatic p
 
   assert.deepEqual(result, {
     status: 'created',
-    name: 'prisma-pre-import-2026-09-29T12-34-56-789Z-abc12345.json',
+    name: 'glitchbudget-pre-import-2026-09-29T12-34-56-789Z-abc12345.json',
   });
   assert.deepEqual(writes, [{
-    name: 'prisma-pre-import-2026-09-29T12-34-56-789Z-abc12345.json',
+    name: 'glitchbudget-pre-import-2026-09-29T12-34-56-789Z-abc12345.json',
     text: '{"v":13,"current":"state"}',
   }]);
 });

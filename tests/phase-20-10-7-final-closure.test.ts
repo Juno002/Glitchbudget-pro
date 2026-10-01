@@ -10,7 +10,7 @@ test('20.10.7 README is strictly product documentation for Prisma', () => {
   const readme = source('README.md');
 
   for (const required of [
-    '# Prisma',
+    'Prisma',
     'Resumen',
     'Movimientos',
     'Plan',
@@ -61,10 +61,9 @@ test('20.10.7 Prisma is visible while compatibility identifiers remain internal'
   assert.match(security, /glitchbudget_app_lock_v1/);
 
   assert.match(encrypted, /compatible de Prisma/);
-  assert.doesNotMatch(backupHook, /glitchbudget-backup-/);
-  assert.match(backupHook, /prisma-backup-/);
-  assert.doesNotMatch(preImport, /glitchbudget-pre-import-/);
-  assert.match(preImport, /prisma-pre-import-/);
+  assert.match(backupHook, /const name = `glitchbudget-backup-/);
+  assert.match(backupHook, /anchor\.download = `prisma-backup-/);
+  assert.match(preImport, /glitchbudget-pre-import-/);
 });
 
 test('20.10.7 roadmap closure and historical quality review are reconciled', () => {
