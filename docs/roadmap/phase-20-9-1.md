@@ -1,6 +1,6 @@
 # Fase 20.9.1 — Auditoría visual y de consistencia
 
-Estado: **inventario cerrado / pendiente de gate**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -536,4 +536,16 @@ El inventario cubre todas las dimensiones exigidas por el roadmap:
 
 Cada familia tiene prioridad y etapa propietaria.
 
-**Pendiente de Quality checks y reconciliación de estado antes de autorizar 20.9.2.**
+Quality gate aprobado:
+
+```text
+591/591 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36886044970 ✅
+```
+
+**Gate 20.9.1 aprobado.** El inventario queda cerrado, priorizado y sin zonas ambiguas. Una vez fusionada esta reconciliación y verificado `main`, la siguiente intervención autorizada es **20.9.2 — Motion tokens ultra rápidos**.
