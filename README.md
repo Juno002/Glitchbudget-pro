@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 1 oct 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 y 20.7.5 cerradas; 20.8 está en curso con 20.8.1–20.8.2 cerradas y 20.8.3 como siguiente intervención autorizada.** 20.9–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
+> **Estado del proyecto — 1 oct 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 y 20.7.5 cerradas; 20.8 está en curso con 20.8.1–20.8.3 cerradas y 20.8.4 como siguiente intervención autorizada.** 20.9–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
@@ -98,9 +98,9 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente tras 20.8.2:
+Baseline vigente tras 20.8.3:
 
-- **547/547 tests**;
+- **557/557 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
@@ -113,7 +113,8 @@ Baseline vigente tras 20.8.2:
 - final hardening manifiesta deuda/fechas/moneda/backups/migraciones/arquitectura como contratos ejecutables;
 - 20.8.1 congela el inventario de información visible de Home/Reportes y protege categorías default de instalación limpia sin reparación especulativa;
 - 20.8.2 centraliza comparaciones canónicas de disponible líquido, patrimonio, deuda e inversiones, distinguiendo valor anterior cero de ausencia real de base comparable;
-- Quality checks **36819113232** verdes para el baseline actual.
+- 20.8.3 añade Lectura rápida local y determinista sobre el snapshot de Reportes, con umbrales explícitos, ranking estable, máximo de 3 insights y copy parametrizado;
+- Quality checks **36821019073** verdes para el baseline funcional actual.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 

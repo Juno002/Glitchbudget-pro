@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.2 completadas / Gates aprobados; 20.8.3 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.3 completadas / Gates aprobados; 20.8.4 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -109,6 +109,33 @@ No calcular estos deltas en componentes React.
 **Gate 20.8.2:** semántica comparativa única, testeada y reutilizable.
 
 ## 20.8.3 — Motor local de Lectura rápida
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+557/557 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36821019073 ✅
+```
+
+Resultado:
+
+- `selectReportQuickRead()` consume exclusivamente métricas/read models ya calculados;
+- umbrales y prioridades quedan explícitos y testeados;
+- salida máxima de 3 insights, con ranking estable;
+- `copy.key + copy.params` evita generación libre de texto;
+- Reportes adjunta `quickRead` al snapshot canónico;
+- mismo snapshot produce la misma salida;
+- no hay reloj, aleatoriedad, red, React, Dexie ni inferencia causal;
+- no se añadió promedio multiperíodo nuevo: spending usa el período comparable ya canónico;
+- sin cambios de schema, backup, migración, persistencia o UI visual.
+
+Evidencia: [phase-20-8-3.md](phase-20-8-3.md).
 
 Crear un motor determinista de insights para Reportes.
 

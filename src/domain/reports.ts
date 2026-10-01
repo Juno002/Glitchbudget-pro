@@ -2,6 +2,7 @@ import type { Account, AccountTransfer, Debt, DebtPayment, Expense, Income } fro
 import { selectPosition } from './ledger';
 import { contains, type DateRange } from './periods';
 import { compareKpi } from './kpi-comparisons';
+import { selectReportQuickRead } from './report-insights';
 
 export type ReportRangePreset = '7d' | '30d' | '3m' | '6m' | '1y' | 'custom';
 
@@ -184,17 +185,21 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
   const previousNetWorth=selectNetWorthReport(input,previousRange.end);
   const netWorthComparison=compareKpi(range,previousRange,netWorth.netWorth,previousNetWorth.netWorth);
 
+  const comparison={
+    spending:{current:spending.total,previous:previousSpending.total,difference:spending.total-previousSpending.total,percentChange:pctChange(spending.total,previousSpending.total)},
+    income:{current:cashFlow.income,previous:previousCashFlow.income,difference:cashFlow.income-previousCashFlow.income,percentChange:pctChange(cashFlow.income,previousCashFlow.income)},
+    netCashFlow:{current:cashFlow.netCashFlow,previous:previousCashFlow.netCashFlow,difference:cashFlow.netCashFlow-previousCashFlow.netCashFlow,percentChange:pctChange(cashFlow.netCashFlow,previousCashFlow.netCashFlow)},
+    netWorth:{current:netWorthComparison.current,previous:netWorthComparison.previous,difference:netWorthComparison.absoluteDelta,percentChange:netWorthComparison.percentageDelta,status:netWorthComparison.status},
+  };
+  const quickRead=selectReportQuickRead({spending,comparison});
+
   return {
     range,
     previousRange,
     spending,
     cashFlow,
     netWorth,
-    comparison:{
-      spending:{current:spending.total,previous:previousSpending.total,difference:spending.total-previousSpending.total,percentChange:pctChange(spending.total,previousSpending.total)},
-      income:{current:cashFlow.income,previous:previousCashFlow.income,difference:cashFlow.income-previousCashFlow.income,percentChange:pctChange(cashFlow.income,previousCashFlow.income)},
-      netCashFlow:{current:cashFlow.netCashFlow,previous:previousCashFlow.netCashFlow,difference:cashFlow.netCashFlow-previousCashFlow.netCashFlow,percentChange:pctChange(cashFlow.netCashFlow,previousCashFlow.netCashFlow)},
-      netWorth:{current:netWorthComparison.current,previous:netWorthComparison.previous,difference:netWorthComparison.absoluteDelta,percentChange:netWorthComparison.percentageDelta,status:netWorthComparison.status},
-    },
+    comparison,
+    quickRead,
   };
 }
