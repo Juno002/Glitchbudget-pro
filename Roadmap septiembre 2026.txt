@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1–20.8.3 completadas / Gates aprobados; próxima intervención autorizada: 20.8.4. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: en curso.** 20.8.1–20.8.4 completadas / Gates aprobados; próxima intervención autorizada: 20.8.5. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3658,6 +3658,32 @@ snapshot de Reportes
 **Gate 20.8.3:** el mismo snapshot financiero produce exactamente la misma Lectura rápida.
 
 ### 20.8.4 — KPI de Resumen: comparar antes que explicar
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+562/562 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36823261725 ✅
+```
+
+Resultado de cierre:
+
+- Resumen muestra nombre → cifra → comparación → señal visual para disponible líquido, patrimonio neto, deuda total e inversiones;
+- `selectReportsSnapshot()` expone las cuatro comparaciones canónicas de posición;
+- el corte `currentThrough` evita incorporar movimientos posteriores a la fecha visible de Home;
+- `home.position` conserva su forma histórica y las comparaciones viven en `home.positionComparisons`;
+- definiciones estables pasan a popover accesible;
+- permanecen visibles las advertencias sobre crédito no incluido, deuda real y rendimientos proyectados no incluidos;
+- porcentaje/delta provienen de dominio; React solo representa el resultado;
+- sin cambios de schema, migración, backup, persistencia, red ni 20.8.5.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-4.md`.
 
 Rediseñar los KPI principales para priorizar:
 
@@ -4266,7 +4292,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.4 → 20.8.8
+20.8.5 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```
