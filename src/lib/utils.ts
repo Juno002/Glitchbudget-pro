@@ -1,3 +1,4 @@
+import type { Cents } from "@/domain/money"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -5,11 +6,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function toCents(amount: number | string): number {
+export function toCents(amount: number | string): Cents {
   if (typeof amount === 'string') {
     amount = parseFloat(amount) || 0;
   }
-  return Math.round(amount * 100);
+  return Math.round(amount * 100) as Cents;
 }
 
 export function formatCurrency(amountInCents: number, currency = 'DOP', locale = 'es-DO') {
@@ -37,4 +38,12 @@ export function formatDate(dateString: string | undefined | null) {
     } catch(e) {
         return 'Fecha inválida';
     }
+}
+
+
+export function currencyInputLabel(currency = 'DOP'): string {
+  const code = typeof currency === 'string' && /^[A-Z]{3}$/.test(currency.trim().toUpperCase())
+    ? currency.trim().toUpperCase()
+    : 'DOP';
+  return code === 'DOP' ? 'RD$' : code;
 }

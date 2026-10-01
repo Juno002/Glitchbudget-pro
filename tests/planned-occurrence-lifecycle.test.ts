@@ -5,15 +5,11 @@ import { after, beforeEach, test } from 'node:test';
 import { db } from '../src/lib/db';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import {
-  addPendingOccurrence,
-  actualTransactionIdForOccurrence,
-  confirmPlannedOccurrence,
-  materializePendingOccurrences,
-  skipPlannedOccurrence,
-} from '../src/lib/planned-occurrence-service';
+  addPendingOccurrence, actualTransactionIdForOccurrence, confirmPlannedOccurrence, materializePendingOccurrences, skipPlannedOccurrence, } from '../src/lib/planned-occurrence-service';
 import { occurrenceDisplayStatus } from '../src/domain/occurrence-status';
 import { BudgetWarning } from '../src/policies/budget-overspending';
-import { removeExpense, removeIncome, saveExpense } from '../src/lib/transaction-service';
+import { removeExpense, removeIncome } from '../src/lib/transaction-service';
+import { saveExpense } from './helpers/major-unit-transaction-writes';
 import { removeRecurringRule, saveRecurringRule } from '../src/lib/recurring-rule-service';
 import { readAccountSnapshot } from '../src/lib/accounts';
 import { selectMonthlyMetrics } from '../src/domain/metrics';

@@ -10,7 +10,8 @@ import { after, beforeEach, test } from 'node:test';
 import { db, type Expense, type Settings } from '../src/lib/db';
 import { calculateRecordedTotals, recordedCategories, isValidDate, localDate, type FinanceSnapshot } from '../src/lib/finance-calculations';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
-import { saveIncome, saveExpense, saveDebtPayment, saveGoalContribution } from '../src/lib/transaction-service';
+import { saveDebtPayment, saveGoalContribution } from '../src/lib/transaction-service';
+import { saveIncome, saveExpense } from './helpers/major-unit-transaction-writes';
 
 const settings: Settings = {
   id: 'general', theme: 'serious', strictMode: true, rolloverStrategy: 'reset',

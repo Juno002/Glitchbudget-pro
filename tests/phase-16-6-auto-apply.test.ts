@@ -113,8 +113,11 @@ test('16.6 UI makes opt-in explicit per rule and automatic application only fill
   assert.match(manager, /applyAutomatically \? \{ applyAutomatically: true \}/);
   assert.match(manager, /solo para esta regla/i);
   assert.match(modal, /resolveAutomaticRuleSuggestion/);
-  assert.match(modal, /setCategoryId\(automaticRuleSuggestion\.suggestion\.categoryId\)/);
-  assert.match(modal, /setNecessity\(automaticRuleSuggestion\.suggestion\.necessity\)/);
+  assert.match(modal, /shouldApplyAutomaticRuleField/);
+  assert.match(modal, /setCategoryEditedManually\(true\)/);
+  assert.match(modal, /setNecessityEditedManually\(true\)/);
+  assert.match(modal, /setCategoryId\(automaticRuleSuggestion\.suggestion\.categoryId!/);
+  assert.match(modal, /setNecessity\(automaticRuleSuggestion\.suggestion\.necessity!/);
   assert.match(modal, /Varias reglas automáticas coinciden/);
   assert.match(modal, /Puedes cambiar estos campos antes de guardar/);
   assert.doesNotMatch(context, /applyAutomatically|autoApply/);

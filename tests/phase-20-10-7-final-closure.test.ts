@@ -73,7 +73,7 @@ test('20.10.7 roadmap closure and historical quality review are reconciled', () 
   const quality = source('docs/quality-review.md');
 
   assert.match(roadmap, /20\.10\.1–20\.10\.7 cerradas/);
-  assert.match(roadmap, /intervenciones pendientes autorizadas = Post-roadmap 1 → Post-roadmap 5/);
+  assert.match(roadmap, /# Post-roadmap — Hardening técnico de Prisma/);
   assert.match(phase20, /Fase 20 completada \/ Gate final aprobado/);
   assert.match(phase2010, /20\.10\.1–20\.10\.7 cerradas \/ Gate final aprobado/);
 

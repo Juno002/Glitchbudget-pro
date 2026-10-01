@@ -16,6 +16,7 @@ import { Bookmark, ChevronDown, Pin, Save, Search, SlidersHorizontal, Trash2 } f
 import TransactionModal from './TransactionModal';
 import {
   applyTransactionFilters,
+  filtersForPeriod,
   hasTransactionFilters,
   type FilterableMovement,
   type MovementFilterType,
@@ -37,13 +38,6 @@ type UnifiedItem = FilterableMovement & {
   raw?: Expense | Income;
 };
 
-function monthRange(month:string) {
-  const [year,monthNumber]=month.split('-').map(Number);
-  const leap=year%4===0 && (year%100!==0 || year%400===0);
-  const days=monthNumber===2 ? (leap?29:28) : [4,6,9,11].includes(monthNumber) ? 30 : 31;
-  return {dateStart:month+'-01',dateEnd:month+'-'+String(days).padStart(2,'0')};
-}
-
 const typeLabels:Record<MovementFilterType,string>={
   income:'Ingreso',
   expense:'Gasto',
@@ -59,13 +53,13 @@ export default function MovementsView() {
   const tabs=useOptionalTabs();
   const movementFocusId=tabs?.movementFocusId ?? null;
   const clearMovementFocus=tabs?.clearMovementFocus;
-  const {incomes,expenses,currentMonth,debtPayments,debts,goalContributions,goals}=useFinances();
+  const {incomes,expenses,currentPeriod,locale,debtPayments,debts,goalContributions,goals}=useFinances();
 
   const accountData=useMovementAccountData();
 
   const [detailItem,setDetailItem]=useState<UnifiedItem|null>(null);
   const [search,setSearch]=useState('');
-  const [filters,setFilters]=useState<TransactionFilters>(()=>monthRange(currentMonth));
+  const [filters,setFilters]=useState<TransactionFilters>(()=>filtersForPeriod(currentPeriod));
   const [savedFilters,setSavedFilters]=useState<SavedTransactionFilter[]>([]);
   const [selectedSavedId,setSelectedSavedId]=useState('');
   const [savedFilterName,setSavedFilterName]=useState('');
@@ -75,9 +69,9 @@ export default function MovementsView() {
   const [editingIncome,setEditingIncome]=useState<Income|undefined>();
 
   useEffect(()=>{
-    setFilters(previous=>({...previous,...monthRange(currentMonth)}));
+    setFilters(previous=>({...previous,...filtersForPeriod(currentPeriod)}));
     setSelectedSavedId('');
-  },[currentMonth]);
+  },[currentPeriod]);
 
   useEffect(()=>{
     if(typeof window!=='undefined') setSavedFilters(loadSavedTransactionFilters(window.localStorage));
@@ -186,7 +180,7 @@ export default function MovementsView() {
   };
 
   const clearFilters=()=>{
-    setFilters(monthRange(currentMonth));
+    setFilters(filtersForPeriod(currentPeriod));
     setSearch('');
     setSelectedSavedId('');
   };
@@ -397,7 +391,7 @@ export default function MovementsView() {
                 badge={badges.length?<span className="flex flex-wrap gap-1">{badges}</span>:undefined}
                 amount={item.amount}
                 tone={tone}
-                dateLabel={new Date(item.date+'T00:00:00').toLocaleDateString('es-DO',{day:'numeric',month:'short'})}
+                dateLabel={new Date(item.date+'T00:00:00').toLocaleDateString(locale,{day:'numeric',month:'short'})}
               />
             );
           })}

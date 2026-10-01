@@ -11,15 +11,15 @@ import { prepareBudgetPeriodsForDate } from './budget-rollover';
 import { recordGoalContribution } from './goal-service';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
+import type { Cents } from '../domain/money';
 
+const centsSchema = z.number().int().positive('El monto debe ser mayor que cero.').max(Number.MAX_SAFE_INTEGER);
 const fields = {
   recurringRuleId: z.string().min(1).optional(),
   accountId: z.string().min(1).optional(),
   date: z.string().refine(isValidDate, 'Selecciona una fecha válida.'),
   categoryId: z.string().min(1, 'Selecciona una categoría.'),
-  amount: z.number().finite().positive('El monto debe ser mayor que cero.')
-    .transform(value => Math.round(value * 100))
-    .pipe(z.number().int().positive('El monto mínimo es 0.01.').max(Number.MAX_SAFE_INTEGER)),
+  amount: centsSchema,
   labels: z.array(z.string()).optional().transform(value => {
     if (value === undefined) return undefined;
     const labels = normalizeTransactionLabels(value);
@@ -38,7 +38,10 @@ const expenseSchema = z.object({
   paymentMethod: z.enum(['cash', 'credit']).default('cash'), debtId: z.string().optional(), recurringRuleId: z.string().optional(),
 });
 
-export async function saveIncome(input: Omit<Income, 'month'>, editing = false, options: ActualSaveOptions = {}): Promise<void> {
+export type IncomeWriteInput = Omit<Income, 'month' | 'amount'> & { amount: Cents };
+export type ExpenseWriteInput = Omit<Expense, 'month' | 'amount'> & { amount: Cents };
+
+export async function saveIncome(input: IncomeWriteInput, editing = false, options: ActualSaveOptions = {}): Promise<void> {
   const value = incomeSchema.parse(input);
   const row: Income = { ...input, ...value, month: value.date.slice(0, 7) };
   await db.transaction('rw', [...accountTables, db.categories, db.recurrents, db.settings], async () => {
@@ -85,7 +88,7 @@ export async function removeIncome(id: string): Promise<void> {
   });
 }
 
-export async function saveExpense(input: Omit<Expense, 'month'>, editing = false, budgetConfirmation?: string, options: ActualSaveOptions = {}): Promise<void> {
+export async function saveExpense(input: ExpenseWriteInput, editing = false, budgetConfirmation?: string, options: ActualSaveOptions = {}): Promise<void> {
   const value = expenseSchema.parse(input);
   const row: Expense = {
     ...input, ...value, month: value.date.slice(0, 7),
@@ -146,7 +149,6 @@ export async function removeExpense(id: string): Promise<void> {
   });
 }
 
-const centsSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 const outgoingTables = [...accountTables, db.categories, db.recurrents, db.settings, db.plans, db.goal_contributions, db.debts, db.goals];
 export async function saveDebtPayment(payment: import('./db').DebtPayment) {
   centsSchema.parse(payment.amount);

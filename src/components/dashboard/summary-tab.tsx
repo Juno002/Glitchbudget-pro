@@ -41,8 +41,8 @@ import { cn } from '@/lib/utils';
 import type { KpiComparison } from '@/domain/kpi-comparisons';
 import type { LucideIcon } from 'lucide-react';
 
-function dateLabel(value:string) {
-  return new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
+function dateLabel(value:string, locale:string) {
+  return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
 }
 
 function HomePreferencesDialog({
@@ -133,9 +133,11 @@ function HomeSection({id,children,className}:{id:HomeModuleId;children:ReactNode
 
 function PositionComparison({
   comparison,
+  locale,
   featured=false,
 }: {
   comparison:KpiComparison;
+  locale:string;
   featured?:boolean;
 }) {
   const textClass=featured ? 'text-primary-foreground/85' : 'text-foreground/80';
@@ -155,7 +157,7 @@ function PositionComparison({
     return (
       <p className={cn('inline-flex items-center gap-1 text-xs font-semibold tabular-nums',textClass)}>
         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-        <span>{comparison.percentageDelta.toLocaleString('es-DO',{maximumFractionDigits:2,signDisplay:'always'})}%</span>
+        <span>{comparison.percentageDelta.toLocaleString(locale,{maximumFractionDigits:2,signDisplay:'always'})}%</span>
         <span className={mutedClass}>vs. período anterior</span>
       </p>
     );
@@ -178,6 +180,7 @@ function PositionCard({
   label,
   amount,
   comparison,
+  locale,
   help,
   warning,
   icon:Icon,
@@ -187,6 +190,7 @@ function PositionCard({
   label:string;
   amount:number;
   comparison:KpiComparison;
+  locale:string;
   help:string;
   warning?:string;
   icon:LucideIcon;
@@ -244,7 +248,7 @@ function PositionCard({
           )}
         />
         <div className="mt-3" data-position-comparison={label}>
-          <PositionComparison comparison={comparison} featured={featured} />
+          <PositionComparison comparison={comparison} locale={locale} featured={featured} />
         </div>
         {warning ? (
           <p className={cn(
@@ -285,6 +289,7 @@ export default function SummaryTab() {
     currentMonth,
     currentPeriod,
     periodStartDay,
+    locale,
     plannedOccurrences,
     recurringRules,
     confirmPlannedOccurrenceItem,
@@ -350,6 +355,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Disponible líquido"
               amount={home.position.liquidAssets}
+              locale={locale}
               comparison={home.positionComparisons.liquidAvailable}
               tone={home.position.liquidAssets<0?'negative':'neutral'}
               help="Efectivo + bancos registrados en el ledger."
@@ -360,6 +366,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Patrimonio neto"
               amount={home.position.netWorth}
+              locale={locale}
               comparison={home.positionComparisons.netWorth}
               tone={home.position.netWorth<0?'negative':'neutral'}
               help="Activos reales registrados menos pasivos registrados."
@@ -368,6 +375,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Deuda total"
               amount={home.position.liabilities}
+              locale={locale}
               comparison={home.positionComparisons.totalDebt}
               tone={home.position.liabilities>0?'negative':'neutral'}
               help="Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles."
@@ -378,6 +386,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Inversiones"
               amount={home.position.investments}
+              locale={locale}
               comparison={home.positionComparisons.investments}
               tone="neutral"
               help="Valor registrado de los activos de inversión."
@@ -446,7 +455,7 @@ export default function SummaryTab() {
                     key={occurrence.id}
                     title={rule.title}
                     amount={rule.amount}
-                    dateLabel={dateLabel(occurrence.scheduledDate)}
+                    dateLabel={dateLabel(occurrence.scheduledDate,locale)}
                     kindLabel={rule.direction==='expense'?'Gasto':'Ingreso'}
                     status={occurrenceDisplayStatus(occurrence,today)}
                     actions={{
@@ -494,7 +503,7 @@ export default function SummaryTab() {
                     remaining={remaining}
                     supporting={schedule.requiredMonthly===null?'Sin fecha límite':schedule.overdue?'Fecha límite vencida':'Aporta '+money(schedule.requiredMonthly)+'/mes'}
                     status={schedule.overdue?'danger':'neutral'}
-                    statusLabel={goal.date?'Para '+dateLabel(goal.date):'Sin fecha límite'}
+                    statusLabel={goal.date?'Para '+dateLabel(goal.date,locale):'Sin fecha límite'}
                   />
                 ))}
               </div>
@@ -530,7 +539,7 @@ export default function SummaryTab() {
                     <div key={investment.id} className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-interactive)] bg-muted/45 px-3 py-3 text-sm">
                       <div>
                         <p className="font-semibold">{investment.name}</p>
-                        <p className="mt-0.5 text-xs text-muted-foreground">{investment.maturityDate ? 'Vence '+dateLabel(investment.maturityDate) : 'Sin vencimiento registrado'}</p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">{investment.maturityDate ? 'Vence '+dateLabel(investment.maturityDate,locale) : 'Sin vencimiento registrado'}</p>
                       </div>
                       <StatusBadge
                         status={projection.maturityReached?'warning':'neutral'}

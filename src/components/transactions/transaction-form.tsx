@@ -13,6 +13,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { localDate } from '@/lib/finance-calculations';
 import { useState, useMemo } from 'react';
+import { toCents } from '@/lib/utils';
 
 const formSchema = z.object({
   type: z.enum(['income', 'expense']),
@@ -45,7 +46,7 @@ export function TransactionForm({ setOpen }: { setOpen: (open: boolean) => void 
 
   async function onSubmit(values: TransactionFormValues) {
     const data = {
-        amount: values.amount,
+        amount: toCents(values.amount),
         date: localDate(),
         categoryId: values.categoryId,
     };

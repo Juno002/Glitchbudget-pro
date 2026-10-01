@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { DEBT_SEMANTICS } from '../src/domain/debt-semantics';
 import { db } from '../src/lib/db';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
-import { saveExpense } from '../src/lib/transaction-service';
+import { saveExpense } from './helpers/major-unit-transaction-writes';
 
 const fixture = (name: string) => JSON.parse(
   readFileSync(new URL(`./fixtures/${name}.json`, import.meta.url), 'utf8'),
