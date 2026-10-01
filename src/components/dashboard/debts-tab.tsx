@@ -202,7 +202,7 @@ export default function DebtsTab() {
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div 
-                      className={cn("h-full rounded-full transition-all duration-500", percentUsed > 80 ? "bg-bad" : percentUsed > 50 ? "bg-warning" : "bg-good")}
+                      className={cn("h-full rounded-full transition-all duration-[var(--motion-content)]", percentUsed > 80 ? "bg-bad" : percentUsed > 50 ? "bg-warning" : "bg-good")}
                       style={{ width: `${percentUsed}%` }}
                     />
                   </div>
