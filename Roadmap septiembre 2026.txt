@@ -2868,7 +2868,7 @@ Fase 20 no es un rewrite. Cada superficie se sustituye solo después de demostra
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.5 completadas / Gates aprobados y 20.8.6 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
+**Estado: completada / Gate aprobado.** 20.7.5.1–20.7.5.9 completadas. Fase 20.8 en curso; 20.8.1–20.8.6 completadas / Gates aprobados y 20.8.7 es la próxima intervención autorizada. Desarrollo detallado consolidado en `docs/roadmap/phase-20.md`.
 
 Esta etapa fue aprobada el 30 sep 2026 tras una revisión externa del código y verificación posterior contra `main`.
 
@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1–20.8.5 completadas / Gates aprobados; próxima intervención autorizada: 20.8.6. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: en curso.** 20.8.1–20.8.6 completadas / Gates aprobados; próxima intervención autorizada: 20.8.7. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3765,6 +3765,31 @@ No eliminar información necesaria para entender consecuencias financieras.
 **Gate 20.8.5:** menor ruido visual con igual o mayor capacidad de decisión.
 
 ### 20.8.6 — Reportes: nueva jerarquía editorial
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+576/576 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36826235113 ✅
+```
+
+Resultado de implementación:
+
+- Lectura rápida determinista abre Reportes usando `report.quickRead`;
+- Spending se convierte en hero analítico sin reconstruir métricas;
+- Comparison precede el desglose por categoría/naturaleza;
+- gráficos, tablas, Cash Flow y Net Worth quedan preservados;
+- Largest transactions pasa a Detalle exacto después de Net Worth;
+- todos los rangos y el seguimiento secundario de presupuestos permanecen disponibles;
+- sin cambios de dominio, persistencia, schema, backup, red ni fórmulas financieras nuevas.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-6.md`.
 
 Recomponer Reportes para que la pantalla cuente una historia analítica en lugar de presentar bloques equivalentes.
 
@@ -4318,7 +4343,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.6 → 20.8.8
+20.8.7 → 20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```
