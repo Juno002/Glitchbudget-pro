@@ -115,6 +115,33 @@ test('20.9.6 backup surfaces say copia while preserving technical formats', () =
   assert.doesNotMatch(preview, /Resumen del backup|Backup JSON v| · schema | · app /);
 });
 
+test('20.9.6 propagated display sources are also Spanish', () => {
+  const reports = source('src/components/dashboard/reports-tab.tsx');
+  const automation = source('src/lib/local-automation.ts');
+  const encrypted = source('src/lib/encrypted-backup.ts');
+  const management = source('src/hooks/use-backup-management.ts');
+
+  for (const label of [
+    "{label:'Gastos en efectivo'",
+    "{label:'Efectivo'",
+    "{label:'Bancos'",
+    "{label:'Inversiones'",
+    "{label:'Pasivos'",
+  ]) assert.ok(reports.includes(label), label);
+
+  assert.match(automation, /title: 'Plantillas'/);
+  assert.match(automation, /location: 'Registro rápido'/);
+  assert.match(automation, /title: 'Filtros guardados'/);
+  assert.match(automation, /title: 'Reglas'/);
+  assert.doesNotMatch(automation, /title: 'Templates'|title: 'Saved filters'|title: 'Rules'|location: 'Quick Add'|una Rule/);
+
+  assert.match(encrypted, /copia cifrada/i);
+  assert.doesNotMatch(encrypted, /backup cifrado/i);
+  assert.match(management, /Copia cifrada restaurada/);
+  assert.match(management, /No se pudo restaurar la copia cifrada/);
+  assert.doesNotMatch(management, /Backup cifrado restaurado|restaurar el backup cifrado/);
+});
+
 test('20.9.6 keeps documented technical names and formats unchanged', () => {
   const help = source('src/components/layout/help-dialog.tsx');
   const csv = source('src/components/backup/csv-backup-dialog.tsx');
