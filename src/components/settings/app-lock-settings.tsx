@@ -75,9 +75,9 @@ export default function AppLockSettings() {
       await enable(newPin);
       setNewPin('');
       setConfirmPin('');
-      setMessage('App lock activado. La aplicación se bloqueará al volver a abrirse o al usar “Bloquear ahora”.');
+      setMessage('Bloqueo de aplicación activado. La aplicación se bloqueará al volver a abrirse o al usar “Bloquear ahora”.');
     } catch {
-      setError('No se pudo activar App lock en este navegador.');
+      setError('No se pudo activar el bloqueo de aplicación en este navegador.');
     } finally {
       setBusy(false);
     }
@@ -118,7 +118,7 @@ export default function AppLockSettings() {
         return;
       }
       setDisablePin('');
-      setMessage('App lock desactivado.');
+      setMessage('Bloqueo de aplicación desactivado.');
     } finally {
       setBusy(false);
     }
@@ -126,13 +126,13 @@ export default function AppLockSettings() {
 
   if (!enabled) {
     return (
-      <form onSubmit={activate} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Configurar App lock">
+      <form onSubmit={activate} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Configurar bloqueo de aplicación">
         <div className="flex items-start gap-3">
           <LockOpen className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-medium">Bloqueo de aplicación</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Protege el acceso a la interfaz con un PIN local. No cifra Dexie ni tus backups.
+              Protege el acceso a la interfaz con un PIN local. No cifra Dexie ni tus copias de seguridad.
             </p>
           </div>
         </div>
@@ -145,18 +145,18 @@ export default function AppLockSettings() {
         </p>
         {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
         {message && <p className="text-sm text-muted-foreground" role="status">{message}</p>}
-        <Button type="submit" disabled={busy}>{busy ? 'Activando…' : 'Activar App lock'}</Button>
+        <Button type="submit" disabled={busy}>{busy ? 'Activando…' : 'Activar bloqueo'}</Button>
       </form>
     );
   }
 
   return (
-    <div className="space-y-5 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Administrar App lock">
+    <div className="space-y-5 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Administrar bloqueo de aplicación">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
-            <p className="font-medium">App lock activo</p>
+            <p className="font-medium">Bloqueo de aplicación activo</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Bloquea la interfaz financiera. No cifra Dexie ni los archivos del dispositivo.
             </p>
@@ -176,7 +176,7 @@ export default function AppLockSettings() {
       </form>
 
       <form onSubmit={turnOff} className="space-y-3 border-t pt-4">
-        <p className="text-sm font-medium">Desactivar App lock</p>
+        <p className="text-sm font-medium">Desactivar bloqueo de aplicación</p>
         <div className="max-w-sm">
           <PinInput label="PIN actual" value={disablePin} onChange={setDisablePin} autoComplete="current-password" />
         </div>
