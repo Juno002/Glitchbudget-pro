@@ -1,6 +1,6 @@
 # Fase 20.8.8 — Gate final 20.8
 
-Estado: **en validación**.
+Estado: **completada / Gate aprobado**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -60,8 +60,24 @@ Ninguno previsto.
 
 No hay cambios de schema, migraciones, formato de backup, red, persistencia o fórmula financiera. La única modificación ejecutable del gate es ampliar cobertura E2E/test para validar el contrato ya implementado.
 
+## Quality gate aprobado
+
+```text
+585/585 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36882536925 ✅
+```
+
+El E2E final valida Home desktop/móvil y Reportes desktop/móvil. En móvil, Reportes exige secciones y charts visibles con geometría contenida, controles de rango utilizables y ausencia de overflow horizontal global. También confirma cero requests externos y recarga offline desde service worker.
+
+El gate conserva la evidencia ejecutable de migraciones históricas y backup export/import round-trip. No se cambió schema, migración, formato de backup, persistencia, red ni lógica financiera.
+
 ## Gate
 
-**Pendiente de Quality checks sobre el HEAD de 20.8.8.**
+**Aprobado.** 20.8.8 queda cerrada y con ella se cierra **20.8 — Information Design + Deterministic Insights**.
 
-No autorizar 20.9.1 hasta obtener gate válido, reconciliar roadmap/documentos, fusionar a `main` y verificar `main` post-merge.
+La siguiente intervención autorizada, una vez fusionada esta reconciliación y verificado `main` post-merge, es **20.9.1 — Auditoría visual y de consistencia**.
