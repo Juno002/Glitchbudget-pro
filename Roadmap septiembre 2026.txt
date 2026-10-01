@@ -3596,12 +3596,12 @@ La UI solo representa el resultado.
 Quality gate funcional:
 
 ```text
-555/555 tests
+557/557 tests
 npm run check ✅
 npm run benchmark:ledger ✅
 npm run build ✅
 npm run test:e2e ✅
-Quality checks 36820237031 ✅
+Quality checks 36821019073 ✅
 ```
 
 Resultado de cierre:
@@ -3612,9 +3612,10 @@ Resultado de cierre:
 - máximo de 3 insights;
 - prioridad estable: cash flow 100, spending 90, net worth 80, categoría 60, spending cercano 40, fallback 10;
 - copy expresado como `key + params`, no texto libre generado;
-- reglas cubren spending arriba/abajo/cerca del período comparable, cambio de cash flow, cambio de net worth, categoría dominante y ausencia de cambio material;
+- reglas cubren spending arriba/abajo/cerca del período comparable, incluido 0 → gasto positivo sin porcentaje fabricado, cambio de cash flow, cambio de net worth, categoría dominante y ausencia de cambio material;
 - no se inventa promedio reciente multiperíodo porque el snapshot actual no lo expone;
 - no hay diagnóstico, predicción, causalidad, LLM, reloj, aleatoriedad, red, Dexie ni React en el motor;
+- el umbral de categoría se evalúa sobre la proporción real antes de redondear;
 - mismo snapshot produce exactamente la misma Lectura rápida;
 - sin cambios de schema, migración, backup, persistencia, UI visual ni 20.8.4.
 
