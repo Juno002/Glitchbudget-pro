@@ -54,7 +54,7 @@ test('20.9.1 assigns priorities and an explicit owner to all later premium-polis
 
 test('20.9.1 removes theme-scope ambiguity without changing compatibility', () => {
   assert.match(audit, /Prisma \+ Neón.*dos objetivos premium/s);
-  assert.match(audit, /Minimalista legado.*compatibilidad/s);
+  assert.match(audit, /Minimalista legado[\\s\\S]*compatibilidad/);
   assert.match(audit, /no tercer destino de paridad premium/i);
 });
 
