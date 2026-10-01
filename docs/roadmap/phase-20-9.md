@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.2 completadas / Gates aprobados; 20.9.3 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.3 completadas / Gates aprobados; 20.9.4 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -94,6 +94,31 @@ Principios:
 **Gate 20.9.2:** navegación y controles se sienten instantáneos en desktop y móvil.
 
 ## 20.9.3 — Superficies, textura y profundidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+602/602 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36891760591 ✅
+```
+
+Resultado:
+
+- política única de surfaces, borders, shadows, backdrop y blur;
+- cards/panels opacos y de bajo contraste;
+- dialogs/sheets con profundidad modal compartida;
+- popovers elevados sin blur decorativo generalizado;
+- navegación translúcida conserva blur tokenizado;
+- browser smoke valida Prisma + Neón;
+- Minimalista legado preservado como compatibilidad.
+
+Evidencia: [phase-20-9-3.md](phase-20-9-3.md).
 
 Pulir:
 
