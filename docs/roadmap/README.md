@@ -44,14 +44,14 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-555/555 tests
+557/557 tests
 Ledger benchmark: 50k position 32.22 ms / histories 23.68 ms median
 Golden reconciliation: net worth 1.205m / spending 90k / cash flow 340k
 Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.8.1 information inventory + clean-install category regression ✅
 20.8.2 canonical KPI comparisons: liquid/net worth/debt/investments + explicit base states ✅
 20.8.3 deterministic Quick Read: explicit thresholds + stable ranking + max 3 insights ✅
-Quality checks 36820237031 ✅
+Quality checks 36821019073 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home + Movimientos/composer + Plan + Reports/charts + movement + offline ✅
 ```
 
