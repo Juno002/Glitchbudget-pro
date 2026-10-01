@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.4 completadas / Gates aprobados; 20.8.5 es la próxima intervención autorizada**.
+Estado: **en curso — 20.8.1–20.8.5 completadas / Gates aprobados; 20.8.6 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -208,6 +208,31 @@ Mantener visibles cuando corresponda:
 **Gate 20.8.4:** Home comunica posición + dirección sin reconstruir significado financiero.
 
 ## 20.8.5 — Home: decir más con menos
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate funcional:
+
+```text
+569/569 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36825003818 ✅
+```
+
+Resultado:
+
+- Resumen elimina copy definicional y eyebrows redundantes sin ocultar consecuencias financieras;
+- Presupuesto prioriza Disponible y mantiene Gastado, Presupuestado, estado y alertas accionables;
+- Próximos elimina filler positivo y conserva ocurrencias, fechas, importes y acciones;
+- Metas conserva progreso/fecha/consecuencia con copy más compacto;
+- Inversiones evita duplicar el total de Posición y prioriza vencimientos/revisión;
+- el badge global solo aparece cuando existe atención real;
+- no se añaden fórmulas financieras, dominio, persistencia, schema, backup ni red.
+
+Evidencia: [phase-20-8-5.md](phase-20-8-5.md).
 
 Revisar la composición completa de Resumen:
 
