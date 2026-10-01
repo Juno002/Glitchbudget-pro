@@ -213,16 +213,23 @@ function PositionCard({
                 <button
                   type="button"
                   className={cn(
-                    'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    featured ? 'hover:bg-primary-foreground/10' : 'hover:bg-muted',
+                    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-interactive)] transition-colors duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    featured ? 'hover:bg-primary-foreground/10 active:bg-primary-foreground/15' : 'hover:bg-muted active:bg-muted/80',
                   )}
                   aria-label={'Qué significa '+label}
                 >
-                  <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                  <Info className="h-4 w-4" aria-hidden="true" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="start" className="w-64 text-xs leading-relaxed">
-                {help}
+              <PopoverContent
+                align="start"
+                className="w-64 text-xs leading-relaxed"
+                showCloseButton
+                closeLabel={'Cerrar explicación de '+label}
+                data-context-help={label}
+              >
+                <p className="font-semibold text-foreground">{label}</p>
+                <p className="mt-1 text-muted-foreground">{help}</p>
               </PopoverContent>
             </Popover>
           </div>
