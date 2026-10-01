@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: en curso.** 20.10.1–20.10.2 completadas / Gates aprobados; próxima intervención autorizada: 20.10.3. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: en curso.** 20.10.1–20.10.3 completadas / Gates aprobados; próxima intervención autorizada: 20.10.4. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4475,6 +4475,12 @@ Para cualquier rama no contenida completamente en `main`:
 
 ### 20.10.3 — Unificación controlada en main
 
+**Estado: completada / Gate aprobado.**
+
+20.10.2 confirmó **0 trabajo vigente pendiente de integrar**. `main` `e8ca8f5d4ccbb37fcf296c1ae0aa8c2e8c96a9b0` ya era autosuficiente; 20.10.3 no rescata código antiguo. Se cerraron sin merge las PR históricas #35 (`phase-19-5-prisma-engine-gate`) y #7 (`wip/codex-local`), dejando **0 PRs abiertas** y conservando sus ramas para la limpieza posterior de 20.10.5.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-3.md`.
+
 Integrar únicamente trabajo único que siga siendo válido.
 
 Después:
@@ -4484,7 +4490,7 @@ Después:
 - ninguna rama funciona como fuente paralela de verdad;
 - los documentos históricos pueden seguir existiendo como archivos, no como ramas activas.
 
-**Gate 20.10.3:** `main` es autosuficiente.
+**Gate 20.10.3:** aprobado. `main` es autosuficiente; 20.10.4 es la próxima intervención autorizada.
 
 ### 20.10.4 — Gate completo sobre main
 
