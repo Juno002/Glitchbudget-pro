@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { MOTION_SECONDS } from '@/lib/motion';
-import { PageHeader, StatusBadge } from '@/components/finance-ui';
+import { FeedbackMessage, PageHeader, StatusBadge } from '@/components/finance-ui';
 import { PLAN_SECTIONS } from '@/components/layout/plan-navigation';
 import { useTabs } from '@/contexts/tabs-context';
 import TransferDialog from './transfer-dialog';
@@ -156,7 +156,7 @@ function NewBudgetDialog({
           <button
             disabled={!selectedCatId || !(parseFloat(amount) > 0) || saving}
             onClick={() => void handleSave()}
-            className="h-11 w-full rounded-[var(--radius-interactive)] bg-primary font-semibold text-primary-foreground shadow-[var(--shadow-control)] disabled:opacity-50"
+            className="h-11 w-full rounded-[var(--radius-interactive)] bg-primary font-semibold text-primary-foreground shadow-[var(--shadow-control)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
           >
             {saving ? 'Guardando…' : 'Guardar presupuesto'}
           </button>
@@ -249,9 +249,9 @@ export default function PlanningTab() {
 
             <CardContent>
               {!budgetPeriod ? (
-                <p role="alert" className="rounded-lg border border-destructive/30 p-4 text-sm text-destructive">La fecha inicial debe ser igual o anterior a la final.</p>
+                <FeedbackMessage tone="error" description="La fecha inicial debe ser igual o anterior a la final." />
               ) : loading ? (
-                <div className="space-y-3">{[...Array(4)].map((_, index) => <Skeleton key={index} className="h-36 w-full rounded-xl" />)}</div>
+                <div className="space-y-3">{[...Array(4)].map((_, index) => <Skeleton key={index} className="h-36 w-full rounded-[var(--radius-card)]" />)}</div>
               ) : (
                 <>
                   <div className="grid gap-3 xl:grid-cols-2">
