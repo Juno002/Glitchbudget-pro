@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AccountSelect } from './account-select';
 import { EmptyState } from '@/components/finance-ui';
 import { Landmark, Plus } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const typeLabels = {
   certificate:'Certificado financiero',
@@ -92,7 +93,7 @@ export default function InvestmentsManager() {
     }
   };
 
-  if (!data) return <div className="h-24 animate-pulse rounded-xl bg-muted/20" />;
+  if (!data) return <Skeleton className="h-24 w-full rounded-[var(--radius-card)]" />;
 
   return (
     <div className="space-y-5" data-investments-prisma="true">
@@ -139,7 +140,7 @@ export default function InvestmentsManager() {
                 </label>
               </div>
               <label className="block text-sm">Notas<Input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Opcional" /></label>
-              <div className="rounded-lg border p-3 text-xs text-muted-foreground">
+              <div className="rounded-[var(--radius-interactive)] border p-3 text-xs text-muted-foreground">
                 {mode === 'new'
                   ? 'El principal saldrá de la cuenta elegida mediante una transferencia. El patrimonio neto no cambia por abrir la inversión.'
                   : 'El valor actual se registra como saldo inicial del activo. No se crea ingreso ni transferencia para evitar doble contabilización.'}

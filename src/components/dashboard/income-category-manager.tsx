@@ -11,6 +11,7 @@ import { Button } from "../ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 import IconPicker from "./icon-picker";
+import { Plus, RotateCcw } from "lucide-react";
 
 export default function IncomeCategoryManager() {
     const { incomeCategories, addIncomeCategory, resetIncomeCategories } = useFinances();
@@ -52,10 +53,10 @@ export default function IncomeCategoryManager() {
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto">
-                        <Button onClick={handleAddCategory} className="flex-1 rounded-[var(--radius-interactive)] md:w-auto">➕ Agregar</Button>
+                        <Button onClick={handleAddCategory} className="flex-1 rounded-[var(--radius-interactive)] md:w-auto"><Plus className="mr-2 h-4 w-4" aria-hidden="true" />Agregar</Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <Button variant="outline" className="w-full md:w-auto">🔄 Restablecer</Button>
+                                <Button variant="outline" className="w-full md:w-auto"><RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />Restablecer</Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>

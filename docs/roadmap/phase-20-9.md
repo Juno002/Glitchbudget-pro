@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.8 completadas / Gates aprobados; 20.9.9 es la próxima intervención autorizada**.
+Estado: **completada / Gate aprobado — 20.9.1–20.9.9 cerradas; próxima intervención autorizada: 20.10.1**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -375,6 +375,33 @@ Revisar:
 
 ## 20.9.9 — Pixel/interaction sweep final
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+640/640 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36915706293 ✅
+```
+
+Resultado:
+
+- acciones Agregar/Restablecer de categorías usan Lucide y eliminan emoji funcional residual;
+- TransactionRow y superficies secundarias auditadas consumen radius/pressed/focus compartidos;
+- skeleton residual de Inversiones vuelve al primitive `Skeleton`;
+- Plan reutiliza `Button` para las acciones raw restantes;
+- Ajustes elimina radios locales `rounded-xl` del sweep;
+- E2E recorre todas las superficies exigidas y cambia entre Prisma claro y Neón oscuro desde los controles reales;
+- no se reabre la arquitectura informativa de 20.8 ni se añade funcionalidad;
+- dominio financiero, Dexie, backup, migraciones, persistencia y red permanecen intactos.
+
+Evidencia: [phase-20-9-9.md](phase-20-9-9.md).
+
 Recorrido completo:
 
 ```text
@@ -393,7 +420,7 @@ Revisar ambos temas y varios tamaños.
 
 No introducir nuevas features en esta intervención.
 
-**Gate 20.9:** UI premium cerrada, sin cambios de semántica financiera.
+**Gate 20.9:** aprobado. UI premium cerrada, sin cambios de semántica financiera.
 
 Requerido:
 

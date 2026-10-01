@@ -128,9 +128,9 @@ function NewBudgetDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-interactive)] border border-dashed text-sm font-semibold text-primary transition-colors hover:bg-primary/10">
-          <Plus className="h-4 w-4" /> Nuevo presupuesto
-        </button>
+        <Button variant="outline" className="mt-4 min-h-12 w-full border-dashed text-primary hover:bg-primary/10">
+          <Plus className="mr-2 h-4 w-4" /> Nuevo presupuesto
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
@@ -153,13 +153,13 @@ function NewBudgetDialog({
             <span>Límite</span>
             <Input type="number" min="0.01" step="0.01" inputMode="decimal" value={amount} onChange={event => setAmount(event.target.value)} placeholder="0.00" />
           </label>
-          <button
+          <Button
             disabled={!selectedCatId || !(parseFloat(amount) > 0) || saving}
             onClick={() => void handleSave()}
-            className="h-11 w-full rounded-[var(--radius-interactive)] bg-primary font-semibold text-primary-foreground shadow-[var(--shadow-control)] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
+            className="h-11 w-full shadow-[var(--shadow-control)]"
           >
             {saving ? 'Guardando…' : 'Guardar presupuesto'}
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -279,9 +279,9 @@ export default function PlanningTab() {
                   )}
 
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button type="button" className="min-h-11 rounded-[var(--radius-interactive)] border px-3 text-sm font-medium transition-colors hover:bg-muted/35" onClick={() => setShowAll(value => !value)}>
+                    <Button type="button" variant="outline" className="min-h-11" onClick={() => setShowAll(value => !value)}>
                       {showAll ? 'Ocultar categorías sin presupuesto' : 'Mostrar todas las categorías'}
-                    </button>
+                    </Button>
                   </div>
                   <NewBudgetDialog key={budgetPeriod.id} inactiveCategories={inactive.filter(id => expenseCategories.includes(id))} onSave={handleSaveBudget} />
                 </>

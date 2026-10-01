@@ -259,7 +259,7 @@ export function SettingsDialog() {
               })}
             </div>
 
-            <div className="rounded-xl border bg-muted/20 p-4 text-sm">
+            <div className="rounded-[var(--radius-card)] border bg-muted/20 p-4 text-sm">
               <p className="font-medium">Responsabilidades separadas</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Las plantillas se gestionan dentro del registro rápido; los filtros guardados, en Movimientos; las reglas se gestionan aquí y solo sugieren clasificación.
@@ -303,7 +303,7 @@ export function SettingsDialog() {
             <SectionHeader title="Datos y respaldos" description="Exporta antes de cambiar de navegador, dirección o dispositivo." />
             <div className="max-w-md"><PersistentStorageSettings /></div>
             <div className="max-w-md"><OpfsBackupDialog /></div>
-            <div className="rounded-xl border border-destructive/30 p-4 space-y-3">
+            <div className="rounded-[var(--radius-card)] border border-destructive/30 p-4 space-y-3">
               <h3 className="font-semibold text-destructive">Zona destructiva</h3>
               <p className="text-sm text-muted-foreground">Borrar los datos elimina movimientos, planes, cuentas, metas y copias locales del sitio.</p>
               <AlertDialog>
