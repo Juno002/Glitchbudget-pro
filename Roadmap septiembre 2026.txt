@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: en curso.** 20.10.1 completada / Gate aprobado; próxima intervención autorizada: 20.10.2. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: en curso.** 20.10.1–20.10.2 completadas / Gates aprobados; próxima intervención autorizada: 20.10.3. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4456,6 +4456,12 @@ No borrar ninguna rama antes de completar esta clasificación.
 
 ### 20.10.2 — Auditoría de trabajo único
 
+**Estado: completada / Gate aprobado.**
+
+Auditoría post-squash sobre `main` `d1d36d6de08f2ae94ce0aad4403ebf5df6bba4f8`: 44 ramas no contenidas por ancestry, 44 decisiones explícitas y **0 trabajo vigente pendiente de integrar**. Las 42 ramas de fases/reconciliación, la rama ya fusionada de 20.10.1 y `wip/codex-local` se clasifican como residuos históricos; no se fusionó ni eliminó ninguna rama.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-2.md`.
+
 Para cualquier rama no contenida completamente en `main`:
 
 - comparar contra `main`;
@@ -4465,7 +4471,7 @@ Para cualquier rama no contenida completamente en `main`:
 - no fusionar automáticamente código antiguo solo para “salvarlo”;
 - preservar únicamente trabajo compatible con el producto final.
 
-**Gate 20.10.2:** no existe trabajo relevante sin decisión explícita.
+**Gate 20.10.2:** aprobado. No existe trabajo relevante sin decisión explícita; 20.10.3 es la próxima intervención autorizada.
 
 ### 20.10.3 — Unificación controlada en main
 
