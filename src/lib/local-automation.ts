@@ -28,21 +28,21 @@ export type LocalAutomationStorage = Pick<Storage, 'getItem' | 'setItem' | 'remo
 export const LOCAL_AUTOMATION_LAYERS = [
   {
     id: 'templates',
-    title: 'Templates',
-    location: 'Quick Add',
+    title: 'Plantillas',
+    location: 'Registro rápido',
     description: 'Reutilizan datos de un movimiento frecuente sin crear movimientos por sí solas.',
   },
   {
     id: 'saved_filters',
-    title: 'Saved filters',
+    title: 'Filtros guardados',
     location: 'Movimientos',
     description: 'Recuperan vistas de búsqueda y filtros; nunca clasifican ni modifican movimientos.',
   },
   {
     id: 'rules',
-    title: 'Rules',
+    title: 'Reglas',
     location: 'Ajustes → Automatización',
-    description: 'Clasifican localmente; por defecto sugieren y solo autoaplican cuando una Rule lo habilita explícitamente.',
+    description: 'Clasifican localmente; por defecto sugieren y solo se aplican automáticamente cuando una regla lo habilita explícitamente.',
   },
 ] as const;
 
@@ -84,29 +84,29 @@ export function normalizeLocalAutomationBackup(value: unknown): LocalAutomationB
   }
   const raw = value as Partial<LocalAutomationBackup>;
 
-  const templateRows = requireArray(raw.templates, 'Templates', QUICK_ADD_TEMPLATES_MAX);
+  const templateRows = requireArray(raw.templates, 'Plantillas', QUICK_ADD_TEMPLATES_MAX);
   const templates = templateRows.map(normalizeQuickAddTemplate);
   if (templates.some(row => row === null)) {
-    throw new Error('El respaldo local de Templates contiene datos inválidos.');
+    throw new Error('El respaldo local de Plantillas contiene datos inválidos.');
   }
 
-  const savedFilterRows = requireArray(raw.savedFilters, 'Saved Filters', SAVED_TRANSACTION_FILTERS_MAX);
+  const savedFilterRows = requireArray(raw.savedFilters, 'Filtros guardados', SAVED_TRANSACTION_FILTERS_MAX);
   const savedFilters = savedFilterRows.map(normalizeSavedTransactionFilter);
   if (savedFilters.some(row => row === null)) {
-    throw new Error('El respaldo local de Saved Filters contiene datos inválidos.');
+    throw new Error('El respaldo local de Filtros guardados contiene datos inválidos.');
   }
 
-  const ruleRows = requireArray(raw.rules, 'Rules', TRANSACTION_RULES_MAX);
+  const ruleRows = requireArray(raw.rules, 'Reglas', TRANSACTION_RULES_MAX);
   const rules = normalizeTransactionRules(ruleRows);
   if (rules.length !== ruleRows.length) {
-    throw new Error('El respaldo local de Rules contiene datos inválidos o IDs duplicados.');
+    throw new Error('El respaldo local de Reglas contiene datos inválidos o IDs duplicados.');
   }
 
   const normalizedTemplates = templates as QuickAddTemplate[];
   const normalizedFilters = savedFilters as SavedTransactionFilter[];
-  requireUniqueIds(normalizedTemplates, 'Templates');
-  requireUniqueIds(normalizedFilters, 'Saved Filters');
-  requireUniqueIds(rules, 'Rules');
+  requireUniqueIds(normalizedTemplates, 'Plantillas');
+  requireUniqueIds(normalizedFilters, 'Filtros guardados');
+  requireUniqueIds(rules, 'Reglas');
 
   return {
     templates: normalizedTemplates,
