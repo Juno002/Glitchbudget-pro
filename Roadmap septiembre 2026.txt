@@ -4561,7 +4561,7 @@ nueva tarea
 → borrar rama
 ```
 
-**Gate 20.10.5:** aprobado cuando la ejecución post-merge confirma exactamente una rama remota: `main`. 20.10.6 es la próxima intervención autorizada.
+**Gate 20.10.5:** aprobado y verificado. El repositorio remoto contiene exactamente una rama: `main`. 20.10.6 es la próxima intervención autorizada.
 
 ### 20.10.6 — README final estrictamente de producto
 
