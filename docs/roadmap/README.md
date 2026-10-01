@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.9 completadas / Gates aprobados; 20.10 en curso con 20.10.1–20.10.4 cerradas.
+- **Fase 20 — Modo Prisma:** 20.1–20.9 completadas / Gates aprobados; 20.10 en curso con 20.10.1–20.10.5 cerradas.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -20,18 +20,18 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.7.5 — Semantic Integrity & Security Hardening:** completada / Gate aprobado; 20.7.5.1–20.7.5.9 cerradas.
 - **20.8 — Information Design + Deterministic Insights:** completada / Gate aprobado; 20.8.1–20.8.8 cerradas.
 - **20.9 — Premium UI Polish:** completada / Gate aprobado; 20.9.1–20.9.9 cerradas.
-- **20.10 — Repository Consolidation + Product README:** en curso; 20.10.1–20.10.4 completadas / Gates aprobados.
+- **20.10 — Repository Consolidation + Product README:** en curso; 20.10.1–20.10.5 completadas / Gates aprobados.
 
 ## Próxima intervención autorizada
 
 ```text
-20.10.5 — Eliminación de ramas remotas obsoletas
+20.10.6 — Reescritura total de README.md
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.10.5 → 20.10.7
+20.10.6 → 20.10.7
 ```
 
 No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero `Roadmap septiembre 2026.txt` con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
@@ -68,6 +68,7 @@ Gate 20.9 UI premium ✅
 20.10.2 unique-work audit: 44 ramas post-squash decididas / 0 trabajo vigente pendiente ✅
 20.10.3 main unification: 0 rescates / PR #35 y #7 cerradas / 0 PRs abiertas / main autosuficiente ✅
 20.10.4 full main gate: check/build/E2E/backup/offline/CSP/superficies completos ✅
+20.10.5 remote cleanup: única rama permanente `main` ✅
 Quality checks 36915706293 ✅
 browser E2E Prisma branding + real premium-theme interaction + secondary surfaces + responsive shell + Home desktop/mobile + Movimientos/composer + Plan + Reports desktop/mobile/charts + Logros + Ajustes/backups/App Lock + movement + offline ✅
 ```
@@ -87,7 +88,7 @@ browser E2E Prisma branding + real premium-theme interaction + secondary surface
 | 20.7.5 — Semantic Integrity & Security Hardening | **Completada / Gate aprobado — 20.7.5.1–20.7.5.9** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | **Completada / Gate aprobado — 20.8.1–20.8.8** | [phase-20-8.md](phase-20-8.md) |
 | 20.9 — Premium UI Polish | **Completada / Gate aprobado — 20.9.1–20.9.9** | [phase-20-9.md](phase-20-9.md) |
-| 20.10 — Repository Consolidation + Product README | **En curso — 20.10.1–20.10.4 completadas / Gates aprobados** | [phase-20-10.md](phase-20-10.md) |
+| 20.10 — Repository Consolidation + Product README | **En curso — 20.10.1–20.10.5 completadas / Gates aprobados** | [phase-20-10.md](phase-20-10.md) |
 
 Contrato visual complementario: [Prisma UI System](../ux/prisma-mode.md).
 
