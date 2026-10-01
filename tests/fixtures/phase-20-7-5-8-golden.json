@@ -388,10 +388,12 @@
           "start": "2026-08-25",
           "end": "2026-09-24"
         },
-        "recordedIncome": 10000,
-        "spending": 1000,
-        "cashFlow": 9000,
-        "periodResult": 9000
+        "metrics": {
+          "recordedIncome": 10000,
+          "spending": 1000,
+          "cashFlow": 9000,
+          "periodResult": 9000
+        }
       },
       "october": {
         "range": {
@@ -399,10 +401,12 @@
           "start": "2026-09-25",
           "end": "2026-10-24"
         },
-        "recordedIncome": 20000,
-        "spending": 2000,
-        "cashFlow": 18000,
-        "periodResult": 18000
+        "metrics": {
+          "recordedIncome": 20000,
+          "spending": 2000,
+          "cashFlow": 18000,
+          "periodResult": 18000
+        }
       }
     }
   }
