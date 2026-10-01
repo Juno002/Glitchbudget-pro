@@ -276,7 +276,7 @@ test('20.7.5.8 financial-period boundary assigns Sep 24 and Sep 25 to different 
       cashFlow: septemberMetrics.cashFlow,
       periodResult: septemberMetrics.periodResult,
     },
-    data.expected.september,
+    data.expected.september.metrics,
   );
   assert.deepEqual(
     {
@@ -285,6 +285,6 @@ test('20.7.5.8 financial-period boundary assigns Sep 24 and Sep 25 to different 
       cashFlow: octoberMetrics.cashFlow,
       periodResult: octoberMetrics.periodResult,
     },
-    data.expected.october,
+    data.expected.october.metrics,
   );
 });
