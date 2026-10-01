@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Info } from 'lucide-react';
+import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Info, Monitor } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -324,12 +324,15 @@ export function SettingsDialog() {
 
           <TabsContent value="appearance" className="space-y-5">
             <SectionHeader title="Apariencia" description="Los temas cambian presentación, no jerarquía ni funcionalidad." />
-            <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-3">
+            <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="dark" id="theme-dark" /><Moon className="h-4 w-4" /> Neón oscuro</div>
               </Label>
               <Label htmlFor="theme-light" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="light" id="theme-light" /><Sun className="h-4 w-4" /> Prisma claro</div>
+              </Label>
+              <Label htmlFor="theme-system" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="system" id="theme-system" /><Monitor className="h-4 w-4" /> Seguir sistema</div>
               </Label>
               <Label htmlFor="theme-serious" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="serious" id="theme-serious" /><Briefcase className="h-4 w-4" /> Minimalista legado</div>
