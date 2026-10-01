@@ -50,7 +50,7 @@ export function TransactionRow({
         type="button"
         onClick={onClick}
         className={cn(
-          'flex min-h-14 w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+          'flex min-h-14 w-full items-center gap-3 rounded-[var(--radius-interactive)] border p-3 text-left transition-colors hover:bg-muted/30 active:bg-muted/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           className,
         )}
       >
@@ -59,5 +59,5 @@ export function TransactionRow({
     );
   }
 
-  return <div className={cn('flex min-h-14 items-center gap-3 rounded-xl border p-3', className)}>{body}</div>;
+  return <div className={cn('flex min-h-14 items-center gap-3 rounded-[var(--radius-interactive)] border p-3', className)}>{body}</div>;
 }
