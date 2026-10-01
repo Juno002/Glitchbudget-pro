@@ -409,7 +409,7 @@ export default function SummaryTab() {
                 {home.budget.overCount>0 || home.budget.alertCount>0 ? (
                   <div className="flex flex-wrap gap-x-3 gap-y-1 border-t border-border/70 pt-3 text-xs font-medium text-muted-foreground">
                     {home.budget.overCount>0 ? <span>{home.budget.overCount} {home.budget.overCount===1?'presupuesto excedido':'presupuestos excedidos'}</span> : null}
-                    {home.budget.alertCount>0 ? <span>{home.budget.alertCount} {home.budget.alertCount===1?'cerca del límite':'cerca del límite'}</span> : null}
+                    {home.budget.alertCount>0 ? <span>{home.budget.alertCount} {home.budget.alertCount===1?'presupuesto cerca del límite':'presupuestos cerca del límite'}</span> : null}
                   </div>
                 ) : null}
               </div>
