@@ -67,7 +67,7 @@ export default function AccountsOverview() {
         ]}
       />
       <Dialog open={open} onOpenChange={v => { if (!locked.current) setOpen(v); }}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle className="font-display text-2xl font-normal">Bancos y transferencias</DialogTitle><DialogDescription>Registra tus bancos con su saldo actual. Efectivo se administra automáticamente con tus ingresos y gastos.</DialogDescription></DialogHeader>
+        <DialogContent className="sm:max-w-2xl"><DialogHeader><DialogTitle className="font-display text-2xl font-normal">Bancos y transferencias</DialogTitle><DialogDescription>Registra tus bancos con su saldo actual. Efectivo se administra automáticamente con tus ingresos y gastos.</DialogDescription></DialogHeader>
           <fieldset disabled={busy} className="space-y-6 min-w-0">
             <form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitAccount(); }}>
               <h3 className="font-semibold">{editingAccount ? 'Editar cuenta y saldo inicial' : 'Añadir cuenta bancaria'}</h3>
@@ -87,7 +87,7 @@ export default function AccountsOverview() {
             </form>}
             {cards.length > 0 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{e.preventDefault();void submitCardReconciliation();}}>
               <h3 className="font-semibold">Conciliar deuda actual de una tarjeta</h3>
-              <label className="block text-sm">Tarjeta<select required className="w-full rounded-lg border bg-background p-2" value={card} onChange={e=>setCard(e.target.value)}><option value="">Selecciona una tarjeta</option>{cards.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
+              <label className="block text-sm">Tarjeta<select required className="h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" value={card} onChange={e=>setCard(e.target.value)}><option value="">Selecciona una tarjeta</option>{cards.map(d=><option key={d.id} value={d.id}>{d.name}</option>)}</select></label>
               <label className="block text-sm">{`Deuda actual (${currency})`}<Input required type="number" step="0.01" value={cardBalance} onChange={e=>setCardBalance(e.target.value)}/></label>
               <p className="text-xs text-muted-foreground">Introduce lo que debes, no el límite. Un valor negativo indica saldo a favor. Se ajusta el saldo sin crear un gasto ni cambiar tus compras anteriores.</p>
               <Button type="submit">Confirmar saldo actual</Button>
@@ -96,7 +96,7 @@ export default function AccountsOverview() {
         </DialogContent>
       </Dialog>
       <Dialog open={cardsOpen} onOpenChange={setCardsOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl font-normal">Tarjetas y pagos</DialogTitle>
             <DialogDescription>Consulta y administra tus tarjetas sin convertirlas en una sección principal.</DialogDescription>

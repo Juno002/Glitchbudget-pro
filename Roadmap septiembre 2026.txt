@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.7 completadas / Gates aprobados; próxima intervención autorizada: 20.9.8. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.8 completadas / Gates aprobados; próxima intervención autorizada: 20.9.9. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4296,6 +4296,35 @@ Evitar:
 **Gate 20.9.7:** todos los estados forman parte del mismo sistema visual.
 
 ### 20.9.8 — Mobile, touch, focus y accesibilidad
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+635/635 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36912136865 ✅
+```
+
+Resultado:
+
+- `Dialog` y `AlertDialog` se contienen en el viewport visible y centran su geometría dentro del rectángulo seguro incluso con insets horizontales asimétricos;
+- `Sheet` respeta safe areas mediante geometría por lado sin imponer padding, preservando overrides de consumidores como el sidebar móvil `p-0`;
+- controles táctiles relevantes alcanzan un objetivo mínimo de 44 px en punteros coarse sin inflar visualmente checkbox/radio/switch;
+- inputs numéricos solicitan teclado decimal y los PIN mantienen teclado numérico; controles de formulario evitan texto pequeño durante foco móvil;
+- `BadgeCard` corrige el focus invisible: el glow normal se compone mediante `--achievement-glow` y el ring real permanece visible por encima; reduced motion también cubre XP/badges;
+- select/dropdown y cards seleccionables usan focus/contraste semánticos en lugar de colores hardcodeados o dependencia exclusiva de hover;
+- compositor, Ajustes, cuentas, inversiones, backups y App Lock quedan alineados al contrato móvil compartido;
+- E2E valida compositor a 390 px, Ajustes móvil contenido/scrollable y el ring específico de `BadgeCard`, diferenciándolo del glow normal;
+- review posterior corrigió tres bloqueos reales antes del cierre: composición glow/ring, padding de sheets y centrado con safe-area asimétrico;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-8.md`.
 
 Revisar:
 

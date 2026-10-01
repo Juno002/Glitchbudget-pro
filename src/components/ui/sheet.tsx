@@ -31,7 +31,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 border-[var(--border-subtle)] bg-[hsl(var(--surface-modal))] p-[var(--space-card)] text-popover-foreground shadow-[var(--shadow-modal)] transition ease-in-out duration-[var(--motion-dialog)] data-[state=open]:animate-in data-[state=closed]:animate-out",
+  "viewport-sheet fixed z-50 gap-4 border-[var(--border-subtle)] bg-[hsl(var(--surface-modal))] p-[var(--space-card)] text-popover-foreground shadow-[var(--shadow-modal)] transition ease-in-out duration-[var(--motion-dialog)] data-[state=open]:animate-in data-[state=closed]:animate-out",
   {
     variants: {
       side: {
@@ -62,10 +62,11 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
+      data-sheet-side={side}
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity duration-[var(--motion-control)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      <SheetPrimitive.Close data-sheet-close="true" className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-interactive)] text-muted-foreground ring-offset-background transition-colors duration-[var(--motion-control)] hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
         <X className="h-4 w-4" />
         <span className="sr-only">Cerrar</span>
       </SheetPrimitive.Close>

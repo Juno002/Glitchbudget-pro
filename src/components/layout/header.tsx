@@ -65,7 +65,7 @@ export default function Header() {
                     <AchievementHeaderBadge />
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-h-[85vh] max-w-md overflow-y-auto">
+                <DialogContent className="max-w-md">
                   <DialogHeader>
                     <DialogTitle>Logros</DialogTitle>
                     <DialogDescription>Tu progreso y medallas desbloqueadas.</DialogDescription>

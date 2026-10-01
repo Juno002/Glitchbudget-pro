@@ -63,7 +63,7 @@ export default function AutoLockSettings() {
             aria-label="Tiempo de bloqueo automático"
             value={autoLockMinutes}
             onChange={event => configureAutoLock(Number(event.target.value) as AutoLockTimeoutMinutes)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm"
           >
             {AUTO_LOCK_TIMEOUT_OPTIONS.map(minutes => (
               <option key={minutes} value={minutes}>{LABELS[minutes]}</option>

@@ -4,8 +4,76 @@
 
 .viewport-dialog {
   top: calc(var(--visible-top, 0px) + var(--visible-height, 100dvh) / 2);
-  max-height: calc(var(--visible-height, 100dvh) - 2rem);
+  left: calc(
+    env(safe-area-inset-left, 0px) +
+    (
+      100vw -
+      env(safe-area-inset-left, 0px) -
+      env(safe-area-inset-right, 0px)
+    ) / 2
+  );
+  width: min(
+    calc(100% - 2rem),
+    calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1rem)
+  );
+  max-height: min(
+    calc(var(--visible-height, 100dvh) - 2rem),
+    calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)
+  );
   overscroll-behavior: contain;
+}
+
+.viewport-sheet {
+  max-height: calc(
+    100dvh -
+    env(safe-area-inset-top, 0px) -
+    env(safe-area-inset-bottom, 0px)
+  );
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.viewport-sheet[data-sheet-side='top'] {
+  top: env(safe-area-inset-top, 0px);
+  right: env(safe-area-inset-right, 0px);
+  left: env(safe-area-inset-left, 0px);
+}
+
+.viewport-sheet[data-sheet-side='bottom'] {
+  right: env(safe-area-inset-right, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: env(safe-area-inset-left, 0px);
+}
+
+.viewport-sheet[data-sheet-side='left'] {
+  top: env(safe-area-inset-top, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  left: env(safe-area-inset-left, 0px);
+  height: auto;
+}
+
+.viewport-sheet[data-sheet-side='right'] {
+  top: env(safe-area-inset-top, 0px);
+  right: env(safe-area-inset-right, 0px);
+  bottom: env(safe-area-inset-bottom, 0px);
+  height: auto;
+}
+
+@media (pointer: coarse) {
+  :where(
+    button:not([role='checkbox']):not([role='radio']):not([role='switch']),
+    a[href],
+    summary,
+    select,
+    [role='tab'],
+    [role='menuitem'],
+    [role='option']
+  ) { min-height: 44px; }
+
+  :where(
+    button[aria-label]:not([role='checkbox']):not([role='radio']):not([role='switch']),
+    a[aria-label]
+  ) { min-width: 44px; }
 }
 
 body {

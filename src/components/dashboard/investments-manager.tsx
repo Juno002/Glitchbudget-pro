@@ -103,21 +103,21 @@ export default function InvestmentsManager() {
         </div>
         <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value && !busy) reset(); }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Añadir inversión</Button></DialogTrigger>
-          <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl" data-investment-dialog="prisma">
+          <DialogContent className="sm:max-w-2xl" data-investment-dialog="prisma">
             <DialogHeader>
               <DialogTitle className="font-display text-2xl font-normal">Registrar inversión</DialogTitle>
               <DialogDescription>Elige si ya existía al empezar a usar Prisma o si la financias ahora desde una cuenta registrada.</DialogDescription>
             </DialogHeader>
             <form className="space-y-4" onSubmit={submit}>
               <label className="block text-sm">Origen del valor
-                <select className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)]" value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>
+                <select className="mt-1 h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 py-2 text-base shadow-[var(--shadow-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm" value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>
                   <option value="existing">Ya la tenía — usar valor actual como saldo inicial</option>
                   <option value="new">La acabo de abrir — transferir principal desde una cuenta</option>
                 </select>
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block text-sm">Tipo
-                  <select className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)]" value={type} onChange={e=>setType(e.target.value as typeof type)}>
+                  <select className="mt-1 h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 py-2 text-base shadow-[var(--shadow-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm" value={type} onChange={e=>setType(e.target.value as typeof type)}>
                     {Object.entries(typeLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
                   </select>
                 </label>
@@ -133,7 +133,7 @@ export default function InvestmentsManager() {
                 )}
                 <label className="block text-sm">Tasa anual (%)<Input type="number" min="0" step="0.0001" value={annualRate} onChange={e=>setAnnualRate(e.target.value)} placeholder="Opcional" /></label>
                 <label className="block text-sm">Capitalización
-                  <select disabled={!annualRate} className="mt-1 w-full rounded-[var(--radius-interactive)] border bg-background p-2 shadow-[var(--shadow-control)] disabled:opacity-50" value={compounding} onChange={e=>setCompounding(e.target.value as typeof compounding)}>
+                  <select disabled={!annualRate} className="mt-1 h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-background px-3 py-2 text-base shadow-[var(--shadow-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 sm:text-sm" value={compounding} onChange={e=>setCompounding(e.target.value as typeof compounding)}>
                     {Object.entries(compoundingLabels).map(([value,label])=><option key={value} value={value}>{label}</option>)}
                   </select>
                 </label>

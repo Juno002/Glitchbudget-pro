@@ -190,7 +190,7 @@ export default function OpfsBackupDialog() {
           <span>Copias de Seguridad</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[88vh] overflow-y-auto sm:max-w-2xl" data-backups-prisma="true">
+      <DialogContent className="sm:max-w-2xl" data-backups-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
           <DialogDescription>
@@ -248,13 +248,14 @@ export default function OpfsBackupDialog() {
                             </div>
                         </div>
                         <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => handleDownload(file.name)} title="Descargar">
+                            <Button variant="ghost" size="icon" onClick={() => handleDownload(file.name)} aria-label={'Descargar '+file.name} title="Descargar">
                                 <FileDown className="h-4 w-4" />
                             </Button>
 
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label={'Restaurar '+file.name}
                               title="Restaurar"
                               disabled={isWorking || previewingImport}
                               onClick={() => prepareLocalRestore(file.name)}
@@ -264,7 +265,7 @@ export default function OpfsBackupDialog() {
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" title="Eliminar">
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" aria-label={'Eliminar '+file.name} title="Eliminar">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </AlertDialogTrigger>
