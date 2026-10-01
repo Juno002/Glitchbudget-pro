@@ -520,6 +520,75 @@ async function main() {
       'rango Custom',
     );
 
+    // Phase 20.8.8: exercise the complete Reports hierarchy at a mobile viewport.
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const reports = document.querySelector('[data-reports-prisma="true"]');
+        const controls = document.querySelector('[data-report-range-controls="prisma"]');
+        const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        const requiredSections = [
+          'quick-read',
+          'spending',
+          'comparison',
+          'spending-breakdown',
+          'cash-flow',
+          'net-worth',
+          'detail',
+        ];
+        const sections = requiredSections
+          .map(section => document.querySelector('[data-report-section="' + section + '"]'));
+        const charts = [...document.querySelectorAll('[data-report-chart]')];
+        const presetButtons = [...document.querySelectorAll('[data-report-preset]')];
+        const visibleAndContained = node => {
+          if (!(node instanceof HTMLElement)) return false;
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number.parseFloat(style.opacity || '1') > 0
+            && rect.width > 0
+            && rect.height > 0
+            && rect.left >= -1
+            && rect.right <= window.innerWidth + 1;
+        };
+        const usableControl = node => {
+          if (!visibleAndContained(node)) return false;
+          const rect = node.getBoundingClientRect();
+          return rect.width >= 32 && rect.height >= 32;
+        };
+        return reports && controls && mobileNav
+          && visibleAndContained(reports)
+          && visibleAndContained(controls)
+          && getComputedStyle(mobileNav).display !== 'none'
+          && sections.every(visibleAndContained)
+          && charts.length >= 5
+          && charts.every(visibleAndContained)
+          && presetButtons.length === 6
+          && presetButtons.every(usableControl)
+          && document.documentElement.scrollWidth <= window.innerWidth + 1;
+      })()`,
+      'Reportes Prisma móvil',
+    );
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
+      'retorno a Reportes desktop',
+    );
+
     const externalRequests = requests.filter(url => {
       try {
         const parsed = new URL(url);

@@ -3461,7 +3461,7 @@ No añadir:
 
 ## 20.8 — Information Design + Deterministic Insights
 
-**Estado: en curso.** 20.8.1–20.8.7 completadas / Gates aprobados; próxima intervención autorizada: 20.8.8. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
+**Estado: completada / Gate 20.8 aprobado.** 20.8.1–20.8.8 cerradas; próxima intervención autorizada: 20.9.1. Plan auxiliar: `docs/roadmap/phase-20-8.md`.
 
 ### Objetivo
 
@@ -3872,29 +3872,37 @@ Restricciones:
 
 ### 20.8.8 — Gate final 20.8
 
-Validar:
+**Estado: completada / Gate aprobado.**
 
-- Home desktop;
-- Home móvil;
-- Reportes desktop;
-- Reportes móvil;
-- KPI comparativos deterministas;
-- Lectura rápida reproducible;
-- categorías por defecto en instalación limpia;
-- cero LLM;
-- cero red;
-- cero nuevas fórmulas financieras en UI;
-- tablas/detalle exacto preservados;
-- offline intacto;
-- backup/migraciones intactos.
-
-Requerido:
+Quality gate final:
 
 ```text
-npm run check
-npm run build
-npm run test:e2e
+585/585 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36882536925 ✅
 ```
+
+Resultado de cierre:
+
+- Home validado en desktop y viewport móvil;
+- Reportes validado en desktop y viewport móvil, incluyendo visibilidad, geometría usable, charts contenidos y ausencia de overflow horizontal global;
+- comparaciones KPI y Lectura rápida permanecen deterministas;
+- categorías default siguen protegidas en instalación limpia;
+- guard local-only mantiene cero primitivas de red/SDK remotos en la app y el E2E no observa requests externos;
+- no existe LLM ni texto libre probabilístico;
+- React no reconstruye las fórmulas financieras canónicas cubiertas por 20.8;
+- tablas y detalle exacto de Reportes permanecen disponibles;
+- recarga offline desde service worker permanece operativa;
+- migraciones históricas y backup export/import round-trip permanecen verdes;
+- no hubo cambios de schema, migración, formato de backup, persistencia ni fórmula financiera.
+
+Evidencia detallada: `docs/roadmap/phase-20-8-8.md`.
+
+**Gate 20.8:** aprobado. Information Design + Deterministic Insights queda cerrado y 20.9.1 pasa a ser la siguiente intervención autorizada.
 
 ### Fuera de alcance de 20.8
 
@@ -4366,7 +4374,6 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.8.8
 20.9.1 → 20.9.9
 20.10.1 → 20.10.7
 ```
