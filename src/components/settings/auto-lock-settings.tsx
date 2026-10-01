@@ -25,7 +25,7 @@ export default function AutoLockSettings() {
           <div>
             <p className="font-medium">Bloqueo automático</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Activa primero el bloqueo de aplicación. Bloqueo automático no funciona sin un bloqueo de aplicación configurado.
+              Activa primero el bloqueo de aplicación. El bloqueo automático no funciona sin un bloqueo de aplicación configurado.
             </p>
           </div>
         </div>
@@ -36,7 +36,7 @@ export default function AutoLockSettings() {
   const active = autoLockMinutes !== null;
 
   return (
-    <div className="space-y-3 rounded-[var(--radius-interactive)] border bg-card p-3 text-sm shadow-[var(--shadow-control)]" data-auto-lock-settings="prisma" aria-label="Configurar Bloqueo automático">
+    <div className="space-y-3 rounded-[var(--radius-interactive)] border bg-card p-3 text-sm shadow-[var(--shadow-control)]" data-auto-lock-settings="prisma" aria-label="Configurar bloqueo automático">
       <label className="flex items-start justify-between gap-4">
         <span className="flex items-start gap-3">
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />
@@ -51,7 +51,7 @@ export default function AutoLockSettings() {
           type="checkbox"
           checked={active}
           onChange={event => configureAutoLock(event.target.checked ? 5 : null)}
-          aria-label="Activar Bloqueo automático"
+          aria-label="Activar bloqueo automático"
           className="mt-1 h-5 w-5"
         />
       </label>
@@ -60,7 +60,7 @@ export default function AutoLockSettings() {
         <label className="block max-w-xs space-y-2">
           <span className="font-medium">Bloquear después de</span>
           <select
-            aria-label="Tiempo de Bloqueo automático"
+            aria-label="Tiempo de bloqueo automático"
             value={autoLockMinutes}
             onChange={event => configureAutoLock(Number(event.target.value) as AutoLockTimeoutMinutes)}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
