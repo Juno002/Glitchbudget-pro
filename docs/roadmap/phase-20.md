@@ -329,7 +329,7 @@ Además debe demostrarse:
 
 ## 20.7.5 — Semantic Integrity & Security Hardening
 
-Estado: **planificada / no iniciada**.
+Estado: **completada / Gate aprobado — 20.7.5.1–20.7.5.9 cerradas**.
 
 Esta fase fue aprobada el 30 sep 2026 después de una revisión externa del código y una verificación posterior contra `main`.
 
