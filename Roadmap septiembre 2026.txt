@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.4 completadas / Gates aprobados; próxima intervención autorizada: 20.9.5. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.5 completadas / Gates aprobados; próxima intervención autorizada: 20.9.6. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4124,6 +4124,35 @@ Advertencias importantes no pueden quedar escondidas exclusivamente en tooltip.
 **Gate 20.9.4:** ayuda contextual consistente, accesible y visualmente integrada.
 
 ### 20.9.5 — Achievement toast / feedback celebratorio
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+615/615 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36897118568 ✅
+```
+
+Resultado:
+
+- toast reconstruido sobre superficie elevada opaca y legible;
+- jerarquía explícita: logro → título → descripción → XP → CTA;
+- CTA `Listo` + botón cerrar accesible;
+- entrada/salida usa motion tokens y reduced motion elimina transición decorativa;
+- sonido preservado;
+- confetti preservado para gold/diamond y sigue respetando reduced motion;
+- fix de review: el toast permanece por encima de bottom nav durante todo el rango < md;
+- E2E dispara “Primer Ingreso” y valida geometría a 700×844 sin solapamiento con navegación;
+- Prisma y Neón comparten el mismo contrato semántico;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-5.md`.
 
 Rehacer la notificación de logros observada durante la revisión visual.
 
@@ -4465,7 +4494,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.5 → 20.9.9
+20.9.6 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
