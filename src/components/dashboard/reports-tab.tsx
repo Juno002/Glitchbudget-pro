@@ -304,7 +304,7 @@ export default function ReportsTab() {
 
               <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="nature">
                 <CardHeader>
-                  <CardTitle className="font-display text-2xl font-normal">Fixed / Variable / Occasional</CardTitle>
+                  <CardTitle className="font-display text-2xl font-normal">Fijo / Variable / Ocasional</CardTitle>
                   <CardDescription>Naturaleza del gasto, separada de categoría.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -336,7 +336,7 @@ export default function ReportsTab() {
             />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard label="Ingresos" amount={report.cashFlow.income} tone="positive" />
-              <MetricCard label="Cash expenses" amount={report.cashFlow.cashExpenses} tone="negative" />
+              <MetricCard label="Gastos en efectivo" amount={report.cashFlow.cashExpenses} tone="negative" />
               <MetricCard label="Pagos de deuda" amount={report.cashFlow.debtPayments} tone="negative" />
               <MetricCard label="Flujo neto" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
             </div>
@@ -356,10 +356,10 @@ export default function ReportsTab() {
               description={'Posición registrada al '+range.end+'. Las proyecciones futuras de inversiones no se incluyen.'}
             />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              <MetricCard label="Cash" amount={report.netWorth.cash} tone="neutral" />
-              <MetricCard label="Banks" amount={report.netWorth.banks} tone="neutral" />
-              <MetricCard label="Investments" amount={report.netWorth.investments} tone="neutral" />
-              <MetricCard label="Liabilities" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
+              <MetricCard label="Efectivo" amount={report.netWorth.cash} tone="neutral" />
+              <MetricCard label="Bancos" amount={report.netWorth.banks} tone="neutral" />
+              <MetricCard label="Inversiones" amount={report.netWorth.investments} tone="neutral" />
+              <MetricCard label="Pasivos" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
               <MetricCard label="Patrimonio neto" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
             </div>
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
