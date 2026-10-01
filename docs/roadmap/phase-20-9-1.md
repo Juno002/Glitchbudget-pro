@@ -239,11 +239,14 @@ Lucide es el sistema funcional predominante y mantiene tamaños cercanos a 16–
 ### Excepciones
 
 - BrandMark es identidad propia y queda fuera de normalización Lucide;
-- Logros usa emoji como glyph de recompensa (`role="img"`) y también símbolos visuales como fuego/trofeo.
+- Logros usa emoji como glyph de recompensa (`role="img"`) y también símbolos visuales como fuego/trofeo;
+- los gestores de categorías de gastos e ingresos usan **emoji funcional** en acciones normales: `➕ Agregar` y `🔄 Restablecer`.
 
 Los emoji de Logros se consideran **contenido celebratorio intencional**, no iconografía de navegación. Deben revisarse por tamaño/alineación/contraste en 20.9.5, no reemplazarse automáticamente.
 
-**Dueño: 20.9.5 y sweep 20.9.9.**
+Los emoji de **Agregar/Restablecer** sí son una inconsistencia funcional confirmada frente al sistema Lucide predominante. No son branding ni contenido celebratorio y deben normalizarse como acciones estándar en el sweep.
+
+**Dueño: 20.9.5 para Logros; 20.9.9 para iconografía funcional residual.**
 
 ---
 
@@ -305,10 +308,12 @@ Button/Input y navegación principal usan `focus-visible` con ring semántico.
 - dropdown/select items usan focus como selección visual pero con colores hardcodeados;
 - algunos botones raw dependen de focus heredado o no hacen visible el mismo tratamiento del contenedor;
 - cards seleccionables de Settings alojan RadioGroupItem pero la superficie completa no necesariamente expresa focus como una unidad;
-- tiles de Logros usan `focus:outline-none` y requieren confirmación de ring visible coherente;
+- **defecto confirmado:** los tiles de Logros (`BadgeCard`) usan `focus:outline-none` sin `focus-visible:ring-*`, `focus:ring-*` ni otro indicador visual sustituto; un usuario de teclado puede enfocar el control sin señal visible;
 - skip link usa un patrón específico y se preserva como accesibilidad funcional.
 
-**Dueño: 20.9.7 y 20.9.8.**
+El focus ausente de `BadgeCard` no es una verificación opcional: queda como **remediación obligatoria de 20.9.8**.
+
+**Dueño: 20.9.7 para semántica general de focus/estado; 20.9.8 para accesibilidad y corrección obligatoria de BadgeCard.**
 
 ---
 
@@ -420,7 +425,7 @@ Existe `EmptyState`, `StatusBadge` y `Skeleton`, pero las superficies todavía m
 | Reportes | Fuerte tras 20.8 | depende de primitives de tooltip/popover/chart; copy mixto | P1/P2 | 20.9.4, 20.9.6, 20.9.9 |
 | Cuentas / deuda / inversiones | Mixto | rounded lg/xl/2xl, selects raw, duración 500 ms, dialogs con alturas distintas | P1 | 20.9.2–20.9.4, 20.9.8 |
 | Logros | Deuda visual conocida | toast/blur/contraste/radios/motion/color propio | P1 explícita | 20.9.5 |
-| Ajustes | Mixto | tabs + forms heredados, radios/selects raw, densidad y scroll largo | P0/P1 | 20.9.3–20.9.4, 20.9.7–20.9.8 |
+| Ajustes | Mixto | tabs + forms heredados, radios/selects raw, densidad/scroll largo y emoji funcional en gestores de categorías | P0/P1 | 20.9.3–20.9.4, 20.9.7–20.9.9 |
 | Backups | Funcionalmente estable | dialogs/forms con spacing y responsive dispares | P1 | 20.9.4, 20.9.7–20.9.8 |
 | App Lock / Auto-lock | Funcionalmente estable | radios locales, focus/state/spacing por normalizar | P1 | 20.9.7–20.9.8 |
 | UI primitives | Principal deuda sistémica | motion, radius, overlay, shadow, focus y theme colors divergentes | **P0** | 20.9.2–20.9.4 |
@@ -482,7 +487,7 @@ Unificar loading/empty/success/warning/error/disabled/selected/destructive.
 
 ## 20.9.8 — Mobile / touch / focus / accesibilidad
 
-Validar objetivos táctiles, safe areas, teclado, scroll, focus ring y hover-only information.
+Validar objetivos táctiles, safe areas, teclado, scroll, focus ring y hover-only information. Corregir obligatoriamente el focus invisible confirmado de `BadgeCard` en Logros.
 
 ## 20.9.9 — Sweep final
 
