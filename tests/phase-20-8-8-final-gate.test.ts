@@ -36,7 +36,10 @@ test('20.8.8 exercises Home and Reports at desktop and mobile widths in browser 
   assert.match(e2e, /requiredSections = \[/);
   assert.match(e2e, /'quick-read'/);
   assert.match(e2e, /'detail'/);
-  assert.match(e2e, /requiredSections\.every/);
+  assert.match(e2e, /sections\.every\(visibleAndContained\)/);
+  assert.match(e2e, /charts\.every\(visibleAndContained\)/);
+  assert.match(e2e, /presetButtons\.every\(usableControl\)/);
+  assert.match(e2e, /document\.documentElement\.scrollWidth <= window\.innerWidth \+ 1/);
   assert.match(e2e, /externalRequests\.length/);
   assert.match(e2e, /recarga offline desde service worker/);
 });
