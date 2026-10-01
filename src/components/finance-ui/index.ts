@@ -5,6 +5,7 @@ export { TransactionRow } from './transaction-row';
 export { DetailHeader } from './detail-header';
 export { DeltaValue } from './delta-value';
 export { EmptyState } from './empty-state';
+export { FeedbackMessage, type FeedbackTone } from './feedback-message';
 export { PageHeader, SectionHeader } from './headers';
 export { MetricCard } from './metric-card';
 export { MoneyValue, type MoneyTone } from './money-value';
