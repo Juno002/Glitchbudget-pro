@@ -5,6 +5,7 @@ import type { Expense, Income, PlannedOccurrence, RecurringRule } from '../domai
 import type { DateRange } from '../domain/periods';
 import { plannedOccurrenceId, scheduledDatesForRule, validateDateRange } from '../domain/recurrence';
 import { saveExpense, saveIncome } from './transaction-service';
+import { asCents } from '../domain/money';
 
 const Id = z.string().min(1);
 
@@ -212,7 +213,7 @@ export async function confirmPlannedOccurrence(
         accountId: options.accountId ?? rule.defaultAccountId,
         type: options.incomeType ?? 'extra',
         description: rule.title,
-        amount: amountCents / 100,
+        amount: asCents(amountCents),
         date: actualDate,
         categoryId: rule.categoryId,
       }, false, { allowInactiveRecurringRule: true });
@@ -223,7 +224,7 @@ export async function confirmPlannedOccurrence(
         accountId: options.accountId ?? rule.defaultAccountId,
         nature: options.expenseNature ?? 'Variable',
         concept: rule.title,
-        amount: amountCents / 100,
+        amount: asCents(amountCents),
         date: actualDate,
         categoryId: rule.categoryId,
         paymentMethod: options.paymentMethod ?? 'cash',
