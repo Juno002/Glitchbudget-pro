@@ -144,8 +144,8 @@ El roadmap funcional 0–20.10 está cerrado. El hardening posterior aprobado se
 
 | Intervención | Alcance | Estado |
 |---|---|---|
-| Post-roadmap 1 | Períodos, contrato monetario, currency/locale y reglas automáticas | **Pendiente — próxima autorizada** |
-| Post-roadmap 2 | Fecha financiera, loading y tema system | Pendiente |
+| Post-roadmap 1 | Períodos, contrato monetario, currency/locale y reglas automáticas | **Completada / Gate aprobado** · [evidencia](post-roadmap-1.md) |
+| Post-roadmap 2 | Fecha financiera, loading y tema system | **Pendiente — próxima autorizada** |
 | Post-roadmap 3 | Navegación URL/history y focus robusto | Pendiente |
 | Post-roadmap 4 | Rendimiento medido en navegador | Pendiente |
 | Post-roadmap 5 | Mantenibilidad, pruebas y pulido | Pendiente |
