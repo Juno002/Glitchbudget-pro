@@ -28,7 +28,7 @@ test('20.8.7 keeps decision-changing financial consequences permanently visible'
 
 test('20.8.7 preserves exact report detail instead of hiding it behind disclosure', () => {
   assert.match(reports, /data-report-section="detail"/);
-  assert.match(reports, /Largest transactions/);
+  assert.match(reports, /Movimientos de mayor importe/);
   assert.match(reports, /data-report-section="comparison"/);
   assert.match(reports, /<TableHead>Métrica<\/TableHead>/);
 });
