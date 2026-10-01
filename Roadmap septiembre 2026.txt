@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: en curso.** 20.10.1–20.10.3 completadas / Gates aprobados; próxima intervención autorizada: 20.10.4. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: en curso.** 20.10.1–20.10.4 completadas / Gates aprobados; próxima intervención autorizada: 20.10.5. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4494,6 +4494,12 @@ Después:
 
 ### 20.10.4 — Gate completo sobre main
 
+**Estado: completada / Gate aprobado.**
+
+Baseline verificado: `main` `473850b2291218195aa936f73a59ed09568ebae2`, Quality checks `36923309003` en `success`. El gate ejecutó `npm run check`, benchmark del ledger, `npm run build` y `npm run test:e2e`; el suite cubre backup import/round-trip, offline, `connect-src 'none'`, superficies Prisma, App Lock, backups, idioma y achievement toast. 20.10.4 añade una regresión explícita para categorías default sin cambiar comportamiento del producto.
+
+Evidencia detallada: `docs/roadmap/phase-20-10-4.md`.
+
 Antes de eliminar ramas ejecutar:
 
 ```text
@@ -4519,7 +4525,7 @@ Verificar también:
 - idioma;
 - achievement toast.
 
-**Gate 20.10.4:** `main` verde y funcional por sí solo.
+**Gate 20.10.4:** aprobado. `main` verde y funcional por sí solo; 20.10.5 es la próxima intervención autorizada.
 
 ### 20.10.5 — Eliminación de ramas remotas
 
