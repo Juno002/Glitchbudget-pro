@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **planificada / no iniciada**.
+Estado: **en curso — 20.9.1 completada / Gate aprobado; 20.9.2 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -18,24 +18,32 @@ Las animaciones suavizan cambios; nunca bloquean interacción.
 
 ## 20.9.1 — Auditoría visual y de consistencia
 
-Recorrer todas las superficies y registrar:
+**Estado: completada / Gate aprobado.**
 
-- radios;
-- bordes;
-- sombras;
-- fondos;
-- overlays;
-- tipografía;
-- iconos;
-- espaciado;
-- densidad;
-- estados hover/press/focus/disabled;
-- scroll interno;
-- responsive.
+Quality gate:
 
-No corregir “a ojo” componente por componente sin antes cerrar el inventario.
+```text
+591/591 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36886044970 ✅
+```
 
-**Gate 20.9.1:** mapa de inconsistencias priorizado.
+Resultado:
+
+- mapa P0/P1/P2 cerrado para todas las dimensiones visuales exigidas;
+- matriz completa de shell, Resumen, Movimientos, compositor, Plan, Reportes, cuentas/deuda/inversiones, Logros, Ajustes, backups, App Lock y primitives;
+- cada inconsistencia tiene dueño explícito entre 20.9.2–20.9.9;
+- Minimalista legado queda fuera de la paridad premium Prisma/Neón pero protegido por compatibilidad;
+- focus invisible de BadgeCard confirmado y reservado como corrección obligatoria para 20.9.8;
+- emoji funcional de Agregar/Restablecer inventariado para normalización final;
+- no se aplicó polish ni cambio funcional en 20.9.1.
+
+Evidencia: [phase-20-9-1.md](phase-20-9-1.md).
+
+**Gate 20.9.1:** mapa de inconsistencias priorizado y sin zonas ambiguas.
 
 ## 20.9.2 — Motion tokens ultra rápidos
 
