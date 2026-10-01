@@ -43,8 +43,8 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-609/609 tests
-Ledger benchmark: 50k position 30.24 ms / histories 26.12 ms median
+610/610 tests
+Ledger benchmark: 50k position 30.77 ms / histories 27.58 ms median
 Golden reconciliation: net worth 1.205m / spending 90k / cash flow 340k
 Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.8.1 information inventory + clean-install category regression ✅
@@ -59,7 +59,7 @@ Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.9.2 premium motion tokens 80/110/130/150/170 ms + primary control/dialog/menu migration ✅
 20.9.3 semantic depth system + opaque cards/modals + Prisma/Neón browser verification ✅
 20.9.4 contextual UI: semantic tooltip + responsive dismissible popovers + dialog hierarchy + desktop/mobile KPI help ✅
-Quality checks 36893491408 ✅
+Quality checks 36894175981 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home desktop/mobile + Movimientos/composer + Plan + Reports desktop/mobile/charts + movement + offline ✅
 ```
 
