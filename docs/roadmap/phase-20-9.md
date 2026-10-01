@@ -144,12 +144,12 @@ Objetivo: profundidad suave, no “glassmorphism” que perjudique legibilidad.
 Quality gate:
 
 ```text
-609/609 tests
+610/610 tests
 npm run check ✅
 npm run benchmark:ledger ✅
 npm run build ✅
 npm run test:e2e ✅
-Quality checks 36893491408 ✅
+Quality checks 36894175981 ✅
 ```
 
 Resultado:
