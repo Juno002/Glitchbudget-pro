@@ -115,12 +115,12 @@ No calcular estos deltas en componentes React.
 Quality gate funcional:
 
 ```text
-555/555 tests
+557/557 tests
 npm run check ✅
 npm run benchmark:ledger ✅
 npm run build ✅
 npm run test:e2e ✅
-Quality checks 36820237031 ✅
+Quality checks 36821019073 ✅
 ```
 
 Resultado:
