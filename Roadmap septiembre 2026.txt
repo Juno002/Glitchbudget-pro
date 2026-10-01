@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: planificada / no iniciada.** Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1 completada / Gate aprobado; próxima intervención autorizada: 20.9.2. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -3938,25 +3938,32 @@ Las animaciones suavizan el cambio; nunca deben bloquear el siguiente input.
 
 ### 20.9.1 — Auditoría visual y de consistencia
 
-Recorrer todas las superficies y registrar inconsistencias en:
+**Estado: completada / Gate aprobado.**
 
-- radios;
-- bordes;
-- sombras;
-- fondos;
-- overlays;
-- tipografía;
-- iconografía;
-- spacing;
-- densidad;
-- hover;
-- press;
-- focus;
-- disabled;
-- scroll interno;
-- responsive.
+Quality gate:
 
-No corregir componente por componente sin cerrar primero el mapa de inconsistencias.
+```text
+591/591 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36886044970 ✅
+```
+
+Resultado:
+
+- inventario cerrado para radios, bordes, sombras, fondos, overlays, tipografía, iconografía, spacing, densidad, hover, press, focus, disabled, scroll interno y responsive;
+- todas las superficies visibles quedaron clasificadas y priorizadas P0/P1/P2;
+- cada deuda tiene propietario explícito entre 20.9.2 y 20.9.9;
+- Prisma claro y Neón oscuro quedan como objetivos premium; Minimalista legado se preserva solo como compatibilidad;
+- se confirmó como defecto de accesibilidad el focus invisible de `BadgeCard`, con remediación obligatoria en 20.9.8;
+- `➕ Agregar` y `🔄 Restablecer` en gestores de categorías quedaron inventariados como iconografía funcional no-Luicide/Lucide inconsistente para normalización posterior;
+- no se corrigió ningún componente visual en esta intervención;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-1.md`.
 
 **Gate 20.9.1:** inventario visual priorizado y sin zonas ambiguas.
 
@@ -4374,7 +4381,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.1 → 20.9.9
+20.9.2 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
