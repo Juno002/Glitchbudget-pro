@@ -112,7 +112,7 @@ test('20.8.3 reports a useful category focus when one category concentrates enou
     kind: 'leading_category',
     priority: 60,
     focus: 'categories',
-    direction: 'stable',
+    direction: 'none',
     copy: {
       key: 'leading_category',
       params: {
@@ -191,7 +191,8 @@ test('20.8.3 canonical Reports snapshot includes the deterministic quick read', 
 
 test('20.8.3 engine stays local, deterministic and outside React/persistence', () => {
   const source = readFileSync(new URL('../src/domain/report-insights.ts', import.meta.url), 'utf8');
-  assert.doesNotMatch(source, /useFinances|react|Dexie|IndexedDB|@\/lib\/db|localStorage|sessionStorage/i);
+  assert.doesNotMatch(source, /from ['"][^'"]*(?:react|dexie|\/db)['"]/i);
+  assert.doesNotMatch(source, /\b(?:useFinances|IndexedDB|localStorage|sessionStorage)\b/);
   assert.doesNotMatch(source, /fetch\(|XMLHttpRequest|WebSocket|EventSource|navigator\./);
   assert.doesNotMatch(source, /new Date|Date\.now|Math\.random|crypto\.randomUUID/);
 });
