@@ -4638,7 +4638,143 @@ Después de este punto:
 
 **Gate 20.10.7:** aprobado. El roadmap septiembre 2026 queda cerrado; cualquier trabajo futuro requiere una modificación explícita del roadmap antes de crear nuevas etapas.
 
-### Regla de autoridad y no invención del roadmap
+## Post-roadmap — Hardening técnico de Prisma
+
+**Estado: en curso.** El roadmap funcional 0–20.10 permanece cerrado. Esta sección no crea una Fase 20.11 ni una Fase 21: registra únicamente trabajo de hardening posterior al cierre, aprobado explícitamente después de la auditoría externa sobre `main`.
+
+## Objetivo
+
+Corregir bugs reproducibles y deuda técnica que pueda afectar coherencia, estabilidad, navegabilidad, rendimiento o mantenibilidad del producto final sin reabrir el alcance funcional original.
+
+Reglas:
+
+- la fuente de verdad sigue siendo `Roadmap septiembre 2026.txt`;
+- ejecutar las intervenciones estrictamente en orden;
+- una sola rama temporal por intervención;
+- validar antes del merge;
+- merge a `main`;
+- borrar inmediatamente la rama temporal;
+- no introducir features nuevas mientras una corrección pueda resolverse manteniendo el contrato actual;
+- mantener GlitchBudget Engine como núcleo interno y Prisma como producto visible;
+- no cambiar schema, migraciones o formatos persistentes salvo necesidad demostrada y aprobada;
+- no introducir backend, sincronización financiera remota, telemetría ni APIs financieras/FX.
+
+Secuencia autorizada:
+
+```text
+Post-roadmap 1
+→ Post-roadmap 2
+→ Post-roadmap 3
+→ Post-roadmap 4
+→ Post-roadmap 5
+```
+
+## Post-roadmap 1 — Corrección funcional crítica: períodos, dinero y reglas
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **A1:** cambiar tema/políticas u otros ajustes no debe reiniciar el período seleccionado; solo el montaje y un cambio real de `periodStartDay` pueden recalcular el período actual.
+- **A2:** Movimientos debe usar exactamente el rango financiero de `currentPeriod`, no un mes calendario duplicado.
+- **B1:** eliminar la ambigüedad pesos/centavos de las APIs de escritura. Las fronteras deben expresar claramente unidades monetarias y convertir a centavos una sola vez.
+- **B2:** eliminar `RD$` y locale hardcodeados donde contradigan `settings.currency` / `settings.locale`; usar una única frontera de formato.
+- **A6:** una categoría o necesidad elegida manualmente no puede volver a ser sobrescrita por una regla automática al editar el concepto.
+- añadir tests de comportamiento/regresión que ejerzan estos contratos.
+
+No incluye refactorización general del contexto ni navegación por URL.
+
+**Gate Post-roadmap 1:**
+
+```text
+cambiar tema/políticas conserva período seleccionado
+Movimientos = mismo rango financiero que Resumen/Reportes
+escrituras monetarias tienen unidades inequívocas
+currency/locale visibles respetan settings
+selección manual vence a automatización
+npm run check
+npm run build
+npm run test:e2e
+```
+
+## Post-roadmap 2 — Ciclo de vida: fecha, carga y tema
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **A3:** una PWA abierta al cruzar medianoche debe actualizar la fecha financiera y volver a materializar/preparar lo que dependa de “hoy”.
+- **A4:** evitar estados vacíos falsos mientras los módulos de Resumen siguen cargando.
+- **A5:** resolver definitivamente `theme: 'system'`: implementar `prefers-color-scheme` correctamente o eliminarlo mediante normalización compatible.
+- tests de comportamiento para rollover de fecha, loading y contrato de tema.
+
+**Gate Post-roadmap 2:** ciclo de fecha determinista, loading coherente, tema sin estado ambiguo y quality gate verde.
+
+## Post-roadmap 3 — Navegación robusta
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C4:** tipar `activeTab` con el dominio de navegación;
+- sincronizar área principal con URL/history;
+- soportar atrás/adelante de navegador/Android dentro de Prisma cuando corresponda;
+- reemplazar carreras `setTimeout + getElementById(...).scrollIntoView` por navegación/focus explícitos y testeables.
+
+**Gate Post-roadmap 3:** navegación principal reversible y deep-linkable sin depender de timing del DOM; quality gate verde.
+
+## Post-roadmap 4 — Rendimiento medido
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C1:** medir en navegador el coste real de `readFinanceContextData`, relecturas Dexie y renders con datasets representativos antes de dividir contextos o introducir selectores.
+- **C2:** medir la lista de Movimientos con historial grande y aplicar paginación progresiva/“Mostrar más” o windowing solo si los datos lo justifican.
+- **C3:** medir el coste de los fondos con blur grande en Android/gama media; sustituirlos por una alternativa estática si hay impacto demostrable.
+- conservar benchmark antes/después.
+
+Datasets de referencia: 5k / 25k / 50k movimientos.
+
+**Gate Post-roadmap 4:** evidencia cuantitativa previa, mejora medible cuando se cambie código y ninguna regresión financiera.
+
+## Post-roadmap 5 — Mantenibilidad, pruebas y pulido
+
+**Estado: pendiente.**
+
+Alcance:
+
+- **C5:** reducir repetición de handlers de acciones cuando pueda hacerse sin ocultar semántica ni errores específicos;
+- **E1/E3:** reforzar tests de comportamiento UI y reducir grep-tests a contratos verdaderamente estructurales;
+- extraer un `NativeSelect` si elimina variantes repetidas sin degradar accesibilidad;
+- medir contraste/tamaños de texto pequeños y corregir solo incumplimientos reales;
+- decidir Prettier en un cambio de formato aislado si sigue siendo conveniente;
+- mantener `Must / Need / Want` como decisión de producto salvo cambio explícito;
+- conservar `src/contexts/finance--context.tsx` mientras siga actuando como entrypoint de compatibilidad.
+
+**Gate Post-roadmap 5:** comportamiento preservado, suite menos frágil, deuda repetitiva reducida y quality gate verde.
+
+## Fuera de esta secuencia
+
+Los siguientes puntos NO autorizan cambios dentro de Post-roadmap 1–5:
+
+- **A7:** clamp a cero en préstamos históricos — decisión explícita de compatibilidad read-only.
+- **B3:** importación multimoneda — ya normalizada/rechazada por las fronteras JSON/CSV y cubierta por regresiones.
+- **D1:** PBKDF2-SHA-256 v1 en 310 000 iteraciones — deuda consciente; cualquier v2 exige benchmark móvil físico y lectura retrocompatible de v1.
+- **D2:** CSP por meta / `unsafe-inline` — limitación conocida compatible con el threat model local-only; cualquier endurecimiento requiere una revisión de seguridad separada.
+- `Debt.principal` dual — deuda histórica mitigada por accesores, no urgente.
+- documentación 20.10.6/20.10.7 — cerrada.
+
+Si aparece un bug nuevo reproducible durante estas intervenciones:
+
+```text
+documentar evidencia
+→ decidir si cabe en la intervención actual
+→ si no cabe, no ampliar alcance silenciosamente
+→ proponer modificación explícita de esta sección
+```
+
+## Regla de autoridad y no invención del roadmap
 
 A partir de este punto:
 
@@ -4646,17 +4782,17 @@ A partir de este punto:
 Roadmap septiembre 2026.txt = única fuente de verdad
 ```
 
-El roadmap vigente está **cerrado**.
+El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-etapas pendientes autorizadas = ninguna
+intervenciones pendientes autorizadas = Post-roadmap 1 → Post-roadmap 5
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna microintervención adicional autorizada después de 20.10.7.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. Solo existen las intervenciones Post-roadmap 1–5 descritas explícitamente arriba.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 
@@ -4779,6 +4915,8 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 20.9 Premium UI Polish
 ↓
 20.10 Repository Consolidation + Product README
+↓
+Post-roadmap 1–5 Hardening técnico
 ```
 
 

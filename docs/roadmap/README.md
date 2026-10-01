@@ -136,3 +136,18 @@ Las fases largas conservan sus checkpoints como evidencia histórica:
 - Fase 19.5: [19.5.1](phase-19-5-1.md) · [19.5.2](phase-19-5-2.md) · [19.5.3](phase-19-5-3.md) · [19.5.4](phase-19-5-4.md) · [19.5.5](phase-19-5-5.md)
 
 Los textos de checkpoints históricos reflejan el estado en que fueron cerrados. Para conocer **qué está vigente ahora**, usar este índice y el roadmap canónico.
+
+
+## Post-roadmap — Hardening técnico
+
+El roadmap funcional 0–20.10 está cerrado. El hardening posterior aprobado se ejecuta en orden desde la sección canónica **Post-roadmap** de `Roadmap septiembre 2026.txt`.
+
+| Intervención | Alcance | Estado |
+|---|---|---|
+| Post-roadmap 1 | Períodos, contrato monetario, currency/locale y reglas automáticas | **Pendiente — próxima autorizada** |
+| Post-roadmap 2 | Fecha financiera, loading y tema system | Pendiente |
+| Post-roadmap 3 | Navegación URL/history y focus robusto | Pendiente |
+| Post-roadmap 4 | Rendimiento medido en navegador | Pendiente |
+| Post-roadmap 5 | Mantenibilidad, pruebas y pulido | Pendiente |
+
+No existe Fase 20.11 ni Fase 21. Una intervención Post-roadmap usa una única rama temporal, se valida, se integra en `main` y su rama se elimina antes de iniciar la siguiente.
