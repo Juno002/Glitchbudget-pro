@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **en curso — 20.10.1–20.10.4 completadas / Gates aprobados; 20.10.5 es la próxima intervención autorizada**.
+Estado: **en curso — 20.10.1–20.10.5 completadas / Gates aprobados; 20.10.6 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -117,6 +117,10 @@ Verificar también:
 **Gate 20.10.4:** aprobado. main verde y funcional por sí solo; 20.10.5 queda habilitada.
 
 ## 20.10.5 — Eliminación de ramas remotas
+
+**Estado: completada / Gate aprobado.**
+
+La limpieza remota preserva únicamente `main`, elimina todas las demás ramas ya clasificadas y verifica el resultado mediante workflow one-shot. Evidencia: [phase-20-10-5.md](phase-20-10-5.md).
 
 Solo después del gate anterior:
 
