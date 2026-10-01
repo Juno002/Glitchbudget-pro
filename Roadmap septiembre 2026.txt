@@ -4408,7 +4408,7 @@ npm run test:e2e
 
 ## 20.10 — Repository Consolidation + Product README
 
-**Estado: planificada / etapa final.** Plan auxiliar: `docs/roadmap/phase-20-10.md`.
+**Estado: en curso.** 20.10.1 completada / Gate aprobado; próxima intervención autorizada: 20.10.2. Plan auxiliar: `docs/roadmap/phase-20-10.md`.
 
 Esta etapa solo puede comenzar después de aprobar 20.8 y 20.9.
 
@@ -4426,6 +4426,22 @@ Las ramas futuras serán temporales y deberán eliminarse después del merge.
 
 ### 20.10.1 — Inventario de ramas
 
+**Estado: completada / Gate aprobado.**
+
+Snapshot verificado contra `main` `32e03190651c77511f24090483993b42f3d4ebb3`:
+
+```text
+84 ramas remotas
+1 main permanente
+39 ramas completamente contenidas en main
+42 ramas históricas/obsoletas divergidas → auditar en 20.10.2
+1 wip/codex-local con commit único → auditar en 20.10.2
+1 rama activa phase-20-10-1-branch-inventory → no borrar todavía
+0 ramas eliminadas
+```
+
+Evidencia detallada: `docs/roadmap/phase-20-10-1.md`.
+
 Enumerar todas las ramas remotas y clasificar cada una como:
 
 - ya contenida en `main`;
@@ -4436,7 +4452,7 @@ Enumerar todas las ramas remotas y clasificar cada una como:
 
 No borrar ninguna rama antes de completar esta clasificación.
 
-**Gate 20.10.1:** cada rama tiene destino explícito.
+**Gate 20.10.1:** aprobado. Cada rama tiene destino explícito; ninguna fue eliminada.
 
 ### 20.10.2 — Auditoría de trabajo único
 

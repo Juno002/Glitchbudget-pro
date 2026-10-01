@@ -1,6 +1,6 @@
 # Fase 20.10 — Repository Consolidation + Product README
 
-Estado: **planificada / etapa final**.
+Estado: **en curso — 20.10.1 completada / Gate aprobado; 20.10.2 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -20,6 +20,18 @@ Baseline observado al planificar esta etapa: **54 ramas remotas**.
 
 ## 20.10.1 — Inventario de ramas
 
+**Estado: completada / Gate aprobado.**
+
+Snapshot real: **84 ramas remotas** sobre `main` `32e03190651c77511f24090483993b42f3d4ebb3`.
+
+- 39 ramas ya contenidas completamente en `main`;
+- 42 ramas históricas/obsoletas divergidas que requieren auditoría de commits/archivos únicos en 20.10.2;
+- `wip/codex-local` conserva 1 commit único cuya relevancia debe decidir 20.10.2;
+- `phase-20-10-1-branch-inventory` es la rama activa y no puede eliminarse antes del merge;
+- no se eliminó ni fusionó ninguna rama durante el inventario.
+
+Evidencia completa: [phase-20-10-1.md](phase-20-10-1.md).
+
 Enumerar todas las ramas remotas y clasificar cada una:
 
 - ya contenida en main;
@@ -30,7 +42,7 @@ Enumerar todas las ramas remotas y clasificar cada una:
 
 No borrar ninguna rama antes de esta clasificación.
 
-**Gate 20.10.1:** cada rama tiene destino explícito.
+**Gate 20.10.1:** aprobado. Cada rama tiene destino explícito; ninguna fue eliminada.
 
 ## 20.10.2 — Auditoría de trabajo único
 
