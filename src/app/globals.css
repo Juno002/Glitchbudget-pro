@@ -4,8 +4,47 @@
 
 .viewport-dialog {
   top: calc(var(--visible-top, 0px) + var(--visible-height, 100dvh) / 2);
-  max-height: calc(var(--visible-height, 100dvh) - 2rem);
+  width: min(
+    calc(100% - 2rem),
+    calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1rem)
+  );
+  max-height: min(
+    calc(var(--visible-height, 100dvh) - 2rem),
+    calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)
+  );
   overscroll-behavior: contain;
+}
+
+.viewport-sheet {
+  max-height: 100dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-top: max(var(--space-card), env(safe-area-inset-top, 0px));
+  padding-right: max(var(--space-card), env(safe-area-inset-right, 0px));
+  padding-bottom: max(var(--space-card), env(safe-area-inset-bottom, 0px));
+  padding-left: max(var(--space-card), env(safe-area-inset-left, 0px));
+}
+
+.viewport-sheet [data-sheet-close='true'] {
+  top: max(1rem, env(safe-area-inset-top, 0px));
+  right: max(1rem, env(safe-area-inset-right, 0px));
+}
+
+@media (pointer: coarse) {
+  :where(
+    button:not([role='checkbox']):not([role='radio']):not([role='switch']),
+    a[href],
+    summary,
+    select,
+    [role='tab'],
+    [role='menuitem'],
+    [role='option']
+  ) { min-height: 44px; }
+
+  :where(
+    button[aria-label]:not([role='checkbox']):not([role='radio']):not([role='switch']),
+    a[aria-label]
+  ) { min-width: 44px; }
 }
 
 body {
