@@ -1,0 +1,22 @@
+name: Cleanup merged post-roadmap 1 branch
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/cleanup-post-roadmap-1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged temporary branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/post-roadmap-1-critical-correctness" --silent
