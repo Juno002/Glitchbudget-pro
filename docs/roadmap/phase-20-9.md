@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.5 completadas / Gates aprobados; 20.9.6 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.6 completadas / Gates aprobados; 20.9.7 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -237,6 +237,32 @@ la notificación debe entenderse de un vistazo sin pelear con el fondo
 **Gate 20.9.5:** toast legible en ambos temas y tamaños.
 
 ## 20.9.6 — Idioma visible único
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+622/622 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36900165070 ✅
+```
+
+Resultado:
+
+- Reportes queda visible en español, incluidos chart rows y métricas;
+- Resumen reemplaza Home únicamente en copy visible;
+- Plantillas / Filtros guardados / Reglas / Registro rápido sustituyen copy de automatización;
+- bloqueo de aplicación / bloqueo automático sustituyen App lock / Auto-lock;
+- copia / copia de seguridad sustituye backup en UI, errores y feedback propagado;
+- excepciones documentadas: CSV, JSON, OPFS, Dexie, Google Sheets e identificadores internos;
+- P2 del review resueltos y cubiertos por regresión;
+- E2E de Ajustes actualizado a “Datos y copias”.
+
+Evidencia: [phase-20-9-6.md](phase-20-9-6.md).
 
 Hacer un barrido completo de copy visible.
 
