@@ -344,7 +344,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Disponible líquido"
               amount={home.position.liquidAssets}
-              comparison={home.position.comparisons.liquidAvailable}
+              comparison={home.positionComparisons.liquidAvailable}
               tone={home.position.liquidAssets<0?'negative':'neutral'}
               help="Efectivo + bancos registrados en el ledger."
               warning="No incluye crédito disponible."
@@ -354,7 +354,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Patrimonio neto"
               amount={home.position.netWorth}
-              comparison={home.position.comparisons.netWorth}
+              comparison={home.positionComparisons.netWorth}
               tone={home.position.netWorth<0?'negative':'neutral'}
               help="Activos reales registrados menos pasivos registrados."
               icon={TrendingUp}
@@ -362,7 +362,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Deuda total"
               amount={home.position.liabilities}
-              comparison={home.position.comparisons.totalDebt}
+              comparison={home.positionComparisons.totalDebt}
               tone={home.position.liabilities>0?'negative':'neutral'}
               help="Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles."
               warning="Deuda real registrada."
@@ -372,7 +372,7 @@ export default function SummaryTab() {
             <PositionCard
               label="Inversiones"
               amount={home.position.investments}
-              comparison={home.position.comparisons.investments}
+              comparison={home.positionComparisons.investments}
               tone="neutral"
               help="Valor registrado de los activos de inversión."
               warning="No incluye rendimiento proyectado."
