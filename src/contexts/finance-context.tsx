@@ -21,7 +21,7 @@ import { goalView } from '@/domain/goals';
 import { saveGoal, removeGoal } from '@/lib/goal-service';
 
 import type { Budget, Goal, GoalContribution } from "@/lib/types";
-import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect } from "react";
+import React, { createContext, useContext, useMemo, ReactNode, useCallback, useState, useEffect, useRef } from "react";
 import type { Settings, Income, Expense, Plan, Debt, DebtPayment, RecurringRule, PlannedOccurrence, AccountTransfer, Account, Investment } from '@/domain/models';
 import { useToast } from "@/hooks/use-toast";
 import { localDate } from '@/lib/finance-calculations';
@@ -36,6 +36,8 @@ import { initializeSettings, resetPersistedSettings, saveBaseIncomeInput, savePe
 import { createCreditCard, updateDebt as persistDebt, removeDebt, type CreateCreditCardInput } from '@/lib/debt-service';
 import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@/lib/sounds";
 import { DEFAULT_SETTINGS, resolveSettings } from "@/lib/settings-read-model";
+import type { Cents } from '@/domain/money';
+import { reconcileSelectedPeriod } from '@/domain/period-selection';
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
 export type { BackupFile } from '@/hooks/use-backup-management';
@@ -43,6 +45,7 @@ export type { BackupFile } from '@/hooks/use-backup-management';
 interface FinanceContextType {
   theme: 'light' | 'dark' | 'serious';
   currency: string;
+  locale: string;
   preventNegativeAccountBalance: boolean;
   budgetOverspendingBehavior: BudgetOverspendingBehavior;
   rolloverStrategy: RolloverStrategy;
@@ -73,11 +76,11 @@ interface FinanceContextType {
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setPeriodStartDay: (day: number) => Promise<void>;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
-  addIncomeItem: (income: Omit<Income, "id" | "month">) => Promise<boolean>;
-  updateIncomeItem: (income: Income) => Promise<boolean>;
+  addIncomeItem: (income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents }) => Promise<boolean>;
+  updateIncomeItem: (income: Omit<Income, "amount"> & { amount: Cents }) => Promise<boolean>;
   deleteIncomeItem: (id: string) => Promise<boolean>;
-  addExpense: (expense: Omit<Expense, "id" | "month">) => Promise<boolean>;
-  updateExpense: (expense: Expense) => Promise<boolean>;
+  addExpense: (expense: Omit<Expense, "id" | "month" | "amount"> & { amount: Cents }) => Promise<boolean>;
+  updateExpense: (expense: Omit<Expense, "amount"> & { amount: Cents }) => Promise<boolean>;
   deleteExpense: (id: string) => Promise<boolean>;
   addAccountTransfer: (transfer: Omit<AccountTransfer, 'id'>) => Promise<boolean>;
   addGoal: (goal: Omit<Goal, "id" | "saved" | "startDate" | "status">) => Promise<boolean>;
@@ -143,6 +146,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const [currentMonth, setCurrentMonthState] = useState(localDate().slice(0, 7));
   const { toast } = useToast();
   const [dataVersion, setDataVersion] = useState(0);
+  const previousPeriodStartDay = useRef<number | null>(null);
   const {
     isWorking,
     backupBeforeDestructiveImport,
@@ -199,8 +203,15 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [loading, rawSettings, toast]);
 
   useEffect(() => {
-    setCurrentMonthState(periodContaining(localDate(), settings).id);
-  }, [settings]);
+    const nextStartDay = settings.periodStartDay ?? 1;
+    setCurrentMonthState(current => reconcileSelectedPeriod(
+      current,
+      localDate(),
+      previousPeriodStartDay.current,
+      nextStartDay,
+    ));
+    previousPeriodStartDay.current = nextStartDay;
+  }, [settings.periodStartDay]);
 
   useEffect(() => {
     async function initializeDB() {
@@ -309,7 +320,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addIncomeItem = useCallback(async (income: Omit<Income, "id" | "month">) => {
+  const addIncomeItem = useCallback(async (income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents }) => {
     try {
       await saveIncome({ ...income, id: crypto.randomUUID() });
       playIncome();
@@ -321,7 +332,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const updateIncomeItem = useCallback(async (income: Income) => {
+  const updateIncomeItem = useCallback(async (income: Omit<Income, "amount"> & { amount: Cents }) => {
     try {
       await saveIncome(income, true);
       toast({ title: 'Ingreso actualizado' });
@@ -343,7 +354,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addExpense = useCallback(async (expense: Omit<Expense, "id" | "month">) => {
+  const addExpense = useCallback(async (expense: Omit<Expense, "id" | "month" | "amount"> & { amount: Cents }) => {
     try {
       const input = { ...expense, id: crypto.randomUUID() };
       if (!await withBudgetConfirmation(token => saveExpense(input, false, token), confirmBudget)) return false;
@@ -356,7 +367,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast, confirmBudget]);
 
-  const updateExpense = useCallback(async (expense: Expense) => {
+  const updateExpense = useCallback(async (expense: Omit<Expense, "amount"> & { amount: Cents }) => {
     try {
       if (!await withBudgetConfirmation(token => saveExpense(expense, true, token), confirmBudget)) return false;
       toast({ title: 'Gasto actualizado' });
@@ -648,6 +659,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
     currency: activeSettings.currency,
+    locale: activeSettings.locale,
     preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
     budgetOverspendingBehavior: activeSettings.budgetOverspendingBehavior,
     rolloverStrategy: activeSettings.rolloverStrategy,
