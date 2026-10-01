@@ -66,7 +66,7 @@ export function AppLockGate({ children }: { children: ReactNode }) {
           {busy ? 'Verificando…' : 'Desbloquear'}
         </Button>
         <p className="mt-4 text-xs text-muted-foreground">
-          App lock bloquea esta interfaz. No cifra la base de datos Dexie ni los archivos del dispositivo.
+          El bloqueo de aplicación protege esta interfaz. No cifra la base de datos Dexie ni los archivos del dispositivo.
         </p>
       </form>
     </main>

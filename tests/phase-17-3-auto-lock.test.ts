@@ -93,7 +93,7 @@ test('17.3 cannot operate without App lock and disabling App lock clears Auto-lo
 test('17.3 UI is explicit opt-in and exposes only the canonical timeout options', () => {
   const settings = readFileSync(new URL('../src/components/settings/auto-lock-settings.tsx', import.meta.url), 'utf8');
 
-  assert.match(settings, /Activar Auto-lock/);
+  assert.match(settings, /Activar bloqueo automático/);
   assert.match(settings, /checked=\{active\}/);
   assert.match(settings, /event\.target\.checked \? 5 : null/);
   assert.match(settings, /AUTO_LOCK_TIMEOUT_OPTIONS\.map/);
@@ -101,7 +101,7 @@ test('17.3 UI is explicit opt-in and exposes only the canonical timeout options'
   assert.match(settings, /5 minutos/);
   assert.match(settings, /15 minutos/);
   assert.match(settings, /30 minutos/);
-  assert.match(settings, /Activa App lock primero/i);
+  assert.match(settings, /Activa primero el bloqueo de aplicación/i);
   assert.match(settings, /segundo plano/i);
 });
 

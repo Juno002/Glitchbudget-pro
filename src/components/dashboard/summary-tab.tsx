@@ -66,11 +66,11 @@ function HomePreferencesDialog({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-1 h-4 w-4" />Personalizar Home</Button>
+        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-1 h-4 w-4" />Personalizar Resumen</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Personalizar Home</DialogTitle>
+          <DialogTitle>Personalizar Resumen</DialogTitle>
           <DialogDescription>La preferencia se guarda solo en este navegador. No cambia datos ni cálculos financieros.</DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
@@ -102,7 +102,7 @@ function HomePreferencesDialog({
             })}
           </div>
           <label className="block space-y-2 text-sm">
-            <span className="font-medium">Sección inicial al abrir Home</span>
+            <span className="font-medium">Sección inicial al abrir Resumen</span>
             <select
               className="h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3"
               value={defaultSection}
@@ -110,9 +110,9 @@ function HomePreferencesDialog({
             >
               {HOME_MODULES.filter(module=>!hidden.includes(module.id)).map(module=><option key={module.id} value={module.id}>{module.label}</option>)}
             </select>
-            <span className="block text-xs text-muted-foreground">Al entrar a Home se enfoca esta sección. El orden general se conserva por separado.</span>
+            <span className="block text-xs text-muted-foreground">Al entrar a Resumen se enfoca esta sección. El orden general se conserva por separado.</span>
           </label>
-          <Button type="button" variant="outline" onClick={onReset}>Restablecer Home</Button>
+          <Button type="button" variant="outline" onClick={onReset}>Restablecer Resumen</Button>
         </div>
       </DialogContent>
     </Dialog>

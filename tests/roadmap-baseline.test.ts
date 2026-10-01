@@ -125,7 +125,7 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables, auto
     condition:{field:'description',operator:'regex',value:'oops'},
     suggestion:{categoryId:'food'},
   }];
-  await assert.rejects(importDataJSON(JSON.stringify(invalidV12), storage), /Rules contiene datos inválidos/i);
+  await assert.rejects(importDataJSON(JSON.stringify(invalidV12), storage), /Reglas contiene datos inválidos/i);
   assert.deepEqual(await snapshot(), beforeInvalidV12);
   assert.deepEqual(exportLocalAutomation(storage), automationBeforeInvalidV12);
 });

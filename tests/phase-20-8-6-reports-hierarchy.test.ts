@@ -58,7 +58,7 @@ test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth vis
 test('20.8.6 keeps detailed transactions after Net Worth instead of replacing them with insights', () => {
   const netWorth=reports.indexOf('data-report-section="net-worth"');
   const detail=reports.indexOf('data-report-section="detail"');
-  const largest=reports.indexOf('Largest transactions');
+  const largest=reports.indexOf('Movimientos de mayor importe');
   assert.ok(netWorth>=0 && detail>netWorth && largest>detail);
   assert.match(reports,/report\.spending\.largestTransactions\.map/);
   assert.match(reports,/El resumen editorial no reemplaza los importes y filas exactas del rango\./);

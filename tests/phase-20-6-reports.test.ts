@@ -11,7 +11,7 @@ test('20.6 Reports preserves every canonical analytical section and range', () =
   for (const section of ['spending','cash-flow','net-worth','comparison']) {
     assert.ok(reports.includes('data-report-section="' + section + '"'), section);
   }
-  for (const label of ['Spending','Cash Flow','Net Worth','Comparison','Distribución por categoría','Fixed / Variable / Occasional','Largest transactions']) {
+  for (const label of ['Gastos','Flujo de caja','Patrimonio neto','Comparación','Distribución por categoría','Fijo / Variable / Ocasional','Movimientos de mayor importe']) {
     assert.ok(reports.includes(label), label);
   }
   for (const preset of ['7d','30d','3m','6m','1y','custom']) {

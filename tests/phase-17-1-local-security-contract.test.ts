@@ -68,7 +68,7 @@ test('17.1 binds existing Hide amounts runtime to the canonical storage key and 
 test('17.1 boundaries remain explicit after App lock and Auto-lock implementation', () => {
   const settings = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
 
-  assert.match(settings, /no cifra los datos almacenados ni los backups/i);
+  assert.match(settings, /no cifra los datos almacenados ni las copias de seguridad/i);
   assert.match(settings, /AppLockSettings/);
   assert.match(settings, /AutoLockSettings/);
 

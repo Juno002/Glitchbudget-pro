@@ -127,17 +127,17 @@ export default function ReportsTab() {
     value:row.total,
   }));
   const cashFlowChartRows:ReportChartRow[]=[
-    {label:'Income',value:report.cashFlow.income},
-    {label:'Cash expenses',value:report.cashFlow.cashExpenses},
-    {label:'Debt payments',value:report.cashFlow.debtPayments},
-    {label:'Net cash flow',value:report.cashFlow.netCashFlow},
+    {label:'Ingresos',value:report.cashFlow.income},
+    {label:'Gastos en efectivo',value:report.cashFlow.cashExpenses},
+    {label:'Pagos de deuda',value:report.cashFlow.debtPayments},
+    {label:'Flujo neto',value:report.cashFlow.netCashFlow},
   ];
   const netWorthChartRows:ReportChartRow[]=[
-    {label:'Cash',value:report.netWorth.cash},
-    {label:'Banks',value:report.netWorth.banks},
-    {label:'Investments',value:report.netWorth.investments},
-    {label:'Liabilities',value:-report.netWorth.liabilities},
-    {label:'Net worth',value:report.netWorth.netWorth},
+    {label:'Efectivo',value:report.netWorth.cash},
+    {label:'Bancos',value:report.netWorth.banks},
+    {label:'Inversiones',value:report.netWorth.investments},
+    {label:'Pasivos',value:-report.netWorth.liabilities},
+    {label:'Patrimonio neto',value:report.netWorth.netWorth},
   ];
   const comparisonChartRows:ReportComparisonChartRow[]=comparisonRows.map(row=>({
     label:row.label,
@@ -198,7 +198,7 @@ export default function ReportsTab() {
           <section className="space-y-4" aria-labelledby="spending-title" data-report-section="spending">
             <SectionHeader
               eyebrow="Hero analítico"
-              title={<span id="spending-title">Spending</span>}
+              title={<span id="spending-title">Gastos</span>}
               description="Gasto real registrado dentro del rango. Una compra con tarjeta cuenta una vez como gasto."
             />
             <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-hero="spending">
@@ -230,7 +230,7 @@ export default function ReportsTab() {
           <section className="space-y-4" aria-labelledby="comparison-title" data-report-section="comparison">
             <SectionHeader
               eyebrow="Tendencias"
-              title={<span id="comparison-title">Comparison</span>}
+              title={<span id="comparison-title">Comparación</span>}
               description="Rango actual frente al período inmediatamente anterior de duración comparable."
             />
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="comparison">
@@ -304,7 +304,7 @@ export default function ReportsTab() {
 
               <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="nature">
                 <CardHeader>
-                  <CardTitle className="font-display text-2xl font-normal">Fixed / Variable / Occasional</CardTitle>
+                  <CardTitle className="font-display text-2xl font-normal">Fijo / Variable / Ocasional</CardTitle>
                   <CardDescription>Naturaleza del gasto, separada de categoría.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -331,14 +331,14 @@ export default function ReportsTab() {
           <section className="space-y-4" aria-labelledby="cashflow-title" data-report-section="cash-flow">
             <SectionHeader
               eyebrow="Movimiento de caja"
-              title={<span id="cashflow-title">Cash Flow</span>}
+              title={<span id="cashflow-title">Flujo de caja</span>}
               description="Entradas y salidas reales de efectivo; una compra a crédito no sale de caja hasta que pagas la tarjeta."
             />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard label="Income" amount={report.cashFlow.income} tone="positive" />
-              <MetricCard label="Cash expenses" amount={report.cashFlow.cashExpenses} tone="negative" />
-              <MetricCard label="Debt payments" amount={report.cashFlow.debtPayments} tone="negative" />
-              <MetricCard label="Net cash flow" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
+              <MetricCard label="Ingresos" amount={report.cashFlow.income} tone="positive" />
+              <MetricCard label="Gastos en efectivo" amount={report.cashFlow.cashExpenses} tone="negative" />
+              <MetricCard label="Pagos de deuda" amount={report.cashFlow.debtPayments} tone="negative" />
+              <MetricCard label="Flujo neto" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
             </div>
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="cash-flow">
               <CardHeader>
@@ -352,15 +352,15 @@ export default function ReportsTab() {
           <section className="space-y-4" aria-labelledby="networth-title" data-report-section="net-worth">
             <SectionHeader
               eyebrow="Posición"
-              title={<span id="networth-title">Net Worth</span>}
+              title={<span id="networth-title">Patrimonio neto</span>}
               description={'Posición registrada al '+range.end+'. Las proyecciones futuras de inversiones no se incluyen.'}
             />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              <MetricCard label="Cash" amount={report.netWorth.cash} tone="neutral" />
-              <MetricCard label="Banks" amount={report.netWorth.banks} tone="neutral" />
-              <MetricCard label="Investments" amount={report.netWorth.investments} tone="neutral" />
-              <MetricCard label="Liabilities" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
-              <MetricCard label="Net worth" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
+              <MetricCard label="Efectivo" amount={report.netWorth.cash} tone="neutral" />
+              <MetricCard label="Bancos" amount={report.netWorth.banks} tone="neutral" />
+              <MetricCard label="Inversiones" amount={report.netWorth.investments} tone="neutral" />
+              <MetricCard label="Pasivos" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
+              <MetricCard label="Patrimonio neto" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
             </div>
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
               <CardHeader>
@@ -384,7 +384,7 @@ export default function ReportsTab() {
             />
             <Card className="shadow-[var(--shadow-card)]">
               <CardHeader>
-                <CardTitle className="font-display text-xl font-normal">Largest transactions</CardTitle>
+                <CardTitle className="font-display text-xl font-normal">Movimientos de mayor importe</CardTitle>
                 <CardDescription>Los gastos individuales más grandes del rango.</CardDescription>
               </CardHeader>
               <CardContent>

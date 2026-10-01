@@ -13,7 +13,7 @@ const ITEMS: Array<{ key: keyof Pick<BackupImportPreview, 'accounts' | 'transact
 
 export function BackupPreviewSummary({ preview }: { preview: BackupImportPreview }) {
   return (
-    <div className="rounded-[var(--radius-card)] border bg-muted/20 p-3 shadow-[var(--shadow-control)]" aria-label="Resumen del backup" data-backup-preview="prisma">
+    <div className="rounded-[var(--radius-card)] border bg-muted/20 p-3 shadow-[var(--shadow-control)]" aria-label="Resumen de la copia de seguridad" data-backup-preview="prisma">
       <p className="text-sm font-medium">Este archivo contiene</p>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {ITEMS.map(item => {
@@ -27,9 +27,9 @@ export function BackupPreviewSummary({ preview }: { preview: BackupImportPreview
         })}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Backup JSON v{preview.formatVersion}
-        {preview.schemaVersion ? ' · schema ' + preview.schemaVersion : ''}
-        {preview.appVersion ? ' · app ' + preview.appVersion : ''}
+        Copia JSON v{preview.formatVersion}
+        {preview.schemaVersion ? ' · esquema ' + preview.schemaVersion : ''}
+        {preview.appVersion ? ' · aplicación ' + preview.appVersion : ''}
       </p>
     </div>
   );

@@ -16,8 +16,8 @@ test('20.3 Summary keeps the canonical Home read model and five protected module
   }
   assert.equal((source.match(/HomeSection id="/g) || []).length, 5);
 
-  assert.match(source, /Personalizar Home/);
-  assert.match(source, /Sección inicial al abrir Home/);
+  assert.match(source, /Personalizar Resumen/);
+  assert.match(source, /Sección inicial al abrir Resumen/);
 });
 
 test('20.3 Summary adopts Prisma hierarchy without importing demo finance data', () => {

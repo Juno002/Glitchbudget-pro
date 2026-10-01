@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1–20.9.5 completadas / Gates aprobados; próxima intervención autorizada: 20.9.6. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.6 completadas / Gates aprobados; próxima intervención autorizada: 20.9.7. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -4196,6 +4196,36 @@ sin pelear visualmente con el fondo
 **Gate 20.9.5:** toast legible y coherente en ambos temas y tamaños.
 
 ### 20.9.6 — Idioma visible único
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+622/622 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36900165070 ✅
+```
+
+Resultado:
+
+- Reportes normaliza títulos, métricas, gráficos y naturaleza del gasto al español;
+- copy visible de Home se presenta como Resumen sin renombrar modelos/IDs internos;
+- automatización local muestra Plantillas / Filtros guardados / Reglas / Registro rápido;
+- la fuente `LOCAL_AUTOMATION_LAYERS` queda localizada sin cambiar sus IDs;
+- App lock / Auto-lock pasan a bloqueo de aplicación / bloqueo automático;
+- backup visible pasa a copia / copia de seguridad, incluidos errores propagados y feedback de restauración cifrada;
+- CSV, JSON, OPFS, Dexie y Google Sheets se preservan como formatos/tecnologías/marcas;
+- review P2 de métricas de Reportes, fuente de tarjetas de automatización y errores cifrados quedó resuelto antes del cierre;
+- tests históricos siguen protegiendo estructura/semántica sin congelar copy inglés obsoleto;
+- E2E actualizado a “Datos y copias” pasa completo;
+- sin cambios de semántica financiera, schema, migraciones, formatos persistentes, backup contract, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-6.md`.
 
 Realizar un barrido completo de copy visible.
 
@@ -4494,7 +4524,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.6 → 20.9.9
+20.9.7 → 20.9.9
 20.10.1 → 20.10.7
 ```
 

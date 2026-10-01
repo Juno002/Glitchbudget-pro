@@ -90,7 +90,7 @@ test('20.7.5.3 React surfaces consume explicit card/loan read models and general
 
   assert.match(home, /Pasivos registrados/);
   assert.doesNotMatch(home, /Pasivo real de tarjetas registradas/);
-  assert.match(reports, /label="Liabilities"/);
+  assert.match(reports, /label="Pasivos"/);
   assert.doesNotMatch(reports, /creditCardLiabilities|Credit-card liabilities|pasivos de tarjeta/);
 });
 

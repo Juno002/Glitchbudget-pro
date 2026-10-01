@@ -269,7 +269,7 @@ export default function SubscriptionsManager() {
           label="Reemplazar cuenta al confirmar (opcional)"
         />
         <p className="text-xs text-muted-foreground">
-          Vacío usa la cuenta predeterminada de la regla; si tampoco existe, se utiliza Efectivo para movimientos cash/bank.
+          Vacío usa la cuenta predeterminada de la regla; si tampoco existe, se utiliza Efectivo para movimientos de efectivo/banco.
         </p>
       </div>
 

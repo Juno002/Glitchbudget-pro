@@ -37,7 +37,7 @@ const SETTINGS_SECTIONS = [
   ['categories', 'Categorías'],
   ['automation', 'Automatización'],
   ['privacy', 'Privacidad y seguridad'],
-  ['data', 'Datos y backups'],
+  ['data', 'Datos y copias'],
   ['appearance', 'Apariencia'],
   ['about', 'Acerca de'],
 ] as const;
@@ -236,7 +236,7 @@ export function SettingsDialog() {
           <TabsContent value="automation" className="space-y-6">
             <SectionHeader
               title="Automatización"
-              description="Flujo local del roadmap: Templates → Saved filters → Rules. Cada capa conserva una responsabilidad distinta."
+              description="Flujo local: Plantillas → Filtros guardados → Reglas. Cada capa conserva una responsabilidad distinta."
             />
 
             <div className="grid gap-3 md:grid-cols-3" data-local-automation-order="templates-saved-filters-rules">
@@ -262,7 +262,7 @@ export function SettingsDialog() {
             <div className="rounded-xl border bg-muted/20 p-4 text-sm">
               <p className="font-medium">Responsabilidades separadas</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Templates se gestionan dentro de Quick Add; Saved filters, en Movimientos; Rules se gestionan aquí y solo sugieren clasificación.
+                Las plantillas se gestionan dentro del registro rápido; los filtros guardados, en Movimientos; las reglas se gestionan aquí y solo sugieren clasificación.
               </p>
             </div>
 
@@ -275,7 +275,7 @@ export function SettingsDialog() {
               <label className="flex items-start justify-between gap-4">
                 <span>
                   <span className="block font-medium">Ocultar importes</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador; no cifra los datos almacenados ni los backups.</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador; no cifra los datos almacenados ni las copias de seguridad.</span>
                 </span>
                 <input
                   type="checkbox"

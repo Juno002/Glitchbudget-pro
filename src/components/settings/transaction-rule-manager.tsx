@@ -206,7 +206,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
             <span>
               <span className="block font-medium">Aplicar automáticamente</span>
               <span className="mt-1 block text-xs text-muted-foreground">
-                Opcional y solo para esta regla. Si varias reglas automáticas coinciden a la vez, Quick Add no elegirá una por su cuenta.
+                Opcional y solo para esta regla. Si varias reglas automáticas coinciden a la vez, el registro rápido no elegirá una por su cuenta.
               </span>
             </span>
           </label>
@@ -227,13 +227,13 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Orden de aplicación</p><h3 className="mt-1 font-display text-xl font-normal">Reglas locales</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            El orden se conserva y también es el orden en que Quick Add presenta coincidencias.
+            El orden se conserva y también es el orden en que el registro rápido presenta coincidencias.
           </p>
         </div>
 
         {rules.length === 0 ? (
           <div className="rounded-[var(--radius-card)] border border-dashed p-5 text-sm text-muted-foreground">
-            Aún no hay reglas. Crea una para recibir sugerencias locales en Quick Add.
+            Aún no hay reglas. Crea una para recibir sugerencias locales en el registro rápido.
           </div>
         ) : rules.map((rule, index) => {
           const category = rule.suggestion.categoryId

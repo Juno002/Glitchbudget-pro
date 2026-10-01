@@ -96,7 +96,7 @@ test('settings hierarchy includes roadmap sections without pretending future sec
   const appLock = read('src/components/settings/app-lock-settings.tsx');
   const autoLock = read('src/components/settings/auto-lock-settings.tsx');
   assert.match(appLock, /Bloqueo de aplicación/);
-  assert.match(autoLock, /Auto-lock/);
+  assert.match(autoLock, /Bloqueo automático/);
   assert.match(settings, /Zona destructiva/);
 });
 

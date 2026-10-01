@@ -114,7 +114,7 @@ test('Reports 2.0 UI exposes every required roadmap range and section', () => {
     readFileSync(new URL('../src/components/dashboard/reports-tab.tsx',import.meta.url),'utf8'),
     readFileSync(new URL('../src/components/dashboard/report-range-controls.tsx',import.meta.url),'utf8'),
   ].join('\n');
-  for (const text of ['7D','30D','3M','6M','1Y','Custom','Spending','Cash Flow','Net Worth','Comparison','Largest transactions','Fixed / Variable / Occasional']) {
+  for (const text of ['7D','30D','3M','6M','1Y','Custom','Gastos','Flujo de caja','Patrimonio neto','Comparación','Movimientos de mayor importe','Fijo / Variable / Ocasional']) {
     assert.ok(ui.includes(text),text);
   }
 });

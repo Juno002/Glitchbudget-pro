@@ -113,7 +113,7 @@ test('17.2 mounts lock gate before FinanceProvider so financial UI is not render
 
 test('17.2 settings still supports enable, change, manual lock and disable with Auto-lock layered separately', () => {
   const settings = readFileSync(new URL('../src/components/settings/app-lock-settings.tsx', import.meta.url), 'utf8');
-  assert.match(settings, /Activar App lock/);
+  assert.match(settings, /Activar bloqueo/);
   assert.match(settings, /Bloquear ahora/);
   assert.match(settings, /Cambiar PIN/);
   assert.match(settings, /Desactivar bloqueo/);
