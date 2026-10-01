@@ -61,4 +61,4 @@ Merge commit:
 
 **Aprobado.** La reducción de ruido no reduce comprensión ni accesibilidad.
 
-El siguiente paso autorizado, una vez reconciliado este cierre en el roadmap canónico y los índices de Fase 20, es **20.8.8 — Gate final 20.8**.
+Con este cierre reconciliado en el roadmap canónico y los índices de Fase 20, la próxima intervención autorizada es **20.8.8 — Gate final 20.8**.
