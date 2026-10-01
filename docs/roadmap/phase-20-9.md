@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1 completada / Gate aprobado; 20.9.2 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.2 completadas / Gates aprobados; 20.9.3 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -46,6 +46,31 @@ Evidencia: [phase-20-9-1.md](phase-20-9-1.md).
 **Gate 20.9.1:** mapa de inconsistencias priorizado y sin zonas ambiguas.
 
 ## 20.9.2 — Motion tokens ultra rápidos
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+597/597 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36890383021 ✅
+```
+
+Resultado:
+
+- tokens press/control/menu/content/dialog fijados en 80/110/130/150/170 ms;
+- primary controls usan control + press, sin depender del alias de contenido;
+- Dialog/AlertDialog/Sheet comparten dialog timing;
+- Popover/Tooltip/Select/DropdownMenu/Menubar comparten menu timing;
+- Accordion, debt progress, Plan y tile de Logros consumen tokens adecuados;
+- reduced motion permanece protegido;
+- motion celebratorio específico de Logros sigue reservado a 20.9.5.
+
+Evidencia: [phase-20-9-2.md](phase-20-9-2.md).
 
 Definir timings globales orientativos:
 
