@@ -542,11 +542,37 @@ async function main() {
           'net-worth',
           'detail',
         ];
+        const sections = requiredSections
+          .map(section => document.querySelector('[data-report-section="' + section + '"]'));
+        const charts = [...document.querySelectorAll('[data-report-chart]')];
+        const presetButtons = [...document.querySelectorAll('[data-report-preset]')];
+        const visibleAndContained = node => {
+          if (!(node instanceof HTMLElement)) return false;
+          const style = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number.parseFloat(style.opacity || '1') > 0
+            && rect.width > 0
+            && rect.height > 0
+            && rect.left >= -1
+            && rect.right <= window.innerWidth + 1;
+        };
+        const usableControl = node => {
+          if (!visibleAndContained(node)) return false;
+          const rect = node.getBoundingClientRect();
+          return rect.width >= 32 && rect.height >= 32;
+        };
         return reports && controls && mobileNav
+          && visibleAndContained(reports)
+          && visibleAndContained(controls)
           && getComputedStyle(mobileNav).display !== 'none'
-          && requiredSections.every(section => document.querySelector(
-            '[data-report-section="' + section + '"]',
-          ));
+          && sections.every(visibleAndContained)
+          && charts.length >= 5
+          && charts.every(visibleAndContained)
+          && presetButtons.length === 6
+          && presetButtons.every(usableControl)
+          && document.documentElement.scrollWidth <= window.innerWidth + 1;
       })()`,
       'Reportes Prisma móvil',
     );
