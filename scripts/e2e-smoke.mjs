@@ -460,6 +460,61 @@ async function main() {
 
     // Fresh install: create actual data through the public UI, not by touching Dexie.
     await createMovement(client, 'Ingreso', 1000);
+
+    // Phase 20.9.5: the first-income achievement must remain readable and above mobile nav.
+    await waitFor(
+      client,
+      `(() => {
+        const toast = document.querySelector('[data-achievement-toast="true"]');
+        const surface = document.querySelector('[data-achievement-toast-surface="true"]');
+        return toast && surface
+          && surface.textContent?.includes('Logro desbloqueado')
+          && surface.textContent?.includes('Primer Ingreso')
+          && surface.textContent?.includes('+10 XP')
+          && Boolean(surface.querySelector('[data-achievement-toast-action="dismiss"]'))
+          && Boolean(surface.querySelector('[data-achievement-toast-close="true"]'));
+      })()`,
+      'achievement toast',
+    );
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 700,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const toast = document.querySelector('[data-achievement-toast="true"]');
+        const surface = document.querySelector('[data-achievement-toast-surface="true"]');
+        const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        if (!(toast instanceof HTMLElement) || !(surface instanceof HTMLElement) || !(mobileNav instanceof HTMLElement)) return false;
+        const toastRect = toast.getBoundingClientRect();
+        const navRect = mobileNav.getBoundingClientRect();
+        const style = getComputedStyle(surface);
+        return getComputedStyle(mobileNav).display !== 'none'
+          && toastRect.bottom <= navRect.top
+          && toastRect.left >= 0
+          && toastRect.right <= window.innerWidth
+          && style.backgroundColor !== 'rgba(0, 0, 0, 0)'
+          && style.visibility !== 'hidden';
+      })()`,
+      'achievement toast tablet-safe',
+    );
+    await client.evaluate(`document.querySelector('[data-achievement-toast-action="dismiss"]')?.click()`);
+    await waitFor(client, `!document.querySelector('[data-achievement-toast="true"]')`, 'cierre achievement toast');
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
+      'retorno desktop después de achievement toast',
+    );
+
     await createMovement(client, 'Gasto', 100);
 
     if (!await client.evaluate(clickButtonExpression('Movimientos'))) {
