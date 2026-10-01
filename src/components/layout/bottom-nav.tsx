@@ -23,7 +23,7 @@ export default function BottomNav() {
     <nav
       aria-label="Navegación principal"
       data-shell-nav="mobile"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 backdrop-blur-xl shadow-[var(--shadow-nav)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-[var(--border-subtle)] bg-background/95 backdrop-blur-[var(--blur-navigation)] shadow-[var(--shadow-nav)] md:hidden"
     >
       <div
         className="grid grid-cols-4 gap-1 px-2 pt-2"
