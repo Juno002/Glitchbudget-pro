@@ -56,21 +56,27 @@ test('20.8.4 Home read model passes canonical position comparisons through witho
     periodStartDay: 1,
   });
 
-  assert.equal(home.position.comparisons, report.positionComparisons);
-  assert.equal(home.position.comparisons.liquidAvailable.absoluteDelta, 30_000);
-  assert.equal(home.position.comparisons.netWorth.absoluteDelta, 30_000);
-  assert.equal(home.position.comparisons.totalDebt.absoluteDelta, 0);
-  assert.equal(home.position.comparisons.investments.absoluteDelta, 0);
+  assert.deepEqual(home.position, {
+    liquidAssets: 150_000,
+    investments: 50_000,
+    liabilities: 20_000,
+    netWorth: 180_000,
+  });
+  assert.equal(home.positionComparisons, report.positionComparisons);
+  assert.equal(home.positionComparisons.liquidAvailable.absoluteDelta, 30_000);
+  assert.equal(home.positionComparisons.netWorth.absoluteDelta, 30_000);
+  assert.equal(home.positionComparisons.totalDebt.absoluteDelta, 0);
+  assert.equal(home.positionComparisons.investments.absoluteDelta, 0);
 });
 
 test('20.8.4 Summary renders comparison before contextual explanation for every position KPI', () => {
   const source = readFileSync(new URL('../src/components/dashboard/summary-tab.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /data-position-comparison=/);
-  assert.match(source, /comparison=\{home\.position\.comparisons\.liquidAvailable\}/);
-  assert.match(source, /comparison=\{home\.position\.comparisons\.netWorth\}/);
-  assert.match(source, /comparison=\{home\.position\.comparisons\.totalDebt\}/);
-  assert.match(source, /comparison=\{home\.position\.comparisons\.investments\}/);
+  assert.match(source, /comparison=\{home\.positionComparisons\.liquidAvailable\}/);
+  assert.match(source, /comparison=\{home\.positionComparisons\.netWorth\}/);
+  assert.match(source, /comparison=\{home\.positionComparisons\.totalDebt\}/);
+  assert.match(source, /comparison=\{home\.positionComparisons\.investments\}/);
 
   const cardStart = source.indexOf('function PositionCard');
   const cardEnd = source.indexOf('function PanelHeading');
