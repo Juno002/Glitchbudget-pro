@@ -2,6 +2,21 @@
 
 Fuente funcional: `Roadmap septiembre 2026.txt`. Apoyo: `docs/roadmap/phase-20-8.md`.
 
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+542/542 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36803800520 ✅
+```
+
+No se modificó Home ni Reportes en esta microintervención; el entregable fue el inventario informativo y la regresión de categorías.
+
 ## Inventario de información visible
 
 ### Resumen (`summary-tab.tsx`)
@@ -47,7 +62,7 @@ No se añade lógica de reparación ni migración.
 
 ## Gate 20.8.1
 
-El gate queda preparado cuando:
+El gate quedó aprobado porque:
 
 - este inventario cubre KPI, explicaciones, badges, comparaciones y gráficos visibles de Resumen/Reportes;
 - el test específico protege categorías default de instalación limpia;
