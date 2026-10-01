@@ -38,12 +38,14 @@ import { playExpense, playIncome, playBudgetExceeded, playGoalComplete } from "@
 import { DEFAULT_SETTINGS, resolveSettings } from "@/lib/settings-read-model";
 import type { Cents } from '@/domain/money';
 import { reconcileSelectedPeriod } from '@/domain/period-selection';
+import { resolveVisualTheme } from '@/domain/app-lifecycle';
+import { useFinancialToday } from '@/hooks/use-financial-today';
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
 export type { BackupFile } from '@/hooks/use-backup-management';
 
 interface FinanceContextType {
-  theme: 'light' | 'dark' | 'serious';
+  theme: Settings['theme'];
   currency: string;
   locale: string;
   preventNegativeAccountBalance: boolean;
@@ -51,6 +53,7 @@ interface FinanceContextType {
   rolloverStrategy: RolloverStrategy;
   periodStartDay: number;
   currentPeriod: PeriodRange;
+  today: string;
   incomes: Income[] | undefined;
   baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number };
   expenses: Expense[] | undefined;
@@ -69,7 +72,7 @@ interface FinanceContextType {
   accounts: Account[] | undefined;
   investments: Investment[] | undefined;
 
-  setTheme: (theme: 'light' | 'dark' | 'serious') => void;
+  setTheme: (theme: Settings['theme']) => void;
   setBaseCurrency: (currency: string) => Promise<boolean>;
   setPreventNegativeAccountBalance: (value: boolean) => void;
   setBudgetOverspendingBehavior: (value: BudgetOverspendingBehavior) => void;
@@ -144,6 +147,7 @@ const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
 
 export function FinanceProvider({ children }: { children: ReactNode }) {
   const [currentMonth, setCurrentMonthState] = useState(localDate().slice(0, 7));
+  const today = useFinancialToday();
   const { toast } = useToast();
   const [dataVersion, setDataVersion] = useState(0);
   const previousPeriodStartDay = useRef<number | null>(null);
@@ -186,11 +190,10 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!recurringRules) return;
-    const today = localDate();
     void materializePendingOccurrences(plannedOccurrenceWindow(today)).catch(error => {
       toast({ title: 'No se pudieron actualizar los pagos planificados', description: friendlyError(error), variant: 'destructive' });
     });
-  }, [recurringRules, toast]);
+  }, [recurringRules, today, toast]);
 
   const settings = useMemo(() => resolveSettings(rawSettings), [rawSettings]);
 
@@ -199,8 +202,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (loading) return;
-    void prepareBudgetPeriodsForDate(localDate()).catch(error => toast({ title:'No se pudieron preparar los presupuestos', description:friendlyError(error), variant:'destructive' }));
-  }, [loading, rawSettings, toast]);
+    void prepareBudgetPeriodsForDate(today).catch(error => toast({ title:'No se pudieron preparar los presupuestos', description:friendlyError(error), variant:'destructive' }));
+  }, [loading, rawSettings, today, toast]);
 
   useEffect(() => {
     const nextStartDay = settings.periodStartDay ?? 1;
@@ -231,15 +234,22 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const { confirm: confirmBudget, dialog: budgetConfirmationDialog } = useBudgetConfirmation(activeSettings.currency, activeSettings.locale);
 
   useEffect(() => {
-    if (activeSettings.theme) {
-        const theme = activeSettings.theme === 'system' ? 'dark' : activeSettings.theme;
-        document.body.classList.remove('light', 'dark', 'serious', 'system');
-        document.documentElement.classList.remove('light', 'dark', 'serious', 'system');
-        document.documentElement.classList.add(theme);
-        // "only" opts out of automatic darkening in Chromium-based mobile browsers.
-        document.documentElement.style.colorScheme = theme === 'dark' ? 'only dark' : 'only light';
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080808' : theme === 'serious' ? '#f7f7f7' : '#f5f4ef');
-    }
+    if (!activeSettings.theme) return;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const applyTheme = () => {
+      const theme = resolveVisualTheme(activeSettings.theme, media.matches);
+      document.body.classList.remove('light', 'dark', 'serious', 'system');
+      document.documentElement.classList.remove('light', 'dark', 'serious', 'system');
+      document.documentElement.classList.add(theme);
+      // "only" opts out of automatic darkening in Chromium-based mobile browsers.
+      document.documentElement.style.colorScheme = theme === 'dark' ? 'only dark' : 'only light';
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080808' : theme === 'serious' ? '#f7f7f7' : '#f5f4ef');
+    };
+
+    applyTheme();
+    if (activeSettings.theme !== 'system') return;
+    media.addEventListener('change', applyTheme);
+    return () => media.removeEventListener('change', applyTheme);
   }, [activeSettings.theme]);
 
 
@@ -286,7 +296,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
       }
   }, [toast]);
 
-  const setTheme = useCallback((theme: 'light' | 'dark' | 'serious') => updateSetting('theme', theme), [updateSetting]);
+  const setTheme = useCallback((theme: Settings['theme']) => updateSetting('theme', theme), [updateSetting]);
   const setBaseCurrency = useCallback(async (currency: string) => {
     try {
       const next = await persistBaseCurrency(currency);
@@ -657,7 +667,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   }, [toast]);
 
   const value: FinanceContextType = useMemo(() => ({
-    theme: activeSettings.theme === 'system' ? 'dark' : activeSettings.theme,
+    theme: activeSettings.theme,
     currency: activeSettings.currency,
     locale: activeSettings.locale,
     preventNegativeAccountBalance: activeSettings.preventNegativeAccountBalance,
@@ -665,6 +675,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     rolloverStrategy: activeSettings.rolloverStrategy,
     periodStartDay: activeSettings.periodStartDay ?? 1,
     currentPeriod,
+    today,
     baseIncome: activeSettings.baseIncome,
     expenseCategories: expenseCategories,
     incomeCategories: incomeCategories,
@@ -741,7 +752,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts, investments,
+    activeSettings, currentPeriod, today, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts, investments,
     setTheme, setBaseCurrency, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,

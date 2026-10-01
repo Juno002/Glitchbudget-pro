@@ -29,7 +29,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { localDate } from '@/lib/finance-calculations';
 import { useTabs } from '@/contexts/tabs-context';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { selectHomeReadModel, type HomeModuleId } from '@/domain/home';
@@ -40,6 +39,7 @@ import { formatPeriodRange } from '@/lib/period-format';
 import { cn } from '@/lib/utils';
 import type { KpiComparison } from '@/domain/kpi-comparisons';
 import type { LucideIcon } from 'lucide-react';
+import { loadableContentState } from '@/domain/app-lifecycle';
 
 function dateLabel(value:string, locale:string) {
   return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
@@ -281,6 +281,16 @@ function PanelHeading({
   );
 }
 
+function SummaryPanelLoading() {
+  return (
+    <div className="mt-5 space-y-3" data-summary-loading="true" aria-label="Cargando sección">
+      <Skeleton className="h-7 w-32 rounded-[var(--radius-interactive)]" />
+      <Skeleton className="h-4 w-full rounded-[var(--radius-interactive)]" />
+      <Skeleton className="h-4 w-2/3 rounded-[var(--radius-interactive)]" />
+    </div>
+  );
+}
+
 export default function SummaryTab() {
   const {
     getReportSnapshot,
@@ -289,6 +299,7 @@ export default function SummaryTab() {
     currentMonth,
     currentPeriod,
     periodStartDay,
+    today,
     locale,
     plannedOccurrences,
     recurringRules,
@@ -299,7 +310,6 @@ export default function SummaryTab() {
   }=useFinances();
   const {activeTab,setActiveTab,setPlanningTab}=useTabs();
   const money=usePrivateCurrency();
-  const today=localDate();
   const preferences=useHomePreferences();
   const previousActive=useRef<string|null>(null);
 
@@ -333,6 +343,11 @@ export default function SummaryTab() {
     setActiveTab('movements');
     window.setTimeout(()=>document.getElementById('investments-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
   };
+
+  const budgetState=loadableContentState(loading,home.budget.configuredCount>0);
+  const upcomingState=loadableContentState(loading,home.upcoming.rows.length>0);
+  const goalsState=loadableContentState(loading,home.goals.length>0);
+  const investmentsState=loadableContentState(loading,home.investments.activeCount>0);
 
   const budgetStatus: { status:FinancialStatus; label:string } =
     home.budget.status==='over'
@@ -406,7 +421,7 @@ export default function SummaryTab() {
               title="Presupuesto disponible"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos <ArrowUpRight className="h-4 w-4" /></Button>}
             />
-            {home.budget.configuredCount ? (
+            {budgetState==='loading' ? <SummaryPanelLoading /> : budgetState==='content' ? (
               <div className="mt-5 space-y-4" data-home-budget-summary="decision-first">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
@@ -448,7 +463,7 @@ export default function SummaryTab() {
               title="Próximos pagos"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan <ArrowUpRight className="h-4 w-4" /></Button>}
             />
-            {home.upcoming.rows.length ? (
+            {upcomingState==='loading' ? <SummaryPanelLoading /> : upcomingState==='content' ? (
               <div className="mt-5 grid gap-2">
                 {home.upcoming.rows.map(({occurrence,rule})=>(
                   <PlannedPaymentRow
@@ -491,7 +506,7 @@ export default function SummaryTab() {
               title="Metas relevantes"
               action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas <ArrowUpRight className="h-4 w-4" /></Button>}
             />
-            {home.goals.length ? (
+            {goalsState==='loading' ? <SummaryPanelLoading /> : goalsState==='content' ? (
               <div className="mt-5 grid gap-5">
                 {home.goals.map(({goal,remaining,schedule})=>(
                   <ProgressMetric
@@ -526,7 +541,7 @@ export default function SummaryTab() {
               title="Inversiones"
               action={<Button type="button" variant="ghost" size="sm" onClick={goToInvestments}>Ver inversiones <ArrowUpRight className="h-4 w-4" /></Button>}
             />
-            {home.investments.activeCount ? (
+            {investmentsState==='loading' ? <SummaryPanelLoading /> : investmentsState==='content' ? (
               <div className="mt-5 space-y-3" data-home-investments="action-first">
                 {home.investments.maturedCount>0 ? (
                   <StatusBadge
