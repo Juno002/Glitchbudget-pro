@@ -1,6 +1,6 @@
 # Fase 20.8 — Information Design + Deterministic Insights
 
-Estado: **en curso — 20.8.1–20.8.7 completadas / Gates aprobados; 20.8.8 es la próxima intervención autorizada**.
+Estado: **completada — 20.8.1–20.8.8 cerradas / Gate 20.8 aprobado; 20.9.1 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -344,27 +344,32 @@ Tooltips/popovers deben ser accesibles por teclado y toque.
 
 ## 20.8.8 — Gate final 20.8
 
-Validar:
+**Estado: completada / Gate aprobado.**
 
-- comparaciones deterministas;
-- Lectura rápida determinista;
-- cero red;
-- cero LLM;
-- cero nuevas fórmulas financieras en UI;
-- categorías default en instalación limpia;
-- Home desktop/móvil;
-- Reportes desktop/móvil;
-- tablas/detalle exacto preservados;
-- offline intacto;
-- backup/migraciones intactos.
-
-Requerido:
+Quality gate final:
 
 ```text
-npm run check
-npm run build
-npm run test:e2e
+585/585 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36882536925 ✅
 ```
+
+Resultado:
+
+- el test final consolida categorías default, KPI comparativos, Lectura rápida, jerarquía de Reportes, disclosure, local-only y compatibilidad de backup/migraciones;
+- el smoke E2E valida Home y Reportes en desktop y móvil;
+- Reportes móvil exige secciones/charts visibles y contenidos dentro del viewport, controles utilizables y ausencia de overflow horizontal global;
+- no se observaron requests externos y la recarga offline continúa operativa;
+- tablas y detalle exacto permanecen disponibles;
+- no se introdujeron features, fórmulas financieras, schema, migraciones, backup, persistencia ni red.
+
+Evidencia: [phase-20-8-8.md](phase-20-8-8.md).
+
+**Gate 20.8:** aprobado. La fase Information Design + Deterministic Insights queda cerrada.
 
 ## Fuera de alcance
 
