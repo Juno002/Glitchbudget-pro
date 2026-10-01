@@ -1,0 +1,413 @@
+{
+  "asOf": "2026-09-30",
+  "reportRange": {
+    "start": "2026-09-01",
+    "end": "2026-09-30"
+  },
+  "settings": {
+    "savePct": 0.1,
+    "periodStartDay": 1
+  },
+  "accounts": [
+    {
+      "id": "cash",
+      "name": "Efectivo",
+      "type": "cash",
+      "currency": "DOP",
+      "openingBalance": 100000,
+      "startDate": "2026-09-01"
+    },
+    {
+      "id": "bank",
+      "name": "Banco",
+      "type": "bank",
+      "currency": "DOP",
+      "openingBalance": 1000000,
+      "startDate": "2026-09-01"
+    },
+    {
+      "id": "investment",
+      "name": "Inversión",
+      "type": "investment",
+      "currency": "DOP",
+      "openingBalance": 0,
+      "startDate": "2026-09-01"
+    }
+  ],
+  "debts": [
+    {
+      "id": "card",
+      "name": "Tarjeta",
+      "type": "credit_card",
+      "principal": 200000,
+      "openingAdjustment": 0,
+      "apr": 0,
+      "minPayment": 0,
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "status": "active"
+    },
+    {
+      "id": "loan",
+      "name": "Préstamo legado",
+      "type": "loan",
+      "principal": 300000,
+      "openingAdjustment": 5000,
+      "apr": 0.12,
+      "minPayment": 10000,
+      "createdAt": "2026-09-01T12:00:00.000Z",
+      "status": "active"
+    }
+  ],
+  "incomes": [
+    {
+      "id": "salary",
+      "type": "extra",
+      "description": "Salario",
+      "amount": 500000,
+      "date": "2026-09-05",
+      "categoryId": "salary",
+      "month": "2026-09",
+      "accountId": "bank"
+    }
+  ],
+  "expenses": [
+    {
+      "id": "cash-food",
+      "nature": "Variable",
+      "concept": "Comida cash",
+      "amount": 20000,
+      "date": "2026-09-06",
+      "categoryId": "food",
+      "month": "2026-09",
+      "accountId": "cash",
+      "paymentMethod": "cash"
+    },
+    {
+      "id": "bank-rent",
+      "nature": "Fijo",
+      "concept": "Renta",
+      "amount": 30000,
+      "date": "2026-09-07",
+      "categoryId": "housing",
+      "month": "2026-09",
+      "accountId": "bank",
+      "paymentMethod": "cash"
+    },
+    {
+      "id": "card-food",
+      "nature": "Variable",
+      "concept": "Comida tarjeta",
+      "amount": 40000,
+      "date": "2026-09-08",
+      "categoryId": "food",
+      "month": "2026-09",
+      "paymentMethod": "credit",
+      "debtId": "card"
+    }
+  ],
+  "debtPayments": [
+    {
+      "id": "card-payment",
+      "debtId": "card",
+      "accountId": "bank",
+      "date": "2026-09-10",
+      "amount": 60000
+    },
+    {
+      "id": "loan-payment",
+      "debtId": "loan",
+      "accountId": "bank",
+      "date": "2026-09-11",
+      "amount": 50000
+    }
+  ],
+  "transfers": [
+    {
+      "id": "cash-transfer",
+      "fromAccountId": "bank",
+      "toAccountId": "cash",
+      "amount": 10000,
+      "date": "2026-09-12",
+      "note": "Caja"
+    },
+    {
+      "id": "investment-funding",
+      "fromAccountId": "bank",
+      "toAccountId": "investment",
+      "amount": 200000,
+      "date": "2026-09-13",
+      "note": "Fondeo inversión"
+    }
+  ],
+  "plans": [
+    {
+      "month": "2026-09",
+      "categoryId": "food",
+      "limit": 100000
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal",
+      "name": "Fondo",
+      "target": 300000,
+      "quota": 50000,
+      "startDate": "2026-09-01",
+      "date": "2026-12-31"
+    }
+  ],
+  "goalContributions": [
+    {
+      "id": "goal-contribution",
+      "goalId": "goal",
+      "amount": 50000,
+      "date": "2026-09-15"
+    }
+  ],
+  "recurringRules": [
+    {
+      "id": "rent-rule",
+      "direction": "expense",
+      "title": "Renta",
+      "categoryId": "housing",
+      "amount": 30000,
+      "defaultAccountId": "bank",
+      "cadence": "monthly",
+      "day": 7,
+      "startDate": "2026-09-01",
+      "active": true
+    }
+  ],
+  "plannedOccurrences": [
+    {
+      "id": "planned-confirmed",
+      "ruleId": "rent-rule",
+      "scheduledDate": "2026-09-07",
+      "status": "confirmed",
+      "transactionId": "bank-rent"
+    },
+    {
+      "id": "planned-next",
+      "ruleId": "rent-rule",
+      "scheduledDate": "2026-10-07",
+      "status": "pending"
+    }
+  ],
+  "investments": [
+    {
+      "id": "investment-record",
+      "accountId": "investment",
+      "type": "certificate",
+      "name": "Certificado",
+      "openedAt": "2026-09-13",
+      "maturityDate": "2027-09-13",
+      "principal": 200000,
+      "status": "active"
+    }
+  ],
+  "expected": {
+    "position": {
+      "cash": 90000,
+      "bank": 1150000,
+      "investmentAssets": 200000,
+      "liquidAssets": 1240000,
+      "liabilities": 255000,
+      "cardPositiveBalance": 20000,
+      "netWorth": 1205000,
+      "cardSignedBalance": -20000,
+      "loanCompatibilityBalance": 255000
+    },
+    "withoutTransfers": {
+      "cash": 80000,
+      "bank": 1360000,
+      "investmentAssets": 0,
+      "liquidAssets": 1440000,
+      "liabilities": 255000,
+      "cardPositiveBalance": 20000,
+      "netWorth": 1205000
+    },
+    "reports": {
+      "spending": 90000,
+      "transactionCount": 3,
+      "categories": [
+        {
+          "categoryId": "food",
+          "value": 60000
+        },
+        {
+          "categoryId": "housing",
+          "value": 30000
+        }
+      ],
+      "cashFlow": {
+        "income": 500000,
+        "cashExpenses": 50000,
+        "debtPayments": 110000,
+        "netCashFlow": 340000
+      },
+      "netWorth": {
+        "cash": 90000,
+        "banks": 1150000,
+        "investments": 200000,
+        "liabilities": 255000,
+        "cardPositiveBalance": 20000,
+        "netWorth": 1205000,
+        "liquidAssets": 1240000
+      }
+    },
+    "periodMetrics": {
+      "recordedIncome": 500000,
+      "spending": 90000,
+      "cashSpending": 50000,
+      "cardSpending": 40000,
+      "cardPayments": 110000,
+      "cashFlow": 340000,
+      "monthlyResult": 410000,
+      "periodResult": 410000,
+      "monthlyPlanningMargin": 270000,
+      "periodPlanningMargin": 270000,
+      "plannedBudgetTotal": 100000,
+      "goalContributions": 50000,
+      "planningReservations": 140000,
+      "suggestedSave": 50000
+    },
+    "budget": {
+      "limit": 100000,
+      "spent": 60000,
+      "remaining": 40000,
+      "percentage": 60,
+      "status": "ok",
+      "configured": true
+    },
+    "goal": {
+      "saved": 50000,
+      "remaining": 250000,
+      "status": "active",
+      "periods": 4,
+      "requiredMonthly": 62500,
+      "overdue": false
+    },
+    "planning": {
+      "unresolvedCount": 1,
+      "next7": [
+        "planned-next"
+      ],
+      "recentResolved": [
+        "planned-confirmed"
+      ]
+    },
+    "home": {
+      "attentionCount": 0,
+      "position": {
+        "liquidAssets": 1240000,
+        "investments": 200000,
+        "liabilities": 255000,
+        "netWorth": 1205000
+      },
+      "budget": {
+        "configuredCount": 1,
+        "limit": 100000,
+        "spent": 60000,
+        "remaining": 40000,
+        "overCount": 0,
+        "alertCount": 0,
+        "status": "ok"
+      },
+      "upcoming": {
+        "rows": [
+          "planned-next"
+        ],
+        "overdueCount": 0,
+        "todayCount": 0
+      },
+      "goals": {
+        "count": 1,
+        "remaining": 250000,
+        "periods": 4,
+        "requiredMonthly": 62500
+      },
+      "investments": {
+        "totalRegistered": 200000,
+        "activeCount": 1,
+        "rowCount": 1,
+        "maturedCount": 0
+      }
+    }
+  },
+  "periodBoundary": {
+    "settings": {
+      "savePct": 0,
+      "periodStartDay": 25
+    },
+    "incomes": [
+      {
+        "id": "before-boundary-income",
+        "type": "extra",
+        "description": "Antes",
+        "amount": 10000,
+        "date": "2026-09-24",
+        "categoryId": "salary",
+        "month": "2026-09"
+      },
+      {
+        "id": "after-boundary-income",
+        "type": "extra",
+        "description": "Después",
+        "amount": 20000,
+        "date": "2026-09-25",
+        "categoryId": "salary",
+        "month": "2026-09"
+      }
+    ],
+    "expenses": [
+      {
+        "id": "before-boundary-expense",
+        "nature": "Variable",
+        "concept": "Antes",
+        "amount": 1000,
+        "date": "2026-09-24",
+        "categoryId": "food",
+        "month": "2026-09",
+        "paymentMethod": "cash"
+      },
+      {
+        "id": "after-boundary-expense",
+        "nature": "Variable",
+        "concept": "Después",
+        "amount": 2000,
+        "date": "2026-09-25",
+        "categoryId": "food",
+        "month": "2026-09",
+        "paymentMethod": "cash"
+      }
+    ],
+    "expected": {
+      "september": {
+        "range": {
+          "id": "2026-09",
+          "start": "2026-08-25",
+          "end": "2026-09-24"
+        },
+        "metrics": {
+          "recordedIncome": 10000,
+          "spending": 1000,
+          "cashFlow": 9000,
+          "periodResult": 9000
+        }
+      },
+      "october": {
+        "range": {
+          "id": "2026-10",
+          "start": "2026-09-25",
+          "end": "2026-10-24"
+        },
+        "metrics": {
+          "recordedIncome": 20000,
+          "spending": 2000,
+          "cashFlow": 18000,
+          "periodResult": 18000
+        }
+      }
+    }
+  }
+}
