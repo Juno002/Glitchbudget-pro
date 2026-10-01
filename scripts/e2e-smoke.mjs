@@ -362,6 +362,32 @@ async function main() {
       'Home Prisma desktop',
     );
 
+    if (!await client.evaluate(`(() => {
+      const trigger = document.querySelector('[aria-label="Qué significa Disponible líquido"]');
+      if (!(trigger instanceof HTMLButtonElement)) return false;
+      trigger.click();
+      return true;
+    })()`)) {
+      throw new Error('No se pudo abrir la ayuda contextual del KPI en desktop.');
+    }
+    await waitFor(
+      client,
+      `(() => {
+        const content = document.querySelector('[data-context-help="Disponible líquido"]');
+        const close = content?.querySelector('[data-popover-close="true"]');
+        if (!(content instanceof HTMLElement) || !(close instanceof HTMLButtonElement)) return false;
+        const rect = content.getBoundingClientRect();
+        return content.innerText.includes('Efectivo + bancos registrados en el ledger.')
+          && content.innerText.includes('Disponible líquido')
+          && rect.left >= 0
+          && rect.right <= window.innerWidth
+          && close.getAttribute('aria-label') === 'Cerrar explicación de Disponible líquido';
+      })()`,
+      'ayuda contextual KPI desktop',
+    );
+    await client.evaluate(`document.querySelector('[data-context-help="Disponible líquido"] [data-popover-close="true"]')?.click()`);
+    await waitFor(client, `!document.querySelector('[data-context-help="Disponible líquido"]')`, 'cierre ayuda KPI desktop');
+
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 390,
       height: 844,
@@ -395,6 +421,30 @@ async function main() {
       })()`,
       'Home Prisma móvil',
     );
+
+    if (!await client.evaluate(`(() => {
+      const trigger = document.querySelector('[aria-label="Qué significa Disponible líquido"]');
+      if (!(trigger instanceof HTMLButtonElement)) return false;
+      trigger.click();
+      return true;
+    })()`)) {
+      throw new Error('No se pudo abrir la ayuda contextual del KPI en móvil.');
+    }
+    await waitFor(
+      client,
+      `(() => {
+        const content = document.querySelector('[data-context-help="Disponible líquido"]');
+        const close = content?.querySelector('[data-popover-close="true"]');
+        if (!(content instanceof HTMLElement) || !(close instanceof HTMLButtonElement)) return false;
+        const rect = content.getBoundingClientRect();
+        return rect.left >= 0
+          && rect.right <= window.innerWidth
+          && rect.width <= window.innerWidth - 24;
+      })()`,
+      'ayuda contextual KPI móvil',
+    );
+    await client.evaluate(`document.querySelector('[data-context-help="Disponible líquido"] [data-popover-close="true"]')?.click()`);
+    await waitFor(client, `!document.querySelector('[data-context-help="Disponible líquido"]')`, 'cierre ayuda KPI móvil');
 
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 1280,
