@@ -7,7 +7,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Estado actual
 
 - Fases **0–19.5: completadas**.
-- **Fase 20 — Modo Prisma:** 20.1–20.8 completadas / Gates aprobados; 20.9 en curso con 20.9.1–20.9.5 cerradas; 20.10 planificada.
+- **Fase 20 — Modo Prisma:** 20.1–20.8 completadas / Gates aprobados; 20.9 en curso con 20.9.1–20.9.6 cerradas; 20.10 planificada.
 - **20.1:** completada / Gate aprobado.
 - Preflight técnico de 20.1: **completado**.
 - Contrato visual + inventario de paridad: **completado**.
@@ -19,19 +19,19 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 - **20.7 — Superficies secundarias + branding Prisma:** completada / Gate aprobado.
 - **20.7.5 — Semantic Integrity & Security Hardening:** completada / Gate aprobado; 20.7.5.1–20.7.5.9 cerradas.
 - **20.8 — Information Design + Deterministic Insights:** completada / Gate aprobado; 20.8.1–20.8.8 cerradas.
-- **20.9 — Premium UI Polish:** en curso; 20.9.1–20.9.5 completadas / Gates aprobados.
+- **20.9 — Premium UI Polish:** en curso; 20.9.1–20.9.6 completadas / Gates aprobados.
 - **20.10 — Repository Consolidation + Product README:** etapa final planificada.
 
 ## Próxima intervención autorizada
 
 ```text
-20.9.6 — Idioma visible único
+20.9.7 — Estados y feedback
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
 
 ```text
-20.9.6 → 20.9.9
+20.9.7 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
@@ -43,8 +43,8 @@ Baseline técnico actual:
 Dexie v15
 Backup JSON v13
 Encrypted envelope v1
-615/615 tests
-Ledger benchmark: 50k position 34.00 ms / histories 27.51 ms median
+622/622 tests
+Ledger benchmark: 50k position 27.07 ms / histories 20.91 ms median
 Golden reconciliation: net worth 1.205m / spending 90k / cash flow 340k
 Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.8.1 information inventory + clean-install category regression ✅
@@ -60,7 +60,8 @@ Final hardening manifest: debt/date/currency/backup/migrations/architecture ✅
 20.9.3 semantic depth system + opaque cards/modals + Prisma/Neón browser verification ✅
 20.9.4 contextual UI: semantic tooltip + responsive dismissible popovers + dialog hierarchy + desktop/mobile KPI help ✅
 20.9.5 achievement toast: opaque hierarchy + accessible dismiss + mobile-nav-safe 700px regression ✅
-Quality checks 36897118568 ✅
+20.9.6 Spanish visible copy + propagated automation/security/backup labels + technical-name exceptions ✅
+Quality checks 36900165070 ✅
 browser E2E Prisma branding + secondary surfaces + responsive shell + Home desktop/mobile + Movimientos/composer + Plan + Reports desktop/mobile/charts + movement + offline ✅
 ```
 
@@ -78,7 +79,7 @@ browser E2E Prisma branding + secondary surfaces + responsive shell + Home deskt
 | 20.7 — Superficies secundarias + branding Prisma | **Completado / Gate aprobado** | [phase-20-7.md](phase-20-7.md) |
 | 20.7.5 — Semantic Integrity & Security Hardening | **Completada / Gate aprobado — 20.7.5.1–20.7.5.9** | [phase-20.md](phase-20.md#2075--semantic-integrity--security-hardening) |
 | 20.8 — Information Design + Deterministic Insights | **Completada / Gate aprobado — 20.8.1–20.8.8** | [phase-20-8.md](phase-20-8.md) |
-| 20.9 — Premium UI Polish | **En curso — 20.9.1–20.9.5 completadas / Gates aprobados** | [phase-20-9.md](phase-20-9.md) |
+| 20.9 — Premium UI Polish | **En curso — 20.9.1–20.9.6 completadas / Gates aprobados** | [phase-20-9.md](phase-20-9.md) |
 | 20.10 — Repository Consolidation + Product README | Planificada | [phase-20-10.md](phase-20-10.md) |
 
 Contrato visual complementario: [Prisma UI System](../ux/prisma-mode.md).
