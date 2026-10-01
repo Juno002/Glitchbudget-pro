@@ -129,7 +129,7 @@ test('17.4 export remains available after 17.5 layers encrypted restore separate
   assert.match(dialog, /Exportar a JSON/);
   assert.match(dialog, /EncryptedBackupExport/);
   assert.match(encryptedUi, /Exportar cifrado/);
-  assert.match(encryptedUi, /Crear backup cifrado/);
+  assert.match(encryptedUi, /Crear copia cifrada/);
   assert.match(encryptedUi, /\.gbenc/);
   assert.match(encryptedUi, /La contraseña no se envía ni se guarda/);
   assert.match(encryptedUi, /restauración cifrada está disponible/i);
