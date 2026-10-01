@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-20.8.1 — Comparative financial snapshot
+20.8.1 — Preflight de información + regresión de categorías
 ```
 
 La secuencia pendiente está cerrada por el roadmap canónico:
