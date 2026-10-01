@@ -4,7 +4,7 @@
 
 Aplicación de finanzas personales **local-first**, **offline-capable** y orientada a privacidad. Los datos financieros permanecen en el navegador: no hay cuentas, backend de aplicación, sincronización bancaria, telemetría financiera ni servicios remotos que reciban movimientos.
 
-> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 cerradas; 20.7.5 en curso con 20.7.5.1–20.7.5.7 cerradas; 20.7.5.8 es la siguiente intervención.** 20.8–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
+> **Estado del proyecto — 30 sep 2026:** Fases 0–19.5 completadas. **Fase 20 — 20.1–20.7 cerradas; 20.7.5 en curso con 20.7.5.1–20.7.5.8 cerradas; 20.7.5.9 es la siguiente intervención.** 20.8–20.10 permanecen planificadas. El producto visible es **Prisma**; GlitchBudget Engine permanece como núcleo financiero interno.
 >
 > Este README es la vista general del repositorio. La especificación canónica de ejecución vive en [Roadmap septiembre 2026.txt](Roadmap%20septiembre%202026.txt).
 
@@ -98,9 +98,9 @@ npm run test:e2e
 
 `npm run check` incluye el guard local-only, typecheck, lint y tests.
 
-Baseline vigente tras 20.7.5.7:
+Baseline vigente tras 20.7.5.8:
 
-- **530/530 tests**;
+- **536/536 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
@@ -109,7 +109,8 @@ Baseline vigente tras 20.7.5.7:
 - posición protegida contra suma nominal de monedas heterogéneas;
 - encrypted backup v1 evaluado y conservado sin un v2 no benchmarkeado;
 - benchmark reproducible del ledger: a 50 000 movimientos, posición 32.22 ms e historiales de 8 cuentas 23.68 ms de mediana en CI; no se introdujo optimización especulativa;
-- Quality checks **36795170833** verdes para el gate de 20.7.5.7.
+- golden reconciliation independiente cubre posición, deuda, transferencias, inversión, presupuesto, planning, Home, Reportes y cambio de período sin modificar fórmulas productivas;
+- Quality checks **36796234747** verdes para el gate de 20.7.5.8.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
