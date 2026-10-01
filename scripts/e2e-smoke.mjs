@@ -520,6 +520,49 @@ async function main() {
       'rango Custom',
     );
 
+    // Phase 20.8.8: exercise the complete Reports hierarchy at a mobile viewport.
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const reports = document.querySelector('[data-reports-prisma="true"]');
+        const controls = document.querySelector('[data-report-range-controls="prisma"]');
+        const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        const requiredSections = [
+          'quick-read',
+          'spending',
+          'comparison',
+          'spending-breakdown',
+          'cash-flow',
+          'net-worth',
+          'detail',
+        ];
+        return reports && controls && mobileNav
+          && getComputedStyle(mobileNav).display !== 'none'
+          && requiredSections.every(section => document.querySelector(
+            '[data-report-section="' + section + '"]',
+          ));
+      })()`,
+      'Reportes Prisma móvil',
+    );
+
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 1280,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
+      'retorno a Reportes desktop',
+    );
+
     const externalRequests = requests.filter(url => {
       try {
         const parsed = new URL(url);
