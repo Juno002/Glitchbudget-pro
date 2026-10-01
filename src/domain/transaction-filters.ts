@@ -1,4 +1,5 @@
 import type { TransactionNecessity } from './models';
+import type { DateRange } from './periods';
 
 export type MovementFilterType = 'income' | 'expense' | 'transfer' | 'payment' | 'saving' | 'opening';
 
@@ -13,6 +14,10 @@ export type TransactionFilters = {
   label?: string;
   type?: MovementFilterType;
 };
+
+export function filtersForPeriod(range: DateRange): TransactionFilters {
+  return { dateStart: range.start, dateEnd: range.end };
+}
 
 export type FilterableMovement = {
   id: string;
