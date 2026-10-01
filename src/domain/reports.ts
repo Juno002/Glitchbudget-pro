@@ -1,7 +1,7 @@
 import type { Account, AccountTransfer, Debt, DebtPayment, Expense, Income } from './models';
 import { selectPosition } from './ledger';
 import { contains, type DateRange } from './periods';
-import { compareKpi } from './kpi-comparisons';
+import { selectPositionKpiComparisons } from './kpi-comparisons';
 import { selectReportQuickRead } from './report-insights';
 
 export type ReportRangePreset = '7d' | '30d' | '3m' | '6m' | '1y' | 'custom';
@@ -182,14 +182,19 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
   const netWorth=selectNetWorthReport(input,through);
   const previousSpending=selectSpendingReport(input.expenses,previousRange);
   const previousCashFlow=selectCashFlowReport(input,previousRange);
-  const previousNetWorth=selectNetWorthReport(input,previousRange.end);
-  const netWorthComparison=compareKpi(range,previousRange,netWorth.netWorth,previousNetWorth.netWorth);
+  const positionComparisons=selectPositionKpiComparisons(input,range,previousRange,through);
 
   const comparison={
     spending:{current:spending.total,previous:previousSpending.total,difference:spending.total-previousSpending.total,percentChange:pctChange(spending.total,previousSpending.total)},
     income:{current:cashFlow.income,previous:previousCashFlow.income,difference:cashFlow.income-previousCashFlow.income,percentChange:pctChange(cashFlow.income,previousCashFlow.income)},
     netCashFlow:{current:cashFlow.netCashFlow,previous:previousCashFlow.netCashFlow,difference:cashFlow.netCashFlow-previousCashFlow.netCashFlow,percentChange:pctChange(cashFlow.netCashFlow,previousCashFlow.netCashFlow)},
-    netWorth:{current:netWorthComparison.current,previous:netWorthComparison.previous,difference:netWorthComparison.absoluteDelta,percentChange:netWorthComparison.percentageDelta,status:netWorthComparison.status},
+    netWorth:{
+      current:positionComparisons.netWorth.current,
+      previous:positionComparisons.netWorth.previous ?? 0,
+      difference:positionComparisons.netWorth.absoluteDelta ?? 0,
+      percentChange:positionComparisons.netWorth.percentageDelta,
+      status:positionComparisons.netWorth.status,
+    },
   };
   const quickRead=selectReportQuickRead({spending,comparison});
 
@@ -199,6 +204,7 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
     spending,
     cashFlow,
     netWorth,
+    positionComparisons,
     comparison,
     quickRead,
   };
