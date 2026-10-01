@@ -100,7 +100,7 @@ npm run test:e2e
 
 Baseline vigente tras 20.8.3:
 
-- **555/555 tests**;
+- **557/557 tests**;
 - suite determinista de propiedades del ledger con **1 200 escenarios generados**;
 - build estática + manifest offline;
 - browser E2E sobre Chrome/Chromium real;
@@ -114,7 +114,7 @@ Baseline vigente tras 20.8.3:
 - 20.8.1 congela el inventario de información visible de Home/Reportes y protege categorías default de instalación limpia sin reparación especulativa;
 - 20.8.2 centraliza comparaciones canónicas de disponible líquido, patrimonio, deuda e inversiones, distinguiendo valor anterior cero de ausencia real de base comparable;
 - 20.8.3 añade Lectura rápida local y determinista sobre el snapshot de Reportes, con umbrales explícitos, ranking estable, máximo de 3 insights y copy parametrizado;
-- Quality checks **36820237031** verdes para el baseline funcional actual.
+- Quality checks **36821019073** verdes para el baseline funcional actual.
 
 La suite de propiedades comprueba, entre otras cosas, conservación patrimonial en transferencias, semántica de compras con tarjeta, pagos de deuda y gastos de efectivo.
 
