@@ -144,7 +144,7 @@ nueva tarea
 
 No volver a acumular ramas de fases cerradas.
 
-**Gate 20.10.5:** repositorio remoto con una sola rama permanente: `main`.
+**Gate 20.10.5:** aprobado y verificado. La API de GitHub devuelve exactamente una rama remota: `main`. El workflow one-shot de limpieza ya fue retirado.
 
 ## 20.10.6 — README final estrictamente de producto
 
