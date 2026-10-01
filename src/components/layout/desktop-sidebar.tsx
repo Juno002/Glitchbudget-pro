@@ -32,7 +32,7 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
         type="button"
         onClick={onNewMovement}
         aria-label="Nuevo movimiento"
-        className="mt-8 flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-interactive)] bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-floating)] transition-[transform,background-color,box-shadow] duration-[var(--motion-standard)] hover:bg-primary/90 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+        className="mt-8 flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-interactive)] bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-floating)] transition-[transform,background-color,box-shadow] duration-[var(--motion-control)] hover:bg-primary/90 active:scale-[0.98] active:duration-[var(--motion-press)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
       >
         <Plus className="h-4 w-4" />
         Nuevo movimiento
@@ -49,7 +49,7 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
               onClick={() => setActiveTab(item.value)}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'relative flex min-h-11 items-center gap-3 rounded-[var(--radius-interactive)] px-3 text-left text-sm font-semibold transition-[background-color,color,transform] duration-[var(--motion-standard)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring',
+                'relative flex min-h-11 items-center gap-3 rounded-[var(--radius-interactive)] px-3 text-left text-sm font-semibold transition-[background-color,color,transform] duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring active:scale-[0.98] active:duration-[var(--motion-press)]',
                 active
                   ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                   : 'text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
