@@ -1,6 +1,6 @@
 # Fase 20.9 — Premium UI Polish
 
-Estado: **en curso — 20.9.1–20.9.3 completadas / Gates aprobados; 20.9.4 es la próxima intervención autorizada**.
+Estado: **en curso — 20.9.1–20.9.4 completadas / Gates aprobados; 20.9.5 es la próxima intervención autorizada**.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -138,6 +138,31 @@ Objetivo: profundidad suave, no “glassmorphism” que perjudique legibilidad.
 **Gate 20.9.3:** jerarquía espacial coherente en Prisma y Neón.
 
 ## 20.9.4 — Tooltips, popovers y dialogs
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+610/610 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+Quality checks 36894175981 ✅
+```
+
+Resultado:
+
+- tooltip semántico, legible y collision-aware;
+- popover responsive con dismiss opcional para ayuda táctil;
+- KPI help mantiene advertencias críticas siempre visibles;
+- dialogs comparten jerarquía y cierre con foco visible;
+- AlertDialog conserva consecuencias visibles y confirmación explícita;
+- browser smoke valida ayuda contextual en desktop + móvil;
+- focus de BadgeCard sigue reservado a 20.9.8.
+
+Evidencia: [phase-20-9-4.md](phase-20-9-4.md).
 
 Normalizar:
 
