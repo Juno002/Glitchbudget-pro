@@ -88,7 +88,7 @@ test('16.7 validates the complete local automation backup and rejects duplicate 
       ...valid.rules[0],
       condition:{field:'description',operator:'regex',value:'Spotify.*'},
     }],
-  }),/Rules contiene datos inválidos/i);
+  }),/Reglas contiene datos inválidos/i);
 });
 
 test('16.7 replaces the three local layers atomically and rolls back if storage fails',()=>{
