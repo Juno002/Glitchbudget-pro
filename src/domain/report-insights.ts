@@ -7,7 +7,7 @@ export const QUICK_READ_THRESHOLDS = {
 } as const;
 
 export type QuickReadFocus = 'spending' | 'cash-flow' | 'net-worth' | 'categories' | 'overview';
-export type QuickReadDirection = 'increase' | 'decrease' | 'stable' | 'new';
+export type QuickReadDirection = 'increase' | 'decrease' | 'stable' | 'new' | 'none';
 
 export type QuickReadInsightKind =
   | 'spending_above_previous'
@@ -160,7 +160,7 @@ export function selectReportQuickRead(input: ReportQuickReadInput): QuickReadIns
         'leading_category',
         60,
         'categories',
-        'stable',
+        'none',
         {
           categoryId: leadingCategory.categoryId,
           value: leadingCategory.value,
@@ -176,7 +176,7 @@ export function selectReportQuickRead(input: ReportQuickReadInput): QuickReadIns
       'no_material_change',
       10,
       'overview',
-      'stable',
+      'none',
       {
         spendingCurrent: spending.current,
         spendingPrevious: spending.previous,
