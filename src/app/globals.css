@@ -79,9 +79,16 @@ body {
     --text-metric: 1.75rem;
     --text-supporting: 0.875rem;
 
-    --motion-fast: 120ms;
-    --motion-standard: 180ms;
-    --motion-slow: 280ms;
+    /* Motion contract: decorative motion never delays the next input. */
+    --motion-press: 80ms;
+    --motion-control: 110ms;
+    --motion-menu: 130ms;
+    --motion-content: 150ms;
+    --motion-dialog: 170ms;
+    /* Compatibility aliases for existing surfaces while 20.9 migrates them. */
+    --motion-fast: var(--motion-control);
+    --motion-standard: var(--motion-content);
+    --motion-slow: var(--motion-dialog);
 
     --surface-page: var(--background);
     --surface-section: var(--card);
@@ -261,7 +268,7 @@ html[data-balances-hidden='true'] [data-money-value='true'] {
 /* Phase 20.2 shell atmosphere: Prisma stays quiet; Neon retains ambient glow. */
 .ambient-background {
   opacity: 0;
-  transition: opacity var(--motion-slow) ease;
+  transition: opacity var(--motion-dialog) ease;
 }
 html.dark .ambient-background {
   opacity: 1;
