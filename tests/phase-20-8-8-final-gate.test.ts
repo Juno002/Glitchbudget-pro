@@ -9,13 +9,14 @@ function source(path: string) {
 test('20.8.8 keeps the complete Information Design contracts executable', () => {
   const categories = source('tests/phase-20-8-1-information-preflight.test.ts');
   const quickRead = source('tests/phase-20-8-3-quick-read.test.ts');
+  const quickReadEngine = source('src/domain/report-insights.ts');
   const kpis = source('tests/phase-20-8-4-summary-kpis.test.ts');
   const reports = source('tests/phase-20-8-6-reports-hierarchy.test.ts');
   const disclosure = source('tests/phase-20-8-7-disclosure.test.ts');
 
   assert.match(categories, /clean install exposes every default category/);
   assert.match(quickRead, /same canonical snapshot produces exactly the same ranked quick read/);
-  assert.match(quickRead, /Math\.random|Date\.now/);
+  assert.doesNotMatch(quickReadEngine, /new Date|Date\.now|Math\.random|crypto\.randomUUID/);
   assert.match(kpis, /canonical comparisons for the four Summary position KPIs/);
   assert.match(kpis, /does not reconstruct KPI comparison math in React/);
   assert.match(reports, /canonical editorial hierarchy/);
@@ -32,8 +33,10 @@ test('20.8.8 exercises Home and Reports at desktop and mobile widths in browser 
   assert.match(e2e, /'Reportes Prisma y gráficos'/);
   assert.match(e2e, /'Reportes Prisma móvil'/);
   assert.match(e2e, /width:\s*390/);
-  assert.match(e2e, /data-report-section="quick-read"/);
-  assert.match(e2e, /data-report-section="detail"/);
+  assert.match(e2e, /requiredSections = \[/);
+  assert.match(e2e, /'quick-read'/);
+  assert.match(e2e, /'detail'/);
+  assert.match(e2e, /requiredSections\.every/);
   assert.match(e2e, /externalRequests\.length/);
   assert.match(e2e, /recarga offline desde service worker/);
 });
