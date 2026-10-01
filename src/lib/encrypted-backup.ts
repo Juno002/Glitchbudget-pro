@@ -167,23 +167,23 @@ export function parseEncryptedBackupEnvelopeText(text: string): EncryptedBackupE
 
   const row = raw as Partial<EncryptedBackupEnvelopeV1>;
   if (row.format !== ENCRYPTED_BACKUP_FORMAT) {
-    throw new Error('El archivo no es un backup cifrado de GlitchBudget compatible.');
+    throw new Error('El archivo no es una copia cifrada compatible de GlitchBudget.');
   }
   if (row.version !== ENCRYPTED_BACKUP_VERSION) {
-    throw new Error('La versión del backup cifrado no es compatible.');
+    throw new Error('La versión de la copia cifrada no es compatible.');
   }
   if (!sameKdf(row.kdf) || !sameCipher(row.cipher)) {
-    throw new Error('La metadata criptográfica del backup no es compatible.');
+    throw new Error('Los metadatos criptográficos de la copia no son compatibles.');
   }
   if (typeof row.salt !== 'string' || typeof row.nonce !== 'string' || typeof row.ciphertext !== 'string') {
-    throw new Error('El backup cifrado está incompleto.');
+    throw new Error('La copia cifrada está incompleta.');
   }
 
   const salt = base64ToBytes(row.salt);
   const nonce = base64ToBytes(row.nonce);
   const ciphertext = base64ToBytes(row.ciphertext);
   if (!salt || salt.length !== SALT_BYTES || !nonce || nonce.length !== NONCE_BYTES || !ciphertext || ciphertext.length < 16) {
-    throw new Error('El backup cifrado contiene datos codificados inválidos.');
+    throw new Error('La copia cifrada contiene datos codificados inválidos.');
   }
 
   return {
@@ -202,7 +202,7 @@ export async function decryptEncryptedBackupText(
   password: string,
 ): Promise<string> {
   if (!isValidEncryptedBackupPassword(password)) {
-    throw new Error('No se pudo abrir el backup cifrado. La contraseña puede ser incorrecta o el archivo puede estar dañado.');
+    throw new Error('No se pudo abrir la copia cifrada. La contraseña puede ser incorrecta o el archivo puede estar dañado.');
   }
 
   const envelope = parseEncryptedBackupEnvelopeText(text);
@@ -224,6 +224,6 @@ export async function decryptEncryptedBackupText(
     );
     return new TextDecoder().decode(plaintext);
   } catch {
-    throw new Error('No se pudo abrir el backup cifrado. La contraseña puede ser incorrecta o el archivo puede estar dañado.');
+    throw new Error('No se pudo abrir la copia cifrada. La contraseña puede ser incorrecta o el archivo puede estar dañado.');
   }
 }
