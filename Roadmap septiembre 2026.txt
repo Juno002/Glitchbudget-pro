@@ -3922,7 +3922,7 @@ Eso pertenece a 20.9.
 
 ## 20.9 — Premium UI Polish
 
-**Estado: en curso.** 20.9.1 completada / Gate aprobado; próxima intervención autorizada: 20.9.2. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
+**Estado: en curso.** 20.9.1–20.9.2 completadas / Gates aprobados; próxima intervención autorizada: 20.9.3. Plan auxiliar: `docs/roadmap/phase-20-9.md`.
 
 ### Objetivo
 
@@ -3968,6 +3968,34 @@ Evidencia detallada: `docs/roadmap/phase-20-9-1.md`.
 **Gate 20.9.1:** inventario visual priorizado y sin zonas ambiguas.
 
 ### 20.9.2 — Motion tokens ultra rápidos
+
+**Estado: completada / Gate aprobado.**
+
+Quality gate:
+
+```text
+597/597 tests
+npm run check ✅
+npm run benchmark:ledger ✅
+npm run build ✅
+npm run test:e2e ✅
+static output / connect-src 'none' ✅
+Quality checks 36890383021 ✅
+```
+
+Resultado:
+
+- escala global por intención: press 80 ms, control 110 ms, menu 130 ms, content 150 ms y dialog 170 ms;
+- Button, FAB, bottom nav y sidebar usan control + press explícitos;
+- Dialog, AlertDialog y Sheet comparten timing de dialog;
+- Popover, Tooltip, Select, DropdownMenu y Menubar comparten timing de menu;
+- Accordion, deuda, Plan y tile de Logros abandonan timings heredados 200/300/500 o literales auditados;
+- `src/lib/motion.ts` mantiene paridad JS para consumidores Framer Motion;
+- `prefers-reduced-motion` permanece intacto;
+- animaciones celebratorias específicas de Logros quedan reservadas a 20.9.5;
+- sin cambios de semántica financiera, schema, migraciones, backup, persistencia ni red.
+
+Evidencia detallada: `docs/roadmap/phase-20-9-2.md`.
 
 Definir timings globales orientativos:
 
@@ -4381,7 +4409,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 Las únicas etapas pendientes autorizadas son:
 
 ```text
-20.9.2 → 20.9.9
+20.9.3 → 20.9.9
 20.10.1 → 20.10.7
 ```
 
