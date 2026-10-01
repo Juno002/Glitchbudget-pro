@@ -22,7 +22,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-[var(--border-subtle)] bg-background/90 backdrop-blur-[var(--blur-navigation)]">
         <div className="mx-auto flex w-full max-w-[1280px] flex-wrap items-center gap-2 px-4 py-3 sm:px-6 md:min-h-[68px] md:flex-nowrap lg:px-10">
           {/* Static navigation avoids Next RSC fetches, prohibited by the offline CSP. */}
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
