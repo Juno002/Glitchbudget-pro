@@ -221,7 +221,7 @@ function PositionCard({
         )}>
           <div className="flex min-w-0 items-center gap-1.5">
             <span>{label}</span>
-            <ContextHelp label={'Qué significa '+label}>
+            <ContextHelp label={'Qué significa '+label} contextLabel={label}>
               {help}
             </ContextHelp>
           </div>
