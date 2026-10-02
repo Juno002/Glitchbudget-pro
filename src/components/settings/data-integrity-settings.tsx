@@ -37,6 +37,17 @@ const reasonLabels: Record<DebtPaymentIntegrityIssue['reasons'][number], string>
   invalid_shape: 'estructura del pago inválida',
 };
 
+const inventoryLabels: Record<keyof typeof import('@/domain/data-integrity').FinancialDateIntegrityInventory, string> = {
+  incomes: 'Ingresos',
+  expenses: 'Gastos',
+  transfers: 'Transferencias',
+  goalContributions: 'Aportes a metas',
+  plannedOccurrences: 'Movimientos planificados',
+  recurringRules: 'Reglas recurrentes',
+  accounts: 'Cuentas',
+  investments: 'Inversiones',
+};
+
 function IntegrityRow({
   issue,
   onRepair,
@@ -163,7 +174,7 @@ export default function DataIntegritySettings() {
         <dl className="mt-4 grid gap-1 text-xs text-muted-foreground">
           {otherEntries.map(([name, count]) => (
             <div key={name} className="flex justify-between gap-3">
-              <dt>{name}</dt>
+              <dt>{inventoryLabels[name as keyof typeof inventoryLabels]}</dt>
               <dd className="tabular-nums">{count}</dd>
             </div>
           ))}
