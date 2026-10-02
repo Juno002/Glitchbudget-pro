@@ -123,6 +123,8 @@ export default function DataIntegritySettings() {
 
   const rows = quarantinedDebtPayments || [];
   const otherEntries = Object.entries(financialDateIntegrity).filter(([, count]) => count > 0);
+  let otherIssueCount = 0;
+  for (const [, count] of otherEntries) otherIssueCount += count;
   if (!rows.length && !otherEntries.length) return null;
 
   return (
@@ -138,7 +140,7 @@ export default function DataIntegritySettings() {
           ) : null}
           {otherEntries.length ? (
             <p className="mt-1 text-xs text-muted-foreground">
-              También se detectaron {otherEntries.reduce((sum, [, count]) => sum + count, 0)} anomalías de fecha en otras entidades. Se informan sin cambiar su comportamiento automáticamente.
+              También se detectaron {otherIssueCount} anomalías de fecha en otras entidades. Se informan sin cambiar su comportamiento automáticamente.
             </p>
           ) : null}
         </div>
