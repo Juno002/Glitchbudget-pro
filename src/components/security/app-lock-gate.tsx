@@ -1,16 +1,29 @@
 'use client';
 
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { LockKeyhole } from 'lucide-react';
 import { useAppLock } from '@/contexts/app-lock-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { appLockRetryRemainingMs } from '@/domain/app-lock-retry';
 
 export function AppLockGate({ children }: { children: ReactNode }) {
-  const { ready, enabled, locked, unlock } = useAppLock();
+  const { ready, enabled, locked, unlock, unlockBlockedUntil } = useAppLock();
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [retryNow, setRetryNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!unlockBlockedUntil) return;
+    setRetryNow(Date.now());
+    const timer = setInterval(() => setRetryNow(Date.now()), 1_000);
+    return () => clearInterval(timer);
+  }, [unlockBlockedUntil]);
+
+  const retryRemainingMs = appLockRetryRemainingMs(unlockBlockedUntil, retryNow);
+  const retrySeconds = Math.ceil(retryRemainingMs / 1_000);
+  const retryBlocked = retryRemainingMs > 0;
 
   if (!ready) {
     return (
@@ -24,6 +37,7 @@ export function AppLockGate({ children }: { children: ReactNode }) {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
+    if (retryBlocked) return;
     setBusy(true);
     setError('');
     try {
@@ -59,11 +73,18 @@ export function AppLockGate({ children }: { children: ReactNode }) {
             onChange={event => setPin(event.target.value.replace(/\D/g, '').slice(0, 12))}
             aria-label="PIN de bloqueo"
             autoFocus
+            disabled={busy || retryBlocked}
           />
         </label>
-        {error && <p className="mt-2 text-sm text-destructive" role="alert">{error}</p>}
-        <Button type="submit" className="mt-4 w-full" disabled={busy || pin.length === 0}>
-          {busy ? 'Verificando…' : 'Desbloquear'}
+        {retryBlocked ? (
+          <p className="mt-2 text-sm text-muted-foreground" role="status">
+            Espera {retrySeconds} {retrySeconds === 1 ? 'segundo' : 'segundos'} antes de intentarlo de nuevo.
+          </p>
+        ) : error ? (
+          <p className="mt-2 text-sm text-destructive" role="alert">{error}</p>
+        ) : null}
+        <Button type="submit" className="mt-4 w-full" disabled={busy || retryBlocked || pin.length === 0}>
+          {busy ? 'Verificando…' : retryBlocked ? 'Espera un momento…' : 'Desbloquear'}
         </Button>
         <p className="mt-4 text-xs text-muted-foreground">
           El bloqueo de aplicación protege esta interfaz. No cifra la base de datos Dexie ni los archivos del dispositivo.
