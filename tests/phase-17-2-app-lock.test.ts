@@ -118,7 +118,8 @@ test('17.2 settings still supports enable, change, manual lock and disable with 
   assert.match(settings, /Cambiar PIN/);
   assert.match(settings, /Desactivar bloqueo/);
   assert.match(settings, /PIN actual/);
-  assert.match(settings, /No cifra Dexie/i);
+  assert.match(settings, /ContextHelp/);
+  assert.match(settings, /No cifra los datos almacenados/i);
 
   const dialog = readFileSync(new URL('../src/components/layout/settings-dialog.tsx', import.meta.url), 'utf8');
   assert.match(dialog, /<AppLockSettings \/>/);
