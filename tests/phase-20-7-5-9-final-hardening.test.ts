@@ -17,7 +17,7 @@ test('20.7.5.9 freezes the final persistence, debt, date, currency and crypto co
   const ledger = source('src/domain/ledger.ts');
 
   assert.match(db, /CURRENT_DB_SCHEMA_VERSION = 15/);
-  assert.match(backup, /CURRENT_BACKUP_FORMAT_VERSION = 13/);
+  assert.match(backup, /CURRENT_BACKUP_FORMAT_VERSION = 14/);
   assert.match(security, /ENCRYPTED_BACKUP_VERSION = 1/);
   assert.match(encrypted, /name: 'PBKDF2'/);
   assert.match(encrypted, /hash: 'SHA-256'/);
