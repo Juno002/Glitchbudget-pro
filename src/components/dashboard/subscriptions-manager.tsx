@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { CalendarDays, CirclePause, CirclePlay, Plus } from 'lucide-react';
 import { cn, toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { EmptyState, PlannedPaymentRow, StatusBadge } from '@/components/finance-ui';
+import { ContextHelp, EmptyState, PlannedPaymentRow, StatusBadge } from '@/components/finance-ui';
 import { useTabs } from '@/contexts/tabs-context';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCategoryResolver } from '@/hooks/use-categories';
@@ -138,11 +138,9 @@ export default function SubscriptionsManager() {
   return (
     <div className="space-y-6" data-plan-planned-manager="prisma">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Recurrencias</p><h3 className="mt-1 font-display text-2xl font-normal tracking-[-0.025em]">Movimientos planificados</h3>
-          <p className="text-sm text-muted-foreground">
-            Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un ingreso o gasto real.
-          </p>
+        <div className="flex items-center gap-1">
+          <h3 className="font-display text-2xl font-normal tracking-[-0.025em]">Movimientos planificados</h3>
+          <ContextHelp label="Acerca de los movimientos planificados">Las reglas generan ocurrencias locales. Solo confirmar una ocurrencia crea un ingreso o gasto real.</ContextHelp>
         </div>
 
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
@@ -224,7 +222,10 @@ export default function SubscriptionsManager() {
 
               {newRule.cadence === 'monthly' && (
                 <div className="space-y-2">
-                  <Label>Día preferido</Label>
+                  <div className="flex items-center gap-1">
+                    <Label>Día preferido</Label>
+                    <ContextHelp label="Cómo funciona el día preferido">Si el mes no contiene ese día, se usa su último día válido.</ContextHelp>
+                  </div>
                   <Select value={newRule.day} onValueChange={day => setNewRule({ ...newRule, day })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -233,7 +234,6 @@ export default function SubscriptionsManager() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">Si el mes no contiene ese día, se usa su último día válido.</p>
                 </div>
               )}
 
@@ -262,31 +262,23 @@ export default function SubscriptionsManager() {
         </Dialog>
       </div>
 
-      <div className="space-y-2 rounded-[var(--radius-card)] border bg-muted/25 p-4" data-plan-confirmation-account="prisma">
+      <div className="max-w-md" data-plan-confirmation-account="prisma">
         <AccountSelect
           value={accountOverride}
           onChange={setAccountOverride}
           label="Reemplazar cuenta al confirmar (opcional)"
         />
-        <p className="text-xs text-muted-foreground">
-          Vacío usa la cuenta predeterminada de la regla; si tampoco existe, se utiliza Efectivo para movimientos de efectivo/banco.
-        </p>
       </div>
 
       <section className="space-y-3" aria-labelledby="upcoming-title">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Pendientes</p><h4 id="upcoming-title" className="mt-1 font-display text-xl font-normal">Próximos movimientos</h4>
-            <p aria-live="polite" className="text-xs text-muted-foreground">{unresolvedCount} pendientes dentro de la planificación materializada.</p>
-          </div>
+          <h4 id="upcoming-title" className="font-display text-xl font-normal">Próximos movimientos</h4>
+          <span className="sr-only" aria-live="polite">{unresolvedCount === 0 ? 'No hay movimientos planificados pendientes.' : unresolvedCount + ' movimientos planificados pendientes.'}</span>
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
 
         {unresolvedCount === 0 ? (
-          <EmptyState
-            title="Nada pendiente"
-            description="No hay movimientos planificados pendientes en la ventana actual."
-          />
+          <EmptyState title="Nada pendiente" />
         ) : (
           GROUPS.map(group => {
             const rows = grouped[group.key];
@@ -325,10 +317,7 @@ export default function SubscriptionsManager() {
 
       {recentResolved.length > 0 && (
         <section className="space-y-3" aria-labelledby="recent-planned-title">
-          <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Resueltas</p><h4 id="recent-planned-title" className="mt-1 font-display text-xl font-normal">Actividad planificada reciente</h4>
-            <p className="text-xs text-muted-foreground">Últimas ocurrencias confirmadas u omitidas.</p>
-          </div>
+          <h4 id="recent-planned-title" className="font-display text-xl font-normal">Actividad planificada reciente</h4>
           <div className="grid gap-2 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
             {recentResolved.map(occurrence => {
               const rule = rulesById.get(occurrence.ruleId);
@@ -354,13 +343,13 @@ export default function SubscriptionsManager() {
       )}
 
       <section className="space-y-3" aria-labelledby="rules-title">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Motor local</p><h4 id="rules-title" className="mt-1 font-display text-xl font-normal">Reglas recurrentes</h4>
-          <p className="text-xs text-muted-foreground">Pausar una regla detiene nuevas ocurrencias; las pendientes ya creadas se conservan.</p>
+        <div className="flex items-center gap-1">
+          <h4 id="rules-title" className="font-display text-xl font-normal">Reglas recurrentes</h4>
+          <ContextHelp label="Acerca de las reglas recurrentes">Pausar una regla detiene nuevas ocurrencias; las pendientes ya creadas se conservan.</ContextHelp>
         </div>
 
         {sortedRules.length === 0 ? (
-          <EmptyState title="Aún no hay reglas recurrentes" description="Añade una regla para generar movimientos planificados localmente." />
+          <EmptyState title="Aún no hay reglas recurrentes" />
         ) : (
           <div className="grid gap-2">
             {sortedRules.map(rule => {

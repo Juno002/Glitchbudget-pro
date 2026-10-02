@@ -286,8 +286,8 @@ export default function PlanningTab() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="subscriptions" className="space-y-4">
-          <Card className="border bg-card shadow-[var(--shadow-card)]" data-plan-planned="prisma"><CardContent className="p-5 sm:p-6"><SubscriptionsManager /></CardContent></Card>
+        <TabsContent value="subscriptions" className="space-y-4" data-plan-planned="prisma">
+          <SubscriptionsManager />
         </TabsContent>
       </Tabs>
     </div>

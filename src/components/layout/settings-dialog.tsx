@@ -102,9 +102,9 @@ export function SettingsDialog() {
         </DialogHeader>
 
         <Tabs defaultValue="general" className="space-y-5" onValueChange={value => { if (value === 'automation') refreshAutomationSummary(); }}>
-          <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)]" data-settings-navigation="prisma">
+          <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)] lg:justify-between" data-settings-navigation="prisma">
             {SETTINGS_SECTIONS.map(([value, label]) => (
-              <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] text-xs sm:text-sm">{label}</TabsTrigger>
+              <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] px-2 text-xs">{label}</TabsTrigger>
             ))}
           </TabsList>
 
