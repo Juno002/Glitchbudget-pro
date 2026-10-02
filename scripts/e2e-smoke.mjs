@@ -189,6 +189,17 @@ async function runPostRoadmap4Benchmark(client) {
   for (const size of sizes) {
     await client.command('Page.navigate', { url: APP_URL + '?tab=movements&perf=1' });
     await waitFor(client, `document.readyState === 'complete'`, 'carga benchmark ' + size, 30_000);
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-movement-filter-panel="advanced"] input[type="date"]'))`,
+      'filtros benchmark ' + size,
+      30_000,
+    );
+    const benchmarkDate = await client.evaluate(`(() => {
+      const inputs = [...document.querySelectorAll('[data-movement-filter-panel="advanced"] input[type="date"]')];
+      const value = inputs.find(input => input instanceof HTMLInputElement && input.value)?.value;
+      return value || new Date().toISOString().slice(0, 10);
+    })()`);
 
     await client.evaluate(`(async () => {
       const open = () => new Promise((resolve, reject) => {
@@ -209,9 +220,9 @@ async function runPostRoadmap4Benchmark(client) {
           nature: 'Variable',
           concept: 'Benchmark ' + i,
           amount: 100 + (i % 5000),
-          date: '2026-10-01',
+          date: ${JSON.stringify(benchmarkDate)},
           categoryId: 'perf-category',
-          month: '2026-10',
+          month: ${JSON.stringify(String(benchmarkDate).slice(0, 7))},
           currency: 'DOP',
           fxRate: 1,
           amountBase: 100 + (i % 5000),
@@ -230,20 +241,14 @@ async function runPostRoadmap4Benchmark(client) {
 
     const started = Date.now();
     await client.command('Page.reload', { ignoreCache: true });
-    let ready = false;
-    try {
-      await waitFor(
-        client,
-        `document.readyState === 'complete'
-          && window.location.search.includes('tab=movements')
-          && Boolean(document.querySelector('[data-movement-history="list"]'))`,
-        'Movimientos benchmark ' + size,
-        60_000,
-      );
-      ready = true;
-    } catch {
-      ready = false;
-    }
+    await waitFor(
+      client,
+      `document.readyState === 'complete'
+        && window.location.search.includes('tab=movements')
+        && Boolean(document.querySelector('[data-movement-history="list"]'))`,
+      'Movimientos benchmark ' + size,
+      60_000,
+    );
 
     const metrics = await client.evaluate(`(() => {
       const list = document.querySelector('[data-movement-history="list"]');
@@ -255,11 +260,41 @@ async function runPostRoadmap4Benchmark(client) {
       };
     })()`);
     const elapsedMs = Date.now() - started;
-    const row = { size, ready, elapsedMs, ...metrics };
+    const expectedRows = Math.min(size, 100);
+    const financeCounter = metrics.counters?.financeContext;
+    if (metrics.renderedRows !== expectedRows) {
+      throw new Error(`Benchmark ${size}: se esperaban ${expectedRows} filas DOM y se obtuvieron ${metrics.renderedRows}.`);
+    }
+    if (!financeCounter || financeCounter.calls !== 1 || !Number.isFinite(financeCounter.totalMs)) {
+      throw new Error(`Benchmark ${size}: contador financeContext inválido.`);
+    }
+    if (metrics.counters?.accountOverview || metrics.counters?.investmentManager) {
+      throw new Error(`Benchmark ${size}: reaparecieron lecturas duplicadas.`);
+    }
+    const row = { size, ready: true, elapsedMs, ...metrics };
     results.push(row);
     process.stdout.write('POST_ROADMAP_4_BENCHMARK ' + JSON.stringify(row) + '\\n');
   }
 
+  const originalThemeClass = await client.evaluate('document.documentElement.className');
+  await client.evaluate(`(() => {
+    const html = document.documentElement;
+    html.classList.remove('light', 'dark', 'serious');
+    html.classList.add('dark');
+    return true;
+  })()`);
+  await waitFor(
+    client,
+    `(() => {
+      const ambient = document.querySelector('.ambient-background');
+      if (!(ambient instanceof HTMLElement)) return false;
+      const style = getComputedStyle(ambient);
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number.parseFloat(style.opacity || '0') > 0;
+    })()`,
+    'fondo ambiental visible en Neón oscuro',
+  );
   await client.command('Emulation.setDeviceMetricsOverride', {
     width: 390,
     height: 844,
@@ -292,7 +327,12 @@ async function runPostRoadmap4Benchmark(client) {
   );
   const ambientVisible = await sampleFrames(false);
   const ambientHidden = await sampleFrames(true);
-  await client.evaluate('(() => { const ambient=document.querySelector(".ambient-background"); if(ambient instanceof HTMLElement) ambient.style.display=""; return true; })()');
+  await client.evaluate(`(() => {
+    const ambient = document.querySelector('.ambient-background');
+    if (ambient instanceof HTMLElement) ambient.style.display = '';
+    document.documentElement.className = ${JSON.stringify(originalThemeClass)};
+    return true;
+  })()`);
   await client.command('Emulation.setCPUThrottlingRate', { rate: 1 });
   await client.command('Emulation.setDeviceMetricsOverride', {
     width: 1280,
