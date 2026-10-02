@@ -106,7 +106,7 @@ test('17.5 validates encrypted envelope metadata before attempting decryption', 
   for (const mutate of [
     (row: any) => { row.format = 'Other backup'; },
     (row: any) => { row.version = 2; },
-    (row: any) => { row.kdf.iterations += 1; },
+    (row: any) => { row.kdf.iterations = 309_999; },
     (row: any) => { row.cipher.keyLength = 128; },
     (row: any) => { row.salt = 'not base64 ***'; },
     (row: any) => { row.nonce = ''; },
