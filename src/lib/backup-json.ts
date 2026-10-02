@@ -10,6 +10,8 @@ import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 import { normalizeFinancialDate } from './financial-date';
+import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '../domain/data-integrity';
+import { decodePreservedValue, encodePreservedValue, encodedPreservedValueSchema, type EncodedPreservedValue } from './preserved-value';
 import {
   exportLocalAutomation,
   normalizeLocalAutomationBackup,
@@ -150,6 +152,11 @@ const DebtPaymentV9 = DebtPaymentV3.extend({
   fxRate: z.number().finite().positive(),
   amountBase: MoneyCents,
 });
+const DebtPaymentV14 = DebtPaymentV9.extend({ date: ISODate });
+const PreservedDebtPaymentV14 = z.object({
+  id: Id,
+  row: encodedPreservedValueSchema,
+});
 const FxRateV3 = z.object({
   id: Id, quote: Id, base: Id, rate: z.number().finite().positive(), updatedAt: ISODateTime,
 });
@@ -210,10 +217,10 @@ const DumpV12 = DumpV11.extend({
   v:z.literal(12),
   localAutomation:LocalAutomationV12,
 });
-export const CURRENT_BACKUP_FORMAT_VERSION = 13;
+export const CURRENT_BACKUP_FORMAT_VERSION = 14;
 export const CURRENT_APP_VERSION = packageInfo.version;
 const DumpV13 = DumpV12.extend({
-  v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
+  v:z.literal(13),
   schemaVersion:z.number().int().positive(),
   appVersion:z.string().trim().min(1),
   categories:z.array(categorySchema),
@@ -224,16 +231,28 @@ const DumpV13 = DumpV12.extend({
   debtPayments:z.array(DebtPaymentV9),
   fxRates:z.array(FxRateV3),
 });
-type DumpV13T = z.infer<typeof DumpV13>;
+const DumpV14 = DumpV13.extend({
+  v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
+  debtPayments:z.array(DebtPaymentV14),
+  preservedDebtPayments:z.array(PreservedDebtPaymentV14),
+});
+type DumpV14T = z.infer<typeof DumpV14>;
+
+function requireCompatibleSchema<T extends { schemaVersion:number }>(parsed:T):T {
+  if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
+    throw new Error('Este respaldo requiere una versión más reciente del esquema de Prisma.');
+  }
+  return parsed;
+}
+
 function parseBackup(raw:unknown) {
- const version=(raw as {v?:number})?.v;
- if (version===CURRENT_BACKUP_FORMAT_VERSION) {
-   const parsed=DumpV13.parse(raw);
-   if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
-     throw new Error('Este respaldo requiere una versión más reciente del esquema de Prisma.');
-   }
-   return parsed;
+ const version=(raw as {v?:unknown})?.v;
+ if (!Number.isInteger(version)) throw new Error('El archivo no contiene una versión de respaldo válida.');
+ if ((version as number) > CURRENT_BACKUP_FORMAT_VERSION) {
+   throw new Error('Esta copia requiere una versión más reciente de Prisma.');
  }
+ if (version===CURRENT_BACKUP_FORMAT_VERSION) return requireCompatibleSchema(DumpV14.parse(raw));
+ if (version===13) return requireCompatibleSchema(DumpV13.parse(raw));
  if (version===12) return DumpV12.parse(raw);
  if (version===11) return DumpV11.parse(raw);
  if (version===10) return DumpV10.parse(raw);
@@ -241,8 +260,11 @@ function parseBackup(raw:unknown) {
  if (version===8) return {...DumpV8.parse(raw), investments:[]};
  if (version===7) return {...DumpV7.parse(raw), investments:[]};
  if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: [], investments:[]};
- const legacy=DumpV3.parse(raw);
- return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: [], investments:[]};
+ if (version===3 || version===4 || version===5) {
+   const legacy=DumpV3.parse(raw);
+   return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: [], investments:[]};
+ }
+ throw new Error('La versión de esta copia no es compatible con Prisma.');
 }
 
 // ---------- Helpers ----------
@@ -288,8 +310,13 @@ export async function exportDataJSON(
   const goalData = migrateGoalRecords(goals, goalContributions);
   const baseCurrency = normalizeCurrencyCode(settings.currency);
   const accountCurrencies = new Map(accounts.map(account => [account.id, normalizeCurrencyCode(account.currency, baseCurrency)]));
-  // Backup 2.0 v13 separates format, persistent schema and app version metadata.
-  const dump: DumpV13T = {
+  const paymentIntegrity = classifyDebtPaymentIntegrity(
+    debtPayments as unknown as RawDebtPayment[],
+    debts,
+    accounts,
+  );
+  // Backup v14 keeps valid payments strict and quarantined rows lossless.
+  const dump: DumpV14T = {
     v: CURRENT_BACKUP_FORMAT_VERSION,
     schemaVersion: CURRENT_DB_SCHEMA_VERSION,
     appVersion: CURRENT_APP_VERSION,
@@ -358,12 +385,16 @@ export async function exportDataJSON(
     recurrents,
     plannedOccurrences,
     debts,
-    debtPayments: debtPayments.map(payment => ({
+    debtPayments: paymentIntegrity.valid.map(payment => ({
       ...payment,
-      date:normalizeFinancialDate(payment.date),
+      date:payment.date,
       currency:accountCurrencies.get(payment.accountId || '') || baseCurrency,
       fxRate:1,
       amountBase:toCents(payment.amount),
+    })),
+    preservedDebtPayments: paymentIntegrity.quarantined.map(({ payment }) => ({
+      id: payment.id,
+      row: encodePreservedValue(payment),
     })),
     fxRates,
   };
@@ -374,7 +405,7 @@ export async function exportDataJSON(
   validateCategoryReferences(dump, categories);
   validateBudgetPlans(dump.plans);
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
-  DumpV13.parse(dump);
+  DumpV14.parse(dump);
   return JSON.stringify(dump, null, 2);
 }
 
@@ -400,6 +431,25 @@ export type BackupImportPreview = {
   cards: number;
   investments: number;
 };
+
+function decodePreservedDebtPayment(entry: { id:string; row:EncodedPreservedValue }): RawDebtPayment {
+  const decoded = decodePreservedValue(entry.row);
+  if (!decoded || typeof decoded !== 'object' || Array.isArray(decoded)) {
+    throw new Error('La copia contiene un pago preservado con una estructura inválida.');
+  }
+  const row = decoded as Record<string, unknown>;
+  if (row.id !== entry.id) {
+    throw new Error('La copia contiene un pago preservado cuyo ID no coincide.');
+  }
+  if (typeof row.date === 'string') {
+    try {
+      row.date = normalizeFinancialDate(row.date);
+    } catch {
+      // Keep the exact original string when it still cannot be normalized.
+    }
+  }
+  return row as unknown as RawDebtPayment;
+}
 
 type PreparedBackupImport = {
   d: any;
@@ -493,6 +543,17 @@ function prepareDataJSONImport(
     ...payment,
     date: normalizeFinancialDate(payment.date),
   }));
+  const preservedEntries = d.v >= 14 && 'preservedDebtPayments' in d
+    ? d.preservedDebtPayments as Array<{ id:string; row:EncodedPreservedValue }>
+    : [];
+  const seenPaymentIds = new Set(normalizedDebtPayments.map((payment:any) => payment.id));
+  for (const entry of preservedEntries) {
+    if (seenPaymentIds.has(entry.id)) {
+      throw new Error('La copia contiene IDs de pago duplicados entre registros válidos y preservados.');
+    }
+    seenPaymentIds.add(entry.id);
+  }
+  const restoredPreservedDebtPayments = preservedEntries.map(decodePreservedDebtPayment);
 
   for (const row of [...d.incomes, ...d.expenses, ...normalizedDebtPayments]) {
     const account = row.accountId ? accountMap.get(row.accountId) : undefined;
@@ -623,12 +684,13 @@ function prepareDataJSONImport(
   validateOccurrenceLedgerLinks(plannedOccurrences, incomes, expenses, recurrents);
 
   const debts = d.debts ?? [];
-  const debtPayments = normalizedDebtPayments.map((payment:any) => ({
+  const strictDebtPayments = normalizedDebtPayments.map((payment:any) => ({
     ...payment,
     currency: payment.accountId ? accountMap.get(payment.accountId)!.currency : baseCurrency,
     fxRate: 1,
     amountBase: payment.amount,
   }));
+  const debtPayments = [...strictDebtPayments, ...restoredPreservedDebtPayments];
   const fxRates = d.fxRates ?? [];
 
   const preview: BackupImportPreview = {
@@ -640,6 +702,7 @@ function prepareDataJSONImport(
     transactions: d.incomes.length
       + d.expenses.length
       + (d.debtPayments?.length ?? 0)
+      + preservedEntries.length
       + (d.accountTransfers?.length ?? 0),
     budgets: plans.length,
     goals: goals.length,

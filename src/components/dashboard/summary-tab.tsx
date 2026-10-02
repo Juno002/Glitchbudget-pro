@@ -289,6 +289,7 @@ export default function SummaryTab() {
     skipPlannedOccurrenceItem,
     goals,
     investments,
+    quarantinedDebtPayments,
   }=useFinances();
   const {activeTab,navigate}=useTabs();
   const money=usePrivateCurrency();
@@ -553,6 +554,15 @@ export default function SummaryTab() {
           <StatusBadge
             status="warning"
             label={home.attentionCount+' elementos requieren atención'}
+            className="min-h-7 px-3"
+          />
+        ) : null}
+        {(quarantinedDebtPayments?.length || 0)>0 ? (
+          <StatusBadge
+            status="warning"
+            label={(quarantinedDebtPayments?.length || 0) === 1
+              ? '1 pago tiene datos inválidos y no se incluye en saldos ni reportes'
+              : (quarantinedDebtPayments?.length || 0)+' pagos tienen datos inválidos y no se incluyen en saldos ni reportes'}
             className="min-h-7 px-3"
           />
         ) : null}

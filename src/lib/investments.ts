@@ -62,7 +62,7 @@ export async function createInvestment(input: CreateInvestmentInput): Promise<In
 
   return db.transaction('rw', [
     db.investments, db.accounts, db.account_transfers,
-    db.incomes, db.expenses, db.debt_payments, db.settings,
+    db.incomes, db.expenses, db.debt_payments, db.debts, db.settings,
   ], async () => {
     const settings = await db.settings.get('general');
     const currency = normalizeCurrencyCode(settings?.currency);

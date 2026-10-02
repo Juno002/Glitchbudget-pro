@@ -40,7 +40,7 @@ test('18.3 preview validates without mutating Dexie', async () => {
   const preview = previewDataJSON(current);
 
   assert.deepEqual(await snapshot(), before);
-  assert.equal(preview.formatVersion, 13);
+  assert.equal(preview.formatVersion, 14);
   assert.equal(preview.schemaVersion, 15);
   assert.equal(preview.appVersion, '0.1.0');
   assert.ok(preview.exportedAt);

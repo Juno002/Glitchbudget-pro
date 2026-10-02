@@ -1,6 +1,7 @@
 import type { Income, Expense } from './models';
 import type { FinanceSnapshot } from './snapshot';
 import { contains, periodContaining, periodForId, type DateRange, type PeriodRange, type PeriodSettings } from './periods';
+import { partitionCanonicalFinancialDates } from './financial-date';
 
 /** Recorded activity: an actual purchase is counted once, on its recorded date. */
 export function recordedExpenseForPeriod(expense: Expense, period: DateRange): number {
@@ -30,7 +31,7 @@ export function selectPeriodMetrics(data: FinanceSnapshot, period: PeriodRange) 
   const spending = periodExpenses.reduce((s,e) => s+e.amount,0);
   const cashSpending = periodExpenses.filter(e => e.paymentMethod !== 'credit').reduce((s,e) => s+e.amount,0);
   const cardSpending = spending - cashSpending;
-  const cardPayments = data.debtPayments.filter(p => contains(period, p.date)).reduce((s,p) => s+p.amount,0);
+  const cardPayments = partitionCanonicalFinancialDates(data.debtPayments).valid.filter(p => contains(period, p.date as string)).reduce((s,p) => s+p.amount,0);
   const periodBudgets = data.budgets.filter(b => b.month === period.id);
   const plannedBudgetTotal = periodBudgets.reduce((s,b) => s+b.limit,0);
   const remainingBudgets = periodBudgets.reduce((s,b) =>

@@ -40,6 +40,8 @@ import type { Cents } from '@/domain/money';
 import { reconcileSelectedPeriod } from '@/domain/period-selection';
 import { resolveVisualTheme } from '@/domain/app-lifecycle';
 import { useFinancialToday } from '@/hooks/use-financial-today';
+import { assessFinancialDateIntegrity, type DebtPaymentIntegrityIssue, type FinancialDateIntegrityInventory } from '@/domain/data-integrity';
+import { deleteQuarantinedDebtPayment as deleteQuarantinedDebtPaymentCommand, repairQuarantinedDebtPaymentDate as repairQuarantinedDebtPaymentDateCommand } from '@/lib/debt-payment-integrity-service';
 
 type RolloverStrategy = 'reset' | 'accumulate_surplus' | 'accumulate_debt';
 export type { BackupFile } from '@/hooks/use-backup-management';
@@ -66,6 +68,8 @@ interface FinanceContextType {
 
   debts: Debt[] | undefined;
   debtPayments: DebtPayment[] | undefined;
+  quarantinedDebtPayments: DebtPaymentIntegrityIssue[] | undefined;
+  financialDateIntegrity: FinancialDateIntegrityInventory;
   recurringRules: RecurringRule[] | undefined;
   plannedOccurrences: PlannedOccurrence[] | undefined;
   accountTransfers: AccountTransfer[] | undefined;
@@ -100,6 +104,8 @@ interface FinanceContextType {
   updateDebt: (debt: Debt) => Promise<boolean>;
   deleteDebt: (id: string) => Promise<boolean>;
   addDebtPayment: (payment: Omit<DebtPayment, 'id'>) => Promise<boolean>;
+  repairQuarantinedDebtPaymentDate: (id: string, nextDate: string) => Promise<boolean>;
+  deleteQuarantinedDebtPayment: (id: string) => Promise<boolean>;
 
   addRecurringRule: (recurring: Omit<RecurringRule, 'id'>) => Promise<boolean>;
   updateRecurringRule: (recurring: RecurringRule) => Promise<boolean>;
@@ -177,11 +183,22 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
   const budgets = financialData?.budgets;
   const debts = financialData?.debts;
   const debtPayments = financialData?.debtPayments;
+  const quarantinedDebtPayments = financialData?.quarantinedDebtPayments;
   const transfers = financialData?.transfers;
   const accounts = financialData?.accounts;
   const investments = financialData?.investments;
   const expenseCategories = useMemo(() => activeCategories(categories || [], 'expense').map(c => c.id), [categories]);
   const incomeCategories = useMemo(() => activeCategories(categories || [], 'income').map(c => c.id), [categories]);
+  const financialDateIntegrity = useMemo(() => assessFinancialDateIntegrity({
+    incomes: incomes || [],
+    expenses: expenses || [],
+    transfers: transfers || [],
+    goalContributions: goalContributions || [],
+    plannedOccurrences: plannedOccurrences || [],
+    recurringRules: recurringRules || [],
+    accounts: accounts || [],
+    investments: investments || [],
+  }), [incomes, expenses, transfers, goalContributions, plannedOccurrences, recurringRules, accounts, investments]);
   useEffect(() => {
     if (accounts && !accounts.some(a => a.isDefaultCash)) {
       void ensureCashAccount().catch(error => toast({ title: 'No se pudo preparar Efectivo', description: friendlyError(error), variant: 'destructive' }));
@@ -606,6 +623,35 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     [runAction],
   );
 
+  const repairQuarantinedDebtPaymentDate = useCallback(async (id: string, nextDate: string) => {
+    try {
+      const result = await repairQuarantinedDebtPaymentDateCommand(id, nextDate);
+      setDataVersion(version => version + 1);
+      toast({
+        title: 'Fecha corregida',
+        description: result.status === 'repaired'
+          ? 'El pago volvió a formar parte de los saldos y reportes.'
+          : 'La fecha es válida, pero el pago sigue aislado por referencias que requieren revisión.',
+      });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo corregir el pago', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
+  const deleteQuarantinedDebtPayment = useCallback(async (id: string) => {
+    try {
+      await deleteQuarantinedDebtPaymentCommand(id);
+      setDataVersion(version => version + 1);
+      toast({ title: 'Registro inválido eliminado' });
+      return true;
+    } catch (error) {
+      toast({ title: 'No se pudo eliminar el registro', description: friendlyError(error), variant: 'destructive' });
+      return false;
+    }
+  }, [toast]);
+
   const addRecurringRule = useCallback(
     (recurring: Omit<RecurringRule, "id">) => runAction(
       () => saveRecurringRule({ ...recurring, id: crypto.randomUUID() }).then(() => undefined),
@@ -688,6 +734,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     budgets,
     debts,
     debtPayments,
+    quarantinedDebtPayments,
+    financialDateIntegrity,
     recurringRules,
     plannedOccurrences,
     accountTransfers: transfers,
@@ -719,6 +767,8 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updateDebt,
     deleteDebt,
     addDebtPayment,
+    repairQuarantinedDebtPaymentDate,
+    deleteQuarantinedDebtPayment,
     addRecurringRule,
     updateRecurringRule,
     deleteRecurringRule,
@@ -753,12 +803,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     loading,
     isWorking,
   }), [
-    activeSettings, currentPeriod, today, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, recurringRules, plannedOccurrences, transfers, accounts, investments,
+    activeSettings, currentPeriod, today, expenseCategories, incomeCategories, incomes, expenses, goals, goalContributions, budgets, debts, debtPayments, quarantinedDebtPayments, financialDateIntegrity, recurringRules, plannedOccurrences, transfers, accounts, investments,
     setTheme, setBaseCurrency, setPreventNegativeAccountBalance, setBudgetOverspendingBehavior, setRolloverStrategy, setPeriodStartDay, setBaseIncome, updateSettings,
     addIncomeItem, updateIncomeItem, deleteIncomeItem, addExpense, updateExpense, deleteExpense, addAccountTransfer,
     addGoal, updateGoal, deleteGoal, contributeToGoal,
     updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
-    addCreditCard, updateDebt, deleteDebt, addDebtPayment,
+    addCreditCard, updateDebt, deleteDebt, addDebtPayment, repairQuarantinedDebtPaymentDate, deleteQuarantinedDebtPayment,
     addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
     getMonthlyAverages, getDisposable, getTotals, getPosition, getReportSnapshot, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,

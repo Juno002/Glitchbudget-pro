@@ -35,7 +35,12 @@ export class GlitchBudgetDB extends Dexie {
       debt_payments: 'id, debtId, date, accountId',
     }).upgrade(async tx => {
       await tx.table('debt_payments').toCollection().modify(payment => {
-        payment.date = normalizeFinancialDate(payment.date);
+        try {
+          payment.date = normalizeFinancialDate(payment.date);
+        } catch {
+          // Preserve corrupt historical data verbatim. Runtime integrity
+          // boundaries quarantine it from financial calculations until repaired.
+        }
       });
     });
     this.version(14).stores({
