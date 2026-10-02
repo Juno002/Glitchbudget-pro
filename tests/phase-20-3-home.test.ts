@@ -42,11 +42,11 @@ test('20.3 Summary adopts Prisma hierarchy without importing demo finance data',
 test('20.3 Summary preserves finance-context navigation and planned-payment actions', () => {
   const source = read('src/components/dashboard/summary-tab.tsx');
 
-  assert.match(source, /setActiveTab\('movements'\)/);
-  assert.match(source, /setActiveTab\('planning'\)/);
-  assert.match(source, /setPlanningTab\('budgets'\)/);
-  assert.match(source, /setPlanningTab\('goals'\)/);
-  assert.match(source, /setPlanningTab\('subscriptions'\)/);
+  assert.match(source, /navigate\(\{area:'movements',movementSection:'accounts'\}\)/);
+  assert.match(source, /navigate\(\{area:'movements',movementSection:'investments'\}\)/);
+  assert.match(source, /navigate\(\{area:'planning',planningTab:'budgets'\}\)/);
+  assert.match(source, /navigate\(\{area:'planning',planningTab:'goals'\}\)/);
+  assert.match(source, /navigate\(\{area:'planning',planningTab:'subscriptions'\}\)/);
   assert.match(source, /confirmPlannedOccurrenceItem/);
   assert.match(source, /skipPlannedOccurrenceItem/);
 });

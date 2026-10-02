@@ -784,7 +784,7 @@ async function main() {
         && Boolean(document.querySelector('[data-report-section="comparison"]'))
         && document.querySelectorAll('[data-report-chart]').length >= 5
         && window.location.search === '?tab=reports'`,
-      'Reportes Prisma y gráficos + URL',
+      'Reportes Prisma y gráficos',
     );
 
     await client.evaluate(`history.back(); true`);
