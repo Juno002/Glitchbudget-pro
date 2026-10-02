@@ -1,6 +1,7 @@
 'use client';
 
 import { TimerReset } from 'lucide-react';
+import { ContextHelp } from '@/components/finance-ui';
 import { useAppLock } from '@/contexts/app-lock-context';
 import {
   AUTO_LOCK_TIMEOUT_OPTIONS,
@@ -24,9 +25,7 @@ export default function AutoLockSettings() {
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />
           <div>
             <p className="font-medium">Bloqueo automático</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Activa primero el bloqueo de aplicación. El bloqueo automático no funciona sin un bloqueo de aplicación configurado.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Activa primero el bloqueo de aplicación.</p>
           </div>
         </div>
       </div>
@@ -40,11 +39,9 @@ export default function AutoLockSettings() {
       <label className="flex items-start justify-between gap-4">
         <span className="flex items-start gap-3">
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>
+          <span className="flex items-center gap-1">
             <span className="block font-medium">Bloqueo automático</span>
-            <span className="mt-1 block text-xs text-muted-foreground">
-              Bloquea la interfaz después de un período sin actividad. La configuración se guarda solo en este navegador.
-            </span>
+            <ContextHelp label="Acerca del bloqueo automático">Bloquea la interfaz tras un período sin actividad y también comprueba el tiempo transcurrido al volver desde segundo plano.</ContextHelp>
           </span>
         </span>
         <input
@@ -69,9 +66,6 @@ export default function AutoLockSettings() {
               <option key={minutes} value={minutes}>{LABELS[minutes]}</option>
             ))}
           </select>
-          <span className="block text-xs text-muted-foreground">
-            También se comprueba el tiempo transcurrido al volver a la aplicación desde segundo plano.
-          </span>
         </label>
       )}
     </div>
