@@ -1,0 +1,31 @@
+name: Refresh ESLint lockfile
+
+on:
+  push:
+    branches:
+      - post-audit-tooling-5
+    paths:
+      - package.json
+      - eslint.config.mjs
+      - .github/workflows/refresh-eslint-lock.yml
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Regenerate package lock
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Emit generated lockfile
+        run: |
+          echo LOCKFILE_BASE64_BEGIN
+          base64 -w0 package-lock.json
+          echo
+          echo LOCKFILE_BASE64_END

@@ -1,0 +1,98 @@
+import { FlatCompat } from '@eslint/eslintrc';
+
+const compat = new FlatCompat({
+  baseDirectory: import.meta.dirname,
+});
+
+const eslintConfig = [
+  ...compat.config({
+    extends: ['next/core-web-vitals'],
+    overrides: [
+      {
+        files: [
+          'src/components/**/*.{ts,tsx}',
+          'src/app/**/*.{ts,tsx}',
+          'src/contexts/**/*.{ts,tsx}',
+        ],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              paths: [
+                {
+                  name: '@/lib/db',
+                  message:
+                    'React surfaces must consume queries/services instead of importing the Dexie database directly.',
+                },
+                {
+                  name: 'dexie',
+                  message:
+                    'React surfaces must not depend on Dexie persistence primitives directly.',
+                },
+                {
+                  name: 'dexie-react-hooks',
+                  message:
+                    'Reactive Dexie subscriptions belong only in dedicated query adapter hooks.',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ['src/hooks/**/*.{ts,tsx}'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              paths: [
+                {
+                  name: '@/lib/db',
+                  message:
+                    'Hooks must consume non-React queries/services instead of importing the Dexie database directly.',
+                },
+                {
+                  name: 'dexie',
+                  message:
+                    'Hooks must not depend on Dexie persistence primitives directly.',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        files: ['src/domain/**/*.{ts,tsx}', 'src/policies/**/*.{ts,tsx}'],
+        rules: {
+          'no-restricted-imports': [
+            'error',
+            {
+              paths: [
+                {
+                  name: 'react',
+                  message: 'Domain and policy modules must remain React-free.',
+                },
+                {
+                  name: 'react-dom',
+                  message: 'Domain and policy modules must remain React-free.',
+                },
+                {
+                  name: 'dexie-react-hooks',
+                  message: 'Domain and policy modules must remain React-free.',
+                },
+              ],
+              patterns: [
+                '@/components/*',
+                '@/hooks/*',
+                '@/contexts/*',
+                '@/app/*',
+              ],
+            },
+          ],
+        },
+      },
+    ],
+  }),
+];
+
+export default eslintConfig;
