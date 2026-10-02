@@ -55,7 +55,7 @@ async function assertRejectedBeforeDeriveKey(text: string): Promise<void> {
     assert.equal(deriveKeyCalls, 0);
   } finally {
     if (previous) Object.defineProperty(subtle, 'deriveKey', previous);
-    else delete (subtle as SubtleCrypto & { deriveKey?: SubtleCrypto['deriveKey'] }).deriveKey;
+    else delete (subtle as unknown as { deriveKey?: unknown }).deriveKey;
   }
 }
 
