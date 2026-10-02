@@ -168,8 +168,6 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
       setAutoLockMinutes(null);
       failedUnlockAttempts.current = 0;
       setUnlockBlockedUntil(null);
-      failedUnlockAttempts.current = 0;
-      setUnlockBlockedUntil(null);
       return true;
     }
 
@@ -207,6 +205,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
       setEnabled(false);
       setLocked(false);
       setAutoLockMinutes(null);
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
     }
     return disabled;
   }, []);
