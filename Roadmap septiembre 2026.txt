@@ -4782,7 +4782,7 @@ Secuencia autorizada:
 ```text
 Intervención 1 — Integridad de fechas + Backup v14 ✅
 → Intervención 2 — App Lock ✅
-→ Intervención 3 — Backup cifrado evolutivo
+→ Intervención 3 — Backup cifrado evolutivo ✅
 → Intervención 4 — Mantenimiento pequeño
 → Intervención 5 — Tooling aislado
 ```
@@ -4812,7 +4812,7 @@ Intervención 1 — Integridad de fechas + Backup v14 ✅
 
 ### Intervención 3 — Backup cifrado evolutivo
 
-**Estado: autorizada / en ejecución.**
+**Estado: completada / Gate aprobado.** PR #100.
 
 Objetivo: hacer que el importador del envelope v1 pueda consumir metadatos criptográficos validados sin cambiar todavía los parámetros de exportación.
 
@@ -4860,7 +4860,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-audit hardening 3 → 4 → 5
+intervenciones pendientes autorizadas = Post-audit hardening 4 → 5
 ```
 
 No existe una Fase 20.11.
