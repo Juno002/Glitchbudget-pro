@@ -47,7 +47,8 @@ test('20.9.7 empty states converge on the reusable EmptyState primitive', () => 
   const backups = source('src/components/backup/opfs-backup-dialog.tsx');
 
   assert.match(debts, /<EmptyState[\s\S]*title="Aún no tienes tarjetas"/);
-  assert.match(movements, /<EmptyState title="No hay movimientos"/);
+  assert.match(movements, /<EmptyState description="No hay movimientos registrados que coincidan con estos filtros\."/);
+  assert.doesNotMatch(movements, /<EmptyState title="No hay movimientos"/);
   assert.match(goals, /<EmptyState title="Todavía no tienes metas"/);
   assert.match(subscriptions, /<EmptyState[\s\S]*No hay movimientos planificados pendientes/);
   assert.match(backups, /<EmptyState className="min-h-28" title="Sin copias locales"/);
