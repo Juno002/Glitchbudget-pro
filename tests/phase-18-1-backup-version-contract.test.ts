@@ -96,6 +96,31 @@ test('18.1 preserves legacy JSON v12 import compatibility', async () => {
   assert.equal(roundTrip.appVersion, CURRENT_APP_VERSION);
 });
 
+test('18.1 preserves legacy JSON v13 import compatibility after v14', async () => {
+  await importDataJSON(JSON.stringify(fixture('backup-v4')));
+  const current = JSON.parse(await exportDataJSON());
+  const legacyV13 = structuredClone(current);
+  legacyV13.v = 13;
+  delete legacyV13.preservedDebtPayments;
+
+  await assert.doesNotReject(importDataJSON(JSON.stringify(legacyV13)));
+  const roundTrip = JSON.parse(await exportDataJSON());
+  assert.equal(roundTrip.v, 14);
+});
+
+test('18.1 rejects future backup formats with an explicit newer-version message before writing', async () => {
+  await importDataJSON(JSON.stringify(fixture('backup-v4')));
+  const before = await snapshot();
+  const future = JSON.parse(await exportDataJSON());
+  future.v = CURRENT_BACKUP_FORMAT_VERSION + 1;
+
+  await assert.rejects(
+    importDataJSON(JSON.stringify(future)),
+    /versión más reciente de Prisma/i,
+  );
+  assert.deepEqual(await snapshot(), before);
+});
+
 test('18.1 encrypted backup automatically inherits the new internal JSON metadata', async () => {
   await importDataJSON(JSON.stringify(fixture('backup-v4')));
   const normal = await exportDataJSON();
