@@ -110,7 +110,7 @@ test('v7 backup migrates goal progress once into the current contract without cr
   const metrics = selectPeriodMetrics({settings:(await db.settings.get('general'))!,incomes:[],expenses:[],debtPayments:[],budgets:[],goalContributions:contributions},periodForId('2026-09'));
   assert.equal(metrics.goalContributions,200); assert.equal(metrics.monthlyPlanningMargin,-200);
   const exported = JSON.parse(await exportDataJSON());
-  assert.equal(exported.v,13); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
+  assert.equal(exported.v,14); assert.equal('saved' in exported.goals[0],false); assert.equal('status' in exported.goals[0],false);
   const before = await snapshot();
   await importDataJSON(JSON.stringify(exported));
   assert.deepEqual(await snapshot(),before);
