@@ -36,6 +36,8 @@ export const LOCAL_SECURITY_CONTRACT = {
     storageKey: APP_LOCK_STORAGE_KEY,
     verifier: 'PBKDF2-SHA-256',
     plaintextPinStored: false,
+    retryBackoff: 'session-memory-progressive',
+    retryBackoffMaxMs: 30_000,
     legacyDefault: 'disabled',
     doesNotProtect: [
       'dexie-at-rest',
