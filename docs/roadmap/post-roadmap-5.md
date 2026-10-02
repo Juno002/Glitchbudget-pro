@@ -1,6 +1,6 @@
 # Post-roadmap 5 — Mantenibilidad, pruebas y pulido
 
-Estado técnico: **completado / pendiente de integración conjunta con Post-roadmap 4**.
+Estado técnico: **completado / Gate aprobado / listo para integración final**. Post-roadmap 4 ya está integrado en `main`.
 
 Fuente funcional única: `Roadmap septiembre 2026.txt`.
 
@@ -154,4 +154,4 @@ Sin cambios en:
 
 ## Gate técnico
 
-**Aprobado.** La rama debe volver a pasar el gate completo con esta evidencia incluida antes de la integración conjunta.
+**Aprobado.** Tras rebasar Post-roadmap 5 sobre `main` con Post-roadmap 4 ya integrado, el head `e50ae565e2599d7d1ba2100b79bf852f3acf0328` pasó el gate completo tanto por `push` (**Quality checks #2027**) como por `pull_request` (**#2028**): `npm run check`, benchmark del ledger, `npm run build` y `npm run test:e2e` en verde. La rama queda lista para la integración final.
