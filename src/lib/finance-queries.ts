@@ -24,20 +24,52 @@ async function measuredQuery<T>(name: string, query: () => Promise<T>): Promise<
 }
 
 import { db } from '@/lib/db';
+import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '@/domain/data-integrity';
 
 export function readFinanceContextData() {
-  return measuredQuery('financeContext', () => db.transaction('r', db.tables, async () => ({
-    expenses: await db.expenses.toArray(),
-    incomes: await db.incomes.toArray(),
-    goals: await db.goals.toArray(),
-    goalContributions: await db.goal_contributions.toArray(),
-    budgets: await db.plans.toArray(),
-    debts: await db.debts.toArray(),
-    debtPayments: await db.debt_payments.toArray(),
-    transfers: await db.account_transfers.toArray(),
-    accounts: await db.accounts.toArray(),
-    investments: await db.investments.toArray(),
-  })));
+  return measuredQuery('financeContext', () => db.transaction('r', db.tables, async () => {
+    const [
+      expenses,
+      incomes,
+      goals,
+      goalContributions,
+      budgets,
+      debts,
+      rawDebtPayments,
+      transfers,
+      accounts,
+      investments,
+    ] = await Promise.all([
+      db.expenses.toArray(),
+      db.incomes.toArray(),
+      db.goals.toArray(),
+      db.goal_contributions.toArray(),
+      db.plans.toArray(),
+      db.debts.toArray(),
+      db.debt_payments.toArray(),
+      db.account_transfers.toArray(),
+      db.accounts.toArray(),
+      db.investments.toArray(),
+    ]);
+    const paymentIntegrity = classifyDebtPaymentIntegrity(
+      rawDebtPayments as unknown as RawDebtPayment[],
+      debts,
+      accounts,
+    );
+    return {
+      expenses,
+      incomes,
+      goals,
+      goalContributions,
+      budgets,
+      debts,
+      debtPayments: paymentIntegrity.valid,
+      quarantinedDebtPayments: paymentIntegrity.quarantined,
+      transfers,
+      accounts,
+      investments,
+    };
+  }));
 }
 
 export function readGeneralSettings() {
@@ -71,28 +103,57 @@ export function readAccountOverviewData() {
   return measuredQuery('accountOverview', () => db.transaction(
     'r',
     [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts],
-    async () => ({
-      accounts: await db.accounts.toArray(),
-      transfers: await db.account_transfers.toArray(),
-      incomes: await db.incomes.toArray(),
-      expenses: await db.expenses.toArray(),
-      payments: await db.debt_payments.toArray(),
-      debts: await db.debts.toArray(),
-    }),
+    async () => {
+      const [accounts, transfers, incomes, expenses, rawPayments, debts] = await Promise.all([
+        db.accounts.toArray(),
+        db.account_transfers.toArray(),
+        db.incomes.toArray(),
+        db.expenses.toArray(),
+        db.debt_payments.toArray(),
+        db.debts.toArray(),
+      ]);
+      return {
+        accounts,
+        transfers,
+        incomes,
+        expenses,
+        payments: classifyDebtPaymentIntegrity(
+          rawPayments as unknown as RawDebtPayment[],
+          debts,
+          accounts,
+        ).valid,
+        debts,
+      };
+    },
   ));
 }
 
 export function readInvestmentManagerData() {
   return measuredQuery('investmentManager', () => db.transaction(
     'r',
-    [db.investments, db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments],
-    async () => ({
-      investments: await db.investments.toArray(),
-      accounts: await db.accounts.toArray(),
-      transfers: await db.account_transfers.toArray(),
-      incomes: await db.incomes.toArray(),
-      expenses: await db.expenses.toArray(),
-      payments: await db.debt_payments.toArray(),
-    }),
+    [db.investments, db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts],
+    async () => {
+      const [investments, accounts, transfers, incomes, expenses, rawPayments, debts] = await Promise.all([
+        db.investments.toArray(),
+        db.accounts.toArray(),
+        db.account_transfers.toArray(),
+        db.incomes.toArray(),
+        db.expenses.toArray(),
+        db.debt_payments.toArray(),
+        db.debts.toArray(),
+      ]);
+      return {
+        investments,
+        accounts,
+        transfers,
+        incomes,
+        expenses,
+        payments: classifyDebtPaymentIntegrity(
+          rawPayments as unknown as RawDebtPayment[],
+          debts,
+          accounts,
+        ).valid,
+      };
+    },
   ));
 }
