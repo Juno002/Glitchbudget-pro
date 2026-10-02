@@ -45,7 +45,7 @@ async function decryptForTest(envelope: EncryptedBackupEnvelopeV1, password: str
       name: 'AES-GCM',
       iv: fromBase64(envelope.nonce),
       tagLength: envelope.cipher.tagLength,
-      additionalData: encryptedBackupAad(),
+      additionalData: encryptedBackupAad(envelope.kdf, envelope.cipher),
     },
     key,
     fromBase64(envelope.ciphertext),

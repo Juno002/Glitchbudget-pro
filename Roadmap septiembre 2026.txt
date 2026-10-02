@@ -4763,6 +4763,92 @@ documentar evidencia
 → proponer modificación explícita de esta sección
 ```
 
+## Post-audit hardening — Integridad y seguridad posterior al roadmap
+
+**Estado: en ejecución.** Esta secuencia fue autorizada explícitamente después del cierre de Post-roadmap 1–5. No crea una Fase 20.11 ni una Fase 21.
+
+Reglas:
+
+- ejecutar las intervenciones estrictamente en orden;
+- una sola rama temporal por intervención;
+- validar antes del merge;
+- merge a `main` solo con el gate de la intervención aprobado;
+- eliminar la rama temporal después del merge;
+- no ampliar alcance silenciosamente;
+- Prisma sigue siendo el nombre público; GlitchBudget permanece como identidad interna/de compatibilidad donde corresponda.
+
+Secuencia autorizada:
+
+```text
+Intervención 1 — Integridad de fechas + Backup v14 ✅
+→ Intervención 2 — App Lock ✅
+→ Intervención 3 — Backup cifrado evolutivo ✅
+→ Intervención 4 — Mantenimiento pequeño
+→ Intervención 5 — Tooling aislado
+```
+
+### Intervención 1 — Integridad de fechas + Backup v14
+
+**Estado: completada / Gate aprobado.** PR #98.
+
+- migración v15 tolerante ante fechas corruptas;
+- clasificación canónica y cuarentena de `debt_payments`;
+- exclusión de pagos aislados de saldos, tarjetas/préstamos, métricas y reportes;
+- diagnóstico y reparación explícita;
+- Backup JSON v14 con preservación lossless de registros aislados;
+- importación v3–v13 preservada y formatos futuros rechazados;
+- gate real Dexie v14 corrupta → v15 → backup/restore → reparación.
+
+### Intervención 2 — App Lock
+
+**Estado: completada / Gate aprobado.** PR #99.
+
+- backoff progresivo moderado tras PIN incorrectos;
+- 0 s en los dos primeros fallos y después 1/2/4/8/16/30 s;
+- estado solo en memoria de la sesión;
+- comprobación del bloqueo antes de PBKDF2;
+- deadline contado después de la verificación fallida;
+- sin presentar App Lock como protección criptográfica de Dexie.
+
+### Intervención 3 — Backup cifrado evolutivo
+
+**Estado: completada / Gate aprobado.** PR #100.
+
+Objetivo: hacer que el importador del envelope v1 pueda consumir metadatos criptográficos validados sin cambiar todavía los parámetros de exportación.
+
+Contrato:
+
+- exportación pública permanece en PBKDF2-HMAC-SHA-256, 310 000 iteraciones, AES-256-GCM, envelope v1;
+- `kdf.name` y `kdf.hash` permanecen en lista cerrada: `PBKDF2` y `SHA-256`;
+- `iterations` pasa a ser variable en importación, pero debe ser un entero seguro y quedar dentro de un rango explícito;
+- mínimo = 310 000, para impedir downgrade de coste;
+- máximo = 750 000 como límite defensivo con margen sobre la referencia de 600 000 de 20.7.5.6; no implica que 750 000 quede aprobado como futuro coste de producción;
+- la validación completa del envelope ocurre antes de cualquier `deriveKey`;
+- KDF y AAD se reconstruyen únicamente desde metadatos ya validados;
+- el AAD conserva exactamente el orden histórico de propiedades: `format`, `version`, `kdf`, `cipher`; dentro de KDF: `name`, `hash`, `iterations`; dentro de cipher: `name`, `keyLength`, `tagLength`;
+- campos extra del archivo no participan en el AAD;
+- debe existir un fixture v1/310k generado con la implementación previa a esta intervención y seguir descifrándose;
+- tests adversariales deben demostrar que iteraciones inválidas se rechazan antes de PBKDF2;
+- debe existir round-trip interno con un envelope válido de 400 000 iteraciones sin cambiar la exportación pública;
+- alterar `iterations` dentro del rango sin recomputar el ciphertext debe caer en el mismo error genérico de contraseña/archivo dañado;
+- no normalizar contraseñas Unicode/NFC en esta intervención;
+- no decidir todavía si un futuro coste de producción mayor conserva `version: 1` o exige v2.
+
+### Intervención 4 — Mantenimiento pequeño
+
+**Estado: pendiente.**
+
+- documentar en README que Prisma es el nombre público y GlitchBudget permanece como identidad interna/de compatibilidad en DB, claves y formatos históricos;
+- alinear `@types/node` con Node 22.
+
+### Intervención 5 — Tooling aislado
+
+**Estado: pendiente.**
+
+- revisar/migrar ESLint como trabajo independiente;
+- ejecutar CI completo;
+- no mezclarlo con seguridad, migraciones ni backups.
+
 ## Regla de autoridad y no invención del roadmap
 
 A partir de este punto:
@@ -4774,7 +4860,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = ninguna
+intervenciones pendientes autorizadas = Post-audit hardening 4 → 5
 ```
 
 No existe una Fase 20.11.

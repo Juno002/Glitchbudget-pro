@@ -97,24 +97,45 @@ test('17.5 closes the security contract without claiming App lock encrypts Dexie
   assert.notEqual(AUTO_LOCK_STORAGE_KEY, BALANCE_VISIBILITY_STORAGE_KEY);
 });
 
-test('17.5 validates encrypted envelope metadata before attempting decryption', async () => {
+test('17.5 validates encrypted envelope metadata before attempting key derivation', async () => {
   const encrypted = await exportEncryptedBackupText('{"v":12}', 'backup-password');
   const parsed = JSON.parse(encrypted);
 
   assert.equal(parseEncryptedBackupEnvelopeText(encrypted).format, ENCRYPTED_BACKUP_FORMAT);
 
-  for (const mutate of [
-    (row: any) => { row.format = 'Other backup'; },
-    (row: any) => { row.version = 2; },
-    (row: any) => { row.kdf.iterations += 1; },
-    (row: any) => { row.cipher.keyLength = 128; },
-    (row: any) => { row.salt = 'not base64 ***'; },
-    (row: any) => { row.nonce = ''; },
-    (row: any) => { row.ciphertext = ''; },
-  ]) {
-    const candidate = structuredClone(parsed);
-    mutate(candidate);
-    assert.throws(() => parseEncryptedBackupEnvelopeText(JSON.stringify(candidate)));
+  const subtle = crypto.subtle;
+  const previous = Object.getOwnPropertyDescriptor(subtle, 'deriveKey');
+  let deriveKeyCalls = 0;
+
+  Object.defineProperty(subtle, 'deriveKey', {
+    configurable: true,
+    writable: true,
+    value: async () => {
+      deriveKeyCalls += 1;
+      throw new Error('deriveKey must not run for rejected envelope metadata');
+    },
+  });
+
+  try {
+    for (const mutate of [
+      (row: any) => { row.format = 'Other backup'; },
+      (row: any) => { row.version = 2; },
+      (row: any) => { row.kdf.iterations = 309_999; },
+      (row: any) => { row.cipher.keyLength = 128; },
+      (row: any) => { row.salt = 'not base64 ***'; },
+      (row: any) => { row.nonce = ''; },
+      (row: any) => { row.ciphertext = ''; },
+    ]) {
+      const candidate = structuredClone(parsed);
+      mutate(candidate);
+      await assert.rejects(
+        decryptEncryptedBackupText(JSON.stringify(candidate), 'backup-password'),
+      );
+      assert.equal(deriveKeyCalls, 0);
+    }
+  } finally {
+    if (previous) Object.defineProperty(subtle, 'deriveKey', previous);
+    else delete (subtle as unknown as { deriveKey?: unknown }).deriveKey;
   }
 });
 

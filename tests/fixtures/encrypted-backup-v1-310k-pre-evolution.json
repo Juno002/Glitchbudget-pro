@@ -1,0 +1,17 @@
+{
+  "format": "GlitchBudget encrypted backup",
+  "version": 1,
+  "kdf": {
+    "name": "PBKDF2",
+    "hash": "SHA-256",
+    "iterations": 310000
+  },
+  "cipher": {
+    "name": "AES-GCM",
+    "keyLength": 256,
+    "tagLength": 128
+  },
+  "salt": "QFei7bYeaYVOoKa7RdVbVA==",
+  "nonce": "lQnz1czN9I0eEFsC",
+  "ciphertext": "uPjB2e+7ym7F1CJ3azgf+1qfyYvKanm/pYpdzdLtwyZN6AfnppVisfSsPAYfeQDEajOuphxRsu+Ly1vcaP3KJch0FqUzjH9/9koHkSzD"
+}
