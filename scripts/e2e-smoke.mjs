@@ -995,7 +995,7 @@ async function main() {
         actionsScrollWidth: actions instanceof HTMLElement ? actions.scrollWidth : null,
       };
     })()`);
-    process.stdout.write('MOBILE_BACKUP_LAYOUT ' + JSON.stringify(mobileBackupLayout) + '\\n');
+
     if (!(mobileBackupLayout
       && mobileBackupLayout.dialogScrollWidth <= mobileBackupLayout.dialogClientWidth + 1
       && mobileBackupLayout.rowScrollWidth <= mobileBackupLayout.rowClientWidth + 1
