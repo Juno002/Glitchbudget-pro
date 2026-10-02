@@ -30,6 +30,7 @@ import TransactionRuleManager from '@/components/settings/transaction-rule-manag
 import AppLockSettings from '@/components/settings/app-lock-settings';
 import AutoLockSettings from '@/components/settings/auto-lock-settings';
 import PersistentStorageSettings from '@/components/settings/persistent-storage-settings';
+import DataIntegritySettings from '@/components/settings/data-integrity-settings';
 import { APP_LOCK_STORAGE_KEY, AUTO_LOCK_STORAGE_KEY } from '@/domain/local-security';
 import packageJson from '../../../package.json';
 
@@ -314,6 +315,7 @@ export function SettingsDialog() {
 
           <TabsContent value="data" className="min-w-0 space-y-6">
             <SectionHeader title="Datos y copias" />
+            <DataIntegritySettings />
             <div className="max-w-md"><PersistentStorageSettings /></div>
             <div className="max-w-md"><OpfsBackupDialog /></div>
             <div className="rounded-[var(--radius-card)] border border-destructive/30 p-4 space-y-3">
