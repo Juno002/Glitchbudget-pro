@@ -32,7 +32,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
               aria-pressed={value === name}
               onClick={() => onChange(name)}
               className={cn(
-                "flex min-h-10 min-w-10 items-center justify-center rounded-md p-2 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 value === name ? "bg-primary/20 text-primary" : "text-muted-foreground"
               )}
             >
