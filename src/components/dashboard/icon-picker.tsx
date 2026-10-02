@@ -17,19 +17,22 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2 h-10 px-3">
+        <Button type="button" variant="outline" aria-label="Elegir icono de categoría" title="Elegir icono" className="flex h-10 shrink-0 items-center gap-2 px-3">
           <SelectedIcon className="h-4 w-4" />
           <ChevronDown className="h-3 w-3 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-2" align="start">
-        <div className="grid grid-cols-6 gap-1 max-h-[200px] overflow-y-auto pr-1">
+      <PopoverContent className="w-72 p-2 sm:w-80" align="start">
+        <div className="grid max-h-[200px] grid-cols-5 gap-1 overflow-y-auto pr-1 sm:grid-cols-6">
           {Object.entries(ICON_MAP).map(([name, Icon]) => (
             <button
               key={name}
+              type="button"
+              aria-label={'Usar icono '+name}
+              aria-pressed={value === name}
               onClick={() => onChange(name)}
               className={cn(
-                "flex items-center justify-center p-2 rounded-md hover:bg-primary/10 transition-colors",
+                "flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                 value === name ? "bg-primary/20 text-primary" : "text-muted-foreground"
               )}
             >

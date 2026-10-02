@@ -63,7 +63,7 @@ export default function PersistentStorageSettings() {
         <div className="min-w-0">
           <p className="font-medium">Persistencia del navegador</p>
           {details ? (
-            <div className="mt-1 flex items-center gap-1 text-sm">
+            <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1 text-sm">
               <span>{details.title}</span>
               <ContextHelp label="Acerca de la persistencia del navegador">{details.description}</ContextHelp>
             </div>
@@ -76,7 +76,7 @@ export default function PersistentStorageSettings() {
       </div>
 
       {(settled === 'best-effort' || settled === 'error') && (
-        <Button type="button" variant="outline" size="sm" onClick={() => void request()}>
+        <Button type="button" variant="outline" size="sm" className="h-auto min-h-9 w-full whitespace-normal text-center sm:w-auto" onClick={() => void request()}>
           Proteger almacenamiento local
         </Button>
       )}

@@ -128,9 +128,9 @@ export default function AppLockSettings() {
   if (!enabled) {
     return (
       <form onSubmit={activate} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Configurar bloqueo de aplicación">
-        <div className="flex items-start gap-3">
+        <div className="flex min-w-0 items-start gap-3">
           <LockOpen className="mt-0.5 h-4 w-4 shrink-0" />
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1">
             <p className="font-medium">Bloqueo de aplicación</p>
             <ContextHelp label="Acerca del bloqueo de aplicación">Protege la interfaz con un PIN local. No cifra los datos almacenados ni las copias.</ContextHelp>
           </div>
@@ -149,15 +149,15 @@ export default function AppLockSettings() {
 
   return (
     <div className="space-y-5 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Administrar bloqueo de aplicación">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
           <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 flex-wrap items-center gap-1">
             <p className="font-medium">Bloqueo de aplicación activo</p>
             <ContextHelp label="Acerca del bloqueo activo">Bloquea la interfaz financiera; no cifra los datos almacenados ni los archivos del dispositivo.</ContextHelp>
           </div>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={lockNow}>Bloquear ahora</Button>
+        <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={lockNow}>Bloquear ahora</Button>
       </div>
 
       <form onSubmit={replacePin} className="space-y-3 border-t pt-4">

@@ -51,9 +51,9 @@ export default function CategoryMaintenance({direction}:{direction:CategoryDirec
       </label>
       {row && (
         <fieldset disabled={busy} className="space-y-3 rounded-[var(--radius-interactive)] bg-muted/25 p-3">
-          <div className="flex gap-2">
+          <div className="flex min-w-0 gap-2">
             <IconPicker value={icon} onChange={setIcon}/>
-            <Input aria-label="Nombre de categoría" maxLength={120} value={name} onChange={e=>setName(e.target.value)}/>
+            <Input className="min-w-0 flex-1" aria-label="Nombre de categoría" maxLength={120} value={name} onChange={e=>setName(e.target.value)}/>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={()=>void save()}>Guardar cambios</Button>

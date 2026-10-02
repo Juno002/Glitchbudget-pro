@@ -36,10 +36,10 @@ export default function AutoLockSettings() {
 
   return (
     <div className="space-y-3 rounded-[var(--radius-interactive)] border bg-card p-3 text-sm shadow-[var(--shadow-control)]" data-auto-lock-settings="prisma" aria-label="Configurar bloqueo automático">
-      <label className="flex items-start justify-between gap-4">
-        <span className="flex items-start gap-3">
+      <label className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <span className="flex min-w-0 items-start gap-3">
           <TimerReset className="mt-0.5 h-4 w-4 shrink-0" />
-          <span className="flex items-center gap-1">
+          <span className="flex min-w-0 flex-wrap items-center gap-1">
             <span className="block font-medium">Bloqueo automático</span>
             <ContextHelp label="Acerca del bloqueo automático">Bloquea la interfaz tras un período sin actividad y también comprueba el tiempo transcurrido al volver desde segundo plano.</ContextHelp>
           </span>
@@ -49,7 +49,7 @@ export default function AutoLockSettings() {
           checked={active}
           onChange={event => configureAutoLock(event.target.checked ? 5 : null)}
           aria-label="Activar bloqueo automático"
-          className="mt-1 h-5 w-5"
+          className="h-5 w-5 shrink-0 self-end sm:mt-1 sm:self-auto"
         />
       </label>
 

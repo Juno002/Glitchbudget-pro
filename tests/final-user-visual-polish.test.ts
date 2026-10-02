@@ -39,16 +39,16 @@ test('final visual polish keeps non-obvious financial meaning available on deman
   assert.match(help, /data-context-help=\{displayLabel\}/);
 });
 
-test('final visual polish keeps settings navigation in one scrollable row', () => {
+test('final visual polish uses a compact mobile settings selector and full desktop tabs', () => {
   const settings = source('src/components/layout/settings-dialog.tsx');
 
-  assert.match(settings, /flex-nowrap/);
-  assert.match(settings, /overflow-x-auto/);
-  assert.match(settings, /shrink-0/);
-  assert.match(settings, /gap-0\.5/);
-  assert.match(settings, /lg:justify-between/);
-  assert.match(settings, /px-2 text-xs/);
-  assert.doesNotMatch(settings, /flex-wrap justify-start/);
+  assert.match(settings, /data-settings-mobile-navigation="prisma"/);
+  assert.match(settings, /className="mt-3 lg:hidden"/);
+  assert.match(settings, /hidden h-auto w-full justify-between/);
+  assert.match(settings, /lg:flex/);
+  assert.match(settings, /shrink-0 rounded-\[var\(--radius-interactive\)\]/);
+  assert.doesNotMatch(settings, /min-w-0 flex-1/);
+  assert.doesNotMatch(settings, /overflow-x-auto/);
 });
 
 test('final visual polish allows concise empty states without duplicating labels', () => {

@@ -25,6 +25,10 @@ test('20.9.8 keeps dialogs inside the visible viewport and device safe areas', (
   assert.match(alertDialog, /viewport-dialog/);
   assert.match(sheet, /viewport-sheet/);
   assert.match(viewport, /window\.visualViewport/);
+  assert.match(viewport, /viewport\?\.width/);
+  assert.match(viewport, /viewport\?\.offsetLeft/);
+  assert.match(css, /overflow-x: hidden/);
+  assert.match(css, /scrollbar-gutter: stable/);
 });
 
 test('20.9.8 defines coarse-pointer touch targets without enlarging checkbox radio or switch glyphs', () => {
@@ -37,6 +41,8 @@ test('20.9.8 defines coarse-pointer touch targets without enlarging checkbox rad
   assert.match(css, /min-height: 44px/);
   assert.match(css, /min-width: 44px/);
   assert.match(css, /not\(\[role='checkbox'\]\)/);
+  assert.match(css, /input:not\(\[type='checkbox'\]\):not\(\[type='radio'\]\):not\(\[type='range'\]\):not\(\[type='hidden'\]\)/);
+  assert.match(css, /textarea/);
   assert.match(radio, /after:-inset-3\.5/);
   assert.match(checkbox, /after:-inset-3\.5/);
   assert.match(toggle, /after:-inset-y-2\.5/);

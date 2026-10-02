@@ -1,10 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Monitor } from 'lucide-react';
+import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Monitor, X } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -43,6 +43,8 @@ const SETTINGS_SECTIONS = [
   ['about', 'Acerca de'],
 ] as const;
 
+type SettingsSection = (typeof SETTINGS_SECTIONS)[number][0];
+
 export function SettingsDialog() {
   const {
     theme, setTheme,
@@ -61,6 +63,7 @@ export function SettingsDialog() {
   const [baseAmount, setBaseAmount] = useState(String((baseIncome?.amount || 0) / 100));
   const [baseCurrencyDraft, setBaseCurrencyDraft] = useState(currency);
   const [automationSummary, setAutomationSummary] = useState<LocalAutomationSummary>({ templates:0, savedFilters:0, rules:0 });
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general');
   useEffect(() => setBaseCurrencyDraft(currency), [currency]);
 
   const refreshAutomationSummary = useCallback(() => {
@@ -95,20 +98,50 @@ export function SettingsDialog() {
           {isWorking ? <Loader className="animate-spin" /> : <Settings className="h-4 w-4" />}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-4xl" data-settings-prisma="true">
-        <DialogHeader>
-          <DialogTitle className="font-display text-2xl font-normal">Ajustes</DialogTitle>
-          <DialogDescription className="sr-only">Configura preferencias, seguridad y datos de Prisma.</DialogDescription>
-        </DialogHeader>
+      <DialogContent className="overflow-x-hidden sm:max-w-4xl [&>[data-dialog-close=true]]:hidden" data-settings-prisma="true">
+        <Tabs
+          value={activeSection}
+          className="min-w-0"
+          onValueChange={value => {
+            const section=value as SettingsSection;
+            setActiveSection(section);
+            if (section === 'automation') refreshAutomationSummary();
+          }}
+        >
+          <div className="sticky top-0 z-20 -mx-[var(--space-card)] -mt-[var(--space-card)] mb-5 border-b border-[var(--border-subtle)] bg-[hsl(var(--surface-modal))] px-[var(--space-card)] pb-3 pt-[var(--space-card)]">
+            <DialogHeader className="pr-12">
+              <DialogTitle className="font-display text-2xl font-normal">Ajustes</DialogTitle>
+              <DialogDescription className="sr-only">Configura preferencias, seguridad y datos de Prisma.</DialogDescription>
+            </DialogHeader>
+            <DialogClose asChild>
+              <Button type="button" variant="ghost" size="icon" aria-label="Cerrar ajustes" className="absolute right-2 top-2">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </DialogClose>
 
-        <Tabs defaultValue="general" className="space-y-5" onValueChange={value => { if (value === 'automation') refreshAutomationSummary(); }}>
-          <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-0.5 overflow-x-auto rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)] lg:justify-between" data-settings-navigation="prisma">
-            {SETTINGS_SECTIONS.map(([value, label]) => (
-              <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] px-2 text-xs">{label}</TabsTrigger>
-            ))}
-          </TabsList>
+            <div className="mt-3 lg:hidden">
+              <NativeSelect
+                aria-label="Sección de ajustes"
+                value={activeSection}
+                onChange={event => {
+                  const section=event.target.value as SettingsSection;
+                  setActiveSection(section);
+                  if (section === 'automation') refreshAutomationSummary();
+                }}
+                data-settings-mobile-navigation="prisma"
+              >
+                {SETTINGS_SECTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              </NativeSelect>
+            </div>
 
-          <TabsContent value="general" className="space-y-5">
+            <TabsList className="mt-3 hidden h-auto w-full justify-between gap-0.5 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)] lg:flex" data-settings-navigation="prisma">
+              {SETTINGS_SECTIONS.map(([value, label]) => (
+                <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] px-2 text-xs">{label}</TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+
+          <TabsContent value="general" className="min-w-0 space-y-5">
             <SectionHeader title="General" />
             <form className="max-w-sm rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-3" onSubmit={e => { e.preventDefault(); void setBaseCurrency(baseCurrencyDraft); }}>
               <div className="flex items-center gap-1">
@@ -141,12 +174,12 @@ export function SettingsDialog() {
             </label>
           </TabsContent>
 
-          <TabsContent value="finance" className="space-y-6">
+          <TabsContent value="finance" className="min-w-0 space-y-6">
             <SectionHeader title="Finanzas" />
 
             <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-2">
-              <div className="flex items-center gap-1">
-                <label className="flex items-center gap-2 text-sm font-medium">
+              <div className="flex min-w-0 flex-wrap items-center gap-1">
+                <label className="flex min-w-0 items-center gap-2 text-sm font-medium">
                   <input
                     type="checkbox"
                     checked={preventNegativeAccountBalance}
@@ -176,7 +209,7 @@ export function SettingsDialog() {
               <h3 className="font-semibold">Cierre de período</h3>
               <RadioGroup value={rolloverStrategy} onValueChange={value => setRolloverStrategy(value as typeof rolloverStrategy)} className="grid gap-3 md:grid-cols-3">
                 <Label htmlFor="roll-reset" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                  <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Resetear</div>
+                  <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Restablecer</div>
                   <p className="mt-2 text-xs text-muted-foreground">Empieza el siguiente período con los límites base.</p>
                 </Label>
                 <Label htmlFor="roll-surplus" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
@@ -226,13 +259,13 @@ export function SettingsDialog() {
             </div>
           </TabsContent>
 
-          <TabsContent value="categories" className="space-y-6">
+          <TabsContent value="categories" className="min-w-0 space-y-6">
             <SectionHeader title="Categorías" />
             <ExpenseCategoryManager />
             <IncomeCategoryManager />
           </TabsContent>
 
-          <TabsContent value="automation" className="space-y-6">
+          <TabsContent value="automation" className="min-w-0 space-y-6">
             <SectionHeader title="Automatización" />
 
             <div className="grid gap-3 md:grid-cols-3" data-local-automation-order="templates-saved-filters-rules">
@@ -256,19 +289,19 @@ export function SettingsDialog() {
             <TransactionRuleManager onRuleCountChange={handleRuleCountChange} />
           </TabsContent>
 
-          <TabsContent value="privacy" className="space-y-5">
+          <TabsContent value="privacy" className="min-w-0 space-y-5">
             <SectionHeader title="Privacidad y seguridad" />
             <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] text-sm space-y-4">
-              <label className="flex items-start justify-between gap-4">
-                <span>
-                  <span className="flex items-center gap-1 font-medium">Ocultar importes <ContextHelp label="Acerca de ocultar importes">Oculta cantidades monetarias en las superficies principales. No cifra los datos almacenados ni las copias.</ContextHelp></span>
+              <label className="flex min-w-0 items-start justify-between gap-4">
+                <span className="min-w-0">
+                  <span className="flex min-w-0 flex-wrap items-center gap-1 font-medium">Ocultar importes <ContextHelp label="Acerca de ocultar importes">Oculta cantidades monetarias en las superficies principales. No cifra los datos almacenados ni las copias.</ContextHelp></span>
                 </span>
                 <input
                   type="checkbox"
                   checked={balancesHidden}
                   onChange={event => setBalancesHidden(event.target.checked)}
                   aria-label="Ocultar importes"
-                  className="mt-1 h-5 w-5"
+                  className="mt-1 h-5 w-5 shrink-0"
                 />
               </label>
               <div className="border-t pt-4">
@@ -278,7 +311,7 @@ export function SettingsDialog() {
             </div>
           </TabsContent>
 
-          <TabsContent value="data" className="space-y-6">
+          <TabsContent value="data" className="min-w-0 space-y-6">
             <SectionHeader title="Datos y copias" />
             <div className="max-w-md"><PersistentStorageSettings /></div>
             <div className="max-w-md"><OpfsBackupDialog /></div>
@@ -300,7 +333,7 @@ export function SettingsDialog() {
             </div>
           </TabsContent>
 
-          <TabsContent value="appearance" className="space-y-5">
+          <TabsContent value="appearance" className="min-w-0 space-y-5">
             <SectionHeader title="Apariencia" />
             <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
@@ -318,7 +351,7 @@ export function SettingsDialog() {
             </RadioGroup>
           </TabsContent>
 
-          <TabsContent value="about" className="space-y-5">
+          <TabsContent value="about" className="min-w-0 space-y-5">
             <SectionHeader title="Acerca de" />
             <div className="max-w-sm"><HelpDialog /></div>
           </TabsContent>
