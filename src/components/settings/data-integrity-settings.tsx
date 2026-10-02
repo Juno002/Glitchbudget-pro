@@ -34,6 +34,7 @@ const reasonLabels: Record<DebtPaymentIntegrityIssue['reasons'][number], string>
   missing_debt: 'deuda o tarjeta inexistente',
   missing_account: 'cuenta inexistente',
   before_account_start: 'fecha anterior al inicio de la cuenta',
+  invalid_shape: 'estructura del pago inválida',
 };
 
 function IntegrityRow({
