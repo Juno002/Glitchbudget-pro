@@ -9,11 +9,14 @@ export function ContextHelp({
   label,
   children,
   className,
+  contextLabel,
 }: {
   label: string;
   children: ReactNode;
   className?: string;
+  contextLabel?: string;
 }) {
+  const displayLabel=contextLabel ?? label;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -33,10 +36,11 @@ export function ContextHelp({
         sideOffset={6}
         className="w-72 text-xs leading-relaxed"
         showCloseButton
-        closeLabel={'Cerrar explicación de '+label}
-        data-context-help={label}
+        closeLabel={'Cerrar explicación de '+displayLabel}
+        data-context-help={displayLabel}
       >
-        <div className="text-muted-foreground">{children}</div>
+        <p className="font-semibold text-foreground">{displayLabel}</p>
+        <div className="mt-1 text-muted-foreground">{children}</div>
       </PopoverContent>
     </Popover>
   );
