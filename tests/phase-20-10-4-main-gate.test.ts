@@ -78,7 +78,7 @@ test('20.10.4 production E2E covers every required visible surface plus offline 
     "#theme-dark",
     "#theme-light",
     'data-app-lock-settings="prisma"',
-    "clickButtonExpression('Copias de Seguridad')",
+    "clickButtonExpression('Copias de seguridad')",
     'data-category-manager="prisma"',
     'data-achievements-prisma="true"',
     'externalRequests.length',
