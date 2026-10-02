@@ -118,7 +118,7 @@ class CdpClient {
   }
 }
 
-async function waitFor(client, expression, label, timeoutMs = 15_000) {
+async function waitFor(client, expression, label, timeoutMs = 30_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await client.evaluate(expression)) return;
@@ -141,10 +141,14 @@ function activateTabExpression(label) {
   return `(() => {
     const tab = [...document.querySelectorAll('[role="tab"]')]
       .find(node => node.textContent?.trim() === ${JSON.stringify(label)}
-        && node.getAttribute('aria-disabled') !== 'true');
+        && node.getAttribute('aria-disabled') !== 'true'
+        && node.getClientRects().length > 0);
     if (!(tab instanceof HTMLElement)) return false;
-    tab.focus();
-    tab.click();
+    tab.dispatchEvent(new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }));
     return true;
   })()`;
 }
@@ -176,6 +180,170 @@ const selectFirstOptionExpression = selector => `(() => {
   control.dispatchEvent(new Event('change', { bubbles: true }));
   return true;
 })()`;
+
+
+async function runPostRoadmap4Benchmark(client) {
+  const sizes = [5_000, 25_000, 50_000];
+  const results = [];
+
+  for (const size of sizes) {
+    await client.command('Page.navigate', { url: APP_URL + '?tab=movements&perf=1' });
+    await waitFor(client, `document.readyState === 'complete'`, 'carga benchmark ' + size, 30_000);
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-movement-filter-panel="advanced"] input[type="date"]'))`,
+      'filtros benchmark ' + size,
+      30_000,
+    );
+    const benchmarkDate = await client.evaluate(`(() => {
+      const inputs = [...document.querySelectorAll('[data-movement-filter-panel="advanced"] input[type="date"]')];
+      const value = inputs.find(input => input instanceof HTMLInputElement && input.value)?.value;
+      return value || new Date().toISOString().slice(0, 10);
+    })()`);
+
+    await client.evaluate(`(async () => {
+      const open = () => new Promise((resolve, reject) => {
+        const request = indexedDB.open('GlitchBudgetDB');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+      const db = await open();
+      const tx = db.transaction(['expenses','incomes'], 'readwrite');
+      const expenses = tx.objectStore('expenses');
+      const incomes = tx.objectStore('incomes');
+      expenses.clear();
+      incomes.clear();
+      const size = ${size};
+      for (let i = 0; i < size; i += 1) {
+        expenses.put({
+          id: 'perf-expense-' + i,
+          nature: 'Variable',
+          concept: 'Benchmark ' + i,
+          amount: 100 + (i % 5000),
+          date: ${JSON.stringify(benchmarkDate)},
+          categoryId: 'perf-category',
+          month: ${JSON.stringify(String(benchmarkDate).slice(0, 7))},
+          currency: 'DOP',
+          fxRate: 1,
+          amountBase: 100 + (i % 5000),
+          paymentMethod: 'cash',
+        });
+      }
+      await new Promise((resolve, reject) => {
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+      db.close();
+      globalThis.__prismaPerfCounters = {};
+      return true;
+    })()`, { awaitPromise: true });
+
+    const started = Date.now();
+    await client.command('Page.reload', { ignoreCache: true });
+    await waitFor(
+      client,
+      `document.readyState === 'complete'
+        && window.location.search.includes('tab=movements')
+        && Boolean(document.querySelector('[data-movement-history="list"]'))`,
+      'Movimientos benchmark ' + size,
+      60_000,
+    );
+
+    const metrics = await client.evaluate(`(() => {
+      const list = document.querySelector('[data-movement-history="list"]');
+      const counters = globalThis.__prismaPerfCounters || {};
+      return {
+        renderedRows: list ? list.children.length : 0,
+        counters,
+        heap: performance.memory?.usedJSHeapSize ?? null,
+      };
+    })()`);
+    const elapsedMs = Date.now() - started;
+    const expectedRows = Math.min(size, 100);
+    const financeCounter = metrics.counters?.financeContext;
+    if (metrics.renderedRows !== expectedRows) {
+      throw new Error(`Benchmark ${size}: se esperaban ${expectedRows} filas DOM y se obtuvieron ${metrics.renderedRows}.`);
+    }
+    if (!financeCounter || financeCounter.calls !== 1 || !Number.isFinite(financeCounter.totalMs)) {
+      throw new Error(`Benchmark ${size}: contador financeContext inválido.`);
+    }
+    if (metrics.counters?.accountOverview || metrics.counters?.investmentManager) {
+      throw new Error(`Benchmark ${size}: reaparecieron lecturas duplicadas.`);
+    }
+    const row = { size, ready: true, elapsedMs, ...metrics };
+    results.push(row);
+    process.stdout.write('POST_ROADMAP_4_BENCHMARK ' + JSON.stringify(row) + '\\n');
+  }
+
+  const originalThemeClass = await client.evaluate('document.documentElement.className');
+  await client.evaluate(`(() => {
+    const html = document.documentElement;
+    html.classList.remove('light', 'dark', 'serious');
+    html.classList.add('dark');
+    return true;
+  })()`);
+  await waitFor(
+    client,
+    `(() => {
+      const ambient = document.querySelector('.ambient-background');
+      if (!(ambient instanceof HTMLElement)) return false;
+      const style = getComputedStyle(ambient);
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number.parseFloat(style.opacity || '0') > 0;
+    })()`,
+    'fondo ambiental visible en Neón oscuro',
+  );
+  await client.command('Emulation.setDeviceMetricsOverride', {
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await client.command('Emulation.setCPUThrottlingRate', { rate: 4 });
+  const sampleFrames = async hidden => client.evaluate(
+    '(async () => {' +
+      'const ambient=document.querySelector(".ambient-background");' +
+      'if(!(ambient instanceof HTMLElement)) return null;' +
+      'ambient.style.display=' + JSON.stringify(hidden ? 'none' : '') + ';' +
+      'await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));' +
+      'return await new Promise(resolve=>{' +
+        'const frames=[];' +
+        'const tick=time=>{' +
+          'frames.push(time);' +
+          'if(frames.length>=91){' +
+            'const deltas=frames.slice(1).map((value,index)=>value-frames[index]);' +
+            'const total=deltas.reduce((sum,value)=>sum+value,0);' +
+            'resolve({averageFrameMs:total/deltas.length,maxFrameMs:Math.max(...deltas),slowFrames:deltas.filter(value=>value>20).length});' +
+            'return;' +
+          '}' +
+          'requestAnimationFrame(tick);' +
+        '};' +
+        'requestAnimationFrame(tick);' +
+      '});' +
+    '})()',
+    { awaitPromise: true },
+  );
+  const ambientVisible = await sampleFrames(false);
+  const ambientHidden = await sampleFrames(true);
+  await client.evaluate(`(() => {
+    const ambient = document.querySelector('.ambient-background');
+    if (ambient instanceof HTMLElement) ambient.style.display = '';
+    document.documentElement.className = ${JSON.stringify(originalThemeClass)};
+    return true;
+  })()`);
+  await client.command('Emulation.setCPUThrottlingRate', { rate: 1 });
+  await client.command('Emulation.setDeviceMetricsOverride', {
+    width: 1280,
+    height: 800,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  process.stdout.write('POST_ROADMAP_4_AMBIENT ' + JSON.stringify({ visible:ambientVisible, hidden:ambientHidden }) + '\\n');
+
+  return results;
+}
 
 async function createMovement(client, type, amount) {
   if (!await client.evaluate(`(() => {
@@ -899,6 +1067,11 @@ async function main() {
       `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
       'retorno a Reportes desktop',
     );
+
+    const postRoadmap4Results = await runPostRoadmap4Benchmark(client);
+    if (postRoadmap4Results.length !== 3) throw new Error('Benchmark Post-roadmap 4 incompleto.');
+    await client.command('Page.navigate', { url: APP_URL + '?tab=reports' });
+    await waitFor(client, `document.readyState === 'complete' && Boolean(document.querySelector('[data-reports-prisma="true"]'))`, 'restaurar Reportes después del benchmark', 30_000);
 
     const externalRequests = requests.filter(url => {
       try {

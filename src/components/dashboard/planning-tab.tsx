@@ -179,7 +179,7 @@ export default function PlanningTab() {
     expenseCategories,
     loading,
   } = useFinances();
-  const { planningTab, setPlanningTab } = useTabs();
+  const { planningTab, navigate } = useTabs();
   const [showAll, setShowAll] = useState(false);
   const selection = useBudgetPeriod();
   const budgetPeriod = selection.range;
@@ -211,7 +211,7 @@ export default function PlanningTab() {
     <div className="space-y-7 pb-24 md:pb-8" data-plan-prisma="true">
       <PageHeader title={<><span>Plan</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} description={<>Presupuestos, metas y movimientos planificados · <strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong></>} />
 
-      <Tabs value={planningTab} onValueChange={value => setPlanningTab(value as typeof planningTab)} className="w-full">
+      <Tabs value={planningTab} onValueChange={value => navigate({ area:'planning', planningTab:value as typeof planningTab })} className="w-full">
         <TabsList className="mb-6 grid h-auto w-full grid-cols-3 gap-1 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-card)]" data-plan-navigation="prisma">
           {PLAN_SECTIONS.map(section => (
             <TabsTrigger key={section.value} value={section.value} className="min-h-10 whitespace-nowrap rounded-[var(--radius-interactive)] text-xs font-semibold">

@@ -1,6 +1,6 @@
 'use client';
 import { selectAccountOverviewReadModel } from '@/domain/ledger';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { accountBalance, accountEntries } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
@@ -13,13 +13,30 @@ import { ActionMenu, DetailHeader } from '@/components/finance-ui';
 import { Pencil, Settings2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useFinances } from '@/contexts/finance-context';
-import { useAccountOverviewData } from '@/hooks/use-finance-queries';
 import { useAccountManagement } from '@/hooks/use-account-management';
 
 export default function AccountsOverview() {
   const money = usePrivateCurrency();
-  const { currency } = useFinances();
-  const data = useAccountOverviewData();
+  const {
+    currency,
+    accounts,
+    accountTransfers,
+    incomes,
+    expenses,
+    debtPayments,
+    debts,
+  } = useFinances();
+  const data = useMemo(() => {
+    if (!accounts || !accountTransfers || !incomes || !expenses || !debtPayments || !debts) return undefined;
+    return {
+      accounts,
+      transfers: accountTransfers,
+      incomes,
+      expenses,
+      payments: debtPayments,
+      debts,
+    };
+  }, [accounts, accountTransfers, incomes, expenses, debtPayments, debts]);
   const management = useAccountManagement(data?.accounts || [], currency);
   const [selected, setSelected] = useState('');
   const {

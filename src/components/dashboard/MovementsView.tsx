@@ -31,6 +31,8 @@ import {
   type SavedTransactionFilter,
 } from '@/lib/saved-transaction-filters';
 
+const MOVEMENT_PAGE_SIZE = 100;
+
 type UnifiedItem = FilterableMovement & {
   detail?: string;
   label: string;
@@ -63,6 +65,7 @@ export default function MovementsView() {
   const [savedFilters,setSavedFilters]=useState<SavedTransactionFilter[]>([]);
   const [selectedSavedId,setSelectedSavedId]=useState('');
   const [savedFilterName,setSavedFilterName]=useState('');
+  const [visibleCount,setVisibleCount]=useState(MOVEMENT_PAGE_SIZE);
 
   const [modalOpen,setModalOpen]=useState(false);
   const [editingExpense,setEditingExpense]=useState<Expense|undefined>();
@@ -140,6 +143,12 @@ export default function MovementsView() {
       (item.label+' '+(item.detail||'')+' '+(item.labels||[]).join(' ')).toLocaleLowerCase('es').includes(query)
     );
   },[allItems,filters,search]);
+
+  const visibleItems=useMemo(()=>items.slice(0,visibleCount),[items,visibleCount]);
+
+  useEffect(()=>{
+    setVisibleCount(MOVEMENT_PAGE_SIZE);
+  },[filters,search]);
 
   const presentCategories=useMemo(()=>{
     const ids=new Set(allItems.map(item=>item.categoryId).filter((id):id is string=>Boolean(id)));
@@ -364,7 +373,7 @@ export default function MovementsView() {
         <EmptyState title="No hay movimientos" description="No hay movimientos registrados que coincidan con estos filtros." />
       ) : (
         <div className="overflow-hidden rounded-[var(--radius-card)] border bg-card shadow-[var(--shadow-card)]" data-movement-history="list">
-          {items.map(item=>{
+          {visibleItems.map(item=>{
             const category=getCategoryInfo(item.categoryId||'');
             const Icon=category?.icon;
             const isIncome=item.kind==='income';
@@ -397,6 +406,18 @@ export default function MovementsView() {
           })}
         </div>
       )}
+      {visibleCount < items.length ? (
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="outline"
+            data-movement-show-more="true"
+            onClick={()=>setVisibleCount(count=>Math.min(items.length,count+MOVEMENT_PAGE_SIZE))}
+          >
+            Mostrar {Math.min(MOVEMENT_PAGE_SIZE,items.length-visibleCount)} más
+          </Button>
+        </div>
+      ) : null}
 
       <Dialog open={!!detailItem} onOpenChange={open=>{if(!open)setDetailItem(null);}}>
         <DialogContent className="sm:max-w-md">
