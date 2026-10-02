@@ -187,7 +187,7 @@ export default function OpfsBackupDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
           <UploadCloud className="mr-2 h-4 w-4" />
-          <span>Copias de Seguridad</span>
+          <span>Copias de seguridad</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="overflow-x-hidden sm:max-w-2xl" data-backups-prisma="true">
@@ -203,7 +203,7 @@ export default function OpfsBackupDialog() {
               ) : (
                 <FilePlus className="mr-2 h-4 w-4" />
               )}
-              Crear Copia Local
+              Crear copia local
             </Button>
              <Button disabled={isWorking || previewingImport} variant="outline" onClick={() => fileInputRef.current?.click()} className="w-full sm:w-auto">
                 <FileUp className="mr-2 h-4 w-4" />
