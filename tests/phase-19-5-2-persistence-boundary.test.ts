@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { ESLint } from 'eslint';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -78,14 +79,39 @@ test('finance hooks subscribe through the non-React query layer', () => {
   }
 });
 
-test('ESLint guards direct persistence imports across React surfaces', () => {
-  const config = JSON.parse(readFileSync(path.join(root, '.eslintrc.json'), 'utf8'));
-  const serialized = JSON.stringify(config);
+test('ESLint guards direct persistence imports across React surfaces', async () => {
+  const eslint = new ESLint({ cwd: root });
+  const cases = [
+    {
+      file: 'src/components/__eslint-boundary__.tsx',
+      source: "import { db } from '@/lib/db';\nvoid db;\n",
+      message: /React surfaces must consume queries\/services/,
+    },
+    {
+      file: 'src/app/__eslint-boundary__.tsx',
+      source: "import Dexie from 'dexie';\nvoid Dexie;\n",
+      message: /React surfaces must not depend on Dexie/,
+    },
+    {
+      file: 'src/hooks/__eslint-boundary__.ts',
+      source: "import { db } from '@/lib/db';\nvoid db;\n",
+      message: /Hooks must consume non-React queries\/services/,
+    },
+    {
+      file: 'src/contexts/__eslint-boundary__.tsx',
+      source: "import { db } from '@/lib/db';\nvoid db;\n",
+      message: /React surfaces must consume queries\/services/,
+    },
+  ];
 
-  assert.match(serialized, /src\/components/);
-  assert.match(serialized, /src\/app/);
-  assert.match(serialized, /src\/hooks/);
-  assert.match(serialized, /src\/contexts/);
-  assert.match(serialized, /@\/lib\/db/);
-  assert.match(serialized, /dexie/);
+  for (const entry of cases) {
+    const [result] = await eslint.lintText(entry.source, {
+      filePath: path.join(root, entry.file),
+    });
+    const restricted = result.messages.filter(message => message.ruleId === 'no-restricted-imports');
+    assert.ok(
+      restricted.some(message => entry.message.test(message.message)),
+      `${entry.file} must retain its no-restricted-imports boundary`,
+    );
+  }
 });

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { ESLint } from 'eslint';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -88,14 +89,31 @@ test('settings input validation belongs to the non-React settings service', () =
   assert.doesNotMatch(source, /from\s+['"]react/);
 });
 
-test('ESLint permanently guards the React-free domain boundary', () => {
-  const config = JSON.parse(readFileSync(path.join(root, '.eslintrc.json'), 'utf8'));
-  const serialized = JSON.stringify(config);
+test('ESLint permanently guards the React-free domain boundary', async () => {
+  const eslint = new ESLint({ cwd: root });
+  const source = [
+    "import React from 'react';",
+    "import component from '@/components/example';",
+    'void React;',
+    'void component;',
+  ].join('\n');
 
-  assert.match(serialized, /src\/domain/);
-  assert.match(serialized, /src\/policies/);
-  assert.match(serialized, /Domain and policy modules must remain React-free/);
-  assert.match(serialized, /@\/components\/\*/);
-  assert.match(serialized, /@\/hooks\/\*/);
-  assert.match(serialized, /@\/contexts\/\*/);
+  for (const file of [
+    'src/domain/__eslint-boundary__.ts',
+    'src/policies/__eslint-boundary__.ts',
+  ]) {
+    const [result] = await eslint.lintText(source, {
+      filePath: path.join(root, file),
+    });
+    const restricted = result.messages.filter(message => message.ruleId === 'no-restricted-imports');
+
+    assert.ok(
+      restricted.some(message => /Domain and policy modules must remain React-free/.test(message.message)),
+      `${file} must reject React imports`,
+    );
+    assert.ok(
+      restricted.some(message => /components\/example/.test(message.message)),
+      `${file} must reject UI-layer imports`,
+    );
+  }
 });
