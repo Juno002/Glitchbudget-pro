@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
 import { normalizeCurrencyCode, requireCurrencyCode } from '../domain/currency';
+import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '../domain/data-integrity';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
 const commonAccountFields = {
@@ -60,9 +61,22 @@ export function requirePreservedAccountFunds(accounts: Account[], before: Accoun
     }
   }
 }
-export const accountTables = [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments];
+export const accountTables = [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts];
 export async function readAccountSnapshot(): Promise<AccountSnapshot> {
-  return { incomes: await db.incomes.toArray(), expenses: await db.expenses.toArray(), payments: await db.debt_payments.toArray(), transfers: await db.account_transfers.toArray() };
+  const [incomes, expenses, rawPayments, transfers, accounts, debts] = await Promise.all([
+    db.incomes.toArray(),
+    db.expenses.toArray(),
+    db.debt_payments.toArray(),
+    db.account_transfers.toArray(),
+    db.accounts.toArray(),
+    db.debts.toArray(),
+  ]);
+  const payments = classifyDebtPaymentIntegrity(
+    rawPayments as unknown as RawDebtPayment[],
+    debts,
+    accounts,
+  ).valid;
+  return { incomes, expenses, payments, transfers };
 }
 export async function requireAccount(id: string | undefined, movementDate: string) {
   if (!id) throw new Error('Selecciona una cuenta del movimiento.');
@@ -131,10 +145,21 @@ export const debtBalance = (debt: import('./db').Debt, expenses: Expense[], paym
 };
 export async function reconcileDebt(id: string, balance: number) {
   if (!Number.isSafeInteger(balance)) throw new Error('Introduce un saldo válido.');
-  await db.transaction('rw', db.debts, db.expenses, db.debt_payments, async () => {
+  await db.transaction('rw', db.debts, db.expenses, db.debt_payments, db.accounts, async () => {
     const debt = await db.debts.get(id);
     if (!debt || !isCreditCardDebt(debt)) throw new Error('Tarjeta no encontrada.');
-    const recorded = debtBalance({ ...debt, openingAdjustment: 0 }, await db.expenses.toArray(), await db.debt_payments.toArray());
+    const [expenses, rawPayments, debts, accounts] = await Promise.all([
+      db.expenses.toArray(),
+      db.debt_payments.toArray(),
+      db.debts.toArray(),
+      db.accounts.toArray(),
+    ]);
+    const payments = classifyDebtPaymentIntegrity(
+      rawPayments as unknown as RawDebtPayment[],
+      debts,
+      accounts,
+    ).valid;
+    const recorded = debtBalance({ ...debt, openingAdjustment: 0 }, expenses, payments);
     const openingAdjustment = balance - recorded;
     if (!Number.isSafeInteger(openingAdjustment)) throw new Error('El saldo supera el monto admitido.');
     await db.debts.update(id, { openingAdjustment });
