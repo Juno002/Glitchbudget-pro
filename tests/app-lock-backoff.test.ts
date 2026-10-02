@@ -40,6 +40,9 @@ test('App Lock runtime throttles before PBKDF2 and resets retry state after succ
   assert.ok(backoffCheck >= 0 && verifier >= 0 && backoffCheck < verifier);
   assert.match(context, /failedUnlockAttempts\.current \+= 1/);
   assert.match(context, /appLockRetryDelayMs\(failedUnlockAttempts\.current\)/);
+  const failedAt = context.indexOf('const failedAt = Date.now()');
+  const retryDeadline = context.indexOf('failedAt + delay');
+  assert.ok(failedAt > verifier && retryDeadline > failedAt);
   assert.match(context, /failedUnlockAttempts\.current = 0;[\s\S]*setUnlockBlockedUntil\(null\);[\s\S]*setLocked\(false\)/);
 });
 
