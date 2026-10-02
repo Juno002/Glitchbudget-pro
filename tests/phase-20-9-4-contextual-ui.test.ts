@@ -53,11 +53,11 @@ test('20.9.4 KPI help is reusable, dismissible and removes permanent helper rows
   const summary = source('src/components/dashboard/summary-tab.tsx');
   const help = source('src/components/finance-ui/context-help.tsx');
 
-  assert.match(summary, /<ContextHelp label=\\{'Qué significa '\\+label\\} contextLabel=\\{label\\}>/);
+  assert.ok(summary.includes("<ContextHelp label={'Qué significa '+label} contextLabel={label}>"));
   assert.match(help, /aria-label=\{label\}/);
   assert.match(help, /showCloseButton/);
-  assert.match(help, /data-context-help=\{label\}/);
-  assert.match(help, /Cerrar explicación de '\+label/);
+  assert.match(help, /data-context-help=\{displayLabel\}/);
+  assert.match(help, /Cerrar explicación de '\+displayLabel/);
   assert.match(help, /h-8 w-8/);
   assert.doesNotMatch(summary, /warning\?:string|\{warning \? \(/);
 });
