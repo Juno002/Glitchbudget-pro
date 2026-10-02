@@ -4844,14 +4844,6 @@ Contrato:
 - alinear `@types/node` con Node 22 y actualizar `package-lock.json`;
 - validar el gate completo antes de cerrar.
 
-## Pendientes sin autorizar
-
-Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
-
-- **Normalización NFC de contraseñas del backup cifrado:** cualquier cambio debe preservar compatibilidad con copias existentes, probablemente intentando la representación histórica y la normalizada durante descifrado antes de adoptar una nueva escritura.
-- **Versión futura del envelope cifrado:** decidir explícitamente si un futuro aumento del coste de exportación conserva `version: 1` o requiere `version: 2`. No cambiar el coste productivo sin el benchmark móvil representativo exigido por el contrato existente.
-- **Fragilidad de `next/font` en CI:** si vuelve a reproducirse el fallo de descarga/carga de DM Sans durante build, auditar la dependencia de red y decidir una alternativa reproducible. Un fallo aislado no autoriza cambios en esta intervención.
-
 ### Intervención 5 — Tooling aislado
 
 **Estado: pendiente.**
@@ -4859,6 +4851,14 @@ Estos puntos quedan registrados para no perderlos, pero **no autorizan implement
 - revisar/migrar ESLint como trabajo independiente;
 - ejecutar CI completo;
 - no mezclarlo con seguridad, migraciones ni backups.
+
+## Pendientes sin autorizar
+
+Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
+
+- **Normalización NFC de contraseñas del backup cifrado:** cualquier cambio debe preservar compatibilidad con copias existentes, probablemente intentando la representación histórica y la normalizada durante descifrado antes de adoptar una nueva escritura.
+- **Versión futura del envelope cifrado:** decidir explícitamente si un futuro aumento del coste de exportación conserva `version: 1` o requiere `version: 2`. No cambiar el coste productivo sin el benchmark móvil representativo exigido por el contrato existente.
+- **Fragilidad de `next/font` en CI:** si vuelve a reproducirse el fallo de descarga/carga de DM Sans durante build, auditar la dependencia de red y decidir una alternativa reproducible. Un fallo aislado no autoriza cambios en esta intervención.
 
 ## Regla de autoridad y no invención del roadmap
 
