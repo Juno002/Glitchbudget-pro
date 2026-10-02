@@ -156,7 +156,7 @@ test('current backup preserves investments and legacy v9 still imports with no i
   });
   const text=await exportDataJSON();
   const dump=JSON.parse(text);
-  assert.equal(dump.v,13);
+  assert.equal(dump.v,14);
   assert.equal(dump.investments.length,1);
   await importDataJSON(text);
   assert.equal(await db.investments.count(),1);
