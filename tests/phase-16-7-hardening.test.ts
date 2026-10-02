@@ -125,7 +125,7 @@ test('16.7 automation backup contract remains preserved under Backup 2.0',()=>{
   const backup=readFileSync(new URL('../src/lib/backup-json.ts',import.meta.url),'utf8');
   const db=readFileSync(new URL('../src/lib/db.ts',import.meta.url),'utf8');
   assert.match(backup,/const DumpV12/);
-  assert.match(backup,/CURRENT_BACKUP_FORMAT_VERSION = 13/);
+  assert.match(backup,/CURRENT_BACKUP_FORMAT_VERSION = 14/);
   assert.match(backup,/localAutomation/);
   assert.match(backup,/if \(version===11\) return DumpV11\.parse/);
   assert.match(backup,/replaceLocalAutomation/);
