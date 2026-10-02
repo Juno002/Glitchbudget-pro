@@ -256,6 +256,48 @@ async function runPostRoadmap4Benchmark(client) {
     process.stdout.write('POST_ROADMAP_4_BENCHMARK ' + JSON.stringify(row) + '\\n');
   }
 
+  await client.command('Emulation.setDeviceMetricsOverride', {
+    width: 390,
+    height: 844,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await client.command('Emulation.setCPUThrottlingRate', { rate: 4 });
+  const sampleFrames = async hidden => client.evaluate(
+    '(async () => {' +
+      'const ambient=document.querySelector(".ambient-background");' +
+      'if(!(ambient instanceof HTMLElement)) return null;' +
+      'ambient.style.display=' + JSON.stringify(hidden ? 'none' : '') + ';' +
+      'await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));' +
+      'return await new Promise(resolve=>{' +
+        'const frames=[];' +
+        'const tick=time=>{' +
+          'frames.push(time);' +
+          'if(frames.length>=91){' +
+            'const deltas=frames.slice(1).map((value,index)=>value-frames[index]);' +
+            'const total=deltas.reduce((sum,value)=>sum+value,0);' +
+            'resolve({averageFrameMs:total/deltas.length,maxFrameMs:Math.max(...deltas),slowFrames:deltas.filter(value=>value>20).length});' +
+            'return;' +
+          '}' +
+          'requestAnimationFrame(tick);' +
+        '};' +
+        'requestAnimationFrame(tick);' +
+      '});' +
+    '})()',
+    { awaitPromise: true },
+  );
+  const ambientVisible = await sampleFrames(false);
+  const ambientHidden = await sampleFrames(true);
+  await client.evaluate('(() => { const ambient=document.querySelector(".ambient-background"); if(ambient instanceof HTMLElement) ambient.style.display=""; return true; })()');
+  await client.command('Emulation.setCPUThrottlingRate', { rate: 1 });
+  await client.command('Emulation.setDeviceMetricsOverride', {
+    width: 1280,
+    height: 800,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  process.stdout.write('POST_ROADMAP_4_AMBIENT ' + JSON.stringify({ visible:ambientVisible, hidden:ambientHidden }) + '\\n');
+
   return results;
 }
 

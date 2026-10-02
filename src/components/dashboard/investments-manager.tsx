@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useInvestmentManagerData } from '@/hooks/use-finance-queries';
 import { createInvestment } from '@/lib/investments';
 import { selectInvestmentManagerRows } from '@/domain/investments';
 import { localDate } from '@/lib/finance-calculations';
 import { toCents } from '@/lib/utils';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { useFinances } from '@/contexts/finance-context';
 import { useToast } from '@/hooks/use-toast';
 import { friendlyError } from '@/lib/errors';
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,18 @@ export default function InvestmentsManager() {
   const today = localDate();
   const money = usePrivateCurrency();
   const { toast } = useToast();
-  const data = useInvestmentManagerData();
+  const { investments, accounts, accountTransfers, incomes, expenses, debtPayments } = useFinances();
+  const data = useMemo(() => {
+    if (!investments || !accounts || !accountTransfers || !incomes || !expenses || !debtPayments) return undefined;
+    return {
+      investments,
+      accounts,
+      transfers: accountTransfers,
+      incomes,
+      expenses,
+      payments: debtPayments,
+    };
+  }, [investments, accounts, accountTransfers, incomes, expenses, debtPayments]);
 
   const [open,setOpen] = useState(false);
   const [busy,setBusy] = useState(false);

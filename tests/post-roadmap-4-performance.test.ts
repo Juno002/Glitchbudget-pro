@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { test } from 'node:test';
+
+const source = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
+
+test('Post-roadmap 4 reuses FinanceContext data for accounts and investments', () => {
+  const accounts = source('src/components/dashboard/accounts-overview.tsx');
+  const investments = source('src/components/dashboard/investments-manager.tsx');
+  assert.doesNotMatch(accounts, /useAccountOverviewData/);
+  assert.doesNotMatch(investments, /useInvestmentManagerData/);
+  assert.match(accounts, /accountTransfers/);
+  assert.match(investments, /accountTransfers/);
+});
+
+test('Post-roadmap 4 caps initial movement DOM and expands progressively', () => {
+  const movements = source('src/components/dashboard/MovementsView.tsx');
+  assert.match(movements, /MOVEMENT_PAGE_SIZE = 100/);
+  assert.match(movements, /items\.slice\(0,visibleCount\)/);
+  assert.match(movements, /data-movement-show-more="true"/);
+  assert.match(movements, /Math\.min\(items\.length,count\+MOVEMENT_PAGE_SIZE\)/);
+});
+
+test('Post-roadmap 4 preserves measured browser benchmark instrumentation', () => {
+  const queries = source('src/lib/finance-queries.ts');
+  const e2e = source('scripts/e2e-smoke.mjs');
+  assert.match(queries, /__prismaPerfCounters/);
+  assert.match(e2e, /5_000, 25_000, 50_000/);
+  assert.match(e2e, /POST_ROADMAP_4_BENCHMARK/);
+  assert.match(e2e, /POST_ROADMAP_4_AMBIENT/);
+  assert.match(e2e, /setCPUThrottlingRate/);
+});
