@@ -4,7 +4,6 @@ import type { ReportRangePreset } from '@/domain/reports';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SectionHeader } from '@/components/finance-ui';
-import { cn } from '@/lib/utils';
 import { FeedbackMessage } from '@/components/finance-ui';
 
 const presets: Array<{ value:ReportRangePreset; label:string }> = [
@@ -22,8 +21,6 @@ export function ReportRangeControls({
   customEnd,
   today,
   rangeError,
-  currentLabel,
-  previousLabel,
   onPresetChange,
   onCustomStartChange,
   onCustomEndChange,
@@ -33,19 +30,13 @@ export function ReportRangeControls({
   customEnd: string;
   today: string;
   rangeError: string;
-  currentLabel: string;
-  previousLabel: string;
   onPresetChange: (value: ReportRangePreset) => void;
   onCustomStartChange: (value: string) => void;
   onCustomEndChange: (value: string) => void;
 }) {
   return (
     <section className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-card)]" aria-labelledby="range-title" data-report-range-controls="prisma">
-      <SectionHeader
-        eyebrow="Ventana analítica"
-        title={<span id="range-title">Rango</span>}
-        description="El período anterior siempre usa una ventana inmediatamente anterior de duración comparable."
-      />
+      <SectionHeader title={<span id="range-title">Rango</span>} />
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
         {presets.map(option=>(
           <Button
@@ -72,13 +63,7 @@ export function ReportRangeControls({
           </label>
         </div>
       )}
-      {rangeError ? (
-        <FeedbackMessage tone="error" description={rangeError} />
-      ) : (
-        <p className={cn('rounded-[var(--radius-interactive)] bg-muted/25 px-3 py-2 text-xs text-muted-foreground')} aria-live="polite">
-          {'Actual: '+currentLabel+' · Comparable: '+previousLabel}
-        </p>
-      )}
+      {rangeError ? <FeedbackMessage tone="error" description={rangeError} /> : null}
     </section>
   );
 }
