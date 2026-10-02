@@ -133,8 +133,8 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
   return (
     <div className="space-y-5" data-rules-prisma="true">
       <div className="space-y-4 rounded-[var(--radius-card)] border bg-card p-5 shadow-[var(--shadow-card)]">
-        <div className="flex items-center gap-1">
-          <h3 className="font-display text-xl font-normal">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
+          <h3 className="min-w-0 break-words font-display text-xl font-normal">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
           <ContextHelp label="Cómo se aplican las reglas">Por defecto las reglas sugieren clasificación. La aplicación automática se habilita por regla.</ContextHelp>
         </div>
 
@@ -179,7 +179,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
           </label>
 
           <label className="space-y-1 text-sm">
-            <span className="flex items-center gap-1 font-medium">Sugerir necesidad <ContextHelp label="Acerca de necesidad">Solo se aplica a gastos.</ContextHelp></span>
+            <span className="flex min-w-0 flex-wrap items-center gap-1 font-medium">Sugerir necesidad <ContextHelp label="Acerca de necesidad">Solo se aplica a gastos.</ContextHelp></span>
             <select
               aria-label="Necesidad sugerida"
               value={necessity}
@@ -201,7 +201,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
               aria-label="Aplicar automáticamente esta regla"
               className="mt-1"
             />
-            <span className="flex items-center gap-1">
+            <span className="flex min-w-0 flex-wrap items-center gap-1">
               <span className="block font-medium">Aplicar automáticamente</span>
               <ContextHelp label="Acerca de la aplicación automática">Si varias reglas automáticas coinciden a la vez, el registro rápido no elegirá una por su cuenta.</ContextHelp>
             </span>
@@ -220,7 +220,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
       </div>
 
       <div className="space-y-3">
-        <div className="flex items-center gap-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-1">
           <h3 className="font-display text-xl font-normal">Reglas locales</h3>
           <ContextHelp label="Orden de las reglas">El orden se conserva y define cómo se presentan las coincidencias.</ContextHelp>
         </div>
@@ -243,7 +243,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{rule.name}</p>
+                    <p className="min-w-0 break-words font-medium">{rule.name}</p>
                     <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
                       {rule.enabled ? 'Activa' : 'Desactivada'}
                     </span>
@@ -253,7 +253,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
                       </span>
                     )}
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 break-words text-sm text-muted-foreground">
                     Si descripción contiene “{rule.condition.value}” → {outputs}
                   </p>
                 </div>
