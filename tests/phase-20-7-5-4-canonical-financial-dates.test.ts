@@ -119,7 +119,7 @@ test('20.7.5.4 legacy backup datetime is normalized once on restore and re-expor
   const exported = JSON.parse(await exportDataJSON());
   const payment = exported.debtPayments.find((row: { id: string }) => row.id === 'payment');
   assert.equal(payment.date, '2026-09-30');
-  assert.equal(exported.v, 13);
+  assert.equal(exported.v, 14);
   assert.equal(exported.schemaVersion, 15);
 });
 
