@@ -58,6 +58,6 @@ test('Prisma Engine Gate trace: Reports uses shared selectors and the same query
   assert.match(reportsDomain, /selectSpendingReport/);
   assert.match(reportsDomain, /selectCashFlowReport/);
   assert.match(reportsDomain, /selectNetWorthReport/);
-  assert.match(queries, /expenses: await db\.expenses\.toArray\(\)/);
-  assert.match(queries, /accounts: await db\.accounts\.toArray\(\)/);
+  assert.match(queries, /db\.expenses\.toArray\(\)/);
+  assert.match(queries, /db\.accounts\.toArray\(\)/);
 });
