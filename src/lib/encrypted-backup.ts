@@ -5,17 +5,32 @@ import {
   ENCRYPTED_BACKUP_VERSION,
 } from '@/domain/local-security';
 
+export const ENCRYPTED_BACKUP_MIN_KDF_ITERATIONS = 310_000;
+export const ENCRYPTED_BACKUP_MAX_KDF_ITERATIONS = 750_000;
+
+export type EncryptedBackupKdfV1 = {
+  name: 'PBKDF2';
+  hash: 'SHA-256';
+  iterations: number;
+};
+
+export type EncryptedBackupCipherV1 = {
+  name: 'AES-GCM';
+  keyLength: 256;
+  tagLength: 128;
+};
+
 export const ENCRYPTED_BACKUP_KDF = {
   name: 'PBKDF2',
   hash: 'SHA-256',
   iterations: 310_000,
-} as const;
+} as const satisfies EncryptedBackupKdfV1;
 
 export const ENCRYPTED_BACKUP_CIPHER = {
   name: 'AES-GCM',
   keyLength: 256,
   tagLength: 128,
-} as const;
+} as const satisfies EncryptedBackupCipherV1;
 
 const SALT_BYTES = 16;
 const NONCE_BYTES = 12;
@@ -23,8 +38,8 @@ const NONCE_BYTES = 12;
 export type EncryptedBackupEnvelopeV1 = {
   format: typeof ENCRYPTED_BACKUP_FORMAT;
   version: typeof ENCRYPTED_BACKUP_VERSION;
-  kdf: typeof ENCRYPTED_BACKUP_KDF;
-  cipher: typeof ENCRYPTED_BACKUP_CIPHER;
+  kdf: EncryptedBackupKdfV1;
+  cipher: EncryptedBackupCipherV1;
   salt: string;
   nonce: string;
   ciphertext: string;
@@ -47,20 +62,39 @@ function base64ToBytes(value: string): Uint8Array | null {
   }
 }
 
-function sameKdf(value: unknown): value is typeof ENCRYPTED_BACKUP_KDF {
-  if (!value || typeof value !== 'object') return false;
-  const row = value as Partial<typeof ENCRYPTED_BACKUP_KDF>;
-  return row.name === ENCRYPTED_BACKUP_KDF.name
-    && row.hash === ENCRYPTED_BACKUP_KDF.hash
-    && row.iterations === ENCRYPTED_BACKUP_KDF.iterations;
+function validatedKdf(value: unknown): EncryptedBackupKdfV1 | null {
+  if (!value || typeof value !== 'object') return null;
+  const row = value as Partial<EncryptedBackupKdfV1>;
+  if (row.name !== ENCRYPTED_BACKUP_KDF.name || row.hash !== ENCRYPTED_BACKUP_KDF.hash) return null;
+  if (typeof row.iterations !== 'number' || !Number.isSafeInteger(row.iterations)) return null;
+  if (
+    row.iterations < ENCRYPTED_BACKUP_MIN_KDF_ITERATIONS
+    || row.iterations > ENCRYPTED_BACKUP_MAX_KDF_ITERATIONS
+  ) {
+    return null;
+  }
+  return {
+    name: ENCRYPTED_BACKUP_KDF.name,
+    hash: ENCRYPTED_BACKUP_KDF.hash,
+    iterations: row.iterations,
+  };
 }
 
-function sameCipher(value: unknown): value is typeof ENCRYPTED_BACKUP_CIPHER {
-  if (!value || typeof value !== 'object') return false;
-  const row = value as Partial<typeof ENCRYPTED_BACKUP_CIPHER>;
-  return row.name === ENCRYPTED_BACKUP_CIPHER.name
-    && row.keyLength === ENCRYPTED_BACKUP_CIPHER.keyLength
-    && row.tagLength === ENCRYPTED_BACKUP_CIPHER.tagLength;
+function validatedCipher(value: unknown): EncryptedBackupCipherV1 | null {
+  if (!value || typeof value !== 'object') return null;
+  const row = value as Partial<EncryptedBackupCipherV1>;
+  if (
+    row.name !== ENCRYPTED_BACKUP_CIPHER.name
+    || row.keyLength !== ENCRYPTED_BACKUP_CIPHER.keyLength
+    || row.tagLength !== ENCRYPTED_BACKUP_CIPHER.tagLength
+  ) {
+    return null;
+  }
+  return {
+    name: ENCRYPTED_BACKUP_CIPHER.name,
+    keyLength: ENCRYPTED_BACKUP_CIPHER.keyLength,
+    tagLength: ENCRYPTED_BACKUP_CIPHER.tagLength,
+  };
 }
 
 export function isValidEncryptedBackupPassword(password: string): boolean {
@@ -68,12 +102,25 @@ export function isValidEncryptedBackupPassword(password: string): boolean {
     && password.length <= ENCRYPTED_BACKUP_PASSWORD_MAX_LENGTH;
 }
 
-export function encryptedBackupAad(): Uint8Array {
+export function encryptedBackupAad(
+  kdf: EncryptedBackupKdfV1 = ENCRYPTED_BACKUP_KDF,
+  cipher: EncryptedBackupCipherV1 = ENCRYPTED_BACKUP_CIPHER,
+): Uint8Array {
+  const canonicalKdf = {
+    name: kdf.name,
+    hash: kdf.hash,
+    iterations: kdf.iterations,
+  };
+  const canonicalCipher = {
+    name: cipher.name,
+    keyLength: cipher.keyLength,
+    tagLength: cipher.tagLength,
+  };
   return new TextEncoder().encode(JSON.stringify({
     format: ENCRYPTED_BACKUP_FORMAT,
     version: ENCRYPTED_BACKUP_VERSION,
-    kdf: ENCRYPTED_BACKUP_KDF,
-    cipher: ENCRYPTED_BACKUP_CIPHER,
+    kdf: canonicalKdf,
+    cipher: canonicalCipher,
   }));
 }
 
@@ -81,35 +128,38 @@ async function deriveEncryptionKey(
   password: string,
   salt: Uint8Array,
   usages: KeyUsage[],
+  kdf: EncryptedBackupKdfV1,
+  cipher: EncryptedBackupCipherV1,
 ): Promise<CryptoKey> {
   const passwordKey = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(password),
-    'PBKDF2',
+    kdf.name,
     false,
     ['deriveKey'],
   );
 
   return crypto.subtle.deriveKey(
     {
-      name: 'PBKDF2',
-      hash: ENCRYPTED_BACKUP_KDF.hash,
+      name: kdf.name,
+      hash: kdf.hash,
       salt,
-      iterations: ENCRYPTED_BACKUP_KDF.iterations,
+      iterations: kdf.iterations,
     },
     passwordKey,
     {
-      name: 'AES-GCM',
-      length: ENCRYPTED_BACKUP_CIPHER.keyLength,
+      name: cipher.name,
+      length: cipher.keyLength,
     },
     false,
     usages,
   );
 }
 
-export async function encryptBackupJSON(
+async function encryptBackupJSONWithValidatedKdf(
   plaintextJson: string,
   password: string,
+  kdf: EncryptedBackupKdfV1,
 ): Promise<EncryptedBackupEnvelopeV1> {
   if (!isValidEncryptedBackupPassword(password)) {
     throw new Error(
@@ -119,15 +169,16 @@ export async function encryptBackupJSON(
 
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const nonce = crypto.getRandomValues(new Uint8Array(NONCE_BYTES));
-  const key = await deriveEncryptionKey(password, salt, ['encrypt']);
+  const cipher = ENCRYPTED_BACKUP_CIPHER;
+  const key = await deriveEncryptionKey(password, salt, ['encrypt'], kdf, cipher);
   const plaintext = new TextEncoder().encode(plaintextJson);
 
   const ciphertext = await crypto.subtle.encrypt(
     {
-      name: 'AES-GCM',
+      name: cipher.name,
       iv: nonce,
-      tagLength: ENCRYPTED_BACKUP_CIPHER.tagLength,
-      additionalData: encryptedBackupAad(),
+      tagLength: cipher.tagLength,
+      additionalData: encryptedBackupAad(kdf, cipher),
     },
     key,
     plaintext,
@@ -136,12 +187,36 @@ export async function encryptBackupJSON(
   return {
     format: ENCRYPTED_BACKUP_FORMAT,
     version: ENCRYPTED_BACKUP_VERSION,
-    kdf: ENCRYPTED_BACKUP_KDF,
-    cipher: ENCRYPTED_BACKUP_CIPHER,
+    kdf,
+    cipher,
     salt: bytesToBase64(salt),
     nonce: bytesToBase64(nonce),
     ciphertext: bytesToBase64(new Uint8Array(ciphertext)),
   };
+}
+
+/**
+ * Compatibility/test helper for exercising accepted v1 KDF metadata.
+ * Product export flows must use encryptBackupJSON/exportEncryptedBackupText,
+ * which remain pinned to ENCRYPTED_BACKUP_KDF.
+ */
+export async function encryptBackupJSONWithKdf(
+  plaintextJson: string,
+  password: string,
+  kdf: EncryptedBackupKdfV1,
+): Promise<EncryptedBackupEnvelopeV1> {
+  const canonicalKdf = validatedKdf(kdf);
+  if (!canonicalKdf) {
+    throw new Error('Los metadatos criptográficos de la copia no son compatibles.');
+  }
+  return encryptBackupJSONWithValidatedKdf(plaintextJson, password, canonicalKdf);
+}
+
+export async function encryptBackupJSON(
+  plaintextJson: string,
+  password: string,
+): Promise<EncryptedBackupEnvelopeV1> {
+  return encryptBackupJSONWithValidatedKdf(plaintextJson, password, ENCRYPTED_BACKUP_KDF);
 }
 
 export async function exportEncryptedBackupText(
@@ -151,7 +226,6 @@ export async function exportEncryptedBackupText(
   const envelope = await encryptBackupJSON(plaintextJson, password);
   return JSON.stringify(envelope, null, 2);
 }
-
 
 export function parseEncryptedBackupEnvelopeText(text: string): EncryptedBackupEnvelopeV1 {
   let raw: unknown;
@@ -172,7 +246,10 @@ export function parseEncryptedBackupEnvelopeText(text: string): EncryptedBackupE
   if (row.version !== ENCRYPTED_BACKUP_VERSION) {
     throw new Error('La versión de la copia cifrada no es compatible.');
   }
-  if (!sameKdf(row.kdf) || !sameCipher(row.cipher)) {
+
+  const kdf = validatedKdf(row.kdf);
+  const cipher = validatedCipher(row.cipher);
+  if (!kdf || !cipher) {
     throw new Error('Los metadatos criptográficos de la copia no son compatibles.');
   }
   if (typeof row.salt !== 'string' || typeof row.nonce !== 'string' || typeof row.ciphertext !== 'string') {
@@ -189,8 +266,8 @@ export function parseEncryptedBackupEnvelopeText(text: string): EncryptedBackupE
   return {
     format: ENCRYPTED_BACKUP_FORMAT,
     version: ENCRYPTED_BACKUP_VERSION,
-    kdf: ENCRYPTED_BACKUP_KDF,
-    cipher: ENCRYPTED_BACKUP_CIPHER,
+    kdf,
+    cipher,
     salt: row.salt,
     nonce: row.nonce,
     ciphertext: row.ciphertext,
@@ -209,15 +286,21 @@ export async function decryptEncryptedBackupText(
   const salt = base64ToBytes(envelope.salt)!;
   const nonce = base64ToBytes(envelope.nonce)!;
   const ciphertext = base64ToBytes(envelope.ciphertext)!;
-  const key = await deriveEncryptionKey(password, salt, ['decrypt']);
+  const key = await deriveEncryptionKey(
+    password,
+    salt,
+    ['decrypt'],
+    envelope.kdf,
+    envelope.cipher,
+  );
 
   try {
     const plaintext = await crypto.subtle.decrypt(
       {
-        name: 'AES-GCM',
+        name: envelope.cipher.name,
         iv: nonce,
-        tagLength: ENCRYPTED_BACKUP_CIPHER.tagLength,
-        additionalData: encryptedBackupAad(),
+        tagLength: envelope.cipher.tagLength,
+        additionalData: encryptedBackupAad(envelope.kdf, envelope.cipher),
       },
       key,
       ciphertext,
