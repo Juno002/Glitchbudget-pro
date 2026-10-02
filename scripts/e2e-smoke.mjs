@@ -786,60 +786,122 @@ async function main() {
     await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
 
+    await client.command('Emulation.setTouchEmulationEnabled', { enabled:true, maxTouchPoints:5 });
+    const settingsMobileWidths = [320, 360, 390];
+
+    for (const width of settingsMobileWidths) {
+      await client.command('Emulation.setDeviceMetricsOverride', {
+        width,
+        height: 844,
+        deviceScaleFactor: 1,
+        mobile: true,
+      });
+
+      if (width === settingsMobileWidths[0]) {
+        if (!await client.evaluate(`(() => {
+          const button = document.querySelector('button[aria-label="Ajustes"]');
+          if (!(button instanceof HTMLButtonElement)) return false;
+          button.click();
+          return true;
+        })()`)) throw new Error('No se pudo abrir Ajustes.');
+        await waitFor(client, `Boolean(document.querySelector('[data-settings-prisma="true"]'))`, 'Ajustes Prisma');
+      }
+
+      await waitFor(
+        client,
+        `(() => {
+          const dialog = document.querySelector('[data-settings-prisma="true"]');
+          const mobileNav = document.querySelector('[data-settings-mobile-navigation="prisma"]');
+          const desktopNav = document.querySelector('[data-settings-navigation="prisma"]');
+          const baseCurrency = document.querySelector('input[aria-label="Moneda base"]');
+          if (!(dialog instanceof HTMLElement)
+            || !(mobileNav instanceof HTMLSelectElement)
+            || !(desktopNav instanceof HTMLElement)
+            || !(baseCurrency instanceof HTMLInputElement)) return false;
+          const rect = dialog.getBoundingClientRect();
+          const style = getComputedStyle(dialog);
+          return rect.top >= -1
+            && rect.bottom <= window.innerHeight + 1
+            && rect.left >= -1
+            && rect.right <= window.innerWidth + 1
+            && style.overflowY === 'auto'
+            && style.overflowX === 'hidden'
+            && dialog.scrollWidth <= dialog.clientWidth + 1
+            && mobileNav.scrollWidth <= mobileNav.clientWidth + 1
+            && getComputedStyle(mobileNav).display !== 'none'
+            && getComputedStyle(desktopNav).display === 'none'
+            && baseCurrency.getBoundingClientRect().height >= 43
+            && matchMedia('(pointer: coarse)').matches
+            && document.documentElement.scrollWidth <= window.innerWidth + 1;
+        })()`,
+        'Ajustes móvil contenido a ' + width + 'px',
+      );
+    }
+
     await client.command('Emulation.setDeviceMetricsOverride', {
-      width: 390,
+      width: 320,
       height: 844,
       deviceScaleFactor: 1,
-      mobile: false,
+      mobile: true,
     });
 
-    if (!await client.evaluate(`(() => {
-      const button = document.querySelector('button[aria-label="Ajustes"]');
-      if (!(button instanceof HTMLButtonElement)) return false;
-      button.click();
-      return true;
-    })()`)) throw new Error('No se pudo abrir Ajustes.');
-    await waitFor(client, `Boolean(document.querySelector('[data-settings-prisma="true"]'))`, 'Ajustes Prisma');
-    await waitFor(
-      client,
-      `(() => {
-        const dialog = document.querySelector('[data-settings-prisma="true"]');
-        if (!(dialog instanceof HTMLElement)) return false;
-        const rect = dialog.getBoundingClientRect();
-        const style = getComputedStyle(dialog);
-        return rect.top >= -1
-          && rect.bottom <= window.innerHeight + 1
-          && rect.left >= -1
-          && rect.right <= window.innerWidth + 1
-          && style.overflowY === 'auto'
-          && document.documentElement.scrollWidth <= window.innerWidth + 1;
-      })()`,
-      'Ajustes móvil contenido y desplazable',
-    );
-
-    if (!await client.evaluate(activateTabExpression('Categorías'))) throw new Error('No se pudo abrir Categorías.');
+    if (!await client.evaluate(setControlExpression('[data-settings-mobile-navigation="prisma"]', 'categories'))) {
+      throw new Error('No se pudo abrir Categorías desde navegación móvil.');
+    }
     await waitFor(client, `document.querySelectorAll('[data-category-manager="prisma"]').length >= 2`, 'Categorías Prisma');
     await waitFor(
       client,
       `(() => {
+        const dialog = document.querySelector('[data-settings-prisma="true"]');
         const managers = [...document.querySelectorAll('[data-category-manager="prisma"]')];
-        return managers.length === 2 && managers.every(manager => {
-          const buttons = [...manager.querySelectorAll('button')];
-          const add = buttons.find(button => button.textContent?.trim() === 'Agregar');
-          const reset = buttons.find(button => button.textContent?.trim() === 'Restablecer');
-          return add instanceof HTMLButtonElement
-            && reset instanceof HTMLButtonElement
-            && Boolean(add.querySelector('svg'))
-            && Boolean(reset.querySelector('svg'))
-            && !manager.textContent?.includes('➕')
-            && !manager.textContent?.includes('🔄');
-        });
+        return dialog instanceof HTMLElement
+          && dialog.scrollWidth <= dialog.clientWidth + 1
+          && managers.length === 2
+          && managers.every(manager => {
+            if (!(manager instanceof HTMLElement) || manager.scrollWidth > manager.clientWidth + 1) return false;
+            const buttons = [...manager.querySelectorAll('button')];
+            const add = buttons.find(button => button.textContent?.trim() === 'Agregar');
+            const reset = buttons.find(button => button.textContent?.trim() === 'Restablecer');
+            return add instanceof HTMLButtonElement
+              && reset instanceof HTMLButtonElement
+              && Boolean(add.querySelector('svg'))
+              && Boolean(reset.querySelector('svg'))
+              && !manager.textContent?.includes('➕')
+              && !manager.textContent?.includes('🔄');
+          });
       })()`,
-      'iconografía funcional de categorías',
+      'Categorías Prisma sin overflow a 320px',
     );
 
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Elegir icono de categoría"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir el selector de iconos.');
+    await waitFor(
+      client,
+      `(() => {
+        const buttons = [...document.querySelectorAll('button[aria-label^="Usar icono "]')]
+          .filter(button => button.getClientRects().length > 0);
+        return buttons.length > 0 && buttons.every(button => {
+          const rect = button.getBoundingClientRect();
+          return button.getAttribute('aria-pressed') !== null
+            && rect.width >= 43
+            && rect.height >= 43
+            && rect.left >= -1
+            && rect.right <= window.innerWidth + 1;
+        });
+      })()`,
+      'selector de iconos táctil y contenido',
+    );
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
+
     // Phase 20.9.9: switch through both premium themes using the real Settings controls.
-    if (!await client.evaluate(activateTabExpression('Apariencia'))) throw new Error('No se pudo abrir Apariencia.');
+    if (!await client.evaluate(setControlExpression('[data-settings-mobile-navigation="prisma"]', 'appearance'))) {
+      throw new Error('No se pudo abrir Apariencia desde navegación móvil.');
+    }
     if (!await client.evaluate(`(() => {
       const radio = document.querySelector('#theme-dark');
       if (!(radio instanceof HTMLElement)) return false;
@@ -867,24 +929,87 @@ async function main() {
       'tema Prisma claro real',
     );
 
-    if (!await client.evaluate(activateTabExpression('Privacidad y seguridad'))) throw new Error('No se pudo abrir Privacidad y seguridad.');
+    if (!await client.evaluate(setControlExpression('[data-settings-mobile-navigation="prisma"]', 'privacy'))) {
+      throw new Error('No se pudo abrir Privacidad y seguridad desde navegación móvil.');
+    }
     await waitFor(
       client,
-      `Boolean(document.querySelector('[data-app-lock-settings="prisma"]'))
-        && Boolean(document.querySelector('[data-auto-lock-settings="prisma"]'))`,
-      'Seguridad Prisma',
+      `(() => {
+        const lock = document.querySelector('[data-app-lock-settings="prisma"]');
+        const autoLock = document.querySelector('[data-auto-lock-settings="prisma"]');
+        return lock instanceof HTMLElement
+          && autoLock instanceof HTMLElement
+          && lock.scrollWidth <= lock.clientWidth + 1
+          && autoLock.scrollWidth <= autoLock.clientWidth + 1;
+      })()`,
+      'Seguridad Prisma sin overflow',
     );
 
-    if (!await client.evaluate(activateTabExpression('Datos y copias'))) throw new Error('No se pudo abrir Datos y copias.');
+    if (!await client.evaluate(setControlExpression('[data-settings-mobile-navigation="prisma"]', 'data'))) {
+      throw new Error('No se pudo abrir Datos y copias desde navegación móvil.');
+    }
     await waitFor(client, `Boolean(document.querySelector('[data-persistent-storage-settings="prisma"]'))`, 'Datos Prisma');
+
+    const mobileOverflowBackupName = 'glitchbudget-mobile-overflow-' + 'x'.repeat(72) + '.json';
+    await client.evaluate(`(async () => {
+      if (!navigator.storage || !('getDirectory' in navigator.storage)) return true;
+      const root = await navigator.storage.getDirectory();
+      const handle = await root.getFileHandle(${JSON.stringify(mobileOverflowBackupName)}, { create:true });
+      const writable = await handle.createWritable();
+      await writable.write('{}');
+      await writable.close();
+      return true;
+    })()`);
 
     if (!await client.evaluate(clickButtonExpression('Copias de Seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
     await waitFor(client, `Boolean(document.querySelector('[data-backups-prisma="true"]'))`, 'Backups Prisma');
+    await waitFor(
+      client,
+      `(() => {
+        const dialog = document.querySelector('[data-backups-prisma="true"]');
+        if (!(dialog instanceof HTMLElement)) return false;
+        const row = [...dialog.querySelectorAll('li')].find(node => node.textContent?.includes(${JSON.stringify(mobileOverflowBackupName)}));
+        return row instanceof HTMLElement
+          && dialog.scrollWidth <= dialog.clientWidth + 1
+          && row.scrollWidth <= row.clientWidth + 1
+          && row.getBoundingClientRect().right <= window.innerWidth + 1;
+      })()`,
+      'backup con nombre largo contenido',
+    );
+
+    if (!await client.evaluate(`(() => {
+      const button = [...document.querySelectorAll('button')]
+        .find(node => node.getAttribute('aria-label') === ${JSON.stringify('Eliminar '+mobileOverflowBackupName)});
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir confirmación de borrado de copia larga.');
+    await waitFor(
+      client,
+      `(() => {
+        const alert = document.querySelector('[role="alertdialog"]');
+        return alert instanceof HTMLElement
+          && alert.scrollWidth <= alert.clientWidth + 1
+          && alert.getBoundingClientRect().left >= -1
+          && alert.getBoundingClientRect().right <= window.innerWidth + 1;
+      })()`,
+      'confirmación de backup largo contenida',
+    );
+    await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
+    await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyDown', key:'Escape', code:'Escape' });
     await client.command('Input.dispatchKeyEvent', { type:'keyUp', key:'Escape', code:'Escape' });
 
+    await client.evaluate(`(async () => {
+      if (!navigator.storage || !('getDirectory' in navigator.storage)) return true;
+      const root = await navigator.storage.getDirectory();
+      try { await root.removeEntry(${JSON.stringify(mobileOverflowBackupName)}); } catch {}
+      return true;
+    })()`);
+
+    await client.command('Emulation.setTouchEmulationEnabled', { enabled:false });
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 1280,
       height: 800,
