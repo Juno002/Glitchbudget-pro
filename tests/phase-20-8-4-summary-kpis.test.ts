@@ -82,7 +82,7 @@ test('20.8.4 Summary keeps canonical comparisons and contextual KPI help', () =>
   const cardEnd = source.indexOf('function PanelHeading');
   const card = source.slice(cardStart, cardEnd);
   assert.ok(card.indexOf('<MoneyValue') < card.indexOf('data-position-comparison='));
-  assert.match(card, /<ContextHelp label=\\{'Qué significa '\\+label\\} contextLabel=\\{label\\}>/);
+  assert.ok(card.includes("<ContextHelp label={'Qué significa '+label} contextLabel={label}>"));
 });
 
 test('20.8.4 keeps interpretation details available on demand instead of permanent warning rows', () => {
