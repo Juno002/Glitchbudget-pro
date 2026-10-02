@@ -12,7 +12,7 @@ const positionCard = summary.slice(
 );
 
 test('20.8.7 keeps stable KPI definitions behind touch and keyboard accessible disclosure', () => {
-  assert.match(positionCard, /<ContextHelp label=\{'Qué significa '\+label\}>/);
+  assert.match(positionCard, /<ContextHelp label=\\{'Qué significa '\\+label\\} contextLabel=\\{label\\}>/);
   assert.match(contextHelp, /<PopoverTrigger asChild>/);
   assert.match(contextHelp, /type="button"/);
   assert.match(contextHelp, /aria-label=\{label\}/);
