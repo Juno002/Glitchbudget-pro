@@ -30,3 +30,10 @@ test('Post-roadmap 4 preserves measured browser benchmark instrumentation', () =
   assert.match(e2e, /POST_ROADMAP_4_AMBIENT/);
   assert.match(e2e, /setCPUThrottlingRate/);
 });
+
+
+test('Post-roadmap 4 Plan subsection navigation updates state and URL atomically', () => {
+  const planning = source('src/components/dashboard/planning-tab.tsx');
+  assert.match(planning, /navigate\(\{ area:'planning', planningTab:value as typeof planningTab \}\)/);
+  assert.doesNotMatch(planning, /setPlanningTab\(/);
+});

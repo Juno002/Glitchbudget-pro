@@ -101,6 +101,12 @@ El smoke E2E conserva:
 - medición de filas DOM y heap;
 - comparación de ambient background con CPU throttling.
 
+## Carrera detectada por el gate
+
+Los runs de PR reprodujeron timeouts alternos en Metas/Planificados. La revisión mostró que `PlanningTab` todavía usaba `setPlanningTab()`, cuya escritura de URL dependía de que el closure de `activeTab` ya estuviera en `planning`. Se eliminó esa dependencia: las subsecciones ahora llaman directamente a `navigate({ area:'planning', planningTab })`, actualizando estado y URL mediante el mismo contrato atómico usado por la navegación principal.
+
+Esto no amplía alcance funcional; endurece C4/C2 bajo la carga del benchmark y elimina una carrera revelada por el smoke.
+
 ## Datos e invariantes
 
 Sin cambios en:
