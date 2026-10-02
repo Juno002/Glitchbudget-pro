@@ -29,6 +29,12 @@ test('Post-roadmap 4 preserves measured browser benchmark instrumentation', () =
   assert.match(e2e, /POST_ROADMAP_4_BENCHMARK/);
   assert.match(e2e, /POST_ROADMAP_4_AMBIENT/);
   assert.match(e2e, /setCPUThrottlingRate/);
+  assert.match(e2e, /data-movement-filter-panel="advanced"/);
+  assert.match(e2e, /financeCounter\.calls !== 1/);
+  assert.match(e2e, /reaparecieron lecturas duplicadas/);
+  assert.match(e2e, /html\.classList\.add\('dark'\)/);
+  assert.doesNotMatch(e2e, /date: '2026-10-01'/);
+  assert.doesNotMatch(e2e, /catch \{\s*ready = false;/);
 });
 
 
