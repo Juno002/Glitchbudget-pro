@@ -961,7 +961,7 @@ async function main() {
       return true;
     })()`);
 
-    if (!await client.evaluate(clickButtonExpression('Copias de Seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
+    if (!await client.evaluate(clickButtonExpression('Copias de seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
     await waitFor(client, `Boolean(document.querySelector('[data-backups-prisma="true"]'))`, 'Backups Prisma');
     await waitFor(
       client,
