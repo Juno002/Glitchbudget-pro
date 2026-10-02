@@ -273,6 +273,7 @@ export default function SubscriptionsManager() {
       <section className="space-y-3" aria-labelledby="upcoming-title">
         <div className="flex items-center justify-between gap-3">
           <h4 id="upcoming-title" className="font-display text-xl font-normal">Próximos movimientos</h4>
+          <span className="sr-only" aria-live="polite">{unresolvedCount === 0 ? 'No hay movimientos planificados pendientes.' : unresolvedCount + ' movimientos planificados pendientes.'}</span>
           <CalendarDays className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
         </div>
 
