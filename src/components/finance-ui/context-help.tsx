@@ -21,14 +21,21 @@ export function ContextHelp({
           type="button"
           aria-label={label}
           className={cn(
-            'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-interactive)] text-muted-foreground transition-colors duration-[var(--motion-control)] hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-interactive)] text-muted-foreground transition-colors duration-[var(--motion-control)] hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             className,
           )}
         >
           <Info className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={6} className="w-72 text-xs leading-relaxed" showCloseButton>
+      <PopoverContent
+        align="start"
+        sideOffset={6}
+        className="w-72 text-xs leading-relaxed"
+        showCloseButton
+        closeLabel={'Cerrar explicación de '+label}
+        data-context-help={label}
+      >
         <div className="text-muted-foreground">{children}</div>
       </PopoverContent>
     </Popover>
