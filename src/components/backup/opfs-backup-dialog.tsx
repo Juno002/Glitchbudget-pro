@@ -190,7 +190,7 @@ export default function OpfsBackupDialog() {
           <span>Copias de Seguridad</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl" data-backups-prisma="true">
+      <DialogContent className="overflow-x-hidden sm:max-w-2xl" data-backups-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
           <DialogDescription className="sr-only">Crear, exportar o restaurar copias de tus datos.</DialogDescription>
@@ -226,7 +226,7 @@ export default function OpfsBackupDialog() {
         </div>
         
         <p className="mt-4 text-sm font-semibold">Copias locales</p>
-        <ScrollArea className="mt-2 h-64 rounded-[var(--radius-card)] border bg-muted/15">
+        <ScrollArea className="mt-2 h-52 rounded-[var(--radius-card)] border bg-muted/15 sm:h-64">
             <div className="p-4">
                 {isWorking && backupFiles.length === 0 ? (
                     <div role="status" aria-label="Cargando copias locales" className="flex h-full items-center justify-center">
@@ -235,17 +235,17 @@ export default function OpfsBackupDialog() {
                 ) : backupFiles.length > 0 ? (
                     <ul className="space-y-2">
                     {backupFiles.map((file) => (
-                        <li key={file.name} className="flex items-center justify-between rounded-[var(--radius-interactive)] p-2 hover:bg-accent">
-                        <div className="flex items-center gap-3">
-                            <FileClock className="h-5 w-5 text-muted-foreground" />
-                            <div>
-                                <p className="font-mono text-sm">{file.name}</p>
-                                <p className="text-xs text-muted-foreground">
+                        <li key={file.name} className="flex min-w-0 flex-col gap-2 rounded-[var(--radius-interactive)] p-2 hover:bg-accent sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex min-w-0 items-start gap-3">
+                            <FileClock className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+                            <div className="min-w-0">
+                                <p className="break-all font-mono text-sm">{file.name}</p>
+                                <p className="break-words text-xs text-muted-foreground">
                                     {format(new Date(file.lastModified), "PPP p", { locale: es })} ({formatDistanceToNow(new Date(file.lastModified), { addSuffix: true, locale: es })})
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex shrink-0 items-center gap-1 self-end sm:self-auto">
                             <Button variant="ghost" size="icon" onClick={() => handleDownload(file.name)} aria-label={'Descargar '+file.name} title="Descargar">
                                 <FileDown className="h-4 w-4" />
                             </Button>
@@ -271,7 +271,7 @@ export default function OpfsBackupDialog() {
                                     <AlertDialogHeader>
                                         <AlertDialogTitle>¿Eliminar copia de seguridad?</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                           Esta acción eliminará permanentemente el archivo de copia de seguridad &quot;{file.name}&quot;.
+                                           Esta acción eliminará permanentemente el archivo de copia de seguridad <span className="break-all font-medium">&quot;{file.name}&quot;</span>.
                                         </AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
