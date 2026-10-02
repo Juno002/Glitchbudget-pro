@@ -18,7 +18,8 @@ export type DebtPaymentIntegrityReason =
   | 'invalid_date'
   | 'missing_debt'
   | 'missing_account'
-  | 'before_account_start';
+  | 'before_account_start'
+  | 'invalid_shape';
 
 export type DebtPaymentIntegrityIssue = {
   payment: RawDebtPayment;
@@ -43,6 +44,14 @@ export function classifyDebtPaymentIntegrity(
     const reasons: DebtPaymentIntegrityReason[] = [];
     const hasCanonicalDate = canonicalIds.has(raw.id);
 
+    if (
+      typeof raw.id !== 'string'
+      || raw.id.length === 0
+      || typeof raw.debtId !== 'string'
+      || raw.debtId.length === 0
+      || !Number.isSafeInteger(raw.amount)
+      || raw.amount < 0
+    ) reasons.push('invalid_shape');
     if (!hasCanonicalDate) reasons.push('invalid_date');
     if (typeof raw.debtId !== 'string' || !debtIds.has(raw.debtId)) reasons.push('missing_debt');
 
