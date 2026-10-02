@@ -78,7 +78,7 @@ test('20.10.7 Prisma is visible while compatibility identifiers remain internal'
 });
 
 test('20.10.7 roadmap closure and historical quality review are reconciled', () => {
-  const roadmap = source('Roadmap septiembre 2026.txt');
+  const roadmap = source('docs/roadmap/Roadmap septiembre 2026.txt');
   const phase20 = source('docs/roadmap/phase-20.md');
   const phase2010 = source('docs/roadmap/phase-20-10.md');
   const quality = source('docs/quality-review.md');

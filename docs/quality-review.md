@@ -2,7 +2,7 @@
 
 Alcance original: aplicación personal con datos locales, sin sincronización ni IA. Estado de esta revisión: candidata a prueba piloto; no certificada para venta general.
 
-> **Nota de vigencia (2026-10-01):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las afirmaciones sobre capacidades, versiones o límites describen el momento en que fueron escritas salvo que indiquen explícitamente estado actual. El producto vigente es Prisma; el esquema actual es Dexie v15, el backup JSON canónico es v13 y existe copia cifrada opcional mediante el envelope v1. Para el estado canónico, consultar `Roadmap septiembre 2026.txt` y la documentación de Fase 20.
+> **Nota de vigencia (2026-10-01):** este documento conserva evidencia histórica de las revisiones del 17–22 de septiembre. Las afirmaciones sobre capacidades, versiones o límites describen el momento en que fueron escritas salvo que indiquen explícitamente estado actual. El producto vigente es Prisma; el esquema actual es Dexie v15, el backup JSON canónico es v13 y existe copia cifrada opcional mediante el envelope v1. Para el estado canónico, consultar `docs/roadmap/Roadmap septiembre 2026.txt` y la documentación de Fase 20.
 
 ## Correcciones de esta revisión
 
