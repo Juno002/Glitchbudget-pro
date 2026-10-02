@@ -30,12 +30,14 @@ import {
   saveAutoLockRecord,
   shouldAutoLock,
 } from '@/lib/auto-lock';
+import { appLockRetryDelayMs, appLockRetryRemainingMs } from '@/domain/app-lock-retry';
 
 type AppLockContextValue = {
   ready: boolean;
   enabled: boolean;
   locked: boolean;
   autoLockMinutes: AutoLockTimeoutMinutes | null;
+  unlockBlockedUntil: number | null;
   enable: (pin: string) => Promise<void>;
   unlock: (pin: string) => Promise<boolean>;
   changePin: (currentPin: string, newPin: string) => Promise<boolean>;
@@ -51,6 +53,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
   const [enabled, setEnabled] = useState(false);
   const [locked, setLocked] = useState(false);
   const [autoLockMinutes, setAutoLockMinutes] = useState<AutoLockTimeoutMinutes | null>(null);
+  const [unlockBlockedUntil, setUnlockBlockedUntil] = useState<number | null>(null);
+  const failedUnlockAttempts = useRef(0);
   const lastActivityAt = useRef(Date.now());
 
   const load = useCallback(() => {
@@ -62,6 +66,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     setEnabled(nextEnabled);
     setLocked(nextEnabled);
     setAutoLockMinutes(autoLock?.timeoutMinutes ?? null);
+    failedUnlockAttempts.current = 0;
+    setUnlockBlockedUntil(null);
     lastActivityAt.current = Date.now();
     setReady(true);
   }, []);
@@ -79,6 +85,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
 
       setEnabled(nextEnabled);
       setAutoLockMinutes(autoLock?.timeoutMinutes ?? null);
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
       lastActivityAt.current = Date.now();
 
       if (event.key === APP_LOCK_STORAGE_KEY) setLocked(nextEnabled);
@@ -143,31 +151,49 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     setEnabled(true);
     setLocked(false);
     setAutoLockMinutes(null);
+    failedUnlockAttempts.current = 0;
+    setUnlockBlockedUntil(null);
     lastActivityAt.current = Date.now();
   }, []);
 
   const unlock = useCallback(async (pin: string) => {
+    const now = Date.now();
+    if (appLockRetryRemainingMs(unlockBlockedUntil, now) > 0) return false;
+
     const record = loadAppLockRecord(localStorage);
     if (!record) {
       clearAutoLock(localStorage);
       setEnabled(false);
       setLocked(false);
       setAutoLockMinutes(null);
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
       return true;
     }
+
     const valid = await verifyAppLockPin(record, pin);
     if (valid) {
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
       setLocked(false);
-      lastActivityAt.current = Date.now();
+      lastActivityAt.current = now;
+      return true;
     }
-    return valid;
-  }, []);
+
+    failedUnlockAttempts.current += 1;
+    const delay = appLockRetryDelayMs(failedUnlockAttempts.current);
+    const failedAt = Date.now();
+    setUnlockBlockedUntil(delay > 0 ? failedAt + delay : null);
+    return false;
+  }, [unlockBlockedUntil]);
 
   const changePin = useCallback(async (currentPin: string, newPin: string) => {
     const changed = await replaceAppLockPin(localStorage, currentPin, newPin);
     if (changed) {
       setEnabled(true);
       setLocked(false);
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
       lastActivityAt.current = Date.now();
     }
     return changed;
@@ -180,6 +206,8 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
       setEnabled(false);
       setLocked(false);
       setAutoLockMinutes(null);
+      failedUnlockAttempts.current = 0;
+      setUnlockBlockedUntil(null);
     }
     return disabled;
   }, []);
@@ -215,6 +243,7 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     enabled,
     locked,
     autoLockMinutes,
+    unlockBlockedUntil,
     enable,
     unlock,
     changePin,
@@ -226,6 +255,7 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
     enabled,
     locked,
     autoLockMinutes,
+    unlockBlockedUntil,
     enable,
     unlock,
     changePin,
