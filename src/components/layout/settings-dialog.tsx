@@ -136,7 +136,7 @@ export function SettingsDialog() {
 
             <TabsList className="mt-3 hidden h-auto w-full justify-between gap-0.5 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)] lg:flex" data-settings-navigation="prisma">
               {SETTINGS_SECTIONS.map(([value, label]) => (
-                <TabsTrigger key={value} value={value} className="min-h-9 min-w-0 flex-1 rounded-[var(--radius-interactive)] px-2 text-xs">{label}</TabsTrigger>
+                <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] px-2 text-xs">{label}</TabsTrigger>
               ))}
             </TabsList>
           </div>
