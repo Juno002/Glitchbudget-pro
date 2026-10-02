@@ -96,7 +96,7 @@ export default function CsvBackupDialog() {
           Importar/Exportar CSV
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="overflow-x-hidden sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Gestión de CSV</DialogTitle>
           <DialogDescription>
@@ -105,9 +105,9 @@ export default function CsvBackupDialog() {
         </DialogHeader>
         <div className="space-y-2 py-4">
             {backupActions.map(({ name, label, exportFn, importFn }) => (
-                <div key={name} className="flex items-center justify-between rounded-[var(--radius-interactive)] border bg-card p-2 shadow-[var(--shadow-control)]">
-                    <span className="font-medium">{label}</span>
-                    <div className="flex gap-2">
+                <div key={name} className="flex min-w-0 flex-col gap-2 rounded-[var(--radius-interactive)] border bg-card p-2 shadow-[var(--shadow-control)] sm:flex-row sm:items-center sm:justify-between">
+                    <span className="min-w-0 break-words font-medium">{label}</span>
+                    <div className="flex shrink-0 gap-2 self-end sm:self-auto">
                         <Button variant="ghost" size="icon" disabled={busy} onClick={() => triggerImport(importFn)} aria-label={`Importar ${label}`} title={`Importar ${label}`}>
                             <Upload className="h-4 w-4 text-primary" />
                         </Button>
