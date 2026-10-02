@@ -88,6 +88,10 @@ En este benchmark reproducible no aparece impacto medible, por lo que **no se mo
 
 La medición es un proxy Chromium móvil/throttled, no un teléfono Android físico. La validación física sigue siendo QA de release; no hay evidencia cuantitativa que justifique degradar la identidad visual dentro de este hardening.
 
+## Estabilidad del smoke E2E
+
+Durante la PR aparecieron timeouts distintos en transiciones de Plan/Metas/Planificados con el mismo SHA que había pasado en el run de rama. Como el smoke ahora también ejecuta datasets grandes y comparte runner con build/benchmark, el timeout genérico de `waitFor` se amplió de 15 s a **30 s**. Esto no cambia comportamiento del producto ni oculta fallos: un estado que no aparece en 30 s sigue fallando, pero se reduce el falso negativo por variación del runner.
+
 ## Benchmark reproducible
 
 El smoke E2E conserva:

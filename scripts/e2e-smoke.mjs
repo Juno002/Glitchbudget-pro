@@ -118,7 +118,7 @@ class CdpClient {
   }
 }
 
-async function waitFor(client, expression, label, timeoutMs = 15_000) {
+async function waitFor(client, expression, label, timeoutMs = 30_000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     if (await client.evaluate(expression)) return;
