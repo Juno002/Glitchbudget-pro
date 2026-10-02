@@ -118,7 +118,7 @@ test('17.4 encrypted envelope remains separate from the normal JSON contract', a
   assert.equal(parsed.version, 1);
 
   const normalBackup = readFileSync(new URL('../src/lib/backup-json.ts', import.meta.url), 'utf8');
-  assert.match(normalBackup, /CURRENT_BACKUP_FORMAT_VERSION = 13/);
+  assert.match(normalBackup, /CURRENT_BACKUP_FORMAT_VERSION = 14/);
   assert.doesNotMatch(normalBackup, /AES-GCM|ciphertext|ENCRYPTED_BACKUP_FORMAT/);
 });
 
