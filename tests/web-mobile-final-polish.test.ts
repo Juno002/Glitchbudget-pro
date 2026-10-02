@@ -42,7 +42,7 @@ test('category editing and icon picking remain inside narrow mobile widths', () 
   assert.match(picker, /aria-pressed=\{value === name\}/);
   assert.match(picker, /grid-cols-5/);
   assert.match(picker, /sm:grid-cols-6/);
-  assert.match(picker, /min-h-10 min-w-10/);
+  assert.match(picker, /min-h-11 min-w-11/);
 });
 
 test('privacy and automation layouts tolerate active and long-content states', () => {
