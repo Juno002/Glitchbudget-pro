@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { HardDrive, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ContextHelp } from '@/components/finance-ui';
 import {
   readStoragePersistenceState,
   requestPersistentStorage,
@@ -62,10 +63,10 @@ export default function PersistentStorageSettings() {
         <div className="min-w-0">
           <p className="font-medium">Persistencia del navegador</p>
           {details ? (
-            <>
-              <p className="mt-1 text-sm">{details.title}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{details.description}</p>
-            </>
+            <div className="mt-1 flex items-center gap-1 text-sm">
+              <span>{details.title}</span>
+              <ContextHelp label="Acerca de la persistencia del navegador">{details.description}</ContextHelp>
+            </div>
           ) : (
             <p className="mt-1 text-xs text-muted-foreground">
               {state === 'requesting' ? 'Solicitando protección al navegador…' : 'Comprobando protección del almacenamiento…'}
@@ -80,9 +81,6 @@ export default function PersistentStorageSettings() {
         </Button>
       )}
 
-      <p className="text-xs text-muted-foreground">
-        Esta protección depende del navegador y no sustituye una copia de seguridad descargada fuera del sitio.
-      </p>
     </section>
   );
 }
