@@ -2,7 +2,7 @@
 
 Este archivo es un **índice de estado y navegación**. No reemplaza la especificación funcional.
 
-**Fuente de verdad:** [`Roadmap septiembre 2026.txt`](../../Roadmap%20septiembre%202026.txt).
+**Fuente de verdad:** [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt).
 
 ## Estado actual
 
@@ -28,7 +28,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ninguna — roadmap vigente cerrado
 ```
 
-No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero `Roadmap septiembre 2026.txt` con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
+No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
 
 Baseline técnico actual:
 
@@ -140,7 +140,7 @@ Los textos de checkpoints históricos reflejan el estado en que fueron cerrados.
 
 ## Post-roadmap — Hardening técnico
 
-El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 también quedó completado. La fuente canónica sigue siendo `Roadmap septiembre 2026.txt`.
+El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 también quedó completado. La fuente canónica sigue siendo [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt).
 
 | Intervención | Alcance | Estado |
 |---|---|---|
