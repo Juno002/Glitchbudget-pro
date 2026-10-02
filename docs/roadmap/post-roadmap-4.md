@@ -57,55 +57,67 @@ No se cambian:
 - conteos;
 - semántica de movimientos.
 
-## Resultado después del cambio — commit 1960e12
+## Resultado después del cambio — medición revalidada en CI
+
+Medición del head `703b8d9`, run de rama **Quality checks #2022**:
 
 | Dataset | Apertura Movimientos | Filas DOM iniciales | financeContext | lecturas duplicadas | Heap |
 |---:|---:|---:|---:|---:|---:|
-| 5k | 374 ms | 100 | 113.7 ms | 0 | 29.9 MB |
-| 25k | 672 ms | 100 | 350.5 ms | 0 | 41.2 MB |
-| 50k | 1 169 ms | 100 | 749.3 ms | 0 | 88.7 MB |
+| 5k | 244 ms | 100 | 48.5 ms | 0 | 24.3 MB |
+| 25k | 587 ms | 100 | 215.6 ms | 0 | 39.5 MB |
+| 50k | 696 ms | 100 | 457.3 ms | 0 | 95.3 MB |
 
-Mejora observada:
+Frente al baseline, esta ejecución observó aproximadamente:
 
-- 5k: ~74 % menos tiempo hasta Movimientos;
-- 25k: ~89 % menos;
-- 50k: ~91 % menos;
-- 50k: ~77 % menos heap observado;
-- las dos lecturas redundantes grandes desaparecen por completo.
+- 5k: ~83 % menos tiempo hasta Movimientos;
+- 25k: ~91 % menos;
+- 50k: ~94 % menos;
+- 50k: ~75 % menos heap observado;
+- las dos lecturas redundantes grandes permanecen ausentes.
+
+Los tiempos absolutos varían entre runners; el criterio estructural es que las 100 filas iniciales, la única lectura `financeContext` y la ausencia de lecturas redundantes se mantienen bajo 5k / 25k / 50k.
 
 ## C3 — fondos con blur
 
-Se midió la vista a 390×844 con throttling de CPU 4×, comparando el fondo ambiental visible frente a oculto durante 90 intervalos de animación.
+Se midió la vista a 390×844 con throttling de CPU 4×, comparando el fondo ambiental realmente visible frente a oculto durante 90 intervalos de animación. El smoke fuerza temporalmente **Neón oscuro**, verifica que `.ambient-background` tenga visibilidad y opacidad efectiva, toma la muestra visible y después oculta únicamente ese fondo para la comparación.
 
-Resultado:
+Resultado del run **#2022**:
 
 | Estado | Frame medio | Frame máximo | frames >20 ms |
 |---|---:|---:|---:|
 | blurs visibles | 16.67 ms | 16.80 ms | 0 |
 | fondo oculto | 16.67 ms | 16.80 ms | 0 |
 
-En este benchmark reproducible no aparece impacto medible, por lo que **no se modifica el fondo**.
+En este proxy no aparece impacto medible, por lo que **no se modifica el fondo**.
 
-La medición es un proxy Chromium móvil/throttled, no un teléfono Android físico. La validación física sigue siendo QA de release; no hay evidencia cuantitativa que justifique degradar la identidad visual dentro de este hardening.
+La medición es Chromium headless móvil/throttled, no un teléfono Android físico. La validación física sigue siendo QA de release; esta evidencia no justifica degradar la identidad visual dentro de este hardening.
 
 ## Estabilidad del smoke E2E
 
-Durante la PR aparecieron timeouts distintos en transiciones de Plan/Metas/Planificados con el mismo SHA que había pasado en el run de rama. Como el smoke ahora también ejecuta datasets grandes y comparte runner con build/benchmark, el timeout genérico de `waitFor` se amplió de 15 s a **30 s**. Esto no cambia comportamiento del producto ni oculta fallos: un estado que no aparece en 30 s sigue fallando, pero se reduce el falso negativo por variación del runner.
+Los rojos de Plan/Metas/Planificados resultaron intermitentes: el mismo SHA `5f8c830` que había fallado pasó al reejecutar el job sin cambios de producto. El helper del smoke activaba tabs de Radix mediante `focus()` + `click()`, dependiendo de la activación automática por foco. Se cambió a un `mousedown` primario sobre un tab visible, que es la ruta de interacción que Radix usa para seleccionar la pestaña y elimina esa dependencia del foco.
 
-## Benchmark reproducible
+El timeout genérico permanece en **30 s** para absorber variación normal del runner, pero ya no es la corrección principal ni convierte estados ausentes en éxito.
 
-El smoke E2E conserva:
+## Benchmark reproducible y fail-closed
+
+El smoke E2E conserva y ahora valida explícitamente:
 
 - datasets 5k / 25k / 50k;
+- fecha de seed derivada del período activo de Movimientos, sin una fecha fija;
 - contadores de lecturas activados solo por `?perf=1`;
-- medición de filas DOM y heap;
-- comparación de ambient background con CPU throttling.
+- exactamente 100 filas DOM iniciales en cada dataset;
+- una lectura `financeContext` y ausencia de `accountOverview` / `investmentManager`;
+- fallo inmediato si Movimientos no llega a estado medible;
+- medición de heap cuando Chromium la expone;
+- comparación del fondo ambiental visible en Neón oscuro frente al mismo fondo oculto, con CPU throttling.
 
-## Carrera detectada por el gate
+Así, un timeout o una medición inválida ya no puede terminar como benchmark aparentemente exitoso.
 
-Los runs de PR reprodujeron timeouts alternos en Metas/Planificados. La revisión mostró que `PlanningTab` todavía usaba `setPlanningTab()`, cuya escritura de URL dependía de que el closure de `activeTab` ya estuviera en `planning`. Se eliminó esa dependencia: las subsecciones ahora llaman directamente a `navigate({ area:'planning', planningTab })`, actualizando estado y URL mediante el mismo contrato atómico usado por la navegación principal.
+## Navegación de Plan endurecida
 
-Esto no amplía alcance funcional; endurece C4/C2 bajo la carga del benchmark y elimina una carrera revelada por el smoke.
+Además del hardening del harness, `PlanningTab` dejó de depender de `setPlanningTab()` para escribir la URL según el closure de `activeTab`. Las subsecciones llaman directamente a `navigate({ area:'planning', planningTab })`, actualizando estado y URL mediante el mismo contrato atómico usado por la navegación principal.
+
+Esto no amplía alcance funcional ni cambia datos financieros; reduce una dependencia temporal innecesaria entre estado de área y estado de subsección.
 
 ## Datos e invariantes
 
@@ -120,11 +132,13 @@ Sin cambios en:
 
 ## Gate técnico
 
-Antes de documentación, el commit `1960e12a7bfcfa44d0ecab3ae42875d04c1931a9` pasó:
+El head `703b8d9` pasó en **Quality checks #2022**:
 
 - `npm run check` ✅
 - benchmark ledger ✅
 - `npm run build` ✅
 - `npm run test:e2e` ✅
+- benchmark 5k / 25k / 50k fail-closed ✅
+- comparación C3 con fondo realmente visible ✅
 
-La rama debe volver a pasar el gate completo con esta evidencia incluida antes de considerarse lista para la integración conjunta.
+La documentación final debe volver a pasar el mismo gate antes de considerar la rama lista para la integración conjunta.
