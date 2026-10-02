@@ -129,7 +129,7 @@ test('current JSON preserves Phase 15 metadata and legacy v10 imports without in
 
   const text=await exportDataJSON();
   const dump=JSON.parse(text);
-  assert.equal(dump.v,13);
+  assert.equal(dump.v,14);
   assert.equal(dump.expenses[0].necessity,'want');
   assert.deepEqual(dump.expenses[0].labels,['salida','amigos']);
   assert.deepEqual(dump.incomes[0].labels,['trabajo']);
