@@ -141,10 +141,14 @@ function activateTabExpression(label) {
   return `(() => {
     const tab = [...document.querySelectorAll('[role="tab"]')]
       .find(node => node.textContent?.trim() === ${JSON.stringify(label)}
-        && node.getAttribute('aria-disabled') !== 'true');
+        && node.getAttribute('aria-disabled') !== 'true'
+        && node.getClientRects().length > 0);
     if (!(tab instanceof HTMLElement)) return false;
-    tab.focus();
-    tab.click();
+    tab.dispatchEvent(new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      button: 0,
+    }));
     return true;
   })()`;
 }
