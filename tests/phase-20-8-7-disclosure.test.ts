@@ -12,12 +12,12 @@ const positionCard = summary.slice(
 );
 
 test('20.8.7 keeps stable KPI definitions behind touch and keyboard accessible disclosure', () => {
-  assert.match(positionCard, /<ContextHelp label=\\{'Qué significa '\\+label\\} contextLabel=\\{label\\}>/);
+  assert.ok(positionCard.includes("<ContextHelp label={'Qué significa '+label} contextLabel={label}>"));
   assert.match(contextHelp, /<PopoverTrigger asChild>/);
   assert.match(contextHelp, /type="button"/);
   assert.match(contextHelp, /aria-label=\{label\}/);
   assert.match(contextHelp, /showCloseButton/);
-  assert.match(contextHelp, /data-context-help=\{label\}/);
+  assert.match(contextHelp, /data-context-help=\{displayLabel\}/);
 });
 
 test('20.8.7 keeps financial interpretation details accessible without permanent helper rows', () => {
