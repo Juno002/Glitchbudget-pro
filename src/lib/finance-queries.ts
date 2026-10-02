@@ -1,7 +1,32 @@
+type BrowserPerfCounters = Record<string, { calls: number; totalMs: number; maxMs: number }>;
+
+type PerfGlobal = typeof globalThis & {
+  __prismaPerfCounters?: BrowserPerfCounters;
+};
+
+async function measuredQuery<T>(name: string, query: () => Promise<T>): Promise<T> {
+  const enabled = typeof location !== 'undefined' && new URLSearchParams(location.search).get('perf') === '1';
+  const started = enabled ? performance.now() : 0;
+  const result = await query();
+  if (enabled) {
+    const duration = performance.now() - started;
+    const root = globalThis as PerfGlobal;
+    const counters = root.__prismaPerfCounters ?? {};
+    const current = counters[name] ?? { calls: 0, totalMs: 0, maxMs: 0 };
+    counters[name] = {
+      calls: current.calls + 1,
+      totalMs: current.totalMs + duration,
+      maxMs: Math.max(current.maxMs, duration),
+    };
+    root.__prismaPerfCounters = counters;
+  }
+  return result;
+}
+
 import { db } from '@/lib/db';
 
 export function readFinanceContextData() {
-  return db.transaction('r', db.tables, async () => ({
+  return measuredQuery('financeContext', () => db.transaction('r', db.tables, async () => ({
     expenses: await db.expenses.toArray(),
     incomes: await db.incomes.toArray(),
     goals: await db.goals.toArray(),
@@ -12,7 +37,7 @@ export function readFinanceContextData() {
     transfers: await db.account_transfers.toArray(),
     accounts: await db.accounts.toArray(),
     investments: await db.investments.toArray(),
-  }));
+  })));
 }
 
 export function readGeneralSettings() {
@@ -43,7 +68,7 @@ export function readAccounts() {
 }
 
 export function readAccountOverviewData() {
-  return db.transaction(
+  return measuredQuery('accountOverview', () => db.transaction(
     'r',
     [db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments, db.debts],
     async () => ({
@@ -54,11 +79,11 @@ export function readAccountOverviewData() {
       payments: await db.debt_payments.toArray(),
       debts: await db.debts.toArray(),
     }),
-  );
+  ));
 }
 
 export function readInvestmentManagerData() {
-  return db.transaction(
+  return measuredQuery('investmentManager', () => db.transaction(
     'r',
     [db.investments, db.accounts, db.account_transfers, db.incomes, db.expenses, db.debt_payments],
     async () => ({
@@ -69,5 +94,5 @@ export function readInvestmentManagerData() {
       expenses: await db.expenses.toArray(),
       payments: await db.debt_payments.toArray(),
     }),
-  );
+  ));
 }

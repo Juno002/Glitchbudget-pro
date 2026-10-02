@@ -177,6 +177,88 @@ const selectFirstOptionExpression = selector => `(() => {
   return true;
 })()`;
 
+
+async function runPostRoadmap4Benchmark(client) {
+  const sizes = [5_000, 25_000, 50_000];
+  const results = [];
+
+  for (const size of sizes) {
+    await client.command('Page.navigate', { url: APP_URL + '?tab=movements&perf=1' });
+    await waitFor(client, `document.readyState === 'complete'`, 'carga benchmark ' + size, 30_000);
+
+    await client.evaluate(`(async () => {
+      const open = () => new Promise((resolve, reject) => {
+        const request = indexedDB.open('GlitchBudgetDB');
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => resolve(request.result);
+      });
+      const db = await open();
+      const tx = db.transaction(['expenses','incomes'], 'readwrite');
+      const expenses = tx.objectStore('expenses');
+      const incomes = tx.objectStore('incomes');
+      expenses.clear();
+      incomes.clear();
+      const size = ${size};
+      for (let i = 0; i < size; i += 1) {
+        expenses.put({
+          id: 'perf-expense-' + i,
+          nature: 'Variable',
+          concept: 'Benchmark ' + i,
+          amount: 100 + (i % 5000),
+          date: '2026-10-01',
+          categoryId: 'perf-category',
+          month: '2026-10',
+          currency: 'DOP',
+          fxRate: 1,
+          amountBase: 100 + (i % 5000),
+          paymentMethod: 'cash',
+        });
+      }
+      await new Promise((resolve, reject) => {
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
+      db.close();
+      globalThis.__prismaPerfCounters = {};
+      return true;
+    })()`, { awaitPromise: true });
+
+    const started = Date.now();
+    await client.command('Page.reload', { ignoreCache: true });
+    let ready = false;
+    try {
+      await waitFor(
+        client,
+        `document.readyState === 'complete'
+          && window.location.search.includes('tab=movements')
+          && Boolean(document.querySelector('[data-movement-history="list"]'))`,
+        'Movimientos benchmark ' + size,
+        60_000,
+      );
+      ready = true;
+    } catch {
+      ready = false;
+    }
+
+    const metrics = await client.evaluate(`(() => {
+      const list = document.querySelector('[data-movement-history="list"]');
+      const counters = globalThis.__prismaPerfCounters || {};
+      return {
+        renderedRows: list ? list.children.length : 0,
+        counters,
+        heap: performance.memory?.usedJSHeapSize ?? null,
+      };
+    })()`);
+    const elapsedMs = Date.now() - started;
+    const row = { size, ready, elapsedMs, ...metrics };
+    results.push(row);
+    process.stdout.write('POST_ROADMAP_4_BENCHMARK ' + JSON.stringify(row) + '\\n');
+  }
+
+  return results;
+}
+
 async function createMovement(client, type, amount) {
   if (!await client.evaluate(`(() => {
     const button = document.querySelector('[aria-label="Nuevo movimiento"]');
@@ -899,6 +981,11 @@ async function main() {
       `getComputedStyle(document.querySelector('[data-shell-sidebar="desktop"]')).display !== 'none'`,
       'retorno a Reportes desktop',
     );
+
+    const postRoadmap4Results = await runPostRoadmap4Benchmark(client);
+    if (postRoadmap4Results.length !== 3) throw new Error('Benchmark Post-roadmap 4 incompleto.');
+    await client.command('Page.navigate', { url: APP_URL + '?tab=reports' });
+    await waitFor(client, `document.readyState === 'complete' && Boolean(document.querySelector('[data-reports-prisma="true"]'))`, 'restaurar Reportes después del benchmark', 30_000);
 
     const externalRequests = requests.filter(url => {
       try {
