@@ -364,13 +364,12 @@ export default function MovementsView() {
         </div>
       </details>
 
-      <div className="flex items-center justify-between gap-3 px-1 text-xs text-muted-foreground">
-        <span>{items.length} de {allItems.length} movimientos</span>
-        <span>Actividad real · planificados pendientes viven en Plan</span>
+      <div className="px-1 text-xs text-muted-foreground">
+        {items.length} de {allItems.length} movimientos
       </div>
 
       {items.length===0 ? (
-        <EmptyState title="No hay movimientos" description="No hay movimientos registrados que coincidan con estos filtros." />
+        <EmptyState description="No hay movimientos registrados que coincidan con estos filtros." />
       ) : (
         <div className="overflow-hidden rounded-[var(--radius-card)] border bg-card shadow-[var(--shadow-card)]" data-movement-history="list">
           {visibleItems.map(item=>{
