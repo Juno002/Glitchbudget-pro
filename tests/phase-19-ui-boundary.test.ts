@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { ESLint } from 'eslint';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -28,10 +29,22 @@ test('UI cannot import Dexie database or Dexie React hooks directly', () => {
   assert.deepEqual(violations, []);
 });
 
-test('ESLint permanently guards the UI persistence boundary', () => {
-  const config = JSON.parse(readFileSync(path.join(root, '.eslintrc.json'), 'utf8'));
-  const serialized = JSON.stringify(config);
-  assert.match(serialized, /no-restricted-imports/);
-  assert.match(serialized, /@\/lib\/db/);
-  assert.match(serialized, /dexie-react-hooks/);
+test('ESLint permanently guards the UI persistence boundary', async () => {
+  const eslint = new ESLint({ cwd: root });
+  const source = [
+    "import { db } from '@/lib/db';",
+    "import { useLiveQuery } from 'dexie-react-hooks';",
+    'void db;',
+    'void useLiveQuery;',
+  ].join('\n');
+  const [result] = await eslint.lintText(source, {
+    filePath: path.join(root, 'src/components/__eslint-boundary__.tsx'),
+  });
+  const restricted = result.messages.filter(message => message.ruleId === 'no-restricted-imports');
+
+  assert.equal(
+    restricted.length,
+    2,
+    'UI flat-config boundary must reject both direct DB and Dexie React hook imports',
+  );
 });
