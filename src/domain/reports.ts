@@ -3,6 +3,7 @@ import { selectPosition } from './ledger';
 import { contains, type DateRange } from './periods';
 import { selectPositionKpiComparisons } from './kpi-comparisons';
 import { selectReportQuickRead } from './report-insights';
+import { partitionCanonicalFinancialDates } from './financial-date';
 
 export type ReportRangePreset = '7d' | '30d' | '3m' | '6m' | '1y' | 'custom';
 
@@ -105,7 +106,7 @@ function incomeForRange(incomes:Income[], range:DateRange) {
   return incomes.filter(row=>contains(range,row.date));
 }
 function paymentsForRange(payments:DebtPayment[], range:DateRange) {
-  return payments.filter(row=>contains(range,row.date));
+  return partitionCanonicalFinancialDates(payments).valid.filter(row=>contains(range,row.date as string));
 }
 
 function categories(rows:Expense[]) {
