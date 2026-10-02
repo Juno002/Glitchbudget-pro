@@ -5,22 +5,25 @@
 .viewport-dialog {
   top: calc(var(--visible-top, 0px) + var(--visible-height, 100dvh) / 2);
   left: calc(
+    var(--visible-left, 0px) +
     env(safe-area-inset-left, 0px) +
     (
-      100vw -
+      var(--visible-width, 100vw) -
       env(safe-area-inset-left, 0px) -
       env(safe-area-inset-right, 0px)
     ) / 2
   );
   width: min(
-    calc(100% - 2rem),
-    calc(100% - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1rem)
+    calc(var(--visible-width, 100vw) - 2rem),
+    calc(var(--visible-width, 100vw) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px) - 1rem)
   );
   max-height: min(
     calc(var(--visible-height, 100dvh) - 2rem),
     calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 1rem)
   );
+  overflow-x: hidden;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .viewport-sheet {
@@ -65,6 +68,8 @@
     a[href],
     summary,
     select,
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='hidden']),
+    textarea,
     [role='tab'],
     [role='menuitem'],
     [role='option']
