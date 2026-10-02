@@ -6,7 +6,7 @@ function source(path: string) {
   return readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
 }
 
-test('20.10.7 README is strictly product documentation for Prisma', () => {
+test('20.10.7 README stays product-facing while documenting maintenance essentials', () => {
   const readme = source('README.md');
 
   for (const required of [
@@ -20,9 +20,22 @@ test('20.10.7 README is strictly product documentation for Prisma', () => {
     'Modo Prisma',
     'Modo Neón',
     'Copias y recuperación',
+    'Node.js 22',
+    'npm ci',
+    'npm run dev',
+    'npm run check',
+    'Nombre público y compatibilidad interna',
+    'GlitchBudget',
+    'src/domain/local-security.ts',
   ]) {
     assert.match(readme, new RegExp(required, 'i'), required);
   }
+
+  assert.equal(
+    (readme.match(/GlitchBudget/g) ?? []).length,
+    1,
+    'GlitchBudget debe aparecer solo en la nota pública de compatibilidad interna',
+  );
 
   for (const forbidden of [
     /roadmap/i,
@@ -32,8 +45,6 @@ test('20.10.7 README is strictly product documentation for Prisma', () => {
     /\bcommit\b/i,
     /\bSHA\b/i,
     /Quality checks/i,
-    /npm run/i,
-    /GlitchBudget/i,
   ]) {
     assert.doesNotMatch(readme, forbidden);
   }

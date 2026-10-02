@@ -4783,7 +4783,7 @@ Secuencia autorizada:
 Intervención 1 — Integridad de fechas + Backup v14 ✅
 → Intervención 2 — App Lock ✅
 → Intervención 3 — Backup cifrado evolutivo ✅
-→ Intervención 4 — Mantenimiento pequeño
+→ Intervención 4 — Mantenimiento pequeño ✅
 → Intervención 5 — Tooling aislado
 ```
 
@@ -4836,10 +4836,13 @@ Contrato:
 
 ### Intervención 4 — Mantenimiento pequeño
 
-**Estado: pendiente.**
+**Estado: completada / Gate aprobado.** PR #101.
 
 - documentar en README que Prisma es el nombre público y GlitchBudget permanece como identidad interna/de compatibilidad en DB, claves y formatos históricos;
-- alinear `@types/node` con Node 22.
+- documentar requisitos de desarrollo, incluyendo Node 22 y los comandos principales;
+- aclarar en README el alcance real de App Lock y enlazar al contrato técnico de seguridad;
+- alinear `@types/node` con Node 22 y actualizar `package-lock.json`;
+- validar el gate completo antes de cerrar.
 
 ### Intervención 5 — Tooling aislado
 
@@ -4848,6 +4851,14 @@ Contrato:
 - revisar/migrar ESLint como trabajo independiente;
 - ejecutar CI completo;
 - no mezclarlo con seguridad, migraciones ni backups.
+
+## Pendientes sin autorizar
+
+Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
+
+- **Normalización NFC de contraseñas del backup cifrado:** cualquier cambio debe preservar compatibilidad con copias existentes, probablemente intentando la representación histórica y la normalizada durante descifrado antes de adoptar una nueva escritura.
+- **Versión futura del envelope cifrado:** decidir explícitamente si un futuro aumento del coste de exportación conserva `version: 1` o requiere `version: 2`. No cambiar el coste productivo sin el benchmark móvil representativo exigido por el contrato existente.
+- **Fragilidad de `next/font` en CI:** si vuelve a reproducirse el fallo de descarga/carga de DM Sans durante build, auditar la dependencia de red y decidir una alternativa reproducible. Un fallo aislado no autoriza cambios en esta intervención.
 
 ## Regla de autoridad y no invención del roadmap
 
@@ -4860,7 +4871,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-audit hardening 4 → 5
+intervenciones pendientes autorizadas = Post-audit hardening 5
 ```
 
 No existe una Fase 20.11.
