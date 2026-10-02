@@ -54,7 +54,8 @@ test('20.9.9 routes residual Plan actions back through the shared Button primiti
 test('20.9.9 browser sweep exercises real premium-theme controls and residual category iconography', () => {
   const e2e = source('scripts/e2e-smoke.mjs');
 
-  assert.match(e2e, /iconografía funcional de categorías/);
+  assert.match(e2e, /Categorías Prisma sin overflow a 320px/);
+  assert.match(e2e, /selector de iconos táctil y contenido/);
   assert.match(e2e, /#theme-dark/);
   assert.match(e2e, /tema Neón oscuro real/);
   assert.match(e2e, /#theme-light/);
