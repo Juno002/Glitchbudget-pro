@@ -193,9 +193,7 @@ export default function OpfsBackupDialog() {
       <DialogContent className="sm:max-w-2xl" data-backups-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
-          <DialogDescription>
-            Tus datos están en este navegador. Puedes descargar el JSON normal o crear una copia cifrada opcional. Las copias locales del navegador siguen sin cifrar y se eliminan al borrar los datos del sitio.
-          </DialogDescription>
+          <DialogDescription className="sr-only">Crear, exportar o restaurar copias de tus datos.</DialogDescription>
         </DialogHeader>
         
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
@@ -227,7 +225,7 @@ export default function OpfsBackupDialog() {
             <CsvBackupDialog />
         </div>
         
-        <p className="text-sm font-semibold text-muted-foreground mt-4">Copias Locales (Dispositivo)</p>
+        <p className="mt-4 text-sm font-semibold">Copias locales</p>
         <ScrollArea className="mt-2 h-64 rounded-[var(--radius-card)] border bg-muted/15">
             <div className="p-4">
                 {isWorking && backupFiles.length === 0 ? (
@@ -289,8 +287,7 @@ export default function OpfsBackupDialog() {
                     </ul>
                 ) : (
                     <div className="text-center py-10">
-                        <EmptyState className="min-h-28" title="Sin copias locales" description="Crea una copia local o importa un archivo para empezar." />
-                        <p className="text-sm text-muted-foreground">Crea tu primera copia para empezar.</p>
+                        <EmptyState className="min-h-28" title="Sin copias locales" />
                     </div>
                 )}
             </div>

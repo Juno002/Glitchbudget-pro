@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeftRight, BarChart3, Check, FileText, NotebookPen, Plus } from 'lucide-react';
+import { ArrowLeftRight, BarChart3, FileText, NotebookPen, Plus } from 'lucide-react';
 import { BrandMark } from '@/components/layout/brand-mark';
 import { PRIMARY_NAV_ITEMS, type PrimaryArea } from '@/components/layout/primary-navigation';
 import { useTabs } from '@/contexts/tabs-context';
@@ -22,10 +22,7 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
       {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
       <a href="/" className="flex items-center gap-3 px-2" aria-label="Prisma">
         <BrandMark />
-        <span className="min-w-0">
-          <span className="block truncate font-headline text-[1.2rem] leading-none tracking-[-0.035em] text-sidebar-primary">Prisma</span>
-          <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Local / privado</span>
-        </span>
+        <span className="block truncate font-headline text-[1.2rem] leading-none tracking-[-0.035em] text-sidebar-primary">Prisma</span>
       </a>
 
       <button
@@ -63,17 +60,6 @@ export default function DesktopSidebar({ onNewMovement }: { onNewMovement: () =>
         })}
       </nav>
 
-      <div className="mt-auto px-1">
-        <div className="flex items-center gap-2 rounded-[var(--radius-card)] border border-sidebar-border bg-background/45 p-3">
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-good/15 text-good">
-            <Check className="h-3.5 w-3.5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-xs font-semibold text-sidebar-foreground">Solo en tu dispositivo</span>
-            <span className="mt-0.5 block text-[10px] text-muted-foreground">Sincronización financiera remota desactivada</span>
-          </span>
-        </div>
-      </div>
     </aside>
   );
 }

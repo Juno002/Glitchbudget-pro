@@ -9,6 +9,7 @@ import {
 } from '@/domain/local-security';
 import { isValidAppLockPin } from '@/lib/app-lock';
 import { Button } from '@/components/ui/button';
+import { ContextHelp } from '@/components/finance-ui';
 import { Input } from '@/components/ui/input';
 
 function PinInput({
@@ -129,20 +130,16 @@ export default function AppLockSettings() {
       <form onSubmit={activate} className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]" data-app-lock-settings="prisma" aria-label="Configurar bloqueo de aplicación">
         <div className="flex items-start gap-3">
           <LockOpen className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
+          <div className="flex items-center gap-1">
             <p className="font-medium">Bloqueo de aplicación</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Protege el acceso a la interfaz con un PIN local. No cifra Dexie ni tus copias de seguridad.
-            </p>
+            <ContextHelp label="Acerca del bloqueo de aplicación">Protege la interfaz con un PIN local. No cifra los datos almacenados ni las copias.</ContextHelp>
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <PinInput label="Nuevo PIN" value={newPin} onChange={setNewPin} autoComplete="new-password" />
           <PinInput label="Confirmar PIN" value={confirmPin} onChange={setConfirmPin} autoComplete="new-password" />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Usa entre {APP_LOCK_PIN_MIN_LENGTH} y {APP_LOCK_PIN_MAX_LENGTH} dígitos. El PIN no se guarda en texto claro.
-        </p>
+        <p className="text-xs text-muted-foreground">Usa entre {APP_LOCK_PIN_MIN_LENGTH} y {APP_LOCK_PIN_MAX_LENGTH} dígitos.</p>
         {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
         {message && <p className="text-sm text-muted-foreground" role="status">{message}</p>}
         <Button type="submit" disabled={busy}>{busy ? 'Activando…' : 'Activar bloqueo'}</Button>
@@ -155,11 +152,9 @@ export default function AppLockSettings() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
+          <div className="flex items-center gap-1">
             <p className="font-medium">Bloqueo de aplicación activo</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Bloquea la interfaz financiera. No cifra Dexie ni los archivos del dispositivo.
-            </p>
+            <ContextHelp label="Acerca del bloqueo activo">Bloquea la interfaz financiera; no cifra los datos almacenados ni los archivos del dispositivo.</ContextHelp>
           </div>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={lockNow}>Bloquear ahora</Button>

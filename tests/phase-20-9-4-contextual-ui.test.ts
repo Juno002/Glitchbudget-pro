@@ -49,22 +49,17 @@ test('20.9.4 dialogs share hierarchy, responsive close behavior and visible focu
   assert.doesNotMatch(alert, /"mt-2 sm:mt-0"/);
 });
 
-test('20.9.4 KPI help is dismissible while financial warnings remain permanently visible', () => {
+test('20.9.4 KPI help is reusable, dismissible and removes permanent helper rows', () => {
   const summary = source('src/components/dashboard/summary-tab.tsx');
+  const help = source('src/components/finance-ui/context-help.tsx');
 
-  assert.match(summary, /aria-label=\{'Qué significa '\+label\}/);
-  assert.match(summary, /showCloseButton/);
-  assert.match(summary, /data-context-help=\{label\}/);
-  assert.match(summary, /Cerrar explicación de '\+label/);
-  assert.match(summary, /h-8 w-8/);
-
-  const popoverEnd = summary.indexOf('</PopoverContent>');
-  const warningBlock = summary.indexOf('{warning ? (');
-  assert.ok(popoverEnd >= 0 && warningBlock > popoverEnd, 'warnings must remain outside contextual popovers');
-
-  assert.match(summary, /warning="No incluye crédito disponible\."/);
-  assert.match(summary, /warning="Deuda real registrada\."/);
-  assert.match(summary, /warning="No incluye rendimiento proyectado\."/);
+  assert.ok(summary.includes("<ContextHelp label={'Qué significa '+label} contextLabel={label}>"));
+  assert.match(help, /aria-label=\{label\}/);
+  assert.match(help, /showCloseButton/);
+  assert.match(help, /data-context-help=\{displayLabel\}/);
+  assert.match(help, /Cerrar explicación de '\+displayLabel/);
+  assert.match(help, /h-8 w-8/);
+  assert.doesNotMatch(summary, /warning\?:string|\{warning \? \(/);
 });
 
 test('20.9.4 destructive consequences stay in visible AlertDialog descriptions', () => {

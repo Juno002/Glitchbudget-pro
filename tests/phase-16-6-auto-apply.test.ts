@@ -111,7 +111,8 @@ test('16.6 UI makes opt-in explicit per rule and automatic application only fill
 
   assert.match(manager, /Aplicar automáticamente esta regla/);
   assert.match(manager, /applyAutomatically \? \{ applyAutomatically: true \}/);
-  assert.match(manager, /solo para esta regla/i);
+  assert.match(manager, /ContextHelp label="Acerca de la aplicación automática"/);
+  assert.match(manager, /varias reglas automáticas coinciden/i);
   assert.match(modal, /resolveAutomaticRuleSuggestion/);
   assert.match(modal, /shouldApplyAutomaticRuleField/);
   assert.match(modal, /setCategoryEditedManually\(true\)/);

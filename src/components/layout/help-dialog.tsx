@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Button } from '@/components/ui/button';
 export function HelpDialog() {
   return <Dialog><DialogTrigger asChild><Button variant="ghost" className="w-full justify-start">Ayuda y privacidad</Button></DialogTrigger>
-    <DialogContent className="sm:max-w-xl"><DialogHeader><DialogTitle>Tu presupuesto, en tu dispositivo</DialogTitle><DialogDescription>Guía rápida · Versión 0.1.0 · En evaluación</DialogDescription></DialogHeader>
+    <DialogContent className="sm:max-w-xl"><DialogHeader><DialogTitle>Tu presupuesto, en tu dispositivo</DialogTitle><DialogDescription>Guía rápida</DialogDescription></DialogHeader>
     <div className="space-y-4 text-sm leading-relaxed text-foreground">
       <section><h3 className="font-semibold">Para empezar</h3><p>Registra movimientos reales con el botón +. Configura tus saldos iniciales en Movimientos y asigna presupuestos en Plan. La fecha del movimiento determina a qué período financiero pertenece.</p></section>
       <section><h3 className="font-semibold">Cómo leer el resumen</h3><p>Disponible líquido suma efectivo y bancos registrados. Ingresos y Gastos corresponden al período seleccionado: una compra con tarjeta es un gasto y aumenta la deuda. Pagarla reduce el saldo de la cuenta y la deuda, sin repetir el gasto. El ahorro sugerido es planificación, no dinero separado.</p></section>

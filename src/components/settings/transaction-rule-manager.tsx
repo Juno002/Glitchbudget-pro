@@ -15,6 +15,7 @@ import {
   upsertTransactionRule,
 } from '@/lib/transaction-rules';
 import { Button } from '@/components/ui/button';
+import { ContextHelp } from '@/components/finance-ui';
 import { Input } from '@/components/ui/input';
 
 type NecessityDraft = '' | TransactionNecessity;
@@ -132,11 +133,9 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
   return (
     <div className="space-y-5" data-rules-prisma="true">
       <div className="space-y-4 rounded-[var(--radius-card)] border bg-card p-5 shadow-[var(--shadow-card)]">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Automatización local</p><h3 className="mt-1 font-display text-xl font-normal">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Por defecto las reglas solo sugieren clasificación. Puedes habilitar aplicación automática de forma explícita en una regla concreta.
-          </p>
+        <div className="flex items-center gap-1">
+          <h3 className="font-display text-xl font-normal">{editingId ? 'Editar regla' : 'Crear regla'}</h3>
+          <ContextHelp label="Cómo se aplican las reglas">Por defecto las reglas sugieren clasificación. La aplicación automática se habilita por regla.</ContextHelp>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
@@ -180,7 +179,7 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
           </label>
 
           <label className="space-y-1 text-sm">
-            <span className="font-medium">Sugerir necesidad</span>
+            <span className="flex items-center gap-1 font-medium">Sugerir necesidad <ContextHelp label="Acerca de necesidad">Solo se aplica a gastos.</ContextHelp></span>
             <select
               aria-label="Necesidad sugerida"
               value={necessity}
@@ -192,7 +191,6 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
                 <option key={value} value={value}>{NECESSITY_LABELS[value]}</option>
               ))}
             </select>
-            <span className="block text-xs text-muted-foreground">La necesidad solo puede aplicarse a gastos.</span>
           </label>
 
           <label className="flex items-start gap-3 rounded-[var(--radius-interactive)] border bg-muted/25 p-3 text-sm md:col-span-2">
@@ -203,11 +201,9 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
               aria-label="Aplicar automáticamente esta regla"
               className="mt-1"
             />
-            <span>
+            <span className="flex items-center gap-1">
               <span className="block font-medium">Aplicar automáticamente</span>
-              <span className="mt-1 block text-xs text-muted-foreground">
-                Opcional y solo para esta regla. Si varias reglas automáticas coinciden a la vez, el registro rápido no elegirá una por su cuenta.
-              </span>
+              <ContextHelp label="Acerca de la aplicación automática">Si varias reglas automáticas coinciden a la vez, el registro rápido no elegirá una por su cuenta.</ContextHelp>
             </span>
           </label>
         </div>
@@ -224,11 +220,9 @@ export default function TransactionRuleManager({ onRuleCountChange }: Transactio
       </div>
 
       <div className="space-y-3">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Orden de aplicación</p><h3 className="mt-1 font-display text-xl font-normal">Reglas locales</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            El orden se conserva y también es el orden en que el registro rápido presenta coincidencias.
-          </p>
+        <div className="flex items-center gap-1">
+          <h3 className="font-display text-xl font-normal">Reglas locales</h3>
+          <ContextHelp label="Orden de las reglas">El orden se conserva y define cómo se presentan las coincidencias.</ContextHelp>
         </div>
 
         {rules.length === 0 ? (

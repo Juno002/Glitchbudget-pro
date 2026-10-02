@@ -46,7 +46,9 @@ test('20.4 accounts and cards remain secondary surfaces backed by existing read 
   assert.match(accounts, /selectAccountOverviewReadModel/);
   assert.match(cards, /data-cards-prisma="true"/);
   assert.match(cards, /selectCardReadModel/);
-  assert.match(movements, /Gestión secundaria/);
+  assert.match(movements, /id="accounts-section"/);
+  assert.match(movements, /Cuentas y tarjetas/);
+  assert.ok(movements.includes('<AccountsOverview />'));
   assert.doesNotMatch(movements, /setActiveTab\(['"]accounts|setActiveTab\(['"]cards/);
 });
 

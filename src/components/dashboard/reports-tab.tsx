@@ -147,10 +147,7 @@ export default function ReportsTab() {
 
   return (
     <div className="space-y-8 pb-24 md:pb-8" data-reports-prisma="true">
-      <PageHeader
-        title={<><span>Reportes</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
-        description="Lectura rápida, comparación y detalle exacto del rango seleccionado."
-      />
+      <PageHeader title={<><span>Reportes</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} />
 
       <ReportRangeControls
         preset={preset}
@@ -158,8 +155,6 @@ export default function ReportsTab() {
         customEnd={customEnd}
         today={today}
         rangeError={rangeError}
-        currentLabel={currentLabel}
-        previousLabel={previousLabel}
         onPresetChange={setPreset}
         onCustomStartChange={setCustomStart}
         onCustomEndChange={setCustomEnd}
@@ -173,11 +168,7 @@ export default function ReportsTab() {
       ) : (
         <>
           <section className="space-y-4" aria-labelledby="quick-read-title" data-report-section="quick-read">
-            <SectionHeader
-              eyebrow="Lectura rápida"
-              title={<span id="quick-read-title">Lo más relevante del rango</span>}
-              description="Señales deterministas derivadas del mismo snapshot; el detalle exacto permanece debajo."
-            />
+            <SectionHeader title={<span id="quick-read-title">Lo más relevante del rango</span>} />
             <div className="grid gap-3 md:grid-cols-3">
               {report.quickRead.map(insight=>(
                 <Card key={insight.kind} className="shadow-[var(--shadow-control)]" data-quick-read-kind={insight.kind}>
@@ -186,9 +177,11 @@ export default function ReportsTab() {
                       {insight.focus==='cash-flow'?'Flujo de caja':insight.focus==='net-worth'?'Patrimonio':insight.focus==='categories'?'Categorías':insight.focus==='spending'?'Gastos':'Resumen'}
                     </p>
                     <p className="mt-2 font-display text-xl font-normal tracking-[-0.025em]">{quickReadTitle(insight)}</p>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {quickReadBody(insight,money,id=>getCategoryInfo(id)?.name || id)}
-                    </p>
+                    {insight.kind !== 'no_material_change' ? (
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                        {quickReadBody(insight,money,id=>getCategoryInfo(id)?.name || id)}
+                      </p>
+                    ) : null}
                   </CardContent>
                 </Card>
               ))}
@@ -196,11 +189,7 @@ export default function ReportsTab() {
           </section>
 
           <section className="space-y-4" aria-labelledby="spending-title" data-report-section="spending">
-            <SectionHeader
-              eyebrow="Hero analítico"
-              title={<span id="spending-title">Gastos</span>}
-              description="Gasto real registrado dentro del rango. Una compra con tarjeta cuenta una vez como gasto."
-            />
+            <SectionHeader title={<span id="spending-title">Gastos</span>} />
             <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-hero="spending">
               <CardContent className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.35fr_2fr] lg:items-end">
                 <div>
@@ -228,11 +217,7 @@ export default function ReportsTab() {
           </section>
 
           <section className="space-y-4" aria-labelledby="comparison-title" data-report-section="comparison">
-            <SectionHeader
-              eyebrow="Tendencias"
-              title={<span id="comparison-title">Comparación</span>}
-              description="Rango actual frente al período inmediatamente anterior de duración comparable."
-            />
+            <SectionHeader title={<span id="comparison-title">Comparación</span>} />
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="comparison">
               <CardHeader>
                 <CardTitle className="font-display text-xl font-normal">Actual vs. anterior</CardTitle>
@@ -270,17 +255,12 @@ export default function ReportsTab() {
           </section>
 
           <section className="space-y-4" aria-labelledby="spending-breakdown-title" data-report-section="spending-breakdown">
-            <SectionHeader
-              eyebrow="Distribución"
-              title={<span id="spending-breakdown-title">Categorías y naturaleza</span>}
-              description="Dos lecturas del mismo gasto real: dónde ocurrió y qué tipo de gasto fue."
-            />
+            <SectionHeader title={<span id="spending-breakdown-title">Categorías y naturaleza</span>} />
             <div className="grid gap-4 xl:grid-cols-2">
               <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="categories">
                 <CardHeader>
                   <CardTitle className="font-display text-2xl font-normal">Distribución por categoría</CardTitle>
-                  <CardDescription>La categoría es una dimensión; la naturaleza del gasto se presenta aparte.</CardDescription>
-                </CardHeader>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <ReportCategoryDonut data={categoryChartRows} />
                   {report.spending.categories.length ? (
@@ -298,15 +278,14 @@ export default function ReportsTab() {
                         </TableBody>
                       </Table>
                     </div>
-                  ) : <EmptyState title="Sin gastos" description="No hay gastos registrados dentro de este rango." />}
+                  ) : <EmptyState description="No hay gastos registrados dentro de este rango." />}
                 </CardContent>
               </Card>
 
               <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="nature">
                 <CardHeader>
                   <CardTitle className="font-display text-2xl font-normal">Fijo / Variable / Ocasional</CardTitle>
-                  <CardDescription>Naturaleza del gasto, separada de categoría.</CardDescription>
-                </CardHeader>
+                  </CardHeader>
                 <CardContent className="space-y-4">
                   <ReportValueBars data={natureChartRows} />
                   <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
@@ -329,11 +308,7 @@ export default function ReportsTab() {
           </section>
 
           <section className="space-y-4" aria-labelledby="cashflow-title" data-report-section="cash-flow">
-            <SectionHeader
-              eyebrow="Movimiento de caja"
-              title={<span id="cashflow-title">Flujo de caja</span>}
-              description="Entradas y salidas reales de efectivo; una compra a crédito no sale de caja hasta que pagas la tarjeta."
-            />
+            <SectionHeader title={<span id="cashflow-title">Flujo de caja</span>} />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard label="Ingresos" amount={report.cashFlow.income} tone="positive" />
               <MetricCard label="Gastos en efectivo" amount={report.cashFlow.cashExpenses} tone="negative" />
@@ -343,18 +318,13 @@ export default function ReportsTab() {
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="cash-flow">
               <CardHeader>
                 <CardTitle className="font-display text-xl font-normal">Flujo del rango</CardTitle>
-                <CardDescription>Representación de las métricas del snapshot; no mezcla compras a crédito con salidas de caja.</CardDescription>
               </CardHeader>
               <CardContent><ReportValueBars data={cashFlowChartRows} signed /></CardContent>
             </Card>
           </section>
 
           <section className="space-y-4" aria-labelledby="networth-title" data-report-section="net-worth">
-            <SectionHeader
-              eyebrow="Posición"
-              title={<span id="networth-title">Patrimonio neto</span>}
-              description={'Posición registrada al '+range.end+'. Las proyecciones futuras de inversiones no se incluyen.'}
-            />
+            <SectionHeader title={<span id="networth-title">Patrimonio neto</span>} />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <MetricCard label="Efectivo" amount={report.netWorth.cash} tone="neutral" />
               <MetricCard label="Bancos" amount={report.netWorth.banks} tone="neutral" />
@@ -365,7 +335,6 @@ export default function ReportsTab() {
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
               <CardHeader>
                 <CardTitle className="font-display text-xl font-normal">Composición registrada</CardTitle>
-                <CardDescription>Activos registrados frente a pasivos registrados y patrimonio neto.</CardDescription>
               </CardHeader>
               <CardContent><ReportValueBars data={netWorthChartRows} signed /></CardContent>
             </Card>
@@ -377,15 +346,10 @@ export default function ReportsTab() {
           </section>
 
           <section className="space-y-4" aria-labelledby="detail-title" data-report-section="detail">
-            <SectionHeader
-              eyebrow="Detalle exacto"
-              title={<span id="detail-title">Movimientos destacados</span>}
-              description="El resumen editorial no reemplaza los importes y filas exactas del rango."
-            />
+            <SectionHeader title={<span id="detail-title">Movimientos destacados</span>} />
             <Card className="shadow-[var(--shadow-card)]">
               <CardHeader>
                 <CardTitle className="font-display text-xl font-normal">Movimientos de mayor importe</CardTitle>
-                <CardDescription>Los gastos individuales más grandes del rango.</CardDescription>
               </CardHeader>
               <CardContent>
                 {report.spending.largestTransactions.length ? (
@@ -404,17 +368,13 @@ export default function ReportsTab() {
                       </TableBody>
                     </Table>
                   </div>
-                ) : <EmptyState title="Sin transacciones" description="No hay gastos para ordenar en este rango." />}
+                ) : <EmptyState description="No hay gastos para ordenar en este rango." />}
               </CardContent>
             </Card>
           </section>
 
           <section className="space-y-4" aria-labelledby="budget-followup-title" data-report-section="budget-followup">
-            <SectionHeader
-              eyebrow="Seguimiento"
-              title={<span id="budget-followup-title">Presupuestos actuales</span>}
-              description="Seguimiento secundario del período financiero actual; no altera el rango analítico."
-            />
+            <SectionHeader title={<span id="budget-followup-title">Presupuestos actuales</span>} />
             <Card className="shadow-[var(--shadow-card)]">
               <CardContent className="pt-6">
                 {budgetDetails.length ? (

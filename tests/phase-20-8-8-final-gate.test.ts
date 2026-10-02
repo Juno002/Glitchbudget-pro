@@ -21,7 +21,7 @@ test('20.8.8 keeps the complete Information Design contracts executable', () => 
   assert.match(kpis, /does not reconstruct KPI comparison math in React/);
   assert.match(reports, /canonical editorial hierarchy/);
   assert.match(reports, /preserves comparison, category, nature, cash-flow and net-worth visuals/);
-  assert.match(disclosure, /keeps decision-changing financial consequences permanently visible/);
+  assert.match(disclosure, /keeps financial interpretation details accessible without permanent helper rows/);
   assert.match(disclosure, /does not rely on hover-only disclosure/);
 });
 

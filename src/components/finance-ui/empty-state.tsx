@@ -9,7 +9,7 @@ export function EmptyState({
   className,
 }: {
   icon?: ReactNode;
-  title: ReactNode;
+  title?: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
   className?: string;
@@ -20,8 +20,8 @@ export function EmptyState({
       className,
     )}>
       {icon ? <div className="mb-3 text-muted-foreground" aria-hidden="true">{icon}</div> : null}
-      <h3 className="font-display text-lg font-normal">{title}</h3>
-      {description ? <div className="mt-1 max-w-md text-sm leading-relaxed text-muted-foreground">{description}</div> : null}
+      {title ? <h3 className="font-display text-lg font-normal">{title}</h3> : null}
+      {description ? <div className={cn('max-w-md text-sm leading-relaxed text-muted-foreground', title && 'mt-1')}>{description}</div> : null}
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );

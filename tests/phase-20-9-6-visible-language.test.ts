@@ -57,8 +57,8 @@ test('20.9.6 local automation uses Spanish visible names without renaming intern
   const rules = source('src/components/settings/transaction-rule-manager.tsx');
   const automation = source('src/components/dashboard/transaction-modal-automation.tsx');
 
-  assert.match(settings, /Plantillas → Filtros guardados → Reglas/);
-  assert.match(settings, /registro rápido/);
+  assert.match(settings, /data-local-automation-order="templates-saved-filters-rules"/);
+  assert.match(settings, /\{layer\.title\}/);
   assert.match(rules, /registro rápido/);
   assert.match(automation, /registro rápido/);
 
@@ -100,7 +100,7 @@ test('20.9.6 backup surfaces say copia while preserving technical formats', () =
   const persistence = source('src/components/settings/persistent-storage-settings.tsx');
 
   assert.match(opfs, /Copia no válida/);
-  assert.match(opfs, /copia cifrada opcional/);
+  assert.match(encryptedExport, /copia cifrada/i);
   assert.match(encryptedExport, /Copia cifrada exportada/);
   assert.match(encryptedExport, /Crear copia cifrada/);
   assert.match(encryptedRestore, /Restaurar copia cifrada/);
@@ -145,11 +145,11 @@ test('20.9.6 propagated display sources are also Spanish', () => {
 test('20.9.6 keeps documented technical names and formats unchanged', () => {
   const help = source('src/components/layout/help-dialog.tsx');
   const csv = source('src/components/backup/csv-backup-dialog.tsx');
-  const lock = source('src/components/settings/app-lock-settings.tsx');
+  const lockGate = source('src/components/security/app-lock-gate.tsx');
 
   assert.match(help, /JSON/);
   assert.match(csv, /CSV/);
   assert.match(csv, /Google Sheets/);
   assert.match(csv, /OPFS/);
-  assert.match(lock, /Dexie/);
+  assert.match(lockGate, /Dexie/);
 });

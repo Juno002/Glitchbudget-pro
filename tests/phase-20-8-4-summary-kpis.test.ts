@@ -69,7 +69,7 @@ test('20.8.4 Home read model passes canonical position comparisons through witho
   assert.equal(home.positionComparisons.investments.absoluteDelta, 0);
 });
 
-test('20.8.4 Summary renders comparison before contextual explanation for every position KPI', () => {
+test('20.8.4 Summary keeps canonical comparisons and contextual KPI help', () => {
   const source = readFileSync(new URL('../src/components/dashboard/summary-tab.tsx', import.meta.url), 'utf8');
 
   assert.match(source, /data-position-comparison=/);
@@ -82,31 +82,17 @@ test('20.8.4 Summary renders comparison before contextual explanation for every 
   const cardEnd = source.indexOf('function PanelHeading');
   const card = source.slice(cardStart, cardEnd);
   assert.ok(card.indexOf('<MoneyValue') < card.indexOf('data-position-comparison='));
-  assert.ok(card.indexOf('data-position-comparison=') < card.indexOf('{warning ?'));
-
-  assert.match(source, /PopoverTrigger/);
-  assert.match(source, /Qué significa /);
+  assert.ok(card.includes("<ContextHelp label={'Qué significa '+label} contextLabel={label}>"));
 });
 
-test('20.8.4 keeps interpretation-changing warnings visible and moves stable definitions into contextual help', () => {
+test('20.8.4 keeps interpretation details available on demand instead of permanent warning rows', () => {
   const source = readFileSync(new URL('../src/components/dashboard/summary-tab.tsx', import.meta.url), 'utf8');
 
-  for (const warning of [
-    'No incluye crédito disponible.',
-    'Deuda real registrada.',
-    'No incluye rendimiento proyectado.',
-  ]) {
-    assert.ok(source.includes('warning="' + warning + '"'), warning);
-  }
-
-  for (const help of [
-    'Efectivo + bancos registrados en el ledger.',
-    'Activos reales registrados menos pasivos registrados.',
-    'Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles.',
-    'Valor registrado de los activos de inversión.',
-  ]) {
-    assert.ok(source.includes('help="' + help + '"'), help);
-  }
+  assert.doesNotMatch(source, /warning\?:string|\{warning \? \(/);
+  assert.match(source, /help="Efectivo \+ bancos registrados en el ledger\. No incluye crédito disponible\."/);
+  assert.match(source, /help="Activos reales registrados menos pasivos registrados\."/);
+  assert.match(source, /help="Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles\."/);
+  assert.match(source, /help="Valor registrado de los activos de inversión\. No incluye rendimiento proyectado\."/);
 });
 
 test('20.8.4 Summary does not reconstruct KPI comparison math in React', () => {

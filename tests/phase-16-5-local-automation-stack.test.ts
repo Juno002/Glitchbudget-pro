@@ -106,11 +106,11 @@ test('16.5 exposes the ordered stack in Settings while each layer keeps its nati
   const movements = readFileSync(new URL('../src/components/dashboard/MovementsView.tsx', import.meta.url), 'utf8');
   const manager = readFileSync(new URL('../src/components/settings/transaction-rule-manager.tsx', import.meta.url), 'utf8');
 
-  assert.match(settings, /Plantillas → Filtros guardados → Reglas/);
   assert.match(settings, /data-local-automation-order="templates-saved-filters-rules"/);
-  assert.match(settings, /Las plantillas se gestionan dentro del registro rápido/);
-  assert.match(settings, /los filtros guardados, en Movimientos/);
-  assert.match(settings, /las reglas se gestionan aquí/);
+  assert.match(settings, /LOCAL_AUTOMATION_LAYERS.map/);
+  assert.match(settings, /{layer.title}/);
+  assert.match(settings, /{count}/);
+  assert.doesNotMatch(settings, /Responsabilidades separadas|Plantillas → Filtros guardados → Reglas/);
 
   assert.match(modal, /quick-add-templates/);
   assert.match(modal, /transaction-rules/);
