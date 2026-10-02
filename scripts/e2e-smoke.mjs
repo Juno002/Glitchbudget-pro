@@ -969,14 +969,39 @@ async function main() {
       `(() => {
         const dialog = document.querySelector('[data-backups-prisma="true"]');
         if (!(dialog instanceof HTMLElement)) return false;
-        const row = [...dialog.querySelectorAll('li')].find(node => node.textContent?.includes(${JSON.stringify(mobileOverflowBackupName)}));
-        return row instanceof HTMLElement
-          && dialog.scrollWidth <= dialog.clientWidth + 1
-          && row.scrollWidth <= row.clientWidth + 1
-          && row.getBoundingClientRect().right <= window.innerWidth + 1;
+        return [...dialog.querySelectorAll('li')].some(node => node.textContent?.includes(${JSON.stringify(mobileOverflowBackupName)}));
       })()`,
-      'backup con nombre largo contenido',
+      'backup largo renderizado',
     );
+    const mobileBackupLayout = await client.evaluate(`(() => {
+      const dialog = document.querySelector('[data-backups-prisma="true"]');
+      const row = dialog instanceof HTMLElement
+        ? [...dialog.querySelectorAll('li')].find(node => node.textContent?.includes(${JSON.stringify(mobileOverflowBackupName)}))
+        : null;
+      const details = row instanceof HTMLElement ? row.querySelector('div.min-w-0') : null;
+      const actions = row instanceof HTMLElement ? row.querySelector('div.shrink-0') : null;
+      const rect = row instanceof HTMLElement ? row.getBoundingClientRect() : null;
+      return {
+        dialogClientWidth: dialog instanceof HTMLElement ? dialog.clientWidth : null,
+        dialogScrollWidth: dialog instanceof HTMLElement ? dialog.scrollWidth : null,
+        rowClientWidth: row instanceof HTMLElement ? row.clientWidth : null,
+        rowScrollWidth: row instanceof HTMLElement ? row.scrollWidth : null,
+        rowLeft: rect?.left ?? null,
+        rowRight: rect?.right ?? null,
+        viewportWidth: window.innerWidth,
+        detailsClientWidth: details instanceof HTMLElement ? details.clientWidth : null,
+        detailsScrollWidth: details instanceof HTMLElement ? details.scrollWidth : null,
+        actionsClientWidth: actions instanceof HTMLElement ? actions.clientWidth : null,
+        actionsScrollWidth: actions instanceof HTMLElement ? actions.scrollWidth : null,
+      };
+    })()`);
+    process.stdout.write('MOBILE_BACKUP_LAYOUT ' + JSON.stringify(mobileBackupLayout) + '\\n');
+    if (!(mobileBackupLayout
+      && mobileBackupLayout.dialogScrollWidth <= mobileBackupLayout.dialogClientWidth + 1
+      && mobileBackupLayout.rowScrollWidth <= mobileBackupLayout.rowClientWidth + 1
+      && mobileBackupLayout.rowRight <= mobileBackupLayout.viewportWidth + 1)) {
+      throw new Error('Backup móvil fuera de contención: ' + JSON.stringify(mobileBackupLayout));
+    }
 
     if (!await client.evaluate(`(() => {
       const button = [...document.querySelectorAll('button')]
