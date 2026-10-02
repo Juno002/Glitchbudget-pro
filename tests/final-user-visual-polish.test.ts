@@ -32,7 +32,7 @@ test('final visual polish keeps non-obvious financial meaning available on deman
   assert.match(accounts, /ContextHelp label="Qué incluye el saldo neto"/);
   assert.match(settings, /ContextHelp label="Acerca de la moneda base"/);
   assert.match(help, /showCloseButton/);
-  assert.match(help, /data-context-help=\{label\}/);
+  assert.match(help, /data-context-help=\{displayLabel\}/);
 });
 
 test('final visual polish keeps settings navigation in one scrollable row', () => {
