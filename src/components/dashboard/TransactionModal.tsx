@@ -8,10 +8,12 @@ import { cn, currencyInputLabel, toCents } from '@/lib/utils';
 import type { Expense, Income } from '@/domain/models';
 import { selectActiveCreditCards } from '@/domain/ledger';
 import { shouldApplyAutomaticRuleField } from '@/domain/transaction-rule-precedence';
+import { canSaveTransactionDraft } from '@/domain/transaction-draft';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle as AlertTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
 import { parseTransactionLabelsInput } from '@/domain/transaction-metadata';
@@ -205,10 +207,19 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
   const hasAccountForActual = !!accountId || isEditing;
-  const canSave = txType === 'transfer'
-    ? validAmount && isValidDate(date) && !!accountId && !!toAccountId && accountId !== toAccountId && !saved && !isSaving
-    : validAmount && !!categoryId && isValidDate(date) && !saved && !isSaving
-      && (txType === 'expense' && paymentMethod === 'credit' ? !!debtId : hasAccountForActual);
+  const canSave = canSaveTransactionDraft({
+    type:txType,
+    validAmount,
+    validDate:isValidDate(date),
+    accountId,
+    toAccountId,
+    categoryId,
+    paymentMethod,
+    debtId,
+    hasAccountForActual,
+    saved,
+    saving:isSaving,
+  });
 
   const templateReady = !isEditing && validAmount && (
     txType === 'transfer'
@@ -497,7 +508,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
             {txType !== 'transfer' && (
               <label data-quick-add-step="category" className="block space-y-1 text-sm">
                 <span className="font-medium">Categoría</span>
-                <select
+                <NativeSelect
                   aria-label="Categoría"
                   value={categoryId}
                   onChange={event => {
@@ -505,11 +516,11 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                     setCategoryEditedManually(true);
                     setAutomaticRuleId(null);
                   }}
-                  className="h-11 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3 text-sm shadow-[var(--shadow-control)]"
+                  className="h-11 bg-card"
                 >
                   <option value="">Selecciona una categoría</option>
                   {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
-                </select>
+                </NativeSelect>
               </label>
             )}
 
@@ -563,7 +574,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                     {txType === 'expense' && (
                       <label className="block space-y-1 text-sm">
                         <span className="text-muted-foreground">Necesidad</span>
-                        <select
+                        <NativeSelect
                           aria-label="Necesidad"
                           value={necessity}
                           onChange={event => {
@@ -571,13 +582,13 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                             setNecessityEditedManually(true);
                             setAutomaticRuleId(null);
                           }}
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                          className=""
                         >
                           <option value="">Sin clasificar</option>
                           <option value="must">Must · imprescindible</option>
                           <option value="need">Need · necesario</option>
                           <option value="want">Want · deseo</option>
-                        </select>
+                        </NativeSelect>
                       </label>
                     )}
 
@@ -597,16 +608,16 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                       <>
                         <label className="block space-y-1 text-sm">
                           <span className="text-muted-foreground">Naturaleza</span>
-                          <select
+                          <NativeSelect
                             aria-label="Naturaleza"
                             value={expenseSubtype}
                             onChange={event => setExpenseSubtype(event.target.value as typeof expenseSubtype)}
-                            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                            className=""
                           >
                             <option value="Variable">Variable</option>
                             <option value="Ocasional">Ocasional</option>
                             <option value="Fijo">Fijo</option>
-                          </select>
+                          </NativeSelect>
                         </label>
 
                         <div className="space-y-2">
@@ -635,30 +646,30 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                         {paymentMethod === 'credit' && (
                           <label className="block space-y-1 text-sm">
                             <span className="text-muted-foreground">Tarjeta</span>
-                            <select
+                            <NativeSelect
                               aria-label="Tarjeta"
                               value={debtId}
                               onChange={event => setDebtId(event.target.value)}
-                              className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                              className=""
                             >
                               <option value="">Selecciona una tarjeta</option>
                               {debts.map(debt => <option key={debt.id} value={debt.id}>{debt.name}</option>)}
-                            </select>
+                            </NativeSelect>
                           </label>
                         )}
                       </>
                     ) : (
                       <label className="block space-y-1 text-sm">
                         <span className="text-muted-foreground">Tipo de ingreso</span>
-                        <select
+                        <NativeSelect
                           aria-label="Tipo de ingreso"
                           value={incomeSubtype}
                           onChange={event => setIncomeSubtype(event.target.value as typeof incomeSubtype)}
-                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                          className=""
                         >
                           <option value="extra">Adicional</option>
                           <option value="gift">Regalo / otro</option>
-                        </select>
+                        </NativeSelect>
                       </label>
                     )}
                   </>

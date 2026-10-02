@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import OpfsBackupDialog from '@/components/backup/opfs-backup-dialog';
 import ExpenseCategoryManager from '@/components/dashboard/expense-category-manager';
@@ -128,16 +129,16 @@ export function SettingsDialog() {
 
             <label className="block max-w-sm space-y-2 text-sm">
               <span className="font-medium">Inicio del período</span>
-              <select
+              <NativeSelect
                 aria-label="Día inicial del período"
                 value={periodStartDay}
                 onChange={e => void setPeriodStartDay(Number(e.target.value))}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="w-full"
               >
                 {Array.from({ length:31 }, (_, index) => index + 1).map(day => (
                   <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
                 ))}
-              </select>
+              </NativeSelect>
               <span className="block text-xs text-muted-foreground">Ej.: día 25 → 25 del mes anterior al 24 del mes seleccionado.</span>
             </label>
           </TabsContent>
@@ -159,7 +160,7 @@ export function SettingsDialog() {
 
             <label className="block max-w-sm space-y-2 text-sm">
               <span className="font-medium">Al exceder un presupuesto</span>
-              <select
+              <NativeSelect
                 aria-label="Al exceder un presupuesto"
                 value={budgetOverspendingBehavior}
                 onChange={e => setBudgetOverspendingBehavior(e.target.value as 'allow'|'warn'|'block')}
@@ -168,7 +169,7 @@ export function SettingsDialog() {
                 <option value="allow">Permitir</option>
                 <option value="warn">Pedir confirmación</option>
                 <option value="block">Bloquear</option>
-              </select>
+              </NativeSelect>
             </label>
 
             <div className="space-y-3">
@@ -193,11 +194,11 @@ export function SettingsDialog() {
               <h3 className="font-semibold">Ingreso previsto</h3>
               <p className="text-xs text-muted-foreground">Es una previsión de planificación; no se convierte en ingreso registrado.</p>
               <div className="grid max-w-xl gap-3 sm:grid-cols-2">
-                <select value={baseFreq} onChange={e => setBaseFreq(e.target.value as typeof baseFreq)} className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                <NativeSelect value={baseFreq} onChange={e => setBaseFreq(e.target.value as typeof baseFreq)} className="">
                   <option value="mensual">Mensual</option>
                   <option value="quincenal">Quincenal</option>
                   <option value="semanal">Semanal</option>
-                </select>
+                </NativeSelect>
                 <Input type="number" min="0" step="0.01" value={baseAmount} onChange={e => setBaseAmount(e.target.value)} placeholder="0.00" />
               </div>
               <Button variant="outline" onClick={() => setBaseIncome({ freq:baseFreq as 'mensual'|'quincenal'|'semanal', amount:Number(baseAmount) })}>Guardar ingreso previsto</Button>

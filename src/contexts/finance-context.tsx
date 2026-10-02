@@ -277,7 +277,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     [getMonthlyAverages],
   );
 
-  const updateSetting = useCallback(async (key: keyof Settings, value: any) => {
+  const updateSetting = useCallback(async <K extends keyof Settings,>(key: K, value: Settings[K]) => {
     try {
       await updatePersistedSetting(key, value);
       return true;
@@ -552,83 +552,86 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addCreditCard = useCallback(async (card: CreateCreditCardInput) => {
+  const runAction = useCallback(async (
+    action: () => Promise<void>,
+    successTitle: string,
+    errorTitle: string,
+  ) => {
     try {
-      await createCreditCard(card);
-      toast({ title: 'Tarjeta registrada' });
+      await action();
+      toast({ title: successTitle });
       return true;
-    } catch (e: any) {
-      toast({ title: 'Error al registrar', description: friendlyError(e), variant: 'destructive' });
+    } catch (error) {
+      toast({ title: errorTitle, description: friendlyError(error), variant: 'destructive' });
       return false;
     }
   }, [toast]);
 
-  const updateDebt = useCallback(async (debt: Debt) => {
-    try {
-      await persistDebt(debt);
-      toast({ title: 'Deuda actualizada' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error al actualizar', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const addCreditCard = useCallback(
+    (card: CreateCreditCardInput) => runAction(
+      () => createCreditCard(card).then(() => undefined),
+      'Tarjeta registrada',
+      'No se pudo registrar la tarjeta',
+    ),
+    [runAction],
+  );
 
-  const deleteDebt = useCallback(async (id: string) => {
-    try {
-      await removeDebt(id);
-      toast({ title: 'Deuda eliminada' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error al eliminar', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const updateDebt = useCallback(
+    (debt: Debt) => runAction(
+      () => persistDebt(debt).then(() => undefined),
+      'Deuda actualizada',
+      'No se pudo actualizar la deuda',
+    ),
+    [runAction],
+  );
 
-  const addDebtPayment = useCallback(async (payment: Omit<DebtPayment, "id">) => {
-    try {
-      const newPayment: DebtPayment = { ...payment, id: crypto.randomUUID() };
-      await saveDebtPayment(newPayment);
-      toast({ title: 'Pago registrado' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error al pagar', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const deleteDebt = useCallback(
+    (id: string) => runAction(
+      () => removeDebt(id).then(() => undefined),
+      'Deuda eliminada',
+      'No se pudo eliminar la deuda',
+    ),
+    [runAction],
+  );
 
-  const addRecurringRule = useCallback(async (recurring: Omit<RecurringRule, "id">) => {
-    try {
-      await saveRecurringRule({ ...recurring, id: crypto.randomUUID() });
-      toast({ title: 'Planificación registrada' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const addDebtPayment = useCallback(
+    (payment: Omit<DebtPayment, "id">) => runAction(
+      async () => {
+        const newPayment: DebtPayment = { ...payment, id: crypto.randomUUID() };
+        await saveDebtPayment(newPayment);
+      },
+      'Pago registrado',
+      'No se pudo registrar el pago',
+    ),
+    [runAction],
+  );
 
-  const updateRecurringRule = useCallback(async (recurring: RecurringRule) => {
-    try {
-      await saveRecurringRule(recurring, true);
-      toast({ title: 'Planificación actualizada' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const addRecurringRule = useCallback(
+    (recurring: Omit<RecurringRule, "id">) => runAction(
+      () => saveRecurringRule({ ...recurring, id: crypto.randomUUID() }).then(() => undefined),
+      'Planificación registrada',
+      'No se pudo registrar la planificación',
+    ),
+    [runAction],
+  );
 
-  const deleteRecurringRule = useCallback(async (id: string) => {
-    try {
-      await removeRecurringRule(id);
-      toast({ title: 'Planificación borrada' });
-      return true;
-    } catch (e: any) {
-      toast({ title: 'Error', description: friendlyError(e), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const updateRecurringRule = useCallback(
+    (recurring: RecurringRule) => runAction(
+      () => saveRecurringRule(recurring, true).then(() => undefined),
+      'Planificación actualizada',
+      'No se pudo actualizar la planificación',
+    ),
+    [runAction],
+  );
+
+  const deleteRecurringRule = useCallback(
+    (id: string) => runAction(
+      () => removeRecurringRule(id).then(() => undefined),
+      'Planificación borrada',
+      'No se pudo borrar la planificación',
+    ),
+    [runAction],
+  );
 
   const confirmPlannedOccurrenceItem = useCallback(async (
     id: string,
@@ -655,16 +658,14 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [confirmBudget, toast]);
 
-  const skipPlannedOccurrenceItem = useCallback(async (id: string) => {
-    try {
-      await skipPlannedOccurrence(id);
-      toast({ title: 'Planificación omitida' });
-      return true;
-    } catch (error) {
-      toast({ title: 'No se pudo omitir', description: friendlyError(error), variant: 'destructive' });
-      return false;
-    }
-  }, [toast]);
+  const skipPlannedOccurrenceItem = useCallback(
+    (id: string) => runAction(
+      () => skipPlannedOccurrence(id).then(() => undefined),
+      'Planificación omitida',
+      'No se pudo omitir',
+    ),
+    [runAction],
+  );
 
   const value: FinanceContextType = useMemo(() => ({
     theme: activeSettings.theme,
