@@ -4784,7 +4784,7 @@ Intervención 1 — Integridad de fechas + Backup v14 ✅
 → Intervención 2 — App Lock ✅
 → Intervención 3 — Backup cifrado evolutivo ✅
 → Intervención 4 — Mantenimiento pequeño ✅
-→ Intervención 5 — Tooling aislado
+→ Intervención 5 — Tooling aislado ✅
 ```
 
 ### Intervención 1 — Integridad de fechas + Backup v14
@@ -4846,7 +4846,7 @@ Contrato:
 
 ### Intervención 5 — Tooling aislado
 
-**Estado: en ejecución.**
+**Estado: completada / Gate aprobado.** PR #102.
 
 Objetivo: retirar ESLint 8 y el formato legacy sin ampliar el alcance funcional ni actualizar Next.
 
@@ -4883,7 +4883,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-audit hardening 5
+intervenciones pendientes autorizadas = ninguna
 ```
 
 No existe una Fase 20.11.
