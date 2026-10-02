@@ -960,7 +960,7 @@ async function main() {
       await writable.write('{}');
       await writable.close();
       return true;
-    })()`);
+    })()`, { awaitPromise:true });
 
     if (!await client.evaluate(clickButtonExpression('Copias de seguridad'))) throw new Error('No se pudo abrir Copias de Seguridad.');
     await waitFor(client, `Boolean(document.querySelector('[data-backups-prisma="true"]'))`, 'Backups Prisma');
@@ -1033,7 +1033,7 @@ async function main() {
       const root = await navigator.storage.getDirectory();
       try { await root.removeEntry(${JSON.stringify(mobileOverflowBackupName)}); } catch {}
       return true;
-    })()`);
+    })()`, { awaitPromise:true });
 
     await client.command('Emulation.setTouchEmulationEnabled', { enabled:false });
     await client.command('Emulation.setDeviceMetricsOverride', {
