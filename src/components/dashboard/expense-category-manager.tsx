@@ -42,18 +42,18 @@ export default function ExpenseCategoryManager() {
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-2 items-end">
-                    <div className="flex-1 flex gap-2 w-full">
+                    <div className="flex min-w-0 flex-1 gap-2 w-full">
                         <IconPicker value={selectedIcon} onChange={setSelectedIcon} />
                         <Input 
                             placeholder="Nueva categoría (ej: Cine)"
                             value={newCategory}
                             onChange={(e) => setNewCategory(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
-                            className="flex-1"
+                            className="min-w-0 flex-1"
                         />
                     </div>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <Button onClick={handleAddCategory} className="flex-1 rounded-[var(--radius-interactive)] md:w-auto"><Plus className="mr-2 h-4 w-4" aria-hidden="true" />Agregar</Button>
+                    <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:flex md:w-auto">
+                        <Button onClick={handleAddCategory} className="w-full rounded-[var(--radius-interactive)] md:w-auto"><Plus className="mr-2 h-4 w-4" aria-hidden="true" />Agregar</Button>
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="outline" className="w-full md:w-auto"><RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />Restablecer</Button>
