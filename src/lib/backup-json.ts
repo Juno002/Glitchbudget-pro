@@ -10,6 +10,8 @@ import { investmentSchema } from './investments';
 import { normalizeCurrencyCode } from '../domain/currency';
 import { normalizeTransactionLabels } from '../domain/transaction-metadata';
 import { normalizeFinancialDate } from './financial-date';
+import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '../domain/data-integrity';
+import { decodePreservedValue, encodePreservedValue, encodedPreservedValueSchema } from './preserved-value';
 import {
   exportLocalAutomation,
   normalizeLocalAutomationBackup,
@@ -150,6 +152,11 @@ const DebtPaymentV9 = DebtPaymentV3.extend({
   fxRate: z.number().finite().positive(),
   amountBase: MoneyCents,
 });
+const DebtPaymentV14 = DebtPaymentV9.extend({ date: ISODate });
+const PreservedDebtPaymentV14 = z.object({
+  id: Id,
+  row: encodedPreservedValueSchema,
+});
 const FxRateV3 = z.object({
   id: Id, quote: Id, base: Id, rate: z.number().finite().positive(), updatedAt: ISODateTime,
 });
@@ -210,10 +217,10 @@ const DumpV12 = DumpV11.extend({
   v:z.literal(12),
   localAutomation:LocalAutomationV12,
 });
-export const CURRENT_BACKUP_FORMAT_VERSION = 13;
+export const CURRENT_BACKUP_FORMAT_VERSION = 14;
 export const CURRENT_APP_VERSION = packageInfo.version;
 const DumpV13 = DumpV12.extend({
-  v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
+  v:z.literal(13),
   schemaVersion:z.number().int().positive(),
   appVersion:z.string().trim().min(1),
   categories:z.array(categorySchema),
@@ -224,16 +231,28 @@ const DumpV13 = DumpV12.extend({
   debtPayments:z.array(DebtPaymentV9),
   fxRates:z.array(FxRateV3),
 });
-type DumpV13T = z.infer<typeof DumpV13>;
+const DumpV14 = DumpV13.extend({
+  v:z.literal(CURRENT_BACKUP_FORMAT_VERSION),
+  debtPayments:z.array(DebtPaymentV14),
+  preservedDebtPayments:z.array(PreservedDebtPaymentV14),
+});
+type DumpV14T = z.infer<typeof DumpV14>;
+
+function requireCompatibleSchema<T extends { schemaVersion:number }>(parsed:T):T {
+  if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
+    throw new Error('Este respaldo requiere una versión más reciente del esquema de Prisma.');
+  }
+  return parsed;
+}
+
 function parseBackup(raw:unknown) {
- const version=(raw as {v?:number})?.v;
- if (version===CURRENT_BACKUP_FORMAT_VERSION) {
-   const parsed=DumpV13.parse(raw);
-   if (parsed.schemaVersion > CURRENT_DB_SCHEMA_VERSION) {
-     throw new Error('Este respaldo requiere una versión más reciente del esquema de Prisma.');
-   }
-   return parsed;
+ const version=(raw as {v?:unknown})?.v;
+ if (!Number.isInteger(version)) throw new Error('El archivo no contiene una versión de respaldo válida.');
+ if ((version as number) > CURRENT_BACKUP_FORMAT_VERSION) {
+   throw new Error('Esta copia requiere una versión más reciente de Prisma.');
  }
+ if (version===CURRENT_BACKUP_FORMAT_VERSION) return requireCompatibleSchema(DumpV14.parse(raw));
+ if (version===13) return requireCompatibleSchema(DumpV13.parse(raw));
  if (version===12) return DumpV12.parse(raw);
  if (version===11) return DumpV11.parse(raw);
  if (version===10) return DumpV10.parse(raw);
@@ -241,8 +260,11 @@ function parseBackup(raw:unknown) {
  if (version===8) return {...DumpV8.parse(raw), investments:[]};
  if (version===7) return {...DumpV7.parse(raw), investments:[]};
  if (version===6) return {...DumpV6.parse(raw), plannedOccurrences: [], investments:[]};
- const legacy=DumpV3.parse(raw);
- return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: [], investments:[]};
+ if (version===3 || version===4 || version===5) {
+   const legacy=DumpV3.parse(raw);
+   return {...legacy, expenses:legacy.expenses.map(row=>migrateActualExpense({...row,concept:row.concept??''})), recurrents:(legacy.recurrents||[]).map(migrateRecurringRule), plannedOccurrences: [], investments:[]};
+ }
+ throw new Error('La versión de esta copia no es compatible con Prisma.');
 }
 
 // ---------- Helpers ----------
