@@ -10,6 +10,8 @@ export function VisibleViewport() {
     const update = () => {
       root.style.setProperty('--visible-height', `${viewport?.height ?? window.innerHeight}px`);
       root.style.setProperty('--visible-top', `${viewport?.offsetTop ?? 0}px`);
+      root.style.setProperty('--visible-width', `${viewport?.width ?? window.innerWidth}px`);
+      root.style.setProperty('--visible-left', `${viewport?.offsetLeft ?? 0}px`);
     };
     update();
     viewport?.addEventListener('resize', update);
@@ -21,6 +23,8 @@ export function VisibleViewport() {
       window.removeEventListener('resize', update);
       root.style.removeProperty('--visible-height');
       root.style.removeProperty('--visible-top');
+      root.style.removeProperty('--visible-width');
+      root.style.removeProperty('--visible-left');
     };
   }, []);
   return null;
