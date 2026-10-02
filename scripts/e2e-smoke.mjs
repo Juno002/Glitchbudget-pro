@@ -883,8 +883,9 @@ async function main() {
       client,
       `(() => {
         const buttons = [...document.querySelectorAll('button[aria-label^="Usar icono "]')]
-          .filter(button => button.getClientRects().length > 0);
-        return buttons.length > 0 && buttons.every(button => {
+          .filter(button => button.getClientRects().length > 0)
+          .slice(0, 5);
+        return buttons.length === 5 && buttons.every(button => {
           const rect = button.getBoundingClientRect();
           return button.getAttribute('aria-pressed') !== null
             && rect.width >= 43
