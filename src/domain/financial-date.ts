@@ -17,3 +17,26 @@ export function isCanonicalFinancialDate(value: string): boolean {
   const day = Number(match[3]);
   return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month);
 }
+
+export type FinancialDatePartition<T> = {
+  valid: T[];
+  invalid: T[];
+};
+
+/**
+ * Classifies rows by canonical financial date without assuming the persisted
+ * value is a string. Corrupt historical IndexedDB rows can contain values that
+ * violate the TypeScript model, so callers must not invoke string operations
+ * before this boundary.
+ */
+export function partitionCanonicalFinancialDates<T extends { date?: unknown }>(
+  rows: readonly T[],
+): FinancialDatePartition<T> {
+  const valid: T[] = [];
+  const invalid: T[] = [];
+  for (const row of rows) {
+    if (typeof row.date === 'string' && isCanonicalFinancialDate(row.date)) valid.push(row);
+    else invalid.push(row);
+  }
+  return { valid, invalid };
+}
