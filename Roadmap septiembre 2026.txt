@@ -4640,7 +4640,7 @@ Después de este punto:
 
 ## Post-roadmap — Hardening técnico de Prisma
 
-**Estado: en curso.** El roadmap funcional 0–20.10 permanece cerrado. Esta sección no crea una Fase 20.11 ni una Fase 21: registra únicamente trabajo de hardening posterior al cierre, aprobado explícitamente después de la auditoría externa sobre `main`.
+**Estado: completado / Gate final aprobado.** El roadmap funcional 0–20.10 permanece cerrado y la secuencia Post-roadmap 1–5 también queda cerrada. Esta sección no crea una Fase 20.11 ni una Fase 21.
 
 ## Objetivo
 
@@ -4710,11 +4710,11 @@ Alcance:
 - soportar atrás/adelante de navegador/Android dentro de Prisma cuando corresponda;
 - reemplazar carreras `setTimeout + getElementById(...).scrollIntoView` por navegación/focus explícitos y testeables.
 
-**Gate Post-roadmap 3:** aprobado. La navegación principal está tipada, sincronizada con URL/history, soporta atrás/adelante y los saltos entre áreas ya no dependen de carreras `setTimeout + getElementById`. Post-roadmap 4 es la próxima intervención autorizada.
+**Gate Post-roadmap 3:** aprobado. La navegación principal está tipada, sincronizada con URL/history, soporta atrás/adelante y los saltos entre áreas ya no dependen de carreras `setTimeout + getElementById`.
 
 ## Post-roadmap 4 — Rendimiento medido
 
-**Estado: pendiente.**
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/post-roadmap-4.md`.
 
 Alcance:
 
@@ -4725,11 +4725,11 @@ Alcance:
 
 Datasets de referencia: 5k / 25k / 50k movimientos.
 
-**Gate Post-roadmap 4:** evidencia cuantitativa previa, mejora medible cuando se cambie código y ninguna regresión financiera.
+**Gate Post-roadmap 4:** aprobado. La optimización se aplicó únicamente después de medir 5k/25k/50k movimientos; se eliminaron lecturas redundantes y se limitó el DOM inicial de Movimientos, con mejora reproducible y sin regresiones financieras. C3 no justificó cambio visual.
 
 ## Post-roadmap 5 — Mantenibilidad, pruebas y pulido
 
-**Estado: pendiente.**
+**Estado: completada / Gate aprobado.** Evidencia: `docs/roadmap/post-roadmap-5.md`.
 
 Alcance:
 
@@ -4741,7 +4741,7 @@ Alcance:
 - mantener `Must / Need / Want` como decisión de producto salvo cambio explícito;
 - conservar `src/contexts/finance--context.tsx` mientras siga actuando como entrypoint de compatibilidad.
 
-**Gate Post-roadmap 5:** comportamiento preservado, suite menos frágil, deuda repetitiva reducida y quality gate verde.
+**Gate Post-roadmap 5:** aprobado. Se redujo duplicación de acciones, se tipó la frontera de settings, se añadió `NativeSelect`, se reforzó la matriz de comportamiento de Quick Add y se corrigió contraste medido en Prisma claro. Prettier queda fuera por no aportar valor funcional a este cierre.
 
 ## Fuera de esta secuencia
 
@@ -4774,14 +4774,14 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-roadmap 4 → Post-roadmap 5
+intervenciones pendientes autorizadas = ninguna
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna fase funcional adicional autorizada después de 20.10.7. Solo existen las intervenciones Post-roadmap 1–5 descritas explícitamente arriba.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7 y la secuencia Post-roadmap 1–5 está cerrada. Cualquier trabajo posterior requiere una nueva autorización explícita.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 

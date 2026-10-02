@@ -140,14 +140,14 @@ Los textos de checkpoints históricos reflejan el estado en que fueron cerrados.
 
 ## Post-roadmap — Hardening técnico
 
-El roadmap funcional 0–20.10 está cerrado. El hardening posterior aprobado se ejecuta en orden desde la sección canónica **Post-roadmap** de `Roadmap septiembre 2026.txt`.
+El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 también quedó completado. La fuente canónica sigue siendo `Roadmap septiembre 2026.txt`.
 
 | Intervención | Alcance | Estado |
 |---|---|---|
 | Post-roadmap 1 | Períodos, contrato monetario, currency/locale y reglas automáticas | **Completada / Gate aprobado** · [evidencia](post-roadmap-1.md) |
 | Post-roadmap 2 | Fecha financiera, loading y tema system | **Completada / Gate aprobado** · [evidencia](post-roadmap-2.md) |
 | Post-roadmap 3 | Navegación URL/history y focus robusto | **Completada / Gate aprobado** · [evidencia](post-roadmap-3.md) |
-| Post-roadmap 4 | Rendimiento medido en navegador | **Pendiente — próxima autorizada** |
-| Post-roadmap 5 | Mantenibilidad, pruebas y pulido | Pendiente |
+| Post-roadmap 4 | Rendimiento medido en navegador | **Completada / Gate aprobado** · [evidencia](post-roadmap-4.md) |
+| Post-roadmap 5 | Mantenibilidad, pruebas y pulido | **Completada / Gate aprobado** · [evidencia](post-roadmap-5.md) |
 
-No existe Fase 20.11 ni Fase 21. Una intervención Post-roadmap usa una única rama temporal, se valida, se integra en `main` y su rama se elimina antes de iniciar la siguiente.
+No existe Fase 20.11 ni Fase 21. No quedan intervenciones Post-roadmap autorizadas pendientes.
