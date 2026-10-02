@@ -46,7 +46,8 @@ test('final visual polish uses a compact mobile settings selector and full deskt
   assert.match(settings, /className="mt-3 lg:hidden"/);
   assert.match(settings, /hidden h-auto w-full justify-between/);
   assert.match(settings, /lg:flex/);
-  assert.match(settings, /min-w-0 flex-1/);
+  assert.match(settings, /shrink-0 rounded-\[var\(--radius-interactive\)\]/);
+  assert.doesNotMatch(settings, /min-w-0 flex-1/);
   assert.doesNotMatch(settings, /overflow-x-auto/);
 });
 
