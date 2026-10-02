@@ -10,7 +10,7 @@ test('20.5 Plan keeps exactly Presupuestos, Metas and Planificados as its second
   assert.match(plan, /data-plan-prisma="true"/);
   assert.match(plan, /data-plan-navigation="prisma"/);
   for (const label of ['Presupuestos','Metas','Planificados']) assert.ok(nav.includes(label), label);
-  assert.equal((nav.match(/label:/g) || []).length, 3);
+  assert.equal((nav.match(/label:\s*'/g) || []).length, 3);
 });
 
 test('20.5 budgets consume canonical status details and period selection instead of rebuilding remaining/status', () => {

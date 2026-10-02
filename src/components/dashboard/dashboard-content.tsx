@@ -4,6 +4,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import SummaryTab from '@/components/dashboard/summary-tab';
 import ReportsTab from '@/components/dashboard/reports-tab';
 import { useTabs } from '@/contexts/tabs-context';
+import type { PrimaryArea } from '@/domain/navigation';
 import MovementsTab from './movements-tab';
 import PlanningTab from './planning-tab';
 
@@ -12,7 +13,7 @@ export default function DashboardContent() {
 
   return (
     <div className="w-full fade-in">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={value => setActiveTab(value as PrimaryArea)} className="w-full">
         <div className="relative min-h-[calc(100vh-180px)] w-full">
           <TabsContent value="summary">
             <SummaryTab />

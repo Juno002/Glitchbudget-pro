@@ -119,10 +119,22 @@ function HomePreferencesDialog({
   );
 }
 
-function HomeSection({id,children,className}:{id:HomeModuleId;children:ReactNode;className?:string}) {
+function HomeSection({
+  id,
+  children,
+  className,
+  sectionRef,
+}: {
+  id:HomeModuleId;
+  children:ReactNode;
+  className?:string;
+  sectionRef?:(node:HTMLElement|null)=>void;
+}) {
   return (
     <section
+      ref={sectionRef}
       id={'home-'+id}
+      tabIndex={-1}
       className={cn('scroll-mt-24',className)}
       data-home-module={id}
     >
@@ -308,10 +320,11 @@ export default function SummaryTab() {
     goals,
     investments,
   }=useFinances();
-  const {activeTab,setActiveTab,setPlanningTab}=useTabs();
+  const {activeTab,navigate}=useTabs();
   const money=usePrivateCurrency();
   const preferences=useHomePreferences();
   const previousActive=useRef<string|null>(null);
+  const homeSectionRefs=useRef<Partial<Record<HomeModuleId,HTMLElement|null>>>({});
 
   const home=useMemo(()=>selectHomeReadModel({
     report:getReportSnapshot(currentPeriod, today),
@@ -331,18 +344,11 @@ export default function SummaryTab() {
     previousActive.current=activeTab;
     if(!entering || !preferences.ready) return;
     const id=preferences.preferences.defaultSection;
-    const timer=window.setTimeout(()=>document.getElementById('home-'+id)?.scrollIntoView({behavior:'smooth',block:'start'}),0);
-    return ()=>window.clearTimeout(timer);
+    homeSectionRefs.current[id]?.scrollIntoView({behavior:'smooth',block:'start'});
   },[activeTab,preferences.ready,preferences.preferences.defaultSection]);
 
-  const goToAccounts=()=>{
-    setActiveTab('movements');
-    window.setTimeout(()=>document.getElementById('accounts-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
-  };
-  const goToInvestments=()=>{
-    setActiveTab('movements');
-    window.setTimeout(()=>document.getElementById('investments-section')?.scrollIntoView({behavior:'smooth',block:'start'}),0);
-  };
+  const goToAccounts=()=>navigate({area:'movements',movementSection:'accounts'});
+  const goToInvestments=()=>navigate({area:'movements',movementSection:'investments'});
 
   const budgetState=loadableContentState(loading,home.budget.configuredCount>0);
   const upcomingState=loadableContentState(loading,home.upcoming.rows.length>0);
@@ -360,7 +366,7 @@ export default function SummaryTab() {
 
   const modules:Record<HomeModuleId,ReactNode>={
     position:(
-      <HomeSection id="position" className="space-y-3">
+      <HomeSection id="position" sectionRef={node=>{homeSectionRefs.current.position=node;}} className="space-y-3">
         <SectionHeader
           title="Posición financiera"
           actions={<Button type="button" variant="ghost" size="sm" onClick={goToAccounts}>Ver cuentas <ArrowUpRight className="h-4 w-4" /></Button>}
@@ -414,12 +420,12 @@ export default function SummaryTab() {
       </HomeSection>
     ),
     budget:(
-      <HomeSection id="budget">
+      <HomeSection id="budget" sectionRef={node=>{homeSectionRefs.current.budget=node;}}>
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
               title="Presupuesto disponible"
-              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Ver presupuestos <ArrowUpRight className="h-4 w-4" /></Button>}
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>navigate({area:'planning',planningTab:'budgets'})}>Ver presupuestos <ArrowUpRight className="h-4 w-4" /></Button>}
             />
             {budgetState==='loading' ? <SummaryPanelLoading /> : budgetState==='content' ? (
               <div className="mt-5 space-y-4" data-home-budget-summary="decision-first">
@@ -456,12 +462,12 @@ export default function SummaryTab() {
       </HomeSection>
     ),
     upcoming:(
-      <HomeSection id="upcoming">
+      <HomeSection id="upcoming" sectionRef={node=>{homeSectionRefs.current.upcoming=node;}}>
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
               title="Próximos pagos"
-              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('subscriptions');setActiveTab('planning');}}>Ver Plan <ArrowUpRight className="h-4 w-4" /></Button>}
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>navigate({area:'planning',planningTab:'subscriptions'})}>Ver Plan <ArrowUpRight className="h-4 w-4" /></Button>}
             />
             {upcomingState==='loading' ? <SummaryPanelLoading /> : upcomingState==='content' ? (
               <div className="mt-5 grid gap-2">
@@ -499,12 +505,12 @@ export default function SummaryTab() {
       </HomeSection>
     ),
     goals:(
-      <HomeSection id="goals">
+      <HomeSection id="goals" sectionRef={node=>{homeSectionRefs.current.goals=node;}}>
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading
               title="Metas relevantes"
-              action={<Button type="button" variant="ghost" size="sm" onClick={()=>{setPlanningTab('goals');setActiveTab('planning');}}>Ver metas <ArrowUpRight className="h-4 w-4" /></Button>}
+              action={<Button type="button" variant="ghost" size="sm" onClick={()=>navigate({area:'planning',planningTab:'goals'})}>Ver metas <ArrowUpRight className="h-4 w-4" /></Button>}
             />
             {goalsState==='loading' ? <SummaryPanelLoading /> : goalsState==='content' ? (
               <div className="mt-5 grid gap-5">
@@ -534,7 +540,7 @@ export default function SummaryTab() {
       </HomeSection>
     ),
     investments:(
-      <HomeSection id="investments">
+      <HomeSection id="investments" sectionRef={node=>{homeSectionRefs.current.investments=node;}}>
         <Card className="h-full">
           <CardContent className="p-5 sm:p-6">
             <PanelHeading

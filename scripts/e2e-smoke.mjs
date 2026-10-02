@@ -563,6 +563,7 @@ async function main() {
     if (!await client.evaluate(clickButtonExpression('Movimientos'))) {
       throw new Error('No se pudo abrir Movimientos.');
     }
+    await waitFor(client, `window.location.search === '?tab=movements'`, 'URL de Movimientos');
     await waitFor(
       client,
       `document.body.innerText.includes('Ingreso') && document.body.innerText.includes('Gasto')`,
@@ -734,8 +735,9 @@ async function main() {
     await waitFor(
       client,
       `Boolean(document.querySelector('[data-plan-prisma="true"]'))
-        && Boolean(document.querySelector('[data-plan-navigation="prisma"]'))`,
-      'Plan Prisma',
+        && Boolean(document.querySelector('[data-plan-navigation="prisma"]'))
+        && window.location.search === '?tab=planning&plan=budgets'`,
+      'Plan Prisma + URL',
     );
 
     if (!await client.evaluate(activateTabExpression('Presupuestos'))) {
@@ -753,8 +755,9 @@ async function main() {
     }
     await waitFor(
       client,
-      `Boolean(document.querySelector('[data-plan-goals="prisma"]'))`,
-      'Metas Prisma',
+      `Boolean(document.querySelector('[data-plan-goals="prisma"]'))
+        && window.location.search === '?tab=planning&plan=goals'`,
+      'Metas Prisma + URL',
     );
 
     if (!await client.evaluate(activateTabExpression('Planificados'))) {
@@ -763,8 +766,9 @@ async function main() {
     await waitFor(
       client,
       `Boolean(document.querySelector('[data-plan-planned="prisma"]'))
-        && Boolean(document.querySelector('[data-plan-planned-manager="prisma"]'))`,
-      'Planificados Prisma',
+        && Boolean(document.querySelector('[data-plan-planned-manager="prisma"]'))
+        && window.location.search === '?tab=planning&plan=subscriptions'`,
+      'Planificados Prisma + URL',
     );
 
     if (!await client.evaluate(clickButtonExpression('Reportes'))) {
@@ -778,8 +782,24 @@ async function main() {
         && Boolean(document.querySelector('[data-report-section="cash-flow"]'))
         && Boolean(document.querySelector('[data-report-section="net-worth"]'))
         && Boolean(document.querySelector('[data-report-section="comparison"]'))
-        && document.querySelectorAll('[data-report-chart]').length >= 5`,
+        && document.querySelectorAll('[data-report-chart]').length >= 5
+        && window.location.search === '?tab=reports'`,
       'Reportes Prisma y gráficos',
+    );
+
+    await client.evaluate(`history.back(); true`);
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-plan-planned="prisma"]'))
+        && window.location.search === '?tab=planning&plan=subscriptions'`,
+      'atrás vuelve a Planificados',
+    );
+    await client.evaluate(`history.forward(); true`);
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-reports-prisma="true"]'))
+        && window.location.search === '?tab=reports'`,
+      'adelante vuelve a Reportes',
     );
 
     if (!await client.evaluate(`(() => {
