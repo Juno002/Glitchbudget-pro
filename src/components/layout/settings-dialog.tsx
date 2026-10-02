@@ -31,6 +31,7 @@ import AppLockSettings from '@/components/settings/app-lock-settings';
 import AutoLockSettings from '@/components/settings/auto-lock-settings';
 import PersistentStorageSettings from '@/components/settings/persistent-storage-settings';
 import { APP_LOCK_STORAGE_KEY, AUTO_LOCK_STORAGE_KEY } from '@/domain/local-security';
+import packageJson from '../../../package.json';
 
 const SETTINGS_SECTIONS = [
   ['general', 'General'],
@@ -353,7 +354,31 @@ export function SettingsDialog() {
 
           <TabsContent value="about" className="min-w-0 space-y-5">
             <SectionHeader title="Acerca de" />
-            <div className="max-w-sm"><HelpDialog /></div>
+            <div className="max-w-md space-y-4">
+              <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
+                <div className="space-y-1">
+                  <h3 className="font-display text-xl font-normal">Prisma</h3>
+                  <p className="text-sm text-muted-foreground">Finanzas personales privadas, con datos guardados en tu dispositivo.</p>
+                </div>
+                <dl className="mt-4 divide-y text-sm">
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <dt className="text-muted-foreground">Versión</dt>
+                    <dd className="font-medium tabular-nums">{packageJson.version}</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <dt className="text-muted-foreground">Cuenta</dt>
+                    <dd className="font-medium">No requerida</dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-4 py-2">
+                    <dt className="text-muted-foreground">Almacenamiento</dt>
+                    <dd className="font-medium">En este dispositivo</dd>
+                  </div>
+                </dl>
+              </div>
+              <div className="rounded-[var(--radius-card)] border bg-card p-2 shadow-[var(--shadow-control)]">
+                <HelpDialog />
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </DialogContent>
