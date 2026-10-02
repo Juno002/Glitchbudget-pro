@@ -209,7 +209,7 @@ export function SettingsDialog() {
               <h3 className="font-semibold">Cierre de período</h3>
               <RadioGroup value={rolloverStrategy} onValueChange={value => setRolloverStrategy(value as typeof rolloverStrategy)} className="grid gap-3 md:grid-cols-3">
                 <Label htmlFor="roll-reset" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                  <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Resetear</div>
+                  <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="reset" id="roll-reset" /><RefreshCw className="h-4 w-4" /> Restablecer</div>
                   <p className="mt-2 text-xs text-muted-foreground">Empieza el siguiente período con los límites base.</p>
                 </Label>
                 <Label htmlFor="roll-surplus" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
