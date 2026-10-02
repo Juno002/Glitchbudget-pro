@@ -31,7 +31,11 @@ test('20.10.7 README stays product-facing while documenting maintenance essentia
     assert.match(readme, new RegExp(required, 'i'), required);
   }
 
-  assert.equal((readme.match(/GlitchBudget/g) ?? []).length, 1);
+  assert.equal(
+    (readme.match(/GlitchBudget/g) ?? []).length,
+    1,
+    'GlitchBudget debe aparecer solo en la nota pública de compatibilidad interna',
+  );
 
   for (const forbidden of [
     /roadmap/i,

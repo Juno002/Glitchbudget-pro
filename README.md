@@ -64,7 +64,7 @@ npm ci
 npm run dev
 ```
 
-Antes de proponer cambios, ejecuta la comprobación local principal:
+Antes de proponer cambios, ejecuta la verificación local principal:
 
 ```bash
 npm run check
