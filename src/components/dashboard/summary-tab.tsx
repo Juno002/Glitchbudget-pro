@@ -1,3 +1,262 @@
+'use client';
+
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpRight,
+  CreditCard,
+  Landmark,
+  Settings2,
+  TrendingUp,
+  WalletCards,
+} from 'lucide-react';
+import { useFinances } from '@/contexts/finance-context';
+import {
+  ContextHelp,
+  EmptyState,
+  MoneyValue,
+  PageHeader,
+  PlannedPaymentRow,
+  ProgressMetric,
+  SectionHeader,
+  StatusBadge,
+  type FinancialStatus,
+  type MoneyTone,
+} from '@/components/finance-ui';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useTabs } from '@/contexts/tabs-context';
+import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { selectHomeReadModel, type HomeModuleId } from '@/domain/home';
+import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
+import { useHomePreferences } from '@/hooks/use-home-preferences';
+import { HOME_MODULES } from '@/lib/home-preferences';
+import { formatPeriodRange } from '@/lib/period-format';
+import { cn } from '@/lib/utils';
+import type { KpiComparison } from '@/domain/kpi-comparisons';
+import type { LucideIcon } from 'lucide-react';
+import { loadableContentState } from '@/domain/app-lifecycle';
+
+function dateLabel(value:string, locale:string) {
+  return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
+}
+
+function HomePreferencesDialog({
+  visibleOrder,
+  hidden,
+  defaultSection,
+  onHiddenChange,
+  onMove,
+  onDefaultChange,
+  onReset,
+}: {
+  visibleOrder:HomeModuleId[];
+  hidden:HomeModuleId[];
+  defaultSection:HomeModuleId;
+  onHiddenChange:(id:HomeModuleId,hidden:boolean)=>void;
+  onMove:(id:HomeModuleId,direction:-1|1)=>void;
+  onDefaultChange:(id:HomeModuleId)=>void;
+  onReset:()=>void;
+}) {
+  const visibleCount=HOME_MODULES.length-hidden.length;
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm"><Settings2 className="mr-1 h-4 w-4" />Personalizar Resumen</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Personalizar Resumen</DialogTitle>
+          <DialogDescription>La preferencia se guarda solo en este navegador. No cambia datos ni cálculos financieros.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Mostrar y ordenar módulos</p>
+            {HOME_MODULES.map(module=>{
+              const isHidden=hidden.includes(module.id);
+              const orderIndex=visibleOrder.indexOf(module.id);
+              return (
+                <div key={module.id} className="flex items-center gap-2 rounded-[var(--radius-interactive)] border bg-card p-3">
+                  <label className="flex min-w-0 flex-1 items-center gap-3 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!isHidden}
+                      disabled={!isHidden && visibleCount===1}
+                      onChange={event=>onHiddenChange(module.id,!event.target.checked)}
+                      aria-label={'Mostrar '+module.label}
+                    />
+                    <span>{module.label}</span>
+                  </label>
+                  <Button type="button" size="icon" variant="ghost" disabled={isHidden || orderIndex<=0} aria-label={'Subir '+module.label} onClick={()=>onMove(module.id,-1)}>
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" size="icon" variant="ghost" disabled={isHidden || orderIndex<0 || orderIndex===visibleOrder.length-1} aria-label={'Bajar '+module.label} onClick={()=>onMove(module.id,1)}>
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+          <label className="block space-y-2 text-sm">
+            <span className="font-medium">Sección inicial al abrir Resumen</span>
+            <select
+              className="h-10 w-full rounded-[var(--radius-interactive)] border border-input bg-card px-3"
+              value={defaultSection}
+              onChange={event=>onDefaultChange(event.target.value as HomeModuleId)}
+            >
+              {HOME_MODULES.filter(module=>!hidden.includes(module.id)).map(module=><option key={module.id} value={module.id}>{module.label}</option>)}
+            </select>
+            <span className="block text-xs text-muted-foreground">Al entrar a Resumen se enfoca esta sección. El orden general se conserva por separado.</span>
+          </label>
+          <Button type="button" variant="outline" onClick={onReset}>Restablecer Resumen</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function HomeSection({
+  id,
+  children,
+  className,
+  sectionRef,
+}: {
+  id:HomeModuleId;
+  children:ReactNode;
+  className?:string;
+  sectionRef?:(node:HTMLElement|null)=>void;
+}) {
+  return (
+    <section
+      ref={sectionRef}
+      id={'home-'+id}
+      tabIndex={-1}
+      className={cn('scroll-mt-24',className)}
+      data-home-module={id}
+    >
+      {children}
+    </section>
+  );
+}
+
+function PositionComparison({
+  comparison,
+  locale,
+  featured=false,
+}: {
+  comparison:KpiComparison;
+  locale:string;
+  featured?:boolean;
+}) {
+  const textClass=featured ? 'text-primary-foreground/85' : 'text-foreground/80';
+  const mutedClass=featured ? 'text-primary-foreground/65' : 'text-muted-foreground';
+
+  if (comparison.status==='no_previous_base') {
+    return <p className={cn('text-xs font-medium',mutedClass)}>Sin base comparable</p>;
+  }
+
+  const delta=comparison.absoluteDelta;
+  if (delta===0) {
+    return <p className={cn('text-xs font-medium',mutedClass)}>Sin cambio vs. período anterior</p>;
+  }
+
+  const Icon=delta>0 ? ArrowUp : ArrowDown;
+  if (comparison.percentageDelta!==null) {
+    return (
+      <p className={cn('inline-flex items-center gap-1 text-xs font-semibold tabular-nums',textClass)}>
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <span>{comparison.percentageDelta.toLocaleString(locale,{maximumFractionDigits:2,signDisplay:'always'})}%</span>
+        <span className={mutedClass}>vs. período anterior</span>
+      </p>
+    );
+  }
+
+  return (
+    <div className={cn('inline-flex flex-wrap items-center gap-1 text-xs font-semibold',textClass)}>
+      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+      <MoneyValue
+        amount={delta}
+        showSign
+        className={cn('text-xs font-semibold',featured && '!text-primary-foreground')}
+      />
+      <span className={mutedClass}>vs. período anterior</span>
+    </div>
+  );
+}
+
+function PositionCard({
+  label,
+  amount,
+  comparison,
+  locale,
+  help,
+  icon:Icon,
+  tone='neutral',
+  variant='default',
+}: {
+  label:string;
+  amount:number;
+  comparison:KpiComparison;
+  locale:string;
+  help:string;
+  icon:LucideIcon;
+  tone?:MoneyTone;
+  variant?:'default'|'featured'|'warm'|'mint';
+}) {
+  const featured=variant==='featured';
+  return (
+    <Card className={cn(
+      'relative overflow-hidden',
+      featured && 'border-primary bg-primary text-primary-foreground shadow-[var(--shadow-floating)]',
+      variant==='warm' && 'border-[hsl(var(--brand-coral)/0.18)] bg-[hsl(var(--brand-coral)/0.07)]',
+      variant==='mint' && 'border-[hsl(var(--brand-mint)/0.22)] bg-[hsl(var(--brand-mint)/0.08)]',
+    )}>
+      <CardContent className="p-5">
+        <div className={cn(
+          'flex items-center justify-between gap-3 text-xs font-semibold',
+          featured ? 'text-primary-foreground/70' : 'text-muted-foreground',
+        )}>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span>{label}</span>
+            <ContextHelp label={'Qué significa '+label} contextLabel={label}>
+              {help}
+            </ContextHelp>
+          </div>
+          <Icon className="h-[19px] w-[19px]" aria-hidden="true" />
+        </div>
+        <MoneyValue
+          amount={amount}
+          tone={tone}
+          className={cn(
+            'mt-4 block font-display text-[1.75rem] leading-none tracking-[-0.04em]',
+            featured && '!text-primary-foreground',
+          )}
+        />
+        <div className="mt-3" data-position-comparison={label}>
+          <PositionComparison comparison={comparison} locale={locale} featured={featured} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PanelHeading({
+  eyebrow,
+  title,
+  action,
+}: {
+  eyebrow?:string;
+  title:string;
+  action?:ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        {eyebrow ? <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p> : null}
+        <h2 className={cn('font-display text-xl font-normal tracking-[-0.025em]',eyebrow && 'mt-1')}>{title}</h2>
       </div>
       {action}
     </div>
