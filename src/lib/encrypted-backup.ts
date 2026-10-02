@@ -103,8 +103,8 @@ export function isValidEncryptedBackupPassword(password: string): boolean {
 }
 
 export function encryptedBackupAad(
-  kdf: EncryptedBackupKdfV1 = ENCRYPTED_BACKUP_KDF,
-  cipher: EncryptedBackupCipherV1 = ENCRYPTED_BACKUP_CIPHER,
+  kdf: EncryptedBackupKdfV1,
+  cipher: EncryptedBackupCipherV1,
 ): Uint8Array {
   const canonicalKdf = {
     name: kdf.name,
