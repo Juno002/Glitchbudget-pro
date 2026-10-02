@@ -61,7 +61,9 @@ test('20.8.6 keeps detailed transactions after Net Worth instead of replacing th
   const largest=reports.indexOf('Movimientos de mayor importe');
   assert.ok(netWorth>=0 && detail>netWorth && largest>detail);
   assert.match(reports,/report\.spending\.largestTransactions\.map/);
-  assert.match(reports,/El resumen editorial no reemplaza los importes y filas exactas del rango\./);
+  assert.match(reports,/<TableHead>Fecha<\/TableHead>/);
+  assert.match(reports,/<TableHead>Movimiento<\/TableHead>/);
+  assert.doesNotMatch(reports,/El resumen editorial no reemplaza los importes y filas exactas del rango\./);
 });
 
 test('20.8.6 preserves every report range and secondary budget follow-up', () => {
