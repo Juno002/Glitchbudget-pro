@@ -4846,11 +4846,23 @@ Contrato:
 
 ### Intervención 5 — Tooling aislado
 
-**Estado: pendiente.**
+**Estado: en ejecución.**
 
-- revisar/migrar ESLint como trabajo independiente;
-- ejecutar CI completo;
-- no mezclarlo con seguridad, migraciones ni backups.
+Objetivo: retirar ESLint 8 y el formato legacy sin ampliar el alcance funcional ni actualizar Next.
+
+Contrato:
+
+- mantener Next.js / `eslint-config-next` en la línea 15.5 ya instalada;
+- migrar ESLint de 8.57.1 a la última línea 9 compatible con Next 15.5: 9.39.5;
+- no usar ESLint 10 mientras `eslint-config-next@15.5.25` no lo declare compatible;
+- sustituir `.eslintrc.json` por `eslint.config.mjs` flat config;
+- usar `FlatCompat` solo como puente para `next/core-web-vitals`, sin alterar su semántica;
+- preservar exactamente las restricciones arquitectónicas actuales de `no-restricted-imports` para React surfaces, hooks y domain/policies;
+- mantener el lint limitado a `src` y `--max-warnings 0`;
+- eliminar flags propios del formato legacy que ya no sean necesarios;
+- actualizar `package-lock.json` de forma reproducible;
+- no tocar lógica de producto, seguridad, backups, migraciones, UI ni invariantes financieras;
+- ejecutar `npm ci`, `npm run check`, benchmark, build y E2E antes de cerrar.
 
 ## Pendientes sin autorizar
 
