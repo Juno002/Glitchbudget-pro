@@ -6,7 +6,6 @@ import {
   ArrowUp,
   ArrowUpRight,
   CreditCard,
-  Info,
   Landmark,
   Settings2,
   TrendingUp,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import {
+  ContextHelp,
   EmptyState,
   MoneyValue,
   PageHeader,
@@ -28,7 +28,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useTabs } from '@/contexts/tabs-context';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { selectHomeReadModel, type HomeModuleId } from '@/domain/home';
@@ -194,7 +193,6 @@ function PositionCard({
   comparison,
   locale,
   help,
-  warning,
   icon:Icon,
   tone='neutral',
   variant='default',
@@ -204,7 +202,6 @@ function PositionCard({
   comparison:KpiComparison;
   locale:string;
   help:string;
-  warning?:string;
   icon:LucideIcon;
   tone?:MoneyTone;
   variant?:'default'|'featured'|'warm'|'mint';
@@ -224,30 +221,9 @@ function PositionCard({
         )}>
           <div className="flex min-w-0 items-center gap-1.5">
             <span>{label}</span>
-            <Popover>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-interactive)] transition-colors duration-[var(--motion-control)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    featured ? 'hover:bg-primary-foreground/10 active:bg-primary-foreground/15' : 'hover:bg-muted active:bg-muted/80',
-                  )}
-                  aria-label={'Qué significa '+label}
-                >
-                  <Info className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                align="start"
-                className="w-64 text-xs leading-relaxed"
-                showCloseButton
-                closeLabel={'Cerrar explicación de '+label}
-                data-context-help={label}
-              >
-                <p className="font-semibold text-foreground">{label}</p>
-                <p className="mt-1 text-muted-foreground">{help}</p>
-              </PopoverContent>
-            </Popover>
+            <ContextHelp label={'Qué significa '+label}>
+              {help}
+            </ContextHelp>
           </div>
           <Icon className="h-[19px] w-[19px]" aria-hidden="true" />
         </div>
@@ -262,12 +238,6 @@ function PositionCard({
         <div className="mt-3" data-position-comparison={label}>
           <PositionComparison comparison={comparison} locale={locale} featured={featured} />
         </div>
-        {warning ? (
-          <p className={cn(
-            'mt-2 text-[11px] leading-relaxed',
-            featured ? 'text-primary-foreground/65' : 'text-muted-foreground',
-          )}>{warning}</p>
-        ) : null}
       </CardContent>
     </Card>
   );
@@ -379,8 +349,7 @@ export default function SummaryTab() {
               locale={locale}
               comparison={home.positionComparisons.liquidAvailable}
               tone={home.position.liquidAssets<0?'negative':'neutral'}
-              help="Efectivo + bancos registrados en el ledger."
-              warning="No incluye crédito disponible."
+              help="Efectivo + bancos registrados en el ledger. No incluye crédito disponible."
               icon={WalletCards}
               variant="featured"
             />
@@ -400,7 +369,6 @@ export default function SummaryTab() {
               comparison={home.positionComparisons.totalDebt}
               tone={home.position.liabilities>0?'negative':'neutral'}
               help="Pasivos registrados, incluidas tarjetas y préstamos históricos compatibles."
-              warning="Deuda real registrada."
               icon={CreditCard}
               variant="warm"
             />
@@ -410,8 +378,7 @@ export default function SummaryTab() {
               locale={locale}
               comparison={home.positionComparisons.investments}
               tone="neutral"
-              help="Valor registrado de los activos de inversión."
-              warning="No incluye rendimiento proyectado."
+              help="Valor registrado de los activos de inversión. No incluye rendimiento proyectado."
               icon={Landmark}
               variant="mint"
             />
@@ -454,7 +421,6 @@ export default function SummaryTab() {
               <EmptyState
                 className="mt-5"
                 title="Aún no tienes presupuestos"
-                description="Crea límites en Plan → Presupuestos para ver cuánto te queda en este período."
               />
             )}
           </CardContent>
@@ -497,7 +463,6 @@ export default function SummaryTab() {
               <EmptyState
                 className="mt-5"
                 title="Nada próximo"
-                description="No hay pagos o ingresos planificados pendientes en los próximos 7 días."
               />
             )}
           </CardContent>
@@ -532,7 +497,6 @@ export default function SummaryTab() {
               <EmptyState
                 className="mt-5"
                 title="Aún no tienes metas activas"
-                description="Crea una meta en Plan → Metas para seguirla desde Resumen."
               />
             )}
           </CardContent>
@@ -574,7 +538,6 @@ export default function SummaryTab() {
               <EmptyState
                 className="mt-5"
                 title="Aún no hay inversiones"
-                description="Registra certificados o depósitos a plazo desde Movimientos → Inversiones."
               />
             )}
           </CardContent>
