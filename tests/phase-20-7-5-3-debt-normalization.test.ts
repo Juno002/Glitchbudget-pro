@@ -99,5 +99,5 @@ test('20.7.5.3 keeps the ambiguous debt field behind compatibility boundaries wi
   const backup = readFileSync(new URL('../src/lib/backup-json.ts', import.meta.url), 'utf8');
 
   assert.match(models, /principal: number;.*campo persistente de compatibilidad/);
-  assert.match(backup, /CURRENT_BACKUP_FORMAT_VERSION = 13/);
+  assert.match(backup, /CURRENT_BACKUP_FORMAT_VERSION = 14/);
 });
