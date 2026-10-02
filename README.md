@@ -6,7 +6,9 @@
 
 <p align="center"><strong>Finanzas personales claras, privadas y disponibles incluso sin conexión.</strong></p>
 
-Prisma reúne tu dinero real, tu planificación y tu análisis financiero en una sola experiencia. Está pensada para responder rápido tres preguntas: **qué tienes**, **qué viene** y **qué necesita atención**, sin convertir cada pantalla en una hoja de cálculo.
+Prisma es una aplicación local-first de finanzas personales para registrar dinero real, planificar lo que viene y entender tu posición sin depender de una cuenta remota. Reúne movimientos, presupuestos, metas, deudas, inversiones y reportes en una sola experiencia.
+
+Está pensada para responder rápido tres preguntas: **qué tienes**, **qué viene** y **qué necesita atención**, sin convertir cada pantalla en una hoja de cálculo.
 
 ## Tu dinero en cuatro espacios
 
@@ -50,6 +52,31 @@ Tus datos financieros permanecen en tu dispositivo.
 - La aplicación puede seguir funcionando sin conexión después de cargarse.
 - **Ocultar importes** protege la información en pantalla.
 - **App Lock** y el bloqueo automático añaden una barrera de acceso a la interfaz.
+
+App Lock protege el acceso a la **interfaz de Prisma**. No cifra Dexie en reposo, no protege por sí solo archivos exportados ni impide el acceso de alguien que ya controle los archivos o herramientas del dispositivo. El contrato técnico y sus límites están definidos en [`src/domain/local-security.ts`](src/domain/local-security.ts).
+
+## Desarrollo
+
+Prisma requiere **Node.js 22 o superior**.
+
+```bash
+npm ci
+npm run dev
+```
+
+Antes de proponer cambios, ejecuta el gate local principal:
+
+```bash
+npm run check
+```
+
+El CI completa además el benchmark del ledger, el build de producción y el E2E.
+
+## Nombre público y compatibilidad interna
+
+**Prisma** es el nombre público del producto.
+
+**GlitchBudget** sigue siendo una identidad interna y de compatibilidad histórica en lugares donde renombrarla rompería datos o copias existentes, por ejemplo nombres de base de datos, claves de almacenamiento y formatos/versiones de backup. Esos identificadores no deben cambiarse solo por razones de branding.
 
 ## Copias y recuperación
 
