@@ -108,11 +108,7 @@ export default function InvestmentsManager() {
 
   return (
     <div className="space-y-5" data-investments-prisma="true">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Activos</p><h3 className="mt-1 font-display text-2xl font-normal tracking-[-0.025em]">Inversiones</h3>
-          <p className="text-sm text-muted-foreground">Activos no líquidos. El rendimiento futuro siempre se muestra como estimado y no aumenta tu patrimonio real.</p>
-        </div>
+      <div className="flex justify-end">
         <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value && !busy) reset(); }}>
           <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Añadir inversión</Button></DialogTrigger>
           <DialogContent className="sm:max-w-2xl" data-investment-dialog="prisma">
@@ -163,7 +159,7 @@ export default function InvestmentsManager() {
       </div>
 
       {!rows.length ? (
-        <EmptyState title="Aún no hay inversiones" description="Registra certificados, depósitos a plazo u otras inversiones con rendimiento conocido." />
+        <EmptyState title="Aún no hay inversiones" />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {rows.map(({investment,account,currentValue,projection}) => (
