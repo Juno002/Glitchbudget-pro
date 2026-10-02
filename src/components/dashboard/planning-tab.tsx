@@ -8,9 +8,8 @@ import { useBudgetPeriod } from '@/hooks/use-budget-period';
 import { BudgetPeriodControls } from './budget-period-controls';
 import { Button } from '@/components/ui/button';
 import { monthlyAmount } from '@/lib/finance-calculations';
-import { formatPeriodRange } from '@/lib/period-format';
 import { cn } from '@/lib/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -170,7 +169,6 @@ export default function PlanningTab() {
   const money = usePrivateCurrency();
   const {
     currentMonth,
-    currentPeriod,
     baseIncome,
     getTotals,
     updateAllBudgets,
@@ -209,7 +207,7 @@ export default function PlanningTab() {
 
   return (
     <div className="space-y-7 pb-24 md:pb-8" data-plan-prisma="true">
-      <PageHeader title={<><span>Plan</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} description={<>Presupuestos, metas y movimientos planificados · <strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong></>} />
+      <PageHeader title={<><span>Plan</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} />
 
       <Tabs value={planningTab} onValueChange={value => navigate({ area:'planning', planningTab:value as typeof planningTab })} className="w-full">
         <TabsList className="mb-6 grid h-auto w-full grid-cols-3 gap-1 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-card)]" data-plan-navigation="prisma">
@@ -232,7 +230,6 @@ export default function PlanningTab() {
                 <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3"><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Ingresos registrados</span><strong className="mt-1 block font-display text-lg font-normal">{money(monthlyTotals.recordedIncome)}</strong></div>
                 <div className="rounded-[var(--radius-interactive)] bg-muted/45 p-3"><span className="block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Margen tras reservas</span><strong className="mt-1 block font-display text-lg font-normal">{money(monthlyTotals.monthlyPlanningMargin)}</strong></div>
               </div>
-              <p className="text-xs text-muted-foreground">Este margen pertenece al período financiero mensual. Los presupuestos semanales, anuales y únicos mantienen su propio rango.</p>
             </div>
           )}
 
@@ -240,7 +237,6 @@ export default function PlanningTab() {
             <CardHeader className="space-y-4">
               <div>
                 <CardTitle className="font-display text-2xl font-normal">Presupuestos</CardTitle>
-                <CardDescription>Define cuánto quieres gastar por categoría y sigue tu progreso.</CardDescription>
               </div>
 
               <BudgetPeriodControls selection={selection} />
