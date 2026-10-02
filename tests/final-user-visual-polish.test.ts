@@ -9,12 +9,16 @@ test('final visual polish removes persistent tutorial copy from primary surfaces
   const movements = source('src/components/dashboard/movements-tab.tsx');
   const reports = source('src/components/dashboard/reports-tab.tsx');
   const plan = source('src/components/dashboard/planning-tab.tsx');
+  const goals = source('src/components/dashboard/goals-manager.tsx');
+  const planned = source('src/components/dashboard/subscriptions-manager.tsx');
 
   for (const [content, forbidden] of [
     [sidebar, ['Local / privado', 'Solo en tu dispositivo', 'Sincronización financiera remota desactivada']],
     [movements, ['Actividad real, búsqueda y gestión de cuentas en un solo lugar.', 'Gestión secundaria', 'Se conserva aquí hasta su migración visual final en 20.7.']],
     [reports, ['Hero analítico', 'Ventana analítica', 'El resumen editorial no reemplaza los importes y filas exactas del rango.']],
     [plan, ['Presupuestos, metas y movimientos planificados', 'Define cuánto quieres gastar por categoría y sigue tu progreso.']],
+    [goals, ['>Objetivos<', 'Define un objetivo y registra tus reservas para seguir su progreso.']],
+    [planned, ['>Recurrencias<', '>Pendientes<', '>Resueltas<', '>Motor local<', 'Últimas ocurrencias confirmadas u omitidas.']],
   ] as const) {
     for (const phrase of forbidden) assert.ok(!content.includes(phrase), phrase);
   }
@@ -41,6 +45,9 @@ test('final visual polish keeps settings navigation in one scrollable row', () =
   assert.match(settings, /flex-nowrap/);
   assert.match(settings, /overflow-x-auto/);
   assert.match(settings, /shrink-0/);
+  assert.match(settings, /gap-0\.5/);
+  assert.match(settings, /lg:justify-between/);
+  assert.match(settings, /px-2 text-xs/);
   assert.doesNotMatch(settings, /flex-wrap justify-start/);
 });
 
