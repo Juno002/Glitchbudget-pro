@@ -64,7 +64,7 @@ test('20.7 preserves persistent GlitchBudget technical identifiers for compatibi
   assert.match(security,/AUTO_LOCK_STORAGE_KEY = 'glitchbudget_auto_lock_v1'/);
   assert.match(security,/ENCRYPTED_BACKUP_FORMAT = 'GlitchBudget encrypted backup'/);
   assert.match(security,/ENCRYPTED_BACKUP_VERSION = 1/);
-  assert.match(backup,/CURRENT_BACKUP_FORMAT_VERSION = 13/);
+  assert.match(backup,/CURRENT_BACKUP_FORMAT_VERSION = 14/);
   assert.match(management,/const name = `glitchbudget-backup-\$\{timestamp\}\.json`/);
 });
 
