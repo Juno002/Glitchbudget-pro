@@ -100,7 +100,7 @@ test('frozen v4 backup: export, empty test DB, import preserves all tables, auto
   const automationBefore = exportLocalAutomation(storage);
   const exported = await exportDataJSON(storage);
   const parsedExport = JSON.parse(exported);
-  assert.equal(parsedExport.v, 13);
+  assert.equal(parsedExport.v, 14);
   assert.deepEqual(clean(parsedExport.localAutomation), clean(automationBefore));
   await db.transaction('rw', db.tables, async () => { for (const table of db.tables) await table.clear(); });
   clearLocalAutomation(storage);
