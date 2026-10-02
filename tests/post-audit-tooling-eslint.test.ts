@@ -18,6 +18,7 @@ test('post-audit tooling uses ESLint 9 flat config without widening the Next.js 
   assert.equal(existsSync(path.join(root, '.eslintrc.json')), false);
   assert.match(config, /FlatCompat/);
   assert.match(config, /next\/core-web-vitals/);
+  assert.match(config, /src\/\*\*\/\*\.\{ts,tsx\}/);
 
   assert.equal(lock.packages['node_modules/eslint'].version, '9.39.5');
   assert.equal(lock.packages['node_modules/eslint-config-next'].version, '15.5.25');
@@ -42,4 +43,17 @@ test('post-audit tooling keeps the architectural import boundaries in flat confi
   ]) {
     assert.ok(config.includes(required), required);
   }
+});
+
+
+test('post-audit tooling discovers TypeScript across every src layer', async () => {
+  const { ESLint } = await import('eslint');
+  const eslint = new ESLint({ cwd: root });
+  const results = await eslint.lintFiles(['src']);
+  const relativePaths = results.map(result => path.relative(root, result.filePath));
+
+  assert.ok(
+    relativePaths.includes(path.join('src', 'lib', 'db.ts')),
+    'flat config must keep src/lib TypeScript inside the same lint scope as before',
+  );
 });

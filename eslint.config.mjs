@@ -5,6 +5,9 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    files: ['src/**/*.{ts,tsx}'],
+  },
   ...compat.config({
     extends: ['next/core-web-vitals'],
     overrides: [
