@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Info, Monitor } from 'lucide-react';
+import { Settings, Loader, Moon, Sun, Briefcase, RefreshCw, Plus, Minus, Monitor } from 'lucide-react';
 import { useFinances } from '@/contexts/finance-context';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -17,7 +17,7 @@ import IncomeCategoryManager from '@/components/dashboard/income-category-manage
 import { HelpDialog } from './help-dialog';
 import { clearPersistedFinanceData } from '@/lib/data-reset-service';
 import { useToast } from '@/hooks/use-toast';
-import { SectionHeader } from '@/components/finance-ui';
+import { ContextHelp, SectionHeader } from '@/components/finance-ui';
 import { useBalanceVisibility } from '@/contexts/balance-visibility-context';
 import { HOME_PREFERENCES_KEY } from '@/lib/home-preferences';
 import {
@@ -98,22 +98,22 @@ export function SettingsDialog() {
       <DialogContent className="sm:max-w-4xl" data-settings-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Ajustes</DialogTitle>
-          <DialogDescription>Preferencias, categorías, privacidad y datos en un solo lugar.</DialogDescription>
+          <DialogDescription className="sr-only">Configura preferencias, seguridad y datos de Prisma.</DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="general" className="space-y-5" onValueChange={value => { if (value === 'automation') refreshAutomationSummary(); }}>
-          <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)]" data-settings-navigation="prisma">
+          <TabsList className="flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-[var(--radius-card)] border bg-card p-1.5 shadow-[var(--shadow-control)]" data-settings-navigation="prisma">
             {SETTINGS_SECTIONS.map(([value, label]) => (
-              <TabsTrigger key={value} value={value} className="min-h-9 rounded-[var(--radius-interactive)] text-xs sm:text-sm">{label}</TabsTrigger>
+              <TabsTrigger key={value} value={value} className="min-h-9 shrink-0 rounded-[var(--radius-interactive)] text-xs sm:text-sm">{label}</TabsTrigger>
             ))}
           </TabsList>
 
           <TabsContent value="general" className="space-y-5">
-            <SectionHeader title="General" description="Cómo se organiza tu período financiero." />
+            <SectionHeader title="General" />
             <form className="max-w-sm rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-3" onSubmit={e => { e.preventDefault(); void setBaseCurrency(baseCurrencyDraft); }}>
-              <div>
+              <div className="flex items-center gap-1">
                 <p className="text-sm font-medium">Moneda base</p>
-                <p className="mt-1 text-xs text-muted-foreground">Código de tres letras. No hay tasas remotas ni conversión automática.</p>
+                <ContextHelp label="Acerca de la moneda base">Usa un código de tres letras. No hay conversión automática y solo puede cambiarse mientras no existan importes registrados.</ContextHelp>
               </div>
               <Input
                 aria-label="Moneda base"
@@ -123,12 +123,11 @@ export function SettingsDialog() {
                 maxLength={3}
                 placeholder="DOP"
               />
-              <p className="text-xs text-muted-foreground">Por seguridad solo puede cambiarse mientras no existan importes registrados. Las cuentas existentes sin movimientos adoptan la nueva moneda.</p>
               <Button type="submit" variant="outline" disabled={baseCurrencyDraft.length !== 3 || baseCurrencyDraft === currency}>Guardar moneda base</Button>
             </form>
 
             <label className="block max-w-sm space-y-2 text-sm">
-              <span className="font-medium">Inicio del período</span>
+              <span className="flex items-center gap-1 font-medium">Inicio del período <ContextHelp label="Cómo funciona el inicio del período">Por ejemplo, el día 25 crea períodos del 25 de un mes al 24 del siguiente.</ContextHelp></span>
               <NativeSelect
                 aria-label="Día inicial del período"
                 value={periodStartDay}
@@ -139,23 +138,24 @@ export function SettingsDialog() {
                   <option key={day} value={day}>{day === 1 ? 'Día 1 · mes calendario' : `Día ${day}`}</option>
                 ))}
               </NativeSelect>
-              <span className="block text-xs text-muted-foreground">Ej.: día 25 → 25 del mes anterior al 24 del mes seleccionado.</span>
             </label>
           </TabsContent>
 
           <TabsContent value="finance" className="space-y-6">
-            <SectionHeader title="Finanzas" description="Protecciones y reglas de planificación. No cambian las fórmulas del ledger." />
+            <SectionHeader title="Finanzas" />
 
             <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium">
-                <input
-                  type="checkbox"
-                  checked={preventNegativeAccountBalance}
-                  onChange={e => setPreventNegativeAccountBalance(e.target.checked)}
-                />
-                Proteger saldo de cuentas
-              </label>
-              <p className="text-xs text-muted-foreground">Impide crear o empeorar saldos negativos en cuentas reales. No utiliza ingresos previstos ni presupuestos.</p>
+              <div className="flex items-center gap-1">
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    checked={preventNegativeAccountBalance}
+                    onChange={e => setPreventNegativeAccountBalance(e.target.checked)}
+                  />
+                  Proteger saldo de cuentas
+                </label>
+                <ContextHelp label="Acerca de proteger saldo de cuentas">Impide crear o empeorar saldos negativos en cuentas reales. No utiliza ingresos previstos ni presupuestos.</ContextHelp>
+              </div>
             </div>
 
             <label className="block max-w-sm space-y-2 text-sm">
@@ -191,8 +191,7 @@ export function SettingsDialog() {
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-semibold">Ingreso previsto</h3>
-              <p className="text-xs text-muted-foreground">Es una previsión de planificación; no se convierte en ingreso registrado.</p>
+              <div className="flex items-center gap-1"><h3 className="font-semibold">Ingreso previsto</h3><ContextHelp label="Acerca del ingreso previsto">Es una referencia de planificación y no se convierte en ingreso registrado.</ContextHelp></div>
               <div className="grid max-w-xl gap-3 sm:grid-cols-2">
                 <NativeSelect value={baseFreq} onChange={e => setBaseFreq(e.target.value as typeof baseFreq)} className="">
                   <option value="mensual">Mensual</option>
@@ -205,8 +204,7 @@ export function SettingsDialog() {
             </div>
 
             <div className="space-y-3 border-t pt-5">
-              <h3 className="font-semibold">Ahorro sugerido</h3>
-              <p className="text-xs text-muted-foreground">Referencia de planificación. Cambiarla no mueve dinero ni modifica el ledger.</p>
+              <div className="flex items-center gap-1"><h3 className="font-semibold">Ahorro sugerido</h3><ContextHelp label="Acerca del ahorro sugerido">Es una referencia de planificación. Cambiarla no mueve dinero.</ContextHelp></div>
               <div className="flex flex-wrap gap-2">
                 {[
                   ['Ninguno 0%',0],
@@ -229,16 +227,13 @@ export function SettingsDialog() {
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-6">
-            <SectionHeader title="Categorías" description="Renombra, archiva y organiza sin romper el historial." />
+            <SectionHeader title="Categorías" />
             <ExpenseCategoryManager />
             <IncomeCategoryManager />
           </TabsContent>
 
           <TabsContent value="automation" className="space-y-6">
-            <SectionHeader
-              title="Automatización"
-              description="Flujo local: Plantillas → Filtros guardados → Reglas. Cada capa conserva una responsabilidad distinta."
-            />
+            <SectionHeader title="Automatización" />
 
             <div className="grid gap-3 md:grid-cols-3" data-local-automation-order="templates-saved-filters-rules">
               {LOCAL_AUTOMATION_LAYERS.map(layer => {
@@ -249,34 +244,24 @@ export function SettingsDialog() {
                     : automationSummary.rules;
                 return (
                   <div key={layer.id} className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)]">
-                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{layer.location}</p>
-                    <div className="mt-1 flex items-baseline justify-between gap-3">
+                    <div className="flex items-baseline justify-between gap-3">
                       <h3 className="font-semibold">{layer.title}</h3>
                       <span className="text-sm tabular-nums text-muted-foreground">{count}</span>
                     </div>
-                    <p className="mt-2 text-xs text-muted-foreground">{layer.description}</p>
                   </div>
                 );
               })}
-            </div>
-
-            <div className="rounded-[var(--radius-card)] border bg-muted/20 p-4 text-sm">
-              <p className="font-medium">Responsabilidades separadas</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Las plantillas se gestionan dentro del registro rápido; los filtros guardados, en Movimientos; las reglas se gestionan aquí y solo sugieren clasificación.
-              </p>
             </div>
 
             <TransactionRuleManager onRuleCountChange={handleRuleCountChange} />
           </TabsContent>
 
           <TabsContent value="privacy" className="space-y-5">
-            <SectionHeader title="Privacidad y seguridad" description="Prisma funciona localmente y no necesita enviar tus datos financieros fuera del dispositivo." />
+            <SectionHeader title="Privacidad y seguridad" />
             <div className="rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] text-sm space-y-4">
               <label className="flex items-start justify-between gap-4">
                 <span>
-                  <span className="block font-medium">Ocultar importes</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">Oculta cantidades monetarias en las superficies principales. La preferencia se guarda solo en este navegador; no cifra los datos almacenados ni las copias de seguridad.</span>
+                  <span className="flex items-center gap-1 font-medium">Ocultar importes <ContextHelp label="Acerca de ocultar importes">Oculta cantidades monetarias en las superficies principales. No cifra los datos almacenados ni las copias.</ContextHelp></span>
                 </span>
                 <input
                   type="checkbox"
@@ -290,23 +275,15 @@ export function SettingsDialog() {
                 <AppLockSettings />
               </div>
               <AutoLockSettings />
-              <div className="flex items-start gap-3 border-t pt-4">
-                <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <div>
-                  <p className="font-medium">Almacenamiento local</p>
-                  <p className="mt-1 text-muted-foreground">Tus movimientos se guardan en este navegador. No hay cuenta, sincronización en la nube ni telemetría financiera.</p>
-                </div>
-              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="data" className="space-y-6">
-            <SectionHeader title="Datos y respaldos" description="Exporta antes de cambiar de navegador, dirección o dispositivo." />
+            <SectionHeader title="Datos y copias" />
             <div className="max-w-md"><PersistentStorageSettings /></div>
             <div className="max-w-md"><OpfsBackupDialog /></div>
             <div className="rounded-[var(--radius-card)] border border-destructive/30 p-4 space-y-3">
               <h3 className="font-semibold text-destructive">Zona destructiva</h3>
-              <p className="text-sm text-muted-foreground">Borrar los datos elimina movimientos, planes, cuentas, metas y copias locales del sitio.</p>
               <AlertDialog>
                 <AlertDialogTrigger asChild><Button variant="destructive">Borrar todos los datos</Button></AlertDialogTrigger>
                 <AlertDialogContent>
@@ -324,7 +301,7 @@ export function SettingsDialog() {
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-5">
-            <SectionHeader title="Apariencia" description="Los temas cambian presentación, no jerarquía ni funcionalidad." />
+            <SectionHeader title="Apariencia" />
             <RadioGroup value={theme} onValueChange={value => setTheme(value as typeof theme)} className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <Label htmlFor="theme-dark" className="cursor-pointer rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
                 <div className="flex items-center gap-2 font-medium"><RadioGroupItem value="dark" id="theme-dark" /><Moon className="h-4 w-4" /> Neón oscuro</div>
@@ -342,7 +319,7 @@ export function SettingsDialog() {
           </TabsContent>
 
           <TabsContent value="about" className="space-y-5">
-            <SectionHeader title="Acerca de" description="Ayuda, privacidad y comportamiento general de la aplicación." />
+            <SectionHeader title="Acerca de" />
             <div className="max-w-sm"><HelpDialog /></div>
           </TabsContent>
         </Tabs>
