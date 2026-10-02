@@ -29,35 +29,20 @@ export default function MovementsTab() {
 
   return (
     <div className="space-y-8" data-movements-surface="prisma">
-      <PageHeader
-        title={<><span>Movimientos</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
-        description="Actividad real, búsqueda y gestión de cuentas en un solo lugar."
-      />
+      <PageHeader title={<><span>Movimientos</span><span className="text-[hsl(var(--brand-coral))]">.</span></>} />
 
       <section ref={historyRef} id="history-section" tabIndex={-1} className="scroll-mt-24 space-y-3" aria-labelledby="history-title">
-        <SectionHeader
-          eyebrow="Actividad real"
-          title={<span id="history-title">Historial</span>}
-          description="Ingresos, gastos, transferencias, pagos y aportes registrados."
-        />
+        <SectionHeader title={<span id="history-title">Historial</span>} />
         <MovementsView />
       </section>
 
       <section ref={accountsRef} id="accounts-section" tabIndex={-1} className="scroll-mt-24 space-y-3 border-t border-border/70 pt-7" aria-labelledby="accounts-title">
-        <SectionHeader
-          eyebrow="Gestión secundaria"
-          title={<span id="accounts-title">Cuentas y tarjetas</span>}
-          description="Saldos, transferencias, conciliación y deuda sin crear otro destino principal."
-        />
+        <SectionHeader title={<span id="accounts-title">Cuentas y tarjetas</span>} />
         <AccountsOverview />
       </section>
 
       <section ref={investmentsRef} id="investments-section" tabIndex={-1} className="scroll-mt-24 space-y-3 border-t border-border/70 pt-7" aria-labelledby="investments-title">
-        <SectionHeader
-          eyebrow="Activos no líquidos"
-          title={<span id="investments-title">Inversiones</span>}
-          description="Se conserva aquí hasta su migración visual final en 20.7."
-        />
+        <SectionHeader title={<span id="investments-title">Inversiones</span>} />
         <InvestmentsManager />
       </section>
     </div>
