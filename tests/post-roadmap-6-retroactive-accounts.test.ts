@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 
 import { accountStartDateBounds, assertAccountStartDateAllowed } from '../src/domain/account-start';
-import { selectAccountBalance, selectAccountHasActivity, selectPosition } from '../src/domain/ledger';
-import type { Account, AccountSnapshot, Expense, Income } from '../src/domain/models';
+import { selectAccountBalance, selectAccountHasActivity, selectPosition, type AccountSnapshot } from '../src/domain/ledger';
+import type { Account, Expense, Income } from '../src/domain/models';
 import { selectReportsSnapshot } from '../src/domain/reports';
 import { shiftPeriodId } from '../src/domain/periods';
 import { db } from '../src/lib/db';
