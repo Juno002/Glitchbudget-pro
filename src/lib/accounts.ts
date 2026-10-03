@@ -1,12 +1,13 @@
 import { accountFundsWorsen } from '../policies/account-protection';
 import { readFinancialPolicies } from './policy-settings';
-import { selectAccountEntries, selectAccountBalance, selectCardSignedBalance, selectPosition } from '../domain/ledger';
+import { selectAccountEntries, selectAccountBalance, selectAccountHasActivity, selectCardSignedBalance, selectPosition } from '../domain/ledger';
 import { isCreditCardDebt } from '../domain/debt-semantics';
 import { z } from 'zod';
 import { db, type Account, type Income, type Expense, type DebtPayment, type AccountTransfer } from './db';
 import { isValidDate, localDate } from './finance-calculations';
 import { normalizeCurrencyCode, requireCurrencyCode } from '../domain/currency';
 import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '../domain/data-integrity';
+import { assertAccountStartDateAllowed } from '../domain/account-start';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
 const commonAccountFields = {
@@ -44,6 +45,7 @@ export async function ensureCashAccount(startDate = localDate()): Promise<Accoun
       }
       return { ...existing, currency:baseCurrency, isDefaultCash: true };
     }
+    assertAccountStartDateAllowed(startDate, localDate());
     const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', currency: baseCurrency, openingBalance: 0, startDate, isDefaultCash: true };
     await db.accounts.add(account);
     return account;
@@ -78,6 +80,16 @@ export async function readAccountSnapshot(): Promise<AccountSnapshot> {
   ).valid;
   return { incomes, expenses, payments, transfers };
 }
+export async function hasAccountActivity(accountId: string): Promise<boolean> {
+  const [incomes, expenses, payments, transfers] = await Promise.all([
+    db.incomes.toArray(),
+    db.expenses.toArray(),
+    db.debt_payments.toArray(),
+    db.account_transfers.toArray(),
+  ]);
+  return selectAccountHasActivity(accountId, { incomes, expenses, payments, transfers });
+}
+
 export async function requireAccount(id: string | undefined, movementDate: string) {
   if (!id) throw new Error('Selecciona una cuenta del movimiento.');
   const account = await db.accounts.get(id);
@@ -88,7 +100,7 @@ export async function requireAccount(id: string | undefined, movementDate: strin
 export async function addAccount(input: Account, editing = false) {
   const account = accountSchema.parse(input);
   if (account.type === 'investment') throw new Error('Las cuentas de inversión se crean desde Investments 1.0.');
-  if (!editing && account.startDate !== localDate()) throw new Error('Introduce el saldo actual para comenzar el seguimiento hoy.');
+  if (!editing) assertAccountStartDateAllowed(account.startDate, localDate());
   await db.transaction('rw', [...accountTables, db.settings], async () => {
     const settings = await db.settings.get('general');
     const baseCurrency = normalizeCurrencyCode(settings?.currency);
@@ -97,7 +109,13 @@ export async function addAccount(input: Account, editing = false) {
     }
     if (editing) {
       const existing = await db.accounts.get(account.id);
-      if (!existing || existing.startDate !== account.startDate) throw new Error('No se puede cambiar la fecha inicial de la cuenta.');
+      if (!existing) throw new Error('La cuenta ya no existe. Actualiza la lista.');
+      if (existing.startDate !== account.startDate) {
+        assertAccountStartDateAllowed(account.startDate, localDate());
+        if (await hasAccountActivity(account.id)) {
+          throw new Error('La fecha inicial no se puede cambiar porque la cuenta ya tiene movimientos registrados.');
+        }
+      }
       if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
       if (normalizeCurrencyCode(existing.currency, baseCurrency) !== account.currency) throw new Error('La moneda de una cuenta con historial no se puede reinterpretar.');
       account.isDefaultCash = existing.isDefaultCash;

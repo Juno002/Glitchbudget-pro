@@ -19,6 +19,7 @@ export function useAccountManagement(accounts: Account[], currency: string) {
   const [cashOpen, setCashOpen] = useState(false);
   const [cardsOpen, setCardsOpen] = useState(false);
   const [opening, setOpening] = useState('');
+  const [startDate, setStartDate] = useState(localDate());
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
@@ -50,6 +51,7 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setEditingAccount('');
     setName('');
     setOpening('');
+    setStartDate(localDate());
   };
 
   const openManagement = () => {
@@ -61,6 +63,7 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setEditingAccount(account.id);
     setName(account.name);
     setOpening(String(account.openingBalance / 100));
+    setStartDate(account.startDate);
     if (account.type === 'cash') setCashOpen(true);
     else setOpen(true);
   };
@@ -85,7 +88,7 @@ export function useAccountManagement(accounts: Account[], currency: string) {
         type: 'bank',
         currency: existing?.currency || currency,
         openingBalance: toCents(opening),
-        startDate: existing?.startDate || localDate(),
+        startDate,
       }, !!editingAccount);
       resetAccountDraft();
     }, editingAccount ? 'Cuenta actualizada' : 'Cuenta creada');
@@ -120,7 +123,7 @@ export function useAccountManagement(accounts: Account[], currency: string) {
       if (!existing || existing.type !== 'cash') {
         throw new Error('Cuenta de efectivo no encontrada.');
       }
-      await addAccount({ ...existing, openingBalance: toCents(opening) }, true);
+      await addAccount({ ...existing, openingBalance: toCents(opening), startDate }, true);
       setCashOpen(false);
       resetAccountDraft();
     }, 'Saldo inicial actualizado');
@@ -143,6 +146,8 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setCardsOpen,
     opening,
     setOpening,
+    startDate,
+    setStartDate,
     from,
     setFrom,
     to,

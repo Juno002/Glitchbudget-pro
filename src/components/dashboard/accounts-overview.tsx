@@ -1,7 +1,8 @@
 'use client';
-import { selectAccountOverviewReadModel } from '@/domain/ledger';
+import { selectAccountHasActivity, selectAccountOverviewReadModel } from '@/domain/ledger';
 import { useMemo, useState } from 'react';
 import { accountBalance, accountEntries } from '@/lib/accounts';
+import { accountStartDateBounds } from '@/domain/account-start';
 import { localDate } from '@/lib/finance-calculations';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { Button } from '@/components/ui/button';
@@ -43,13 +44,29 @@ export default function AccountsOverview() {
     open, setOpen, busy, locked,
     editingAccount, setEditingAccount, editingTransfer, setEditingTransfer,
     name, setName, cashOpen, setCashOpen, cardsOpen, setCardsOpen,
-    opening, setOpening, from, setFrom, to, setTo, amount, setAmount,
+    opening, setOpening, startDate, setStartDate, from, setFrom, to, setTo, amount, setAmount,
     date, setDate, note, setNote, card, setCard, cardBalance, setCardBalance,
     resetAccountDraft, openManagement, editAccount, editTransfer,
     submitAccount, submitTransfer, submitCardReconciliation, submitCashOpening,
   } = management;
   if (!data) return <Skeleton className="h-28 w-full rounded-[var(--radius-card)]" />;
   const today = localDate();
+  const startBounds = accountStartDateBounds(today);
+  const editingAccountRecord = data.accounts.find(item => item.id === editingAccount);
+  const editingAccountHasActivity = editingAccountRecord
+    ? selectAccountHasActivity(editingAccountRecord.id, data)
+    : false;
+  const parsedOpening = Number(opening);
+  const proposedOpening = editingAccountRecord && Number.isFinite(parsedOpening)
+    ? Math.round(parsedOpening * 100)
+    : editingAccountRecord?.openingBalance ?? 0;
+  const currentCalculatedBalance = editingAccountRecord
+    ? accountBalance(editingAccountRecord, data, today)
+    : 0;
+  const openingDifference = editingAccountRecord
+    ? proposedOpening - editingAccountRecord.openingBalance
+    : 0;
+  const projectedCalculatedBalance = currentCalculatedBalance + openingDifference;
   const {
     cards,
     liquidAccounts,
@@ -89,8 +106,12 @@ export default function AccountsOverview() {
             <form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitAccount(); }}>
               <h3 className="font-semibold">{editingAccount ? 'Editar cuenta y saldo inicial' : 'Añadir cuenta bancaria'}</h3>
               <label className="block text-sm">Nombre<Input required maxLength={80} value={name} onChange={e=>setName(e.target.value)} placeholder="Ej. Banco principal" /></label>
-              <label className="block text-sm">{editingAccount ? `Saldo inicial (${currency})` : `Saldo actual (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e=>setOpening(e.target.value)} /></label>
-              <p className="text-xs text-muted-foreground">{editingAccount ? 'Corrige el saldo con el que comenzaste el seguimiento. Los movimientos registrados después se suman o restan a esta cifra.' : 'Incluye los movimientos ya realizados hoy. Registra con esta cuenta solo los que hagas después de crearla. Este saldo no es un ingreso mensual.'}</p>
+              <label className="block text-sm">Llevar esta cuenta desde<Input required type="date" min={startBounds.min} max={startBounds.max} value={startDate} onChange={e=>setStartDate(e.target.value)} disabled={Boolean(editingAccount && editingAccountHasActivity)} /></label>
+              {editingAccount && editingAccountHasActivity && <p className="text-xs text-muted-foreground">La fecha inicial está bloqueada porque la cuenta ya tiene movimientos registrados.</p>}
+              <label className="block text-sm">{editingAccount ? `Corregir saldo inicial (${currency})` : startDate < today ? `Saldo al inicio de ese día (${currency})` : `Saldo actual (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e=>setOpening(e.target.value)} /></label>
+              {editingAccount && editingAccountRecord
+                ? <p className="text-xs text-muted-foreground">Saldo calculado hoy: {money(currentCalculatedBalance, editingAccountRecord.currency)} · Diferencia de apertura: {money(openingDifference, editingAccountRecord.currency)} · Quedaría: {money(projectedCalculatedBalance, editingAccountRecord.currency)}. La corrección no crea ingresos ni gastos.</p>
+                : <p className="text-xs text-muted-foreground">{startDate < today ? 'Indica cuánto tenías al comenzar ese día. Después podrás reconstruir los movimientos desde esa fecha. Este saldo no cuenta como ingreso.' : 'Incluye los movimientos ya realizados hoy. Registra con esta cuenta solo los que hagas después de crearla. Este saldo no es un ingreso mensual.'}</p>}
               <Button type="submit">{editingAccount ? 'Guardar cuenta' : 'Crear cuenta'}</Button>{editingAccount && <Button type="button" variant="ghost" onClick={resetAccountDraft}>Cancelar edición</Button>}
             </form>
             {liquidAccounts.length >= 2 && <form className="space-y-3 border-t pt-4" onSubmit={e=>{ e.preventDefault(); void submitTransfer(); }}>
@@ -144,7 +165,7 @@ export default function AccountsOverview() {
           label={`Acciones de ${account.name}`}
           items={[
             {
-              label: account.type === 'cash' ? 'Ajustar saldo inicial' : 'Editar cuenta',
+              label: account.type === 'cash' ? 'Corregir saldo inicial' : 'Editar cuenta',
               icon: <Pencil className="h-4 w-4" />,
               onSelect: () => editAccount(account),
             },
@@ -158,6 +179,6 @@ export default function AccountsOverview() {
       /><h4 className="font-medium text-sm">Movimientos recientes</h4>{accountEntries(account,data).slice(0,50).map(r=><div key={r.kind+r.id} className="flex justify-between gap-3 text-sm border-b py-2"><div className="min-w-0 break-words">{r.description}{r.kind === 'transfer' && <button className="block rounded-[var(--radius-interactive)] text-primary underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" onClick={()=>{const transfer=data.transfers.find(item=>item.id===r.id);if(transfer)editTransfer(transfer);}}>Ver / editar transferencia</button>}<span className="block text-xs text-muted-foreground">{r.date} · {r.kind==='transfer'?'Transferencia':r.kind==='payment'?'Pago de tarjeta':r.kind==='income'?'Ingreso':'Gasto'}</span></div><span className="shrink-0">{r.amount>0?'+':''}{money(r.amount, account.currency)}</span></div>)}<p className="text-xs text-muted-foreground">Hasta 50 movimientos recientes. Los movimientos anteriores sin cuenta siguen en tus reportes.</p></div>}
     </>}
     </div></details>
-    <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle className="font-display text-2xl font-normal">Saldo inicial de efectivo</DialogTitle><DialogDescription>Corrige solo el dinero que tenías al iniciar el seguimiento. Los ingresos y gastos registrados se calculan automáticamente.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitCashOpening(); }}><label className="block text-sm">{`Saldo inicial (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label><Button disabled={busy} type="submit">Guardar saldo inicial</Button></form></DialogContent></Dialog>
+    <Dialog open={cashOpen} onOpenChange={v => { if (!locked.current) setCashOpen(v); }}><DialogContent><DialogHeader><DialogTitle className="font-display text-2xl font-normal">Corregir saldo inicial de efectivo</DialogTitle><DialogDescription>La fecha inicial solo puede cambiar mientras Efectivo no tenga movimientos. El saldo inicial puede corregirse después con las protecciones habituales.</DialogDescription></DialogHeader><form className="space-y-3" onSubmit={e => { e.preventDefault(); void submitCashOpening(); }}><label className="block text-sm">Llevar esta cuenta desde<Input required type="date" min={startBounds.min} max={startBounds.max} value={startDate} onChange={e=>setStartDate(e.target.value)} disabled={busy || editingAccountHasActivity}/></label>{editingAccountHasActivity && <p className="text-xs text-muted-foreground">La fecha inicial está bloqueada porque Efectivo ya tiene movimientos registrados.</p>}<label className="block text-sm">{`Corregir saldo inicial (${currency})`}<Input required type="number" min="0" step="0.01" value={opening} onChange={e => setOpening(e.target.value)} disabled={busy}/></label>{editingAccountRecord && <p className="text-xs text-muted-foreground">Saldo calculado hoy: {money(currentCalculatedBalance, editingAccountRecord.currency)} · Diferencia de apertura: {money(openingDifference, editingAccountRecord.currency)} · Quedaría: {money(projectedCalculatedBalance, editingAccountRecord.currency)}. La corrección no crea ingresos ni gastos.</p>}<Button disabled={busy} type="submit">Guardar corrección</Button></form></DialogContent></Dialog>
   </section>;
 }
