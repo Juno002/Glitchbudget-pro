@@ -4912,7 +4912,7 @@ No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–6 está cerrada. Cualquier trabajo posterior requiere una nueva autorización explícita. Cualquier trabajo posterior requiere una nueva autorización explícita.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–6 está cerrada. Cualquier trabajo posterior requiere una nueva autorización explícita.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 
