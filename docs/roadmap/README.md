@@ -30,6 +30,10 @@ ninguna — roadmap vigente cerrado
 
 No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
 
+## Evaluación técnica externa al roadmap
+
+- [Auditoría de viabilidad de Capacitor para Android/iOS — 3 de octubre de 2026](capacitor-audit-2026-10-03.md)
+
 Baseline técnico actual:
 
 ```text
