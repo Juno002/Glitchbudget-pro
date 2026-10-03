@@ -1,6 +1,6 @@
 # Post-roadmap 6 — Inicio retroactivo de cuentas
 
-**Estado:** implementada / Gate de rama aprobado; pendiente revisión y merge. PR #104.
+**Estado:** completada / Gate aprobado. PR #104.
 
 ## Objetivo
 
@@ -66,3 +66,18 @@ El PR no se mergea antes de revisión final.
 - Se preservó la compatibilidad de `ensureCashAccount()` con movimientos históricos: la ventana retroactiva solo restringe creación/edición explícita.
 - Gate final de rama: **724/724 tests**, benchmark, build y E2E verdes.
 - Review posterior corrigió un P2 de UI: las cuentas históricas inactivas conservan un `startDate` anterior a la ventana móvil sin que el `min` nativo impida corregir nombre o saldo; cualquier cambio nuevo sigue validándose por el servicio.
+
+
+## Verificaciones finales previas al merge
+
+Tras revisión manual del diff se cerraron tres bloqueantes adicionales:
+
+1. el diálogo de Efectivo conserva el `startDate` persistido cuando la fecha del borrador no fue tocada; solo un cambio explícito puede modificarla;
+2. un backup v14 con una cuenta cuyo `startDate` sea anterior a la ventana retroactiva actual importa correctamente sin pasar por `addAccount()` como creación;
+3. una cuenta histórica sin actividad puede cambiar nombre o `openingBalance` conservando un `startDate` fuera de la ventana actual.
+
+Cobertura adicional:
+- borde de año: `2027-01-05` resuelve `min = 2026-12-01`;
+- gate completo final previo al cierre: **728/728 tests**, benchmark, build y E2E verdes;
+- Vercel verde;
+- reviews pendientes: 0.
