@@ -226,3 +226,10 @@ test('pure activity selector includes every account-affecting movement family', 
   assert.equal(selectAccountHasActivity('a', { ...empty, transfers:[{ toAccountId:'a' } as any] }), true);
   assert.equal(selectAccountHasActivity('a', { ...empty, expenses:[{ accountId:'a', paymentMethod:'credit' } as Expense] }), false);
 });
+
+
+test('UI preserves an unchanged historical startDate outside the rolling edit window', () => {
+  const source = readFileSync(new URL('../src/components/dashboard/accounts-overview.tsx', import.meta.url), 'utf8');
+  assert.match(source, /startInputMin = editingAccountRecord && editingAccountRecord\.startDate < startBounds\.min/);
+  assert.match(source, /min=\{startInputMin\} max=\{startBounds\.max\}/);
+});
