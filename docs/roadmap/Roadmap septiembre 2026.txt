@@ -4866,7 +4866,7 @@ Contrato:
 
 ### Intervención 6 — Inicio retroactivo de cuentas
 
-**Estado: autorizada / en ejecución.**
+**Estado: implementada / Gate de rama aprobado; pendiente revisión y merge.** PR #104.
 
 Objetivo: permitir que una cuenta líquida empiece a llevarse desde una fecha pasada dentro de una ventana controlada, reutilizando `Account.startDate` y `Account.openingBalance` sin crear ingresos ni movimientos sintéticos de apertura.
 
