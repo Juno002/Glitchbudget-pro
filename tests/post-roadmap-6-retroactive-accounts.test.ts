@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 
-import { accountStartDateBounds, assertAccountStartDateAllowed } from '../src/domain/account-start';
+import { accountStartDateBounds, assertAccountStartDateAllowed, resolveEditedAccountStartDate } from '../src/domain/account-start';
 import { selectAccountBalance, selectAccountHasActivity, selectPosition, type AccountSnapshot } from '../src/domain/ledger';
 import type { Account, Expense, Income } from '../src/domain/models';
 import { selectReportsSnapshot } from '../src/domain/reports';
@@ -232,4 +232,52 @@ test('UI preserves an unchanged historical startDate outside the rolling edit wi
   const source = readFileSync(new URL('../src/components/dashboard/accounts-overview.tsx', import.meta.url), 'utf8');
   assert.match(source, /startInputMin = editingAccountRecord && editingAccountRecord\.startDate < startBounds\.min/);
   assert.match(source, /min=\{startInputMin\} max=\{startBounds\.max\}/);
+});
+
+
+test('year boundary keeps the retroactive window on the previous calendar month', () => {
+  assert.deepEqual(accountStartDateBounds('2027-01-05'), { min: '2026-12-01', max: '2027-01-05' });
+});
+
+test('untouched edit drafts preserve the persisted account start date', () => {
+  assert.equal(
+    resolveEditedAccountStartDate('2026-01-01', '2026-10-02', '2026-10-02'),
+    '2026-01-01',
+  );
+  assert.equal(
+    resolveEditedAccountStartDate('2026-01-01', '2026-10-02', '2026-01-01'),
+    '2026-10-02',
+  );
+});
+
+test('historical account outside the current window can change name and opening balance when startDate is unchanged', async () => {
+  const historical: Account = {
+    id:'historical',
+    name:'Cuenta antigua',
+    type:'bank',
+    currency:'DOP',
+    openingBalance:10_000,
+    startDate:'2026-01-01',
+  };
+  await db.accounts.add(historical);
+  await addAccount({ ...historical, name:'Cuenta antigua corregida', openingBalance:25_000 }, true);
+  const stored = await db.accounts.get(historical.id);
+  assert.equal(stored?.startDate, '2026-01-01');
+  assert.equal(stored?.name, 'Cuenta antigua corregida');
+  assert.equal(stored?.openingBalance, 25_000);
+});
+
+test('backup import accepts an account startDate older than the current retroactive edit window', async () => {
+  await addAccount(baseAccount('backup-old'));
+  const backup = JSON.parse(await exportDataJSON());
+  const row = backup.accounts.find((account: Account) => account.id === 'backup-old');
+  assert.ok(row);
+  row.startDate = '2026-01-01';
+  row.openingBalance = 77_700;
+
+  await importDataJSON(JSON.stringify(backup));
+
+  const restored = await db.accounts.get('backup-old');
+  assert.equal(restored?.startDate, '2026-01-01');
+  assert.equal(restored?.openingBalance, 77_700);
 });
