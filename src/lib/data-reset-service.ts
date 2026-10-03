@@ -1,3 +1,4 @@
+import { reconstructCategories } from '@/domain/categories';
 import { db } from '@/lib/db';
 
 /**
@@ -9,5 +10,10 @@ import { db } from '@/lib/db';
 export async function clearPersistedFinanceData(): Promise<void> {
   await db.transaction('rw', db.tables, async () => {
     for (const table of db.tables) await table.clear();
+
+    // Clearing tables does not trigger Dexie's populate hook. Restore the same
+    // category state as a brand-new database so transaction entry remains usable.
+    const defaultCategories = reconstructCategories({});
+    if (defaultCategories.length) await db.categories.bulkAdd(defaultCategories);
   });
 }
