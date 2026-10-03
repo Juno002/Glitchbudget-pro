@@ -3,6 +3,14 @@ import { cardCreditLimit, isCreditCardDebt, isHistoricalLoanDebt, loanOriginalPr
 import { normalizeCurrencyCode } from './currency';
 import { partitionCanonicalFinancialDates } from './financial-date';
 export type AccountSnapshot = { incomes: Income[]; expenses: Expense[]; payments: DebtPayment[]; transfers: AccountTransfer[] };
+
+export function selectAccountHasActivity(accountId: string, data: AccountSnapshot): boolean {
+  return data.incomes.some(row => row.accountId === accountId)
+    || data.expenses.some(row => row.accountId === accountId && row.paymentMethod !== 'credit')
+    || data.payments.some(row => row.accountId === accountId)
+    || data.transfers.some(row => row.fromAccountId === accountId || row.toAccountId === accountId);
+}
+
 export function selectAccountEntries(account: Account, data: AccountSnapshot, through: string) {
   const validPayments = partitionCanonicalFinancialDates(data.payments).valid;
   const entries = [

@@ -5,6 +5,7 @@ import type { Account, AccountTransfer } from '@/domain/models';
 import { addAccount, reconcileDebt, saveTransfer } from '@/lib/accounts';
 import { localDate } from '@/lib/finance-calculations';
 import { friendlyError } from '@/lib/errors';
+import { resolveEditedAccountStartDate } from '@/domain/account-start';
 import { toCents } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +20,8 @@ export function useAccountManagement(accounts: Account[], currency: string) {
   const [cashOpen, setCashOpen] = useState(false);
   const [cardsOpen, setCardsOpen] = useState(false);
   const [opening, setOpening] = useState('');
+  const [startDate, setStartDate] = useState(localDate());
+  const [initialStartDate, setInitialStartDate] = useState(localDate());
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
@@ -50,6 +53,9 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setEditingAccount('');
     setName('');
     setOpening('');
+    const today = localDate();
+    setStartDate(today);
+    setInitialStartDate(today);
   };
 
   const openManagement = () => {
@@ -61,6 +67,8 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setEditingAccount(account.id);
     setName(account.name);
     setOpening(String(account.openingBalance / 100));
+    setStartDate(account.startDate);
+    setInitialStartDate(account.startDate);
     if (account.type === 'cash') setCashOpen(true);
     else setOpen(true);
   };
@@ -85,7 +93,9 @@ export function useAccountManagement(accounts: Account[], currency: string) {
         type: 'bank',
         currency: existing?.currency || currency,
         openingBalance: toCents(opening),
-        startDate: existing?.startDate || localDate(),
+        startDate: existing
+          ? resolveEditedAccountStartDate(existing.startDate, startDate, initialStartDate)
+          : startDate,
       }, !!editingAccount);
       resetAccountDraft();
     }, editingAccount ? 'Cuenta actualizada' : 'Cuenta creada');
@@ -120,7 +130,8 @@ export function useAccountManagement(accounts: Account[], currency: string) {
       if (!existing || existing.type !== 'cash') {
         throw new Error('Cuenta de efectivo no encontrada.');
       }
-      await addAccount({ ...existing, openingBalance: toCents(opening) }, true);
+      const nextStartDate = resolveEditedAccountStartDate(existing.startDate, startDate, initialStartDate);
+      await addAccount({ ...existing, openingBalance: toCents(opening), startDate: nextStartDate }, true);
       setCashOpen(false);
       resetAccountDraft();
     }, 'Saldo inicial actualizado');
@@ -143,6 +154,8 @@ export function useAccountManagement(accounts: Account[], currency: string) {
     setCardsOpen,
     opening,
     setOpening,
+    startDate,
+    setStartDate,
     from,
     setFrom,
     to,
