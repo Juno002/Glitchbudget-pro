@@ -4866,7 +4866,7 @@ Contrato:
 
 ### Intervención 6 — Inicio retroactivo de cuentas
 
-**Estado: implementada / Gate de rama aprobado; pendiente revisión y merge.** PR #104.
+**Estado: completada / Gate aprobado.** PR #104.
 
 Objetivo: permitir que una cuenta líquida empiece a llevarse desde una fecha pasada dentro de una ventana controlada, reutilizando `Account.startDate` y `Account.openingBalance` sin crear ingresos ni movimientos sintéticos de apertura.
 
@@ -4905,14 +4905,14 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = Post-roadmap 6 — inicio retroactivo de cuentas
+intervenciones pendientes autorizadas = ninguna
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–5 está cerrada y Post-roadmap 6 es la única intervención adicional autorizada en ejecución. Cualquier trabajo posterior requiere una nueva autorización explícita.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–6 está cerrada. Cualquier trabajo posterior requiere una nueva autorización explícita. Cualquier trabajo posterior requiere una nueva autorización explícita.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 
