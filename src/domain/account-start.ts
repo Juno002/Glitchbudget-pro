@@ -16,3 +16,12 @@ export function assertAccountStartDateAllowed(startDate: string, today: string):
   if (startDate < min) throw new Error(`La fecha inicial no puede ser anterior a ${min}.`);
   return startDate;
 }
+
+
+export function resolveEditedAccountStartDate(
+  persistedStartDate: string,
+  draftStartDate: string,
+  initialDraftStartDate: string,
+): string {
+  return draftStartDate === initialDraftStartDate ? persistedStartDate : draftStartDate;
+}
