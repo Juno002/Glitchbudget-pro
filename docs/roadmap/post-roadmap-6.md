@@ -1,6 +1,6 @@
 # Post-roadmap 6 — Inicio retroactivo de cuentas
 
-**Estado:** autorizada / en ejecución.
+**Estado:** implementada / Gate de rama aprobado; pendiente revisión y merge. PR #104.
 
 ## Objetivo
 
@@ -53,3 +53,15 @@ npm run test:e2e
 ```
 
 El PR no se mergea antes de revisión final.
+
+
+## Evidencia de implementación
+
+- `Account` no cambió: se reutilizan `startDate` y `openingBalance`.
+- Dexie permanece en **v15**; no hubo migración.
+- Backup JSON permanece en **v14**; el round-trip conserva banco y Efectivo retroactivos.
+- La actividad de cuenta cubre ingresos, gastos de cuenta, pagos de deuda/tarjeta y transferencias en ambos sentidos.
+- `openingBalance` afecta saldo y patrimonio, pero no ingresos, gastos ni cash flow.
+- Caso 30/09: +11 000, -500 y -1 500 => saldo 9 000 validado.
+- Se preservó la compatibilidad de `ensureCashAccount()` con movimientos históricos: la ventana retroactiva solo restringe creación/edición explícita.
+- Gate de rama: **723/723 tests**, benchmark, build y E2E verdes sobre `ed1daf33d0d32ef02b87ddf0d8c74016411e24b8`.
