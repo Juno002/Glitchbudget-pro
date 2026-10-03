@@ -45,7 +45,6 @@ export async function ensureCashAccount(startDate = localDate()): Promise<Accoun
       }
       return { ...existing, currency:baseCurrency, isDefaultCash: true };
     }
-    assertAccountStartDateAllowed(startDate, localDate());
     const account: Account = { id: crypto.randomUUID(), name: 'Efectivo', type: 'cash', currency: baseCurrency, openingBalance: 0, startDate, isDefaultCash: true };
     await db.accounts.add(account);
     return account;
