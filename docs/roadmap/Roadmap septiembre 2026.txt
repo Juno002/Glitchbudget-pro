@@ -4864,6 +4864,28 @@ Contrato:
 - no tocar lógica de producto, seguridad, backups, migraciones, UI ni invariantes financieras;
 - ejecutar `npm ci`, `npm run check`, benchmark, build y E2E antes de cerrar.
 
+### Intervención 6 — Inicio retroactivo de cuentas
+
+**Estado: autorizada / en ejecución.**
+
+Objetivo: permitir que una cuenta líquida empiece a llevarse desde una fecha pasada dentro de una ventana controlada, reutilizando `Account.startDate` y `Account.openingBalance` sin crear ingresos ni movimientos sintéticos de apertura.
+
+Contrato:
+
+- `startDate` puede elegirse desde el inicio del mes calendario anterior hasta la fecha financiera local actual; nunca en el futuro;
+- el límite retroactivo se define mediante una constante y se calcula sobre fechas financieras canónicas date-only;
+- `startDate` puede corregirse después de crear una cuenta únicamente mientras no exista actividad asociada;
+- actividad incluye ingresos, gastos de cuenta, pagos de deuda/tarjeta desde la cuenta y transferencias como origen o destino; movimientos recurrentes/planificados confirmados quedan cubiertos por su movimiento materializado;
+- una vez exista actividad, intentar cambiar `startDate` debe fallar explícitamente;
+- `openingBalance` conserva su corrección posterior actual y sus protecciones contra saldos imposibles;
+- Efectivo usa el mismo contrato general, sin una excepción de dominio;
+- todo movimiento sigue exigiendo `movement.date >= account.startDate`;
+- `openingBalance` entra en saldo/patrimonio pero nunca en ingresos, gastos ni cash flow;
+- demostrar mediante round-trip que backup JSON v14 y Dexie v15 ya preservan el contrato; no subir versiones sin incompatibilidad real;
+- no introducir un campo nuevo de apertura ni un movimiento `opening`;
+- fuera de alcance: importación masiva de historial, préstamos y edición de `startDate` con actividad existente;
+- entregar un PR atómico y no mergear antes de revisión final.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
@@ -4883,14 +4905,14 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. El único trabajo autorizado adicional es la secuencia de hardening definida en **Post-roadmap**.
 
 ```text
-intervenciones pendientes autorizadas = ninguna
+intervenciones pendientes autorizadas = Post-roadmap 6 — inicio retroactivo de cuentas
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna fase funcional adicional autorizada después de 20.10.7 y la secuencia Post-roadmap 1–5 está cerrada. Cualquier trabajo posterior requiere una nueva autorización explícita.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–5 está cerrada y Post-roadmap 6 es la única intervención adicional autorizada en ejecución. Cualquier trabajo posterior requiere una nueva autorización explícita.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 
