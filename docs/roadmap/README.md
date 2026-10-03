@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-ninguna — roadmap vigente cerrado
+Post-roadmap 6 — inicio retroactivo de cuentas (en ejecución)
 ```
 
 No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
@@ -140,7 +140,7 @@ Los textos de checkpoints históricos reflejan el estado en que fueron cerrados.
 
 ## Post-roadmap — Hardening técnico
 
-El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 también quedó completado. La fuente canónica sigue siendo [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt).
+El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 quedó completado. Post-roadmap 6 fue autorizado explícitamente después de ese cierre. La fuente canónica sigue siendo [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt).
 
 | Intervención | Alcance | Estado |
 |---|---|---|
@@ -149,5 +149,6 @@ El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 t
 | Post-roadmap 3 | Navegación URL/history y focus robusto | **Completada / Gate aprobado** · [evidencia](post-roadmap-3.md) |
 | Post-roadmap 4 | Rendimiento medido en navegador | **Completada / Gate aprobado** · [evidencia](post-roadmap-4.md) |
 | Post-roadmap 5 | Mantenibilidad, pruebas y pulido | **Completada / Gate aprobado** · [evidencia](post-roadmap-5.md) |
+| Post-roadmap 6 | Inicio retroactivo de cuentas | **En ejecución** · [contrato](post-roadmap-6.md) |
 
-No existe Fase 20.11 ni Fase 21. No quedan intervenciones Post-roadmap autorizadas pendientes.
+No existe Fase 20.11 ni Fase 21. Post-roadmap 6 es la única intervención autorizada en ejecución.
