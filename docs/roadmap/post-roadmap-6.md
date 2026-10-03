@@ -64,7 +64,7 @@ El PR no se mergea antes de revisión final.
 - `openingBalance` afecta saldo y patrimonio, pero no ingresos, gastos ni cash flow.
 - Caso 30/09: +11 000, -500 y -1 500 => saldo 9 000 validado.
 - Se preservó la compatibilidad de `ensureCashAccount()` con movimientos históricos: la ventana retroactiva solo restringe creación/edición explícita.
-- Gate final de rama: **724/724 tests**, benchmark, build y E2E verdes.
+- Gate previo al review final: **724/724 tests**, benchmark, build y E2E verdes.
 - Review posterior corrigió un P2 de UI: las cuentas históricas inactivas conservan un `startDate` anterior a la ventana móvil sin que el `min` nativo impida corregir nombre o saldo; cualquier cambio nuevo sigue validándose por el servicio.
 
 
