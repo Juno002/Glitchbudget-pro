@@ -85,7 +85,7 @@ export function ReportCategoryDonut({
               paddingAngle={2}
               stroke="hsl(var(--card))"
               strokeWidth={2}
-              isAnimationActive
+              isAnimationActive={false}
             >
               {data.map((row,index)=><Cell key={row.key} fill={SEGMENT_COLORS[index%SEGMENT_COLORS.length]} />)}
             </Pie>
