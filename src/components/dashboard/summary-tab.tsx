@@ -30,7 +30,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useTabs } from '@/contexts/tabs-context';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
-import { selectHomeReadModel, type HomeModuleId } from '@/domain/home';
+import { selectHomeAttentionState, selectHomeReadModel, type HomeModuleId } from '@/domain/home';
 import { occurrenceDisplayStatus } from '@/domain/occurrence-status';
 import { useHomePreferences } from '@/hooks/use-home-preferences';
 import { HOME_MODULES } from '@/lib/home-preferences';
@@ -42,6 +42,10 @@ import { loadableContentState } from '@/domain/app-lifecycle';
 
 function dateLabel(value:string, locale:string) {
   return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short'}).format(new Date(value+'T12:00:00'));
+}
+
+function financialDateLabel(value:string, locale:string) {
+  return new Intl.DateTimeFormat(locale,{day:'numeric',month:'short',year:'numeric'}).format(new Date(value+'T12:00:00'));
 }
 
 function HomePreferencesDialog({
@@ -310,6 +314,11 @@ export default function SummaryTab() {
     getReportSnapshot,getBudgetStatusDetails,currentPeriod,currentMonth,plannedOccurrences,recurringRules,goals,investments,today,periodStartDay,
   ]);
 
+  const attentionState=selectHomeAttentionState({
+    quarantinedCount:quarantinedDebtPayments?.length || 0,
+    ...home.attentionSources,
+  });
+
   useEffect(()=>{
     const entering=activeTab==='summary' && previousActive.current!=='summary';
     previousActive.current=activeTab;
@@ -550,34 +559,27 @@ export default function SummaryTab() {
   return (
     <div className="space-y-7 pb-24 md:pb-8" data-home-prisma="true">
       <div className="space-y-3">
-        {home.attentionCount>0 ? (
-          <StatusBadge
-            status="warning"
-            label={home.attentionCount+' elementos requieren atención'}
-            className="min-h-7 px-3"
-          />
-        ) : null}
-        {(quarantinedDebtPayments?.length || 0)>0 ? (
-          <StatusBadge
-            status="warning"
-            label={(quarantinedDebtPayments?.length || 0) === 1
-              ? '1 pago tiene datos inválidos y no se incluye en saldos ni reportes'
-              : (quarantinedDebtPayments?.length || 0)+' pagos tienen datos inválidos y no se incluyen en saldos ni reportes'}
-            className="min-h-7 px-3"
-          />
-        ) : null}
         <PageHeader
-          title={<><span>Resumen</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
-          description={<strong className="font-semibold text-foreground">{formatPeriodRange(currentPeriod)}</strong>}
-          actions={<HomePreferencesDialog
-            visibleOrder={preferences.visibleOrder}
-            hidden={preferences.preferences.hidden}
-            defaultSection={preferences.preferences.defaultSection}
-            onHiddenChange={preferences.setHidden}
-            onMove={preferences.move}
-            onDefaultChange={preferences.setDefaultSection}
-            onReset={preferences.reset}
-          />}
+          title={<><span>Tu panorama financiero</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
+          description={<><span>{financialDateLabel(today,locale)}</span><span aria-hidden="true"> · </span><span>período {formatPeriodRange(currentPeriod)}</span></>}
+          actions={<>
+            <span data-home-status-pill={attentionState.kind}>
+              <StatusBadge
+                status={attentionState.status}
+                label={attentionState.label}
+                className="min-h-7 px-3"
+              />
+            </span>
+            <HomePreferencesDialog
+              visibleOrder={preferences.visibleOrder}
+              hidden={preferences.preferences.hidden}
+              defaultSection={preferences.preferences.defaultSection}
+              onHiddenChange={preferences.setHidden}
+              onMove={preferences.move}
+              onDefaultChange={preferences.setDefaultSection}
+              onReset={preferences.reset}
+            />
+          </>}
         />
       </div>
 
