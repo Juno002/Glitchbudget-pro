@@ -5,8 +5,8 @@ import test from 'node:test';
 const source = readFileSync(new URL('../src/components/dashboard/reports-tab.tsx', import.meta.url), 'utf8');
 
 function section(name: string, next: string) {
-  const start = source.indexOf(\`data-report-section="\${name}"\`);
-  const end = source.indexOf(\`data-report-section="\${next}"\`, start + 1);
+  const start = source.indexOf('data-report-section="' + name + '"');
+  const end = source.indexOf('data-report-section="' + next + '"', start + 1);
   assert.ok(start >= 0, 'missing section ' + name);
   assert.ok(end > start, 'missing following section ' + next);
   return source.slice(start, end);
