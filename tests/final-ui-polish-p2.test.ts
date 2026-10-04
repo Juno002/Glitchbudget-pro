@@ -41,8 +41,10 @@ test('P2 money remains private and a zero previous total has only the authorized
   assert.match(hero, /money\(report\.spending\.total\)/);
   assert.match(hero, /money\(report\.spending\.previousTotal\)/);
   assert.doesNotMatch(hero, /formatCurrency|Intl\.NumberFormat|\.toLocaleString\(/);
+  assert.doesNotMatch(hero, /[•●]/, 'P2 takes the shared privacy mask from usePrivateCurrency instead of inventing one');
   assert.doesNotMatch(hero, /(?:aria-label|aria-description|title)=\{[^}]*report\.spending/);
-  assert.match(hero, /report\.spending\.previousTotal\s*===\s*0\s*\?\s*['"]Sin referencia anterior['"]/);
+  assert.match(hero, /report\.spending\.previousTotal\s*===\s*0\s*\?\s*['"]Sin gasto anterior con el que comparar['"]/);
+  assert.doesNotMatch(hero, /Sin referencia anterior|Sin gasto anterior con el que comparar[^'"<]*frente al rango comparable/);
 });
 
 type SpendingFixture = {

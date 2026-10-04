@@ -4915,6 +4915,8 @@ Contrato de autoridad:
 
 Corrección editorial de P1 solicitada explícitamente en la revisión del 4 de octubre de 2026: importes indivisibles, copy observable en cruces estrictos de signo con porcentaje omitido solo en la lectura rápida, titular de categoría válido en todo el threshold existente y cuerpo de ausencia de cambios en lenguaje de usuario. El contrato exacto queda en `final-ui-polish.md`; no modifica cálculos, ranking, thresholds, tablas canónicas ni la secuencia P0–P7 y no inicia P2.
 
+Corrección de P2 solicitada explícitamente en la revisión del 4 de octubre de 2026: pluralización «1 movimiento» / «N movimientos», importe comparable con la fuente del texto conservando su formato indivisible, máscaras del hero con el glifo privado existente y tipografía/tamaño de texto consistentes, y copy «Sin gasto anterior con el que comparar» cuando el total anterior es cero. El contrato exacto queda en `final-ui-polish.md`; no modifica métricas, historia, tablas, privacidad ni la secuencia P0–P7. Se ejecuta como revisión de P2 antes de iniciar P3.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:

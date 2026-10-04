@@ -5,7 +5,7 @@ import { useFinances } from '@/contexts/finance-context';
 import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
 import { presentReportInsight, type ReportEditorialInsight } from '@/lib/report-editorial';
 import { localDate } from '@/lib/finance-calculations';
-import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,6 +77,7 @@ export default function ReportsTab() {
   const { getReportSnapshot, getBudgetStatusDetails, currentMonth, loading } = useFinances();
   const { setActiveTab, setPlanningTab } = useTabs();
   const money = usePrivateCurrency();
+  const { balancesHidden } = useBalanceVisibility();
   const getCategoryInfo = useCategoryResolver();
   const today=localDate();
   const initial=resolveReportRange('30d',today);
@@ -190,7 +191,7 @@ export default function ReportsTab() {
               <CardContent className="space-y-6 p-5 sm:p-6">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gasto del rango</p>
-                  <p className="mt-2 font-display text-[clamp(1.5rem,7vw,3.75rem)] font-normal leading-tight tracking-[-0.05em] text-foreground">
+                  <p className={'mt-2 font-normal text-foreground '+(balancesHidden?'text-base leading-normal tracking-normal':'font-display text-[clamp(1.5rem,7vw,3.75rem)] leading-tight tracking-[-0.05em]')}>
                     <span className="whitespace-nowrap" data-spending-money="total">{money(report.spending.total)}</span>
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">{currentLabel}</p>
@@ -200,12 +201,12 @@ export default function ReportsTab() {
                     {report.spending.previousTotal!==0 && report.spending.percentChange!==null ? (
                       <><span aria-hidden="true">{report.spending.percentChange>0?'↑':report.spending.percentChange<0?'↓':'↔'}</span>{' '}</>
                     ) : null}
-                    {report.spending.previousTotal===0?'Sin referencia anterior':percentLabel(report.spending.percentChange)} frente al rango comparable
+                    {report.spending.previousTotal===0?'Sin gasto anterior con el que comparar':percentLabel(report.spending.percentChange)+' frente al rango comparable'}
                   </p>
-                  <p className="text-muted-foreground" data-spending-count>{report.spending.transactionCount} movimientos</p>
+                  <p className="text-muted-foreground" data-spending-count>{report.spending.transactionCount} {report.spending.transactionCount===1?'movimiento':'movimientos'}</p>
                 </div>
                 <div className="space-y-1 border-t border-[var(--border-subtle)] pt-4 text-xs text-muted-foreground">
-                  <p>Período comparable · <span className="whitespace-nowrap font-mono" data-spending-money="previous">{money(report.spending.previousTotal)}</span></p>
+                  <p>Período comparable · <span className={'whitespace-nowrap'+(balancesHidden?' text-base leading-normal tracking-normal':'')} data-spending-money="previous">{money(report.spending.previousTotal)}</span></p>
                   <p>{previousLabel}</p>
                 </div>
               </CardContent>
