@@ -1185,3 +1185,13 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Decisiones cerradas: `selectReportsSnapshot()` conserva autoridad; tablas anchas mantienen scroll interno y evidencia visible; se conserva `budget-followup` tras detalle. P0 no aplica diseño ni copy de P1–P6.
 - Revisión de diff: solo documentación, tests y scripts de captura/verificación. Sin cambios en Reportes/Home, dominio financiero, schema, migraciones, backup/envelope, semánticas, navegación o red.
 - Bloqueantes de producto: ninguno. El push Git devolvió 401; se publicó la misma rama mediante la API de GitHub, verificando igualdad de árboles.
+
+### Verificación previa a P1 — evidencia P0
+
+**Gate aprobado · PR #110** — [Corrección de evidencia](https://github.com/Juno002/Glitchbudget-pro/pull/110), sin trabajo de P1 ni cambios de producto. El cierre original P0 conserva **Gate aprobado · PR #109**, confirmado mergeado en GitHub.
+
+- Entorno del ledger: executor cloud adjunto, no CI; Node v24.19.0 / Linux x64. El JSON conserva las muestras originales y registra por separado la huella observada en la repetición.
+- Unidad confirmada: `performance.now()` y `medianMs` son milisegundos. 50k original **42.626/40.288 ms**, no segundos. La repetición aislada dio **43.119/37.117 ms**, coherente con el coste existente; no reemplaza la baseline P0 ni modifica la regla 20% / 5 ms de P3.
+- Capturas: reloj **2026-10-04T12:00:00.000Z**, fecha financiera **2026-10-04**, zona **UTC** y dataset versionado. Mismos movimientos del smoke original, categorías explícitas y verificación del dataset antes de capturar; doce PNG en la ruta estable `docs/roadmap/final-ui-polish-p0-baseline/`. Captura en reposo tras comprobar privacidad del tooltip.
+- Dos sesiones aisladas comprobaron contrato y geometría idénticos. Tests nuevos prueban reloj independiente del día del host y rechazo de fecha/categoría/importe/filas diferentes. `npm run check`: **735/735**; `npm run build`, `npm run test:e2e` y `npm run benchmark:ledger`: aprobados.
+- Bloqueantes de producto: ninguno. P1 permanece siguiente autorizada y sin iniciar en esta ejecución.

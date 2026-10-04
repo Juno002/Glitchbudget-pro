@@ -61,3 +61,5 @@ El registro P0 conserva `Gate aprobado · PR #109`; GitHub confirma ese PR merge
 La revisión detectó que las capturas originales usaban reloj real y la primera categoría disponible. Esta corrección fija reloj, zona y dataset en el harness, regenera las doce capturas en la misma ruta estable y deja tests que rechazan una fecha, categoría, importe o cantidad de filas distinta. Las capturas esperan al estado en reposo, sin tooltip abierto ni foco transitorio. Dos corridas independientes comprobaron contrato y geometría idénticos. No cambia producto.
 
 Una repetición aislada del benchmark existente dio posición/historiales 50k **43.119/37.117 ms** (posición +0.493 ms, +1.16%; historiales −3.171 ms, −7.87%). El coste es coherente con las muestras originales de unos 40 ms; no es una medición de 40 segundos. [Muestras de verificación](ledger-recheck.json). Las medianas originales siguen siendo la baseline P0.
+
+Corrección de evidencia: **Gate aprobado · PR #110**, además del cierre original PR #109. Gates de la corrección: `npm run check` 735/735, `npm run build`, `npm run test:e2e` y `npm run benchmark:ledger` aprobados. P1 no se inició.
