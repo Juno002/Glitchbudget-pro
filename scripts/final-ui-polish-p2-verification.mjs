@@ -8,11 +8,11 @@ const history = JSON.parse(readFileSync(new URL('../tests/fixtures/final-ui-poli
 const moneyPattern = /(?:RD\$|DOP|US\$|USD|\$)\s*-?\d/;
 const categories = ['vivienda', 'transporte', 'alimentacion'];
 const cases = [
-  { name: 'prev-zero', current: [100], previous: [], total: 100, previousTotal: 0, variation: 'Sin referencia anterior frente al rango comparable' },
+  { name: 'prev-zero', current: [100], previous: [], total: 100, previousTotal: 0, variation: 'Sin gasto anterior con el que comparar' },
   { name: 'up', current: [200, 200, 200], previous: [100, 100, 100], total: 600, previousTotal: 300, variation: '↑ +100% frente al rango comparable' },
   { name: 'down', current: [100, 100, 100], previous: [200, 200, 200], total: 300, previousTotal: 600, variation: '↓ -50% frente al rango comparable' },
   { name: 'stable', current: [100], previous: [100], total: 100, previousTotal: 100, variation: '↔ Sin cambio frente al rango comparable' },
-  { name: 'empty', current: [], previous: [], total: 0, previousTotal: 0, variation: 'Sin referencia anterior frente al rango comparable' },
+  { name: 'empty', current: [], previous: [], total: 0, previousTotal: 0, variation: 'Sin gasto anterior con el que comparar' },
 ];
 const normalize = value => value.replace(/\s+/g, ' ').trim();
 const money = cents => 'RD$ ' + (cents / 100).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -68,7 +68,7 @@ async function readHero(client) {
       const node = hero.querySelector('[data-spending-money="'+key+'"]');
       const range = document.createRange(); range.selectNodeContents(node);
       const style = getComputedStyle(node);
-      return { text: node.textContent, whiteSpace: style.whiteSpace, lines: range.getClientRects().length, fontSize: parseFloat(style.fontSize), bounds: bounds(node), color: style.color };
+      return { text: node.textContent, whiteSpace: style.whiteSpace, lines: range.getClientRects().length, fontSize: parseFloat(style.fontSize), fontFamily: style.fontFamily, fontWeight: style.fontWeight, letterSpacing: style.letterSpacing, bounds: bounds(node), color: style.color };
     };
     const variation = hero.querySelector('[data-spending-variation]');
     const count = hero.querySelector('[data-spending-count]');
@@ -79,10 +79,15 @@ async function readHero(client) {
     const row = [...document.querySelectorAll('[data-report-section="comparison"] table tbody tr')].find(node => node.firstElementChild.textContent.trim() === 'Gasto');
     const formatter = new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric'});
     const rangeLabel = (start,end) => formatter.format(new Date(start+'T12:00:00'))+' – '+formatter.format(new Date(end+'T12:00:00'));
+    const primary = document.querySelector('[data-quick-read-primary="true"]');
+    const primaryBodyStyle = getComputedStyle(primary.querySelector('h3 + p'));
     return {
       viewport: innerWidth, scrollWidth: document.documentElement.scrollWidth,
       bounds: bounds(hero), text: hero.innerText,
       total: token('total'), previous: token('previous'),
+      bodyFontFamily: getComputedStyle(document.body).fontFamily,
+      displayFontFamily: getComputedStyle(primary.querySelector('h3')).fontFamily,
+      quickReadBody: { fontFamily: primaryBodyStyle.fontFamily, fontSize: parseFloat(primaryBodyStyle.fontSize), moneyTokens: [...primary.querySelectorAll('[data-quick-read-money]')].map(node => node.textContent) },
       variation: variation.textContent, variationBounds: bounds(variation), variationColor: getComputedStyle(variation).color,
       variationFontSize: parseFloat(getComputedStyle(variation).fontSize), count: count.textContent,
       neutralColors,
@@ -100,13 +105,29 @@ function assertHero(view, scenario, hidden) {
   assert.ok(view, 'P2 hero visible');
   assert.match(view.text, /Gasto del rango/i);
   assert.equal(normalize(view.variation), scenario.variation, 'P2 variación real y dirección explícita');
-  assert.equal(normalize(view.count), scenario.current.length + ' movimientos', 'P2 conteo canónico');
+  assert.equal(normalize(view.count), scenario.current.length + (scenario.current.length === 1 ? ' movimiento' : ' movimientos'), 'P2 conteo canónico y concordancia');
   assert.equal(view.prohibitedContent, 0, 'P2 sin chart, placeholder, controles ni tabla dentro del hero');
   assert.equal(view.tabStops, 0, 'P2 hero no añade controles');
   assert.ok(view.scrollWidth <= view.viewport + 1, 'P2 sin overflow horizontal');
   assert.ok(view.neutralColors.includes(view.variationColor), 'P2 variación neutral');
   assert.ok(view.neutralColors.includes(view.total.color), 'P2 importe principal neutral');
-  assert.ok(view.total.fontSize > view.variationFontSize && view.total.fontSize > view.previous.fontSize, 'P2 importe principal protagonista');
+  if (hidden) {
+    assert.equal(view.total.fontFamily, view.previous.fontFamily, 'P2 máscaras del hero con la misma fuente');
+    for (const token of [view.total,view.previous]) {
+      assert.equal(token.fontSize, 16, 'P2 máscaras con tamaño body text-base');
+      assert.equal(token.fontSize, view.quickReadBody.fontSize, 'P2 máscaras del tamaño del cuerpo de Quick Read');
+      assert.equal(token.fontWeight, '400', 'P2 máscaras sin peso display');
+      assert.ok(token.letterSpacing === 'normal' || token.letterSpacing === '0px', 'P2 máscaras sin tracking display');
+      assert.equal(token.fontFamily, view.bodyFontFamily, 'P2 máscaras heredan la fuente body del tema');
+      assert.equal(token.fontFamily, view.quickReadBody.fontFamily, 'P2 máscaras con la fuente body de Quick Read');
+      assert.deepEqual([...token.text].map(character => character.codePointAt(0)), Array(6).fill(0x2022), 'P2 conserva seis bullets U+2022 del hook');
+    }
+    for (const text of view.quickReadBody.moneyTokens) assert.equal(view.total.text, text, 'P2 conserva el mismo enmascarado que Quick Read');
+  } else {
+    assert.ok(view.total.fontSize > view.variationFontSize && view.total.fontSize > view.previous.fontSize, 'P2 importe visible principal protagonista');
+    assert.equal(view.total.fontFamily, view.displayFontFamily, 'P2 total visible conserva la fuente display');
+    assert.equal(view.previous.fontFamily, view.bodyFontFamily, 'P2 comparable visible hereda body sin mono');
+  }
   assert.ok(view.text.includes(view.currentRange) && view.text.includes(view.previousRange), 'P2 etiquetas de ambos rangos conservadas');
   assert.ok(view.comparison?.visible, 'P2 evidencia exacta permanece visible');
   assert.equal(view.total.text, view.comparison.current, 'P2 importe igual al canónico en tabla');
@@ -180,6 +201,7 @@ export async function verifyFinalUiPolishP2(client, waitFor) {
             }
           }
           await setHidden(client, waitFor, false);
+          assertHero(await readHero(client), scenario, false);
         }
       }
     }
@@ -212,7 +234,7 @@ export async function verifyFinalUiPolishP2(client, waitFor) {
     await client.command('Emulation.setEmulatedMedia',{features:[]});
     await client.command('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   }
-  const result = { cases:cases.map(row=>row.name), checks:records.length, captures, widths:[320,360,390,1280], themes:['light','dark'], legacyWidths:[320,1280], canonicalValues:'passed', privacy:'passed', neutralDirection:'passed', keyboard:'passed', touch:'passed', reducedMotion:'passed', empty:'passed', loadingObserved, disabled:'hero has no controls', restoredOriginalDataset:true };
+  const result = { cases:cases.map(row=>row.name), checks:records.length, captures, widths:[320,360,390,1280], themes:['light','dark'], legacyWidths:[320,1280], canonicalValues:'passed', privacy:'passed', moneyTypography:'passed', visibilityTransitions:'passed', neutralDirection:'passed', keyboard:'passed', touch:'passed', reducedMotion:'passed', empty:'passed', loadingObserved, disabled:'hero has no controls', restoredOriginalDataset:true };
   if (directory) await writeFile(path.join(directory,'verification.json'),JSON.stringify({fixture:{instant:captureFixture.instant,timezone:captureFixture.timezone,preset:captureFixture.preset,scenarios:cases.map(scenario=>({...scenario,rows:caseRows(scenario)}))},result,records},null,2)+'\n');
   process.stdout.write('FINAL_UI_POLISH_P2 ' + JSON.stringify(result) + '\n');
 }

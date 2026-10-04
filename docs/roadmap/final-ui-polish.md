@@ -407,12 +407,14 @@ Desktop y mobile deben comunicar:
 GASTO DEL RANGO
 [importe principal]
 [flecha/signo] [variación] frente al rango comparable
-[número] movimientos
+[número] movimiento / movimientos
 ```
 
-Cuando `previousTotal === 0`, la variación presenta **«Sin referencia anterior frente al rango comparable»**, sin porcentaje ni flecha. Esta decisión de presentación incluye el rango vacío (actual y anterior en cero): conserva el `percentChange` canónico y la tabla de comparación sin alterarlos. Con base anterior distinta de cero se presenta el porcentaje canónico con signo y flecha neutral; cero conserva **«Sin cambio»**. Autorización explícita en la revisión del usuario del 4 de octubre de 2026.
+Cuando `previousTotal === 0`, la variación presenta exactamente **«Sin gasto anterior con el que comparar»**, sin porcentaje, flecha ni sufijo adicional. Esta decisión de presentación incluye el rango vacío (actual y anterior en cero): conserva el `percentChange` canónico y la tabla de comparación sin alterarlos. Con base anterior distinta de cero se presenta el porcentaje canónico con signo y flecha neutral; cero conserva **«Sin cambio»**. Autorización explícita en la revisión del usuario del 4 de octubre de 2026.
 
 El total y el importe comparable se formatean en React mediante `usePrivateCurrency()` y permanecen indivisibles (`white-space: nowrap`). No se incorporan importes visibles ni preformateados a `aria-label` ni a descripciones accesibles.
+
+Correcciones de presentación autorizadas en la revisión de P2 del 4 de octubre de 2026: `transactionCount === 1` presenta **«1 movimiento»**; cualquier otro conteo conserva **«N movimientos»**. El importe comparable visible hereda la fuente del texto, sin `font-mono`. Ambos importes ocultos del hero conservan los seis glifos **`••••••`** devueltos por el hook y heredan la fuente del texto con el mismo tamaño `text-base` y tracking normal; el total visible conserva su jerarquía protagonista. No se cambia el hook global ni otras superficies. Esta revisión se cierra antes de iniciar P3; no modifica su contrato de historia desconocida/cero real.
 
 P2 NO crea:
 
