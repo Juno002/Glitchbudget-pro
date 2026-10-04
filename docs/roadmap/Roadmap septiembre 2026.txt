@@ -4934,7 +4934,7 @@ Por instrucción explícita del usuario, **no se hará ningún merge adicional a
 
 ## Corrección de producto autorizada — lectura progresiva de Reportes
 
-**Estado: GATE APROBADO · PR #122 / pendiente de integración a `main`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 después de revisar el resultado de Final UI Polish.
+**Estado: COMPLETADO / integrado en `main` · PR #122.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 después de revisar el resultado de Final UI Polish.
 
 Esta corrección **no crea P8, Fase 20.11 ni Fase 21** y no reabre el motor financiero. P0–P7 permanecen completadas. Corrige exclusivamente una decisión de composición de P5 que, aunque técnicamente válida, dejó Reportes como una hoja demasiado larga y convirtió la auditoría opcional en contenido siempre visible.
 
@@ -4958,7 +4958,7 @@ Registro de ejecución de PR #122:
 - `npm run build`: aprobado, export estático/local-only intacto;
 - `npm run test:e2e`: aprobado, incluyendo lectura compacta, apertura/cierre del análisis detallado, privacidad, responsive y offline;
 - sin cambios de schema, migración, backup, persistencia, red, selectores financieros ni navegación principal;
-- PR #122 permanece sin merge hasta revisión/autorización explícita.
+- PR #122 fue integrado en `main` tras aprobación explícita; merge commit inicial: `36ffa974648b17bb26195615f1ae087b9db14250`.
 
 ## Pendientes sin autorizar
 
@@ -4979,7 +4979,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = ninguna; corrección «lectura progresiva de Reportes» con Gate aprobado en PR #122, pendiente de integración explícita
+intervenciones pendientes autorizadas = ninguna; corrección «lectura progresiva de Reportes» completada e integrada mediante PR #122
 ```
 
 No existe una Fase 20.11.
