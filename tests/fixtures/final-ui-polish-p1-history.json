@@ -1,0 +1,541 @@
+{
+  "version": 1,
+  "instant": "2026-10-04T12:00:00.000Z",
+  "timezone": "UTC",
+  "preset": "30d",
+  "currentDate": "2026-10-04",
+  "previousDate": "2026-09-01",
+  "accounts": [
+    {
+      "id": "p1-history-cash",
+      "name": "Cuenta de evidencia P1",
+      "type": "cash",
+      "currency": "DOP",
+      "openingBalance": 100000,
+      "startDate": "2026-08-01",
+      "isDefaultCash": true
+    }
+  ],
+  "incomeTemplate": {
+    "type": "extra",
+    "description": "",
+    "currency": "DOP",
+    "fxRate": 1,
+    "categoryId": "sueldo"
+  },
+  "expenseTemplate": {
+    "nature": "Variable",
+    "concept": "",
+    "currency": "DOP",
+    "fxRate": 1,
+    "paymentMethod": "cash"
+  },
+  "scenarios": [
+    {
+      "name": "history-increase",
+      "current": [
+        [
+          "vivienda",
+          2000
+        ],
+        [
+          "transporte",
+          2000
+        ],
+        [
+          "alimentacion",
+          2000
+        ]
+      ],
+      "previous": [
+        [
+          "vivienda",
+          1000
+        ],
+        [
+          "transporte",
+          1000
+        ],
+        [
+          "alimentacion",
+          1000
+        ]
+      ],
+      "currentIncome": 60000,
+      "previousIncome": 30000,
+      "expected": [
+        [
+          "cash_flow_change",
+          "El flujo neto aumentó"
+        ],
+        [
+          "spending_above_previous",
+          "Gastaste más que en el rango anterior"
+        ],
+        [
+          "net_worth_change",
+          "El patrimonio registrado aumentó"
+        ]
+      ],
+      "rows": {
+        "accounts": [
+          {
+            "id": "p1-history-cash",
+            "name": "Cuenta de evidencia P1",
+            "type": "cash",
+            "currency": "DOP",
+            "openingBalance": 100000,
+            "startDate": "2026-08-01",
+            "isDefaultCash": true
+          }
+        ],
+        "incomes": [
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-current",
+            "accountId": "p1-history-cash",
+            "amount": 60000,
+            "amountBase": 60000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-previous",
+            "accountId": "p1-history-cash",
+            "amount": 30000,
+            "amountBase": 30000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ],
+        "expenses": [
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 2000,
+            "amountBase": 2000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-1",
+            "accountId": "p1-history-cash",
+            "categoryId": "transporte",
+            "amount": 2000,
+            "amountBase": 2000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-2",
+            "accountId": "p1-history-cash",
+            "categoryId": "alimentacion",
+            "amount": 2000,
+            "amountBase": 2000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 1000,
+            "amountBase": 1000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-1",
+            "accountId": "p1-history-cash",
+            "categoryId": "transporte",
+            "amount": 1000,
+            "amountBase": 1000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-2",
+            "accountId": "p1-history-cash",
+            "categoryId": "alimentacion",
+            "amount": 1000,
+            "amountBase": 1000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "name": "history-decrease",
+      "current": [
+        [
+          "vivienda",
+          10000
+        ],
+        [
+          "transporte",
+          10000
+        ],
+        [
+          "alimentacion",
+          10000
+        ]
+      ],
+      "previous": [
+        [
+          "vivienda",
+          20000
+        ],
+        [
+          "transporte",
+          20000
+        ],
+        [
+          "alimentacion",
+          20000
+        ]
+      ],
+      "currentIncome": 0,
+      "previousIncome": 70000,
+      "expected": [
+        [
+          "cash_flow_change",
+          "El flujo neto disminuyó"
+        ],
+        [
+          "spending_below_previous",
+          "Gastaste menos que en el rango anterior"
+        ],
+        [
+          "net_worth_change",
+          "El patrimonio registrado disminuyó"
+        ]
+      ],
+      "rows": {
+        "accounts": [
+          {
+            "id": "p1-history-cash",
+            "name": "Cuenta de evidencia P1",
+            "type": "cash",
+            "currency": "DOP",
+            "openingBalance": 100000,
+            "startDate": "2026-08-01",
+            "isDefaultCash": true
+          }
+        ],
+        "incomes": [
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-previous",
+            "accountId": "p1-history-cash",
+            "amount": 70000,
+            "amountBase": 70000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ],
+        "expenses": [
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-1",
+            "accountId": "p1-history-cash",
+            "categoryId": "transporte",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-2",
+            "accountId": "p1-history-cash",
+            "categoryId": "alimentacion",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 20000,
+            "amountBase": 20000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-1",
+            "accountId": "p1-history-cash",
+            "categoryId": "transporte",
+            "amount": 20000,
+            "amountBase": 20000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-2",
+            "accountId": "p1-history-cash",
+            "categoryId": "alimentacion",
+            "amount": 20000,
+            "amountBase": 20000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "name": "category-stable",
+      "current": [
+        [
+          "vivienda",
+          8000
+        ],
+        [
+          "transporte",
+          2000
+        ]
+      ],
+      "previous": [
+        [
+          "vivienda",
+          10000
+        ]
+      ],
+      "currentIncome": 10000,
+      "previousIncome": 10000,
+      "expected": [
+        [
+          "leading_category",
+          "Una categoría concentró buena parte del gasto"
+        ],
+        [
+          "spending_near_previous",
+          "El gasto se mantuvo estable"
+        ]
+      ],
+      "rows": {
+        "accounts": [
+          {
+            "id": "p1-history-cash",
+            "name": "Cuenta de evidencia P1",
+            "type": "cash",
+            "currency": "DOP",
+            "openingBalance": 100000,
+            "startDate": "2026-08-01",
+            "isDefaultCash": true
+          }
+        ],
+        "incomes": [
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-current",
+            "accountId": "p1-history-cash",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-previous",
+            "accountId": "p1-history-cash",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ],
+        "expenses": [
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 8000,
+            "amountBase": 8000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-current-1",
+            "accountId": "p1-history-cash",
+            "categoryId": "transporte",
+            "amount": 2000,
+            "amountBase": 2000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "nature": "Variable",
+            "concept": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "paymentMethod": "cash",
+            "id": "p1-expense-previous-0",
+            "accountId": "p1-history-cash",
+            "categoryId": "vivienda",
+            "amount": 10000,
+            "amountBase": 10000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ]
+      }
+    },
+    {
+      "name": "history-no-changes",
+      "current": [],
+      "previous": [],
+      "currentIncome": 1000,
+      "previousIncome": 1000,
+      "expected": [
+        [
+          "no_material_change",
+          "No hay cambios destacados en este rango"
+        ]
+      ],
+      "rows": {
+        "accounts": [
+          {
+            "id": "p1-history-cash",
+            "name": "Cuenta de evidencia P1",
+            "type": "cash",
+            "currency": "DOP",
+            "openingBalance": 100000,
+            "startDate": "2026-08-01",
+            "isDefaultCash": true
+          }
+        ],
+        "incomes": [
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-current",
+            "accountId": "p1-history-cash",
+            "amount": 1000,
+            "amountBase": 1000,
+            "date": "2026-10-04",
+            "month": "2026-10"
+          },
+          {
+            "type": "extra",
+            "description": "",
+            "currency": "DOP",
+            "fxRate": 1,
+            "categoryId": "sueldo",
+            "id": "p1-income-previous",
+            "accountId": "p1-history-cash",
+            "amount": 1000,
+            "amountBase": 1000,
+            "date": "2026-09-01",
+            "month": "2026-09"
+          }
+        ],
+        "expenses": []
+      }
+    }
+  ]
+}

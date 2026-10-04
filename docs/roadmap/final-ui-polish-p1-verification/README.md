@@ -34,3 +34,8 @@ FINAL_UI_POLISH_P1_CAPTURE_DIR=/tmp/final-ui-polish-p1 npm run test:e2e
 `npm run check`: 742/742 tests. `npm run build`: export estático y guard CSP/local-only aprobados. `npm run test:e2e`: matriz P1 y smoke completo aprobados. Los siete tests nuevos cubren copy, direcciones, base cero, parámetros canónicos, pureza, determinismo y ranking/thresholds intactos. P1 no requiere un benchmark propio; no altera la baseline ni las reglas de P3.
 
 Decisiones cerradas: un surface editorial con articles, `report.quickRead[0]` protagonista, titulares sin importes, parámetros numéricos sin formato en `report-editorial.ts`, dinero formateado exclusivamente en React mediante `usePrivateCurrency()`. Hero, métricas, tablas y resto de Reportes permanecen bajo sus contratos actuales.
+
+
+## Revisión posterior a PR #111
+
+[Capturas con historia comparable](history/README.md) amplían la evidencia de aumento, disminución, estable, categoría dominante y ausencia de cambios destacados. Las capturas iniciales de base cero se conservan. La revisión confirma título/kicker existentes compatibles con el contrato P1 y límite de titular a `28ch` intencional; el formato de fecha del shell queda en [issue #112](https://github.com/Juno002/Glitchbudget-pro/issues/112), sin cambio de producto.
