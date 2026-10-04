@@ -1162,7 +1162,7 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 
 ```text
 P0 — Gate aprobado · PR #109
-P1 — Próxima intervención; requiere confirmar merged=true de PR #109
+P1 — SIGUIENTE AUTORIZADA (P0 · PR #109 mergeado)
 P2 — BLOQUEADO POR P1
 P3 — BLOQUEADO POR P2
 P4 — BLOQUEADO POR P3
@@ -1180,8 +1180,8 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - `npm run check`: aprobado, 733/733 tests. `tests/final-ui-polish-p0.test.ts` caracteriza el facade canónico, ausencia de cálculos/persistencia en React, orden protegido, cuatro tablas y rangos anclados de todos los presets.
 - `npm run build`: aprobado; output estático y guard CSP/local-only aprobados.
 - `npm run test:e2e`: aprobado; seis presets, custom válido, cuatro tablas con filas visibles, matriz 320/390/1280 px × Prisma/Neón × importes visibles/ocultos. Incluye tooltip real y árbol accesible sin fugas; smoke existente de interacción, mutaciones, navegación y offline aprobado.
-- `npm run benchmark:ledger`: aprobado, script existente sin cambios. Medianas posición/historiales: 1k **1.208/0.712 ms**, 10k **7.789/9.350 ms**, 50k **42.626/40.288 ms**. Medición aislada del resto de gates; ocho cuentas, siete muestras tras calentamiento; sin thresholds nuevos.
-- [Baseline reproducible, doce capturas, geometría y muestras completas](final-ui-polish-p0-baseline/README.md). Capturas sobre transacciones creadas por el compositor del smoke aislado, antes del benchmark de navegador existente; no se introducen datos demo en producto.
+- `npm run benchmark:ledger`: aprobado, script existente sin cambios. **Entorno: executor cloud adjunto (no GitHub Actions), Node v24.19.0, Linux x64**; identificado en `final-ui-polish-p0-baseline/ledger-benchmark.json`. Medianas posición/historiales: 1k **1.208/0.712 ms**, 10k **7.789/9.350 ms**, 50k **42.626/40.288 ms**. Medición aislada del resto de gates; ocho cuentas, siete muestras tras calentamiento; sin thresholds nuevos.
+- [Baseline reproducible, doce capturas, geometría y muestras completas](final-ui-polish-p0-baseline/README.md). Capturas sobre transacciones creadas por el compositor del smoke aislado, antes del benchmark de navegador existente; reloj/fecha UTC y dataset fijados en `tests/fixtures/final-ui-polish-p0-capture.json`. No se introducen datos demo en producto.
 - Decisiones cerradas: `selectReportsSnapshot()` conserva autoridad; tablas anchas mantienen scroll interno y evidencia visible; se conserva `budget-followup` tras detalle. P0 no aplica diseño ni copy de P1–P6.
 - Revisión de diff: solo documentación, tests y scripts de captura/verificación. Sin cambios en Reportes/Home, dominio financiero, schema, migraciones, backup/envelope, semánticas, navegación o red.
 - Bloqueantes de producto: ninguno. El push Git devolvió 401; se publicó la misma rama mediante la API de GitHub, verificando igualdad de árboles.

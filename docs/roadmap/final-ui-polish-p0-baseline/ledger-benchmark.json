@@ -85,5 +85,18 @@
         ]
       }
     }
-  ]
+  ],
+  "environment": {
+    "origin": "managed cloud executor attached to this session; not GitHub Actions",
+    "node": "v24.19.0",
+    "platform": "Linux x64",
+    "executorId": "ccarenv_b64_Y2NhcmVudl9iYjg4MTg0YmQ4MDg4MTkxODM3NWY5ZWI2YWJiZTM2OA",
+    "identifiedOnRecheck": {
+      "os": "Debian GNU/Linux 13.6",
+      "kernel": "6.18.44",
+      "cpu": "AMD EPYC 9V74",
+      "visibleVcpus": 3,
+      "cgroupCpuQuota": "200000/100000 (2 CPUs)"
+    }
+  }
 }
