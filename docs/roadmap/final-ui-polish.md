@@ -1,0 +1,1076 @@
+# Final UI Polish — Plan ejecutable y contrato de alcance
+
+**Estado:** AUTORIZADO / NO INICIADO  
+**Fecha de autorización:** 4 de octubre de 2026  
+**Repositorio:** `Juno002/Glitchbudget-pro`  
+**Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
+**Naturaleza:** pulido final de UI/jerarquía editorial sobre Prisma visible; no reabre el roadmap funcional.
+
+## 1. Autoridad de este documento
+
+Este documento es la especificación ejecutable y fuente de verdad para **Final UI Polish**. Su autorización queda registrada también en `Roadmap septiembre 2026.txt` para no contradecir la regla canónica de autoridad del repositorio.
+
+Reglas de precedencia:
+
+1. `Roadmap septiembre 2026.txt` sigue siendo la fuente de verdad funcional general.
+2. Para el alcance específico de Final UI Polish, este archivo define la secuencia, límites, entregables y gates.
+3. Si este documento parece pedir algo que contradice una invariante financiera, seguridad, privacidad, backup, persistencia o migración ya cerrada, **gana la invariante existente y se detiene la ejecución**.
+4. Ningún chat, memoria, comentario de PR, rama, README, Manus, Codex ni otra IA puede ampliar P0–P7 por interpretación.
+5. No existe P8, 20.11 ni Fase 21 salvo modificación explícita del roadmap canónico y de este documento con aprobación del usuario.
+
+## 2. Objetivo de producto
+
+Final UI Polish debe convertir la presentación actual de Prisma en una experiencia de lectura financiera más editorial y jerárquica sin sustituir ni reinterpretar el motor real de GlitchBudget.
+
+La pantalla de Reportes debe responder en este orden:
+
+1. **Entender en 5 segundos:** qué cambió y qué merece atención.
+2. **Entender en 30 segundos:** gasto, tendencia, distribución y comparación.
+3. **Auditar cuando se quiera:** cash flow, patrimonio, tablas exactas y movimientos.
+
+La fórmula de diseño es:
+
+```text
+conclusión → contexto visual → evidencia → detalle
+```
+
+El objetivo NO es añadir más información. El objetivo es mejorar prioridad, composición, microcopy y lectura progresiva de información que ya es real.
+
+## 3. Principio arquitectónico no negociable
+
+```text
+Prisma = cara, composición, lenguaje visual y microcopy
+GlitchBudget Engine = única fuente financiera
+```
+
+La UI puede **presentar** métricas; no puede reconstruirlas.
+
+Está prohibido introducir en componentes React:
+
+- sumas o `reduce()` destinados a reconstruir métricas financieras;
+- filtros de ingresos, gastos, pagos o transferencias para recalcular resultados canónicos;
+- nuevas definiciones de liquidez, patrimonio, gasto, cash flow, presupuesto o deuda;
+- acceso directo a Dexie/IndexedDB para producir Reportes;
+- inferencias de causas no presentes en los datos;
+- números de demostración o placeholders tratados como valores reales.
+
+`selectReportsSnapshot()` continúa siendo la fuente canónica de Reportes. Los selectores puros nuevos autorizados en P3 y las proyecciones de presentación autorizadas en P1/P4 deben consumir datos canónicos; no pueden crear una contabilidad paralela.
+
+## 4. Fuera de alcance global
+
+Final UI Polish NO autoriza:
+
+- cambios de schema Dexie;
+- migraciones;
+- bump de versión de backup;
+- cambios de envelope cifrado;
+- cambios de ledger o invariantes financieras, excepto la lectura pura adicional explícitamente descrita en P3;
+- cambios en deuda, préstamos, pagos, currency semantics o account semantics;
+- cambios a la navegación primaria de cuatro áreas: Resumen, Movimientos, Plan y Reportes;
+- nuevas pestañas principales;
+- perfiles de usuario, nombres ficticios o cuentas de usuario;
+- IA local o remota para generar insights;
+- telemetría, analytics o red;
+- copiar la arquitectura monolítica de `Prisma/client/src/pages/Home.tsx`;
+- copiar datos mock del repositorio Prisma de Manus;
+- ocultar tablas exactas detrás de accordions, botones “Ver tabla” o disclosure equivalente;
+- convertir una dirección matemática en juicio moral mediante color.
+
+## 5. Referencia Prisma de Manus
+
+El repositorio Prisma de Manus se usa únicamente como **referencia de composición visual**.
+
+Se autoriza extraer:
+
+- jerarquía editorial;
+- ritmo visual;
+- uso de eyebrow + titular + dato;
+- hero de gasto;
+- lectura rápida protagonista;
+- composición donut + leyenda;
+- apertura editorial de Home;
+- densidad y relaciones entre superficies.
+
+No se autoriza extraer:
+
+- porcentajes hardcoded;
+- arrays de presupuestos o transacciones demo;
+- cifras como `RD$ 30,000`, `6.8%`, `RD$ 28,400` o equivalentes;
+- nombres de usuario ficticios;
+- comportamiento placeholder;
+- cálculos o estado incrustados dentro de una página monolítica.
+
+## 6. Contratos visuales y de accesibilidad globales
+
+Cada P que toque UI debe cerrar por sí misma los siguientes puntos antes de merge:
+
+- viewport de 320 px sin overflow horizontal;
+- 360/390 px correctos;
+- escritorio correcto;
+- tema Prisma claro correcto;
+- tema Neón oscuro correcto;
+- Minimalista legado sin regresión funcional, sin obligación de paridad premium;
+- focus visible por teclado;
+- touch targets compatibles con el sistema actual;
+- `prefers-reduced-motion` respetado;
+- estados loading/empty/disabled coherentes;
+- ocultación de importes sin fugas en texto visible, tooltips, SVG, labels accesibles ni `aria-label`;
+- información obligatoria no dependiente exclusivamente del color.
+
+No se aplazan estos controles a P7.
+
+## 7. Regla de color
+
+Las direcciones matemáticas no se colorean como éxito/fracaso por defecto.
+
+Por tanto:
+
+- gasto que baja: dirección neutral + flecha + texto;
+- gasto que sube: dirección neutral + flecha + texto;
+- cash flow que sube/baja: neutral salvo que exista un estado semántico independiente;
+- patrimonio que sube/baja: neutral como comparación.
+
+Coral/ámbar/destructive se reservan para estados con semántica real de atención ya definida, por ejemplo:
+
+- presupuesto excedido;
+- presupuesto en alerta;
+- ocurrencias vencidas;
+- integridad de datos;
+- acciones destructivas.
+
+Mint/success se reserva para estados explícitamente definidos como éxito por contrato, no por simple dirección numérica.
+
+## 8. Secuencia y estado
+
+| Punto | Entregable | Cambios de dominio | Estado inicial |
+|---|---|---:|---|
+| P0 | Baseline + contratos de caracterización | No | No iniciado |
+| P1 | Lectura rápida editorial | No financiero | No iniciado |
+| P2 | Hero de gasto sin tendencia | No | No iniciado |
+| P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | No iniciado |
+| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
+| P5 | Comparación y análisis profundo | No | No iniciado |
+| P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
+| P7 | Regresión global e integración | No | No iniciado |
+
+No se permite trabajo paralelo entre puntos. P(n+1) empieza únicamente después de que P(n) esté mergeada en `main` con su gate aprobado.
+
+Cada punto usa una rama y PR atómicos propios. No agrupar dos puntos en un mismo PR.
+
+---
+
+# P0 — Baseline y contratos
+
+## Objetivo
+
+Fijar el comportamiento y geometría actuales antes de cualquier cambio visual. P0 no rediseña Reportes ni Home.
+
+## Entregables obligatorios
+
+1. Confirmar que `selectReportsSnapshot()` sigue siendo la fuente de verdad.
+2. Caracterizar el orden editorial protegido actualmente:
+   - quick-read;
+   - spending;
+   - comparison;
+   - spending-breakdown;
+   - cash-flow;
+   - net-worth;
+   - detail.
+3. Confirmar que las tablas exactas siguen visibles.
+4. Confirmar todos los presets: `7d`, `30d`, `3m`, `6m`, `1y`, `custom`.
+5. Registrar baseline visual de Reportes en:
+   - 320 px;
+   - 390 px;
+   - desktop;
+   - Prisma;
+   - Neón.
+6. Registrar baseline de importes ocultos.
+7. Ejecutar y registrar el benchmark de ledger existente.
+
+## Archivos que P0 puede tocar
+
+- tests de caracterización de Final UI Polish;
+- documentación de Final UI Polish;
+- scripts de captura/verificación si son estrictamente necesarios y no cambian producto.
+
+P0 no toca `reports-tab.tsx`, `summary-tab.tsx`, dominio financiero ni persistencia.
+
+## Gate P0
+
+```text
+npm run check
+npm run build
+npm run test:e2e
+npm run benchmark:ledger
+```
+
+Además, los tests deben confirmar que React no introduce cálculos financieros nuevos.
+
+## Stop conditions
+
+Detener P0 si el baseline ya está rojo por una regresión no relacionada. Final UI Polish no debe ocultar ni absorber un bug preexistente.
+
+---
+
+# P1 — Lectura rápida editorial
+
+## Objetivo
+
+Transformar la Quick Read existente en una lectura editorial protagonista sin cambiar su ranking ni sus thresholds canónicos.
+
+El selector existente `selectReportQuickRead()` sigue decidiendo **qué insight importa**. P1 solo decide **cómo expresarlo**.
+
+## Arquitectura autorizada
+
+Crear una capa pura de presentación, preferentemente:
+
+```text
+src/lib/report-editorial.ts
+```
+
+Esta capa NO puede:
+
+- importar React;
+- importar Dexie/db;
+- leer reloj;
+- usar red;
+- usar `Math.random()`;
+- formatear dinero;
+- inferir causas.
+
+Debe devolver parámetros estructurados y claves/tipo de mensaje. Los importes permanecen como números canónicos.
+
+React debe formatear todo importe mediante `usePrivateCurrency()`.
+
+## Privacidad
+
+Está prohibido devolver desde `report-editorial.ts` una frase que ya contenga `RD$`, `$`, moneda o importe textual.
+
+La UI debe construir el texto final de forma que cuando “Ocultar importes” esté activo:
+
+- no aparezca el importe en pantalla;
+- no aparezca en tooltip;
+- no aparezca en texto SVG;
+- no aparezca en `aria-label`;
+- no aparezca en descripción accesible.
+
+Porcentajes no son importes monetarios y pueden permanecer visibles salvo que otra política existente indique lo contrario.
+
+## Copy obligatorio para TODOS los `QuickReadInsightKind`
+
+Se deben cubrir siete tipos:
+
+### `spending_above_previous`
+
+Si `previous > 0` y existe porcentaje:
+
+```text
+Gastaste más que en el rango anterior
+```
+
+El cuerpo puede mencionar porcentaje y diferencia absoluta, sin atribuir causa.
+
+Si `previous === 0` y `current > 0`:
+
+```text
+Hay gasto nuevo en este rango
+```
+
+No mostrar porcentaje infinito, “+∞%” ni equivalente.
+
+### `spending_below_previous`
+
+```text
+Gastaste menos que en el rango anterior
+```
+
+Sin calificarlo automáticamente como bueno.
+
+### `spending_near_previous`
+
+```text
+El gasto se mantuvo estable
+```
+
+Debe respetar el threshold existente; P1 no lo modifica.
+
+### `cash_flow_change`
+
+El titular debe derivarse de `direction`:
+
+- increase → `El flujo neto aumentó`;
+- decrease → `El flujo neto disminuyó`;
+- stable → `El flujo neto se mantuvo estable`;
+- new → `Hay un nuevo flujo neto comparable`.
+
+No usar “mejoró/empeoró” por dirección matemática.
+
+### `net_worth_change`
+
+El titular debe derivarse de `direction`:
+
+- increase → `El patrimonio registrado aumentó`;
+- decrease → `El patrimonio registrado disminuyó`;
+- stable → `El patrimonio registrado se mantuvo estable`;
+- new → `Hay una nueva base de patrimonio registrada`.
+
+No usar “tu situación está mejor/peor”.
+
+### `leading_category`
+
+```text
+Una categoría concentró buena parte del gasto
+```
+
+El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de React.
+
+### `no_material_change`
+
+```text
+No hay cambios destacados en este rango
+```
+
+El cuerpo explica que ningún threshold editorial se activó. No afirmar que “todo está bien”.
+
+## Composición visual
+
+El insight `report.quickRead[0]` es el protagonista, respetando la prioridad ya calculada. No forzar gasto como titular.
+
+Los insights secundarios, si existen, se muestran con menor peso visual y sin competir con el principal.
+
+No usar tres cards idénticas como tres titulares equivalentes.
+
+## Archivos previstos
+
+- `src/lib/report-editorial.ts` (nuevo);
+- `src/components/dashboard/reports-tab.tsx`;
+- tests específicos de Final UI Polish P1;
+- E2E solo si hace falta ampliar cobertura de privacidad/responsive.
+
+No tocar `src/domain/report-insights.ts` salvo que un test demuestre un bug previo; si eso ocurre, DETENER y pedir autorización porque P1 no autoriza cambiar ranking/thresholds.
+
+## Gate P1
+
+- siete `kind` cubiertos;
+- variante `previous=0` cubierta;
+- importes ocultos sin fuga;
+- 320/390/desktop;
+- Prisma/Neón;
+- teclado/reduced motion;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+---
+
+# P2 — Hero de gasto sin tendencia
+
+## Objetivo
+
+Reconstruir la cabecera analítica de gasto para comunicar el rango actual con menos cajas y más jerarquía, SIN gráfico histórico todavía.
+
+## Datos permitidos
+
+El hero solo consume datos ya canónicos de `report.spending` y `report.comparison.spending`:
+
+- `total`;
+- `previousTotal` o comparación equivalente;
+- `percentChange`;
+- `transactionCount`;
+- etiquetas del rango actual/comparable.
+
+No recalcular ninguno dentro del componente.
+
+## Composición obligatoria
+
+Desktop y mobile deben comunicar:
+
+```text
+GASTO DEL RANGO
+[importe principal]
+[flecha/signo] [variación] frente al rango comparable
+[número] movimientos
+```
+
+P2 NO crea:
+
+- sparkline;
+- barras históricas;
+- hueco vacío reservado para P3;
+- props de tendencia no usadas;
+- placeholder de chart;
+- datos ficticios.
+
+P3 añadirá el gráfico sobre una composición P2 ya terminada.
+
+## Color
+
+La variación usa presentación neutral. Flecha + signo + texto comunican dirección.
+
+No usar mint solo porque el gasto bajó ni coral solo porque subió.
+
+## Densidad
+
+Las minicards “Período comparable / Tendencia / Transacciones” pueden convertirse en información secundaria integrada dentro del hero. El resultado debe tener menos fragmentación visual que la implementación anterior.
+
+## Archivos previstos
+
+- `src/components/dashboard/reports-tab.tsx`;
+- primitives existentes solo si el cambio puede reutilizarse sin afectar otras superficies;
+- tests P2.
+
+## Gate P2
+
+- valores exactamente iguales antes/después;
+- sin gráfico ni placeholder;
+- privacidad monetaria;
+- 320/390/desktop;
+- Prisma/Neón;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+---
+
+# P3 — Tendencia histórica real
+
+## Objetivo
+
+Añadir al hero de P2 una evolución temporal REAL de gasto basada exclusivamente en ventanas comparables canónicas.
+
+P3 es la única intervención de Final UI Polish que autoriza un selector nuevo de lectura de datos financieros. No autoriza cambiar semántica de gasto.
+
+## Contrato temporal obligatorio
+
+`resolveReportRange()` ya define los rangos actuales:
+
+- `7d`: 7 días anclados en la fecha financiera actual;
+- `30d`: 30 días anclados;
+- `3m`, `6m`, `1y`: rango anclado mediante desplazamiento de meses;
+- `custom`: rango explícito válido.
+
+La comparación canónica usa `previousComparableRange(range)`, que retrocede por **igual cantidad de días**.
+
+Por tanto, la tendencia se construye iterando:
+
+```text
+window[actual] = rango resuelto
+window[-1] = previousComparableRange(window[actual])
+window[-2] = previousComparableRange(window[-1])
+...
+```
+
+Está prohibido reinterpretar `3m/6m/1y` como meses calendario cerrados para el histórico.
+
+## Número objetivo de ventanas
+
+Antes de aplicar cobertura histórica:
+
+| Preset | Máximo de ventanas visibles incluyendo actual |
+|---|---:|
+| `7d` | 6 |
+| `30d` | 6 |
+| `3m` | 4 |
+| `6m` | 4 |
+| `1y` | 3 |
+| `custom` | hasta 6 ventanas de igual duración |
+
+No aumentar estos máximos sin modificar este documento.
+
+## Inicio de historia y cobertura
+
+No usar `Account.startDate` como corte global del gráfico de gasto.
+
+Razón contractual: Reportes conserva movimientos históricos reportables incluso cuando no estén asociados a una cuenta actual; PR #104 no autoriza borrar ese historial.
+
+P3 debe derivar una fecha pura `reportHistoryStart` a partir de la historia reportable canónica disponible. Deben considerarse, según correspondan al reporte:
+
+- fechas canónicas de gastos;
+- fechas canónicas de ingresos;
+- fechas canónicas de pagos de deuda;
+- fechas canónicas de transferencias;
+- `Account.startDate` únicamente para métricas de posición donde tenga semántica real.
+
+Para la primera implementación del gráfico del hero, que representa **gasto**, la cobertura debe partir de la primera fecha de gasto canónico disponible.
+
+Cada punto/ventana debe declarar:
+
+```ts
+coverage: "full" | "partial"
+```
+
+Reglas:
+
+- ventana totalmente anterior al primer gasto canónico → no se muestra;
+- ventana que cruza el inicio del historial → `partial`;
+- ventana completamente cubierta desde el inicio histórico → `full`;
+- una ventana `partial` debe tener indicación accesible “Historial parcial”;
+- ausencia de historia no debe representarse como cero histórico ficticio.
+
+Un gasto real de 0 dentro de una ventana con cobertura completa sí es un cero válido.
+
+## Selector autorizado
+
+Crear un selector puro equivalente a:
+
+```text
+selectSpendingTrend(input, range, maxWindows)
+```
+
+Debe devolver como mínimo:
+
+- rango de cada ventana;
+- total de gasto;
+- cobertura full/partial;
+- indicador de ventana actual;
+- orden cronológico estable.
+
+No debe depender de React, Dexie, browser, red, reloj ni locale.
+
+## Rendimiento y benchmark
+
+P3 debe ampliar la medición; `benchmark-ledger.mjs` por sí solo no mide la nueva tendencia.
+
+Procedimiento obligatorio:
+
+1. ejecutar benchmark de ledger existente y registrar baseline;
+2. añadir un benchmark reproducible de Reportes/tendencia con datasets 1k, 10k y 50k;
+3. medir una lectura de reporte de una ventana y la tendencia con el máximo de ventanas correspondiente;
+4. usar la misma generación de dataset y mismas muestras antes de decidir optimización.
+
+Regla de optimización:
+
+```text
+si la mediana de tendencia 50k > 2 × mediana de una lectura equivalente de Reportes 50k
+→ no mergear la implementación por rescans sucesivos;
+→ implementar agregación más eficiente manteniendo exactamente el mismo resultado.
+```
+
+Además, el benchmark de ledger existente no puede empeorar simultáneamente más de 20% y más de 5 ms de mediana frente al baseline P0 en el mismo entorno.
+
+No cambiar estas reglas desde el PR para “hacer pasar” el gate.
+
+## Integración visual
+
+P3 añade el gráfico al hero P2.
+
+La ventana actual se destaca. Las anteriores son secundarias.
+
+Tooltips y labels monetarios pasan por `usePrivateCurrency()`.
+
+Con importes ocultos, el chart no filtra dinero en tooltip/ARIA.
+
+## Archivos previstos
+
+- `src/domain/reports.ts` o módulo puro específico de reports;
+- `src/components/dashboard/charts/report-charts.tsx`;
+- `src/components/dashboard/reports-tab.tsx`;
+- script de benchmark de reports/tendencia;
+- tests P3.
+
+Si P3 exige schema, migración o nueva persistencia: DETENER. Eso está fuera de alcance.
+
+## Gate P3
+
+- semántica de ventanas testeada en bordes de mes/año y leap year;
+- `custom` testeado;
+- full/partial testeado;
+- historial sin cuenta no descartado;
+- no ceros ficticios;
+- benchmark reportado;
+- regla 2× satisfecha o implementación optimizada;
+- ledger benchmark sin regresión material según regla;
+- privacidad;
+- 320/390/desktop;
+- Prisma/Neón;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+---
+
+# P4 — Distribución por categoría: donut + leyenda determinista
+
+## Objetivo
+
+Convertir la distribución por categoría en una unidad visual Prisma: donut + total + leyenda controlada, sin alterar el desglose exacto.
+
+## Proyección pura obligatoria
+
+La agrupación visual no puede vivir dentro de `ReportCategoryDonut` ni dentro de JSX.
+
+Crear una función pura, preferentemente en:
+
+```text
+src/lib/report-visualization.ts
+```
+
+responsable de:
+
+- orden estable;
+- top N visible;
+- agregado visual `Otros` cuando corresponda;
+- valores exactos;
+- shares;
+- redondeo de leyenda.
+
+La tabla/desglose detallado conserva TODAS las categorías originales. `Otros` es solo una proyección visual.
+
+## Regla de agrupación
+
+Mostrar como segmentos individuales las primeras 4 categorías por valor. Si existen más de 4, todas las restantes se agrupan en `Otros`.
+
+Excepción: si hay 4 o menos categorías con valor positivo, no crear `Otros`.
+
+Categorías con valor 0 no generan segmento visual.
+
+El valor de `Otros` debe ser exactamente la suma de los valores agrupados.
+
+## Porcentajes
+
+La leyenda debe sumar exactamente **100.0%** cuando el total sea mayor que cero.
+
+Usar redondeo por mayor resto a una decimal:
+
+1. convertir cada share exacto a décimas de porcentaje;
+2. tomar suelo entero de cada cantidad de décimas;
+3. calcular cuántas décimas faltan hasta 1000;
+4. asignarlas una por una según resto fraccional descendente;
+5. desempatar por orden canónico estable.
+
+No usar `toFixed(1)` de forma independiente para cada fila si el total resultante no suma 100.0.
+
+Para total 0 no renderizar un donut falso; usar estado vacío.
+
+## Leyenda
+
+La leyenda principal la controla Prisma, no la leyenda automática de Recharts.
+
+Debe poder mostrar:
+
+- nombre;
+- porcentaje;
+- importe si los balances están visibles;
+- indicador de color;
+- truncado/ajuste accesible.
+
+## Tests obligatorios
+
+- 0 categorías;
+- 1 categoría;
+- 2–4 categorías;
+- más de 4;
+- empates;
+- restos iguales;
+- categoría dominante extrema;
+- suma 100.0%;
+- `Otros` exacto;
+- privacidad monetaria.
+
+## Gate P4
+
+- detalle exacto intacto;
+- donut/leyenda consistente;
+- 320/390/desktop;
+- Prisma/Neón;
+- ocultación de importes;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+---
+
+# P5 — Comparación y análisis profundo
+
+## Objetivo
+
+Completar la jerarquía de Reportes sin añadir nuevas métricas ni esconder evidencia.
+
+## Orden contractual
+
+Debe conservarse exactamente la secuencia protegida:
+
+```text
+quick-read
+→ spending
+→ comparison
+→ spending-breakdown
+→ cash-flow
+→ net-worth
+→ detail
+```
+
+El seguimiento de presupuesto puede permanecer como follow-up secundario después del detalle según el contrato actual.
+
+## Comparación
+
+Primero visualización “Actual vs. anterior”.
+
+Inmediatamente después permanece la tabla exacta con:
+
+- Métrica;
+- rango anterior;
+- rango actual;
+- cambio.
+
+No se permite botón “Ver tabla”.
+No se permite accordion para ocultar esta evidencia.
+
+## Spending breakdown
+
+Categorías mantiene prioridad visual sobre naturaleza.
+
+La naturaleza conserva:
+
+- Fijo;
+- Variable;
+- Ocasional.
+
+No cambiar la semántica de `Expense.nature`.
+
+## Cash flow
+
+Preservar exactamente:
+
+- Ingresos;
+- Gastos en efectivo;
+- Pagos de deuda;
+- Flujo neto.
+
+## Patrimonio
+
+Preservar exactamente:
+
+- Efectivo;
+- Bancos;
+- Inversiones;
+- Pasivos;
+- Patrimonio neto.
+
+La explicación existente de que crédito disponible no es activo debe seguir accesible.
+
+## Detalle
+
+`Movimientos de mayor importe` permanece visible y después de patrimonio.
+
+P5 no sustituye filas exactas por narrativa.
+
+## Densidad
+
+P5 debe reducir fragmentación visual donde sea posible, pero no a costa de esconder información obligatoria.
+
+No crear un PR posterior de “densidad general”; este trabajo se cierra aquí para Reportes.
+
+## Gate P5
+
+- orden contractual testado;
+- tablas visibles;
+- mismos importes antes/después;
+- privacidad;
+- 320/390/desktop;
+- Prisma/Neón;
+- teclado/reduced motion;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+Al terminar P5, **Reportes debe considerarse cerrado** dentro de Final UI Polish.
+
+---
+
+# P6 — Home / Resumen: apertura editorial y estado determinista
+
+## Objetivo
+
+Trasplantar dos decisiones del Prisma de Manus a Home sin perfiles ficticios ni conclusiones vagas:
+
+1. apertura editorial;
+2. status pill determinista.
+
+P6 no empieza hasta que P5 esté mergeada.
+
+## Apertura editorial
+
+La cabecera debe comunicar:
+
+```text
+Tu panorama financiero.
+[fecha financiera] · período [inicio] – [fin]
+```
+
+No usar nombres ficticios como “Alex Rivera”.
+
+La fecha debe derivarse del reloj financiero local ya existente. El período debe venir del Period Engine actual.
+
+## Selector de atención
+
+Crear un selector puro equivalente a:
+
+```text
+selectHomeAttentionState(...)
+```
+
+No construir prioridades mediante condicionales dispersos en JSX.
+
+## Prioridad EXACTA
+
+La primera condición activa gana:
+
+1. **integridad de datos**;
+2. **movimientos planificados vencidos**;
+3. **presupuesto excedido**;
+4. **presupuesto en alerta/cerca del límite**;
+5. **neutral**.
+
+No reordenar prioridades sin modificar este documento.
+
+## Copy autorizado
+
+### Integridad
+
+```text
+Revisa datos preservados
+```
+
+Se activa solo cuando la fuente actual de integridad del producto indique datos cuarentenados/preservados que requieran atención. No inventar una nueva noción de integridad.
+
+### Vencidos
+
+```text
+Hay movimientos planificados vencidos
+```
+
+Debe usar la semántica existente de `occurrenceDisplayStatus`/planned occurrences; no una comparación de fecha nueva en JSX.
+
+### Presupuesto excedido
+
+```text
+Presupuesto excedido
+```
+
+### Presupuesto en alerta
+
+```text
+Presupuesto cerca del límite
+```
+
+### Neutral
+
+```text
+Sin alertas destacadas
+```
+
+Neutral significa únicamente que ninguna de las cuatro condiciones anteriores está activa. NO significa “tus finanzas están bien” ni “todo está en orden”.
+
+## Color
+
+Integridad/excedido/vencido pueden usar semántica de atención ya existente.
+
+Neutral no debe parecer una celebración.
+
+## Tests obligatorios
+
+- cada estado individual;
+- integridad + vencido → gana integridad;
+- vencido + excedido → gana vencido;
+- excedido + alerta → gana excedido;
+- solo alerta;
+- ninguna condición → neutral;
+- cambio de período;
+- fecha local;
+- 320 px;
+- importes ocultos sin fuga.
+
+## Archivos previstos
+
+- selector puro nuevo en dominio/read-model apropiado;
+- `src/components/dashboard/summary-tab.tsx`;
+- tests P6;
+- E2E Home si es necesario.
+
+P6 no toca movimientos, Plan, Reportes ni settings salvo componentes compartidos estrictamente necesarios.
+
+## Gate P6
+
+- prioridades deterministas;
+- ningún perfil ficticio;
+- fecha/período canónicos;
+- 320/390/desktop;
+- Prisma/Neón;
+- privacidad;
+- accesibilidad;
+- `npm run check`;
+- `npm run build`;
+- `npm run test:e2e`.
+
+---
+
+# P7 — Gate global de integración
+
+## Objetivo
+
+Detectar regresiones cruzadas entre P1–P6. P7 no es una fase para arreglar deuda visual que debió cerrar una intervención anterior.
+
+## Prohibiciones
+
+P7 no añade features.
+P7 no rediseña.
+P7 no cambia thresholds.
+P7 no cambia el modelo financiero.
+P7 no introduce “pequeños extras”.
+
+Si aparece un defecto:
+
+- si es regresión causada por P1–P6 → corregir en P7 con test;
+- si es trabajo nuevo no contemplado → registrar y DETENER; no ampliar alcance.
+
+## Flujo manual/E2E mínimo de integración
+
+```text
+Resumen
+→ Reportes
+→ cambiar entre 7d / 30d / 3m / 6m / 1y
+→ rango custom válido
+→ revisar Lectura rápida
+→ revisar hero + tendencia
+→ revisar donut + leyenda
+→ revisar tabla de comparación
+→ revisar cash flow / patrimonio / detalle
+→ ocultar importes
+→ cambiar Prisma ↔ Neón
+→ viewport móvil
+→ volver a Resumen
+→ verificar apertura editorial y status pill
+```
+
+## Gate P7
+
+```text
+npm run check
+npm run benchmark:ledger
+benchmark de Reports/tendencia introducido en P3
+npm run build
+npm run test:e2e
+```
+
+P7 también confirma:
+
+- ningún request financiero remoto;
+- ninguna regresión offline;
+- ningún cambio de schema/backup;
+- ninguna tabla exacta oculta;
+- ninguna fuga de importes;
+- ninguna cifra mock;
+- ningún copy causal no respaldado;
+- ninguna nueva pestaña principal.
+
+Cuando P7 cierre, Final UI Polish queda **COMPLETADO / Gate final aprobado**.
+
+---
+
+# 9. Protocolo obligatorio por PR
+
+Cada P1–P6 debe seguir este orden:
+
+1. leer este documento completo;
+2. verificar que la P anterior esté mergeada en `main`;
+3. sincronizar contra `main`;
+4. crear una rama específica de esa P;
+5. implementar solo el alcance autorizado;
+6. añadir/actualizar tests de esa P;
+7. ejecutar su gate propio;
+8. revisar diff para detectar scope creep;
+9. abrir PR atómico;
+10. no mergear con checks rojos relevantes;
+11. registrar en este documento el estado y PR/evidencia;
+12. solo entonces comenzar la siguiente P.
+
+Convención recomendada de ramas:
+
+```text
+final-ui-polish-p0-baseline
+final-ui-polish-p1-editorial-quick-read
+final-ui-polish-p2-spending-hero
+final-ui-polish-p3-spending-trend
+final-ui-polish-p4-category-composition
+final-ui-polish-p5-reports-depth
+final-ui-polish-p6-home-editorial
+final-ui-polish-p7-final-gate
+```
+
+# 10. Regla de documentación viva
+
+Después de cada merge se actualiza la tabla de estado de este documento con:
+
+- estado `Completado / Gate aprobado`;
+- número de PR;
+- commit de merge;
+- tests relevantes;
+- benchmark si aplica;
+- cualquier decisión ya cerrada.
+
+No reescribir retrospectivamente contratos para justificar una implementación distinta.
+
+Si una P necesita cambiar su contrato antes de implementarse:
+
+```text
+DETENER
+→ documentar por qué el contrato no es viable
+→ proponer cambio concreto
+→ obtener aprobación explícita
+→ modificar este documento
+→ modificar el roadmap canónico si cambia alcance/autoridad
+→ solo entonces continuar
+```
+
+# 11. Definition of Done de Final UI Polish
+
+Final UI Polish solo está terminado cuando:
+
+- P0–P7 están completadas en orden;
+- todas las PR están mergeadas;
+- Reportes expresa primero conclusión, luego contexto, luego evidencia y detalle;
+- Quick Read sigue siendo determinista y local;
+- ningún insight inventa causas;
+- hero usa datos canónicos;
+- tendencia usa ventanas comparables canónicas;
+- cobertura histórica distingue full/partial y no inventa ceros;
+- donut usa composición pura y porcentajes que suman 100.0%;
+- tablas exactas permanecen visibles;
+- Home no usa perfil ficticio ni “Todo está en orden”;
+- status pill usa prioridad determinista;
+- Prisma y Neón mantienen acabado premium;
+- 320 px no tiene overflow;
+- ocultar importes no filtra dinero;
+- ledger benchmark permanece sano;
+- benchmark de Reports/tendencia está documentado;
+- check/build/E2E final están verdes;
+- no hubo cambios de schema, backup ni red.
+
+# 12. Resultado esperado
+
+El producto final debe conservar la arquitectura y exactitud de GlitchBudget Engine, pero presentar la información con la claridad editorial que hizo útil al Prisma de Manus como referencia.
+
+La relación final debe poder resumirse así:
+
+```text
+Prisma de Manus = concept car visual
+Prisma actual = versión de producción
+```
+
+La implementación no busca que ambas aplicaciones sean idénticas. Busca conservar el parentesco visual mientras la versión actual sigue siendo la única que contiene el motor financiero completo, exacto, local y auditable.
+
+# 13. Estado de ejecución
+
+```text
+P0 — NO INICIADO
+P1 — BLOQUEADO POR P0
+P2 — BLOQUEADO POR P1
+P3 — BLOQUEADO POR P2
+P4 — BLOQUEADO POR P3
+P5 — BLOQUEADO POR P4
+P6 — BLOQUEADO POR P5
+P7 — BLOQUEADO POR P6
+```
+
+No cambiar estos estados por anticipación. Solo el gate real de cada punto desbloquea el siguiente.
