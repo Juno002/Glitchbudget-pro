@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P2 Gate aprobado · PR #115
+**Estado:** EN EJECUCIÓN · P2 Gate aprobado · PR #115 · correcciones Gate aprobado · PR #116
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -146,7 +146,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 |---|---|---:|---|
 | P0 | Baseline + contratos de caracterización | No | Gate aprobado · PR #109 |
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
-| P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115 |
+| P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | No iniciado |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
 | P5 | Comparación y análisis profundo | No | No iniciado |
@@ -1187,8 +1187,8 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 ```text
 P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
-P2 — Gate aprobado · PR #115
-P3 — SIGUIENTE AUTORIZADA (requiere P2 · PR #115 mergeado)
+P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
+P3 — SIGUIENTE AUTORIZADA (requiere P2 · PR #115 y correcciones PR #116 mergeados)
 P4 — BLOQUEADO POR P3
 P5 — BLOQUEADO POR P4
 P6 — BLOQUEADO POR P5
@@ -1275,3 +1275,18 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Evidencia: [24 capturas y matriz reproducible](final-ui-polish-p2-verification/README.md), fecha **2026-10-04 UTC**, casos y filas fijos registrados en `verification.json`; Node **v24.19.0**, Chromium **151**, Linux x64, cloud executor. Capturas estabilizan fuentes/layout y ocultan scrollbars antes de medir el recorte. Referencias P0/P1 intactas.
 - Benchmark propio no exigido por P2; baseline P0 y contrato de rendimiento P3 intactos.
 - Revisión completa del diff: sin ampliación de alcance, importes filtrados, copy causal, datos ficticios en producto, reconstrucción de métricas, schema/backup ni invariantes alteradas. Sin bloqueantes reales. Merge condicionado a checks relevantes verdes y confirmación real de GitHub; próxima P autorizada después del merge: P3.
+
+
+## Registro de correcciones P2 — 4 de octubre de 2026
+
+**Gate aprobado · PR #116** — [PR atómico de correcciones](https://github.com/Juno002/Glitchbudget-pro/pull/116), solicitado explícitamente al revisar P2. El cierre original conserva **Gate aprobado · PR #115**, confirmado `merged=true` en GitHub. Esta revisión se considera completada únicamente cuando GitHub confirme `merged=true` de PR #116; P3 no se inicia.
+
+- Reanudación: `main` y contenido real verificados; P1 PR #114 y P2 PR #115 confirmados mergeados. No había rama ni PR parcial de estas correcciones; rama única `final-ui-polish-p2-review-corrections` sincronizada con `main`. Autorización funcional y contrato de copy/presentación actualizados antes de modificar el hero.
+- Cambios cerrados: **«1 movimiento»** para conteo uno; **«N movimientos»** para el resto. Comparable visible con la fuente heredada del texto, sin monoespaciada, manteniendo importe indivisible. Ambos importes ocultos conservan los seis bullets **U+2022 (`••••••`)** del hook privado, fuente heredada del tema y tamaño `text-base` (16 px), peso normal y tracking normal; el total visible conserva su tipografía y jerarquía anteriores. Con anterior cero, copy exacto **«Sin gasto anterior con el que comparar»**, sin porcentaje, flecha ni sufijo adicional.
+- Alcance: solo presentación del hero P2 y pruebas/documentación. Hook global, P1, valores canónicos, variación, tablas, thresholds, dominio, schema, migraciones, backup/envelope, navegación y local-only intactos. No añade tendencia, datos ficticios, espacio reservado ni reglas P3 de historia desconocida/cero real.
+- `npm run check`: aprobado, **754/754 tests**. Los nueve tests P2 mantienen los seis snapshots financieros y protegen nuevo copy exacto/uso del hook compartido sin máscaras inventadas ni cálculos/persistencia en React.
+- `npm run build`: aprobado; output estático y guard CSP/local-only aprobados.
+- `npm run test:e2e`: aprobado; **100 combinaciones** P2 de cinco casos × Prisma/Neón 320/360/390/1280 px y legado 320/1280 px × visible/oculto. Verifica concordancia, copy, importes exactamente iguales a tabla, nowrap, geometría, tipografía calculada del comparable, máscaras iguales a Lectura rápida con U+2022/fuente/tamaño/tracking, y regreso a visible recuperando jerarquía display. Privacidad de texto/atributos/árbol accesible, focus, touch, reduced motion, loading real y vacío aprobados; disabled no aplica al hero sin controles. Smoke global, mutaciones, cuatro tablas y offline aprobados; dataset original restaurado exactamente.
+- Evidencia: [24 capturas y matriz reproducible de la revisión](final-ui-polish-p2-review-verification/README.md), mismos casos y reloj **2026-10-04 UTC** de PR #115. Referencias P0/P1/P2 originales intactas. Entorno: Node **v24.19.0**, Chromium **151.0.7922.173**, Linux x64, cloud executor.
+- Benchmark propio no exigido por P2; baseline P0 y contrato de rendimiento P3 intactos.
+- Diff completo revisado: sin ampliación de alcance, reconstrucción de métricas, fugas de importes, copy causal, colores direccionales semánticos ni cambios de schema/backup. Sin bloqueantes. Merge condicionado a checks relevantes verdes. Próxima P autorizada después del merge de esta revisión: P3, sin cambios en su contrato de historia desconocida/cero real.
