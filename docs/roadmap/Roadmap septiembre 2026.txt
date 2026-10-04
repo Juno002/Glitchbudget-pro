@@ -4888,7 +4888,7 @@ Contrato:
 
 ## Final UI Polish — secuencia autorizada
 
-**Estado: autorizado / no iniciado.** Autorización explícita del 4 de octubre de 2026.
+**Estado: COMPLETADO / Gate final aprobado · PR #121.** Autorización explícita del 4 de octubre de 2026; P0–P7 cerradas en orden.
 
 Final UI Polish es una secuencia independiente de pulido final de la cara Prisma. **No crea Fase 20.11 ni Fase 21 y no reabre el roadmap funcional 0–20.10.**
 
@@ -4948,17 +4948,17 @@ A partir de este punto:
 Roadmap septiembre 2026.txt = única fuente de verdad
 ```
 
-El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. El único trabajo autorizado adicional pendiente es **Final UI Polish P0–P7**, definido en `docs/roadmap/final-ui-polish.md`.
+El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = Final UI Polish P0 → P7
+intervenciones pendientes autorizadas = ninguna
 ```
 
 No existe una Fase 20.11.
 
 No existe una Fase 21.
 
-No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–6 está cerrada. Final UI Polish P0–P7 es una secuencia de pulido UI explícitamente autorizada y no constituye una fase funcional nueva. Cualquier trabajo fuera de P0–P7 requiere una nueva autorización explícita.
+No existe ninguna fase funcional adicional autorizada después de 20.10.7. La secuencia Post-roadmap 1–6 y Final UI Polish P0–P7 están cerradas. Cualquier trabajo nuevo requiere una nueva autorización explícita.
 
 Si durante la ejecución aparece trabajo nuevo que no cabe en una intervención existente:
 

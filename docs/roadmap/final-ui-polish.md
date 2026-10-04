@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P6 Gate aprobado · PR #120 · staged
+**Estado:** COMPLETADO / Gate final aprobado · PR #121
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -148,10 +148,10 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
 | P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
-| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 · staged |
-| P5 | Comparación y análisis profundo | No | Gate aprobado · PR #119 · staged |
-| P6 | Transplante Prisma a Home | Selector puro de estado | Gate aprobado · PR #120 · staged |
-| P7 | Regresión global e integración | No | No iniciado |
+| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 |
+| P5 | Comparación y análisis profundo | No | Gate aprobado · PR #119 |
+| P6 | Transplante Prisma a Home | Selector puro de estado | Gate aprobado · PR #120 |
+| P7 | Regresión global e integración | No | Gate final aprobado · PR #121 |
 
 No se permite trabajo paralelo entre puntos. La regla normal exige integrar P(n) antes de P(n+1), salvo la política temporal P4–P7 autorizada abajo, que conserva la misma dependencia estricta mediante ramas apiladas y gates completos sin tocar `main`.
 
@@ -1203,10 +1203,10 @@ P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
 P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
 P3 — Gate aprobado · PR #117
-P4 — Gate aprobado · PR #118 · STAGED (sin merge por política P4–P7)
-P5 — Gate aprobado · PR #119 · STAGED (sin merge por política P4–P7)
-P6 — Gate aprobado · PR #120 · STAGED (sin merge por política P4–P7)
-P7 — SIGUIENTE AUTORIZADA desde HEAD de P6
+P4 — Gate aprobado · PR #118
+P5 — Gate aprobado · PR #119
+P6 — Gate aprobado · PR #120
+P7 — Gate final aprobado · PR #121
 ```
 
 No cambiar estos estados por anticipación. Solo el gate real de cada punto desbloquea el siguiente.
@@ -1381,4 +1381,18 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - `npm run test:e2e`: aprobado; valida Home desktop/390 y gate específico a **320 px**, además del smoke global, privacidad, navegación y offline.
 - Diff revisado: solo Home/read-model/tests/E2E; sin cambios en Reportes, Movimientos, Plan, settings, schema, backup, persistencia, ledger ni red.
 - Siguiente punto autorizado: **P7**, desde el HEAD staged de P6.
+
+
+## Registro P7 — 4 de octubre de 2026
+
+**Gate final aprobado · PR #121** — gate global de integración sobre el HEAD staged de P6. P7 no añade features ni rediseño; solo amplía caracterización y E2E de integración.
+
+- `npm run check`: **801/801** tests, 0 fallos.
+- `npm run benchmark:reports`: **18/18** mediciones, gate ≤2× aprobado.
+- `npm run build`: aprobado.
+- `npm run test:e2e`: aprobado. El flujo final recorre 7d/30d/3m/6m/1y/custom, donut + leyenda + tabla exacta, privacidad con importes ocultos, Prisma ↔ Neón mediante controles reales, viewport móvil, regreso a Home con apertura editorial/status pill, restauración de estado, benchmark de navegador y recarga offline.
+- Red: el smoke conserva el bloqueo de requests externos y no detectó requests financieros remotos.
+- Ledger: el script existente aprobó en ambos runs. Las medianas 50k del CI variaron entre **48.967–52.699 ms** para posición y **49.426–51.047 ms** para historiales. No se comparan directamente con P0 porque P0 fue medido en Node v24/cloud executor y P7 en GitHub Actions Node v22; el contrato exige el mismo entorno. La variación entre runs P4–P7 del mismo CI es material incluso sin cambios de runtime. El diff P6→P7 contiene exclusivamente `scripts/e2e-smoke.mjs` y tests, por lo que no modifica el camino del ledger ni sus datos. No se cambió ningún threshold para hacer pasar el gate.
+- Revisión de alcance: sin cambios de schema, migraciones, backup/envelope, ledger, selectores financieros, persistencia, red, navegación primaria ni producto.
+- Con P7 aprobado, se autoriza la integración final P4 → P5 → P6 → P7. En `main`, Final UI Polish se considera **COMPLETADO / Gate final aprobado** cuando GitHub confirme `merged=true` de PR #118, #119, #120 y #121.
 

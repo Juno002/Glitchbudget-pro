@@ -1180,33 +1180,75 @@ async function main() {
     await verifyFinalUiPolishP2(client, waitFor);
     await verifyFinalUiPolishP3(client, waitFor);
 
-    if (!await client.evaluate(`(() => {
-      const button = document.querySelector('[data-report-preset="7d"]');
-      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
-      button.click();
-      return true;
-    })()`)) {
-      throw new Error('No se pudo activar 7D.');
+    // Final UI Polish P7: exercise every canonical Reports preset in sequence.
+    for (const preset of ['7d','30d','3m','6m','1y']) {
+      if (!await client.evaluate(`(() => {
+        const button = document.querySelector('[data-report-preset="${preset}"]');
+        if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+        button.click();
+        return true;
+      })()`)) throw new Error('No se pudo activar preset ' + preset + '.');
+      await waitFor(
+        client,
+        `document.querySelector('[data-report-preset="${preset}"]')?.getAttribute('aria-pressed') === 'true'`,
+        'Final UI Polish P7 preset ' + preset,
+      );
     }
-    await waitFor(
-      client,
-      `document.querySelector('[data-report-preset="7d"]')?.getAttribute('aria-pressed') === 'true'`,
-      'rango 7D',
-    );
 
     if (!await client.evaluate(`(() => {
       const button = document.querySelector('[data-report-preset="custom"]');
       if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
       button.click();
       return true;
-    })()`)) {
-      throw new Error('No se pudo activar Custom.');
-    }
+    })()`)) throw new Error('No se pudo activar Custom.');
     await waitFor(
       client,
       `document.querySelector('[data-report-preset="custom"]')?.getAttribute('aria-pressed') === 'true'
         && document.querySelectorAll('[data-report-range-controls="prisma"] input[type="date"]').length === 2`,
-      'rango Custom',
+      'Final UI Polish P7 rango Custom',
+    );
+
+    // Return to the stable 30d fixture before validating composition and privacy.
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('[data-report-preset="30d"]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo restaurar 30D.');
+    await waitFor(
+      client,
+      `document.querySelector('[data-report-preset="30d"]')?.getAttribute('aria-pressed') === 'true'`,
+      'Final UI Polish P7 retorno a 30d',
+    );
+
+    await waitFor(
+      client,
+      `(() => {
+        const visual = document.querySelector('[data-report-visual="categories"]');
+        const donut = visual?.querySelector('[data-report-chart="category-donut"]');
+        const legend = visual?.querySelector('[data-category-legend]');
+        const table = visual?.querySelector('table');
+        return visual instanceof HTMLElement
+          && donut instanceof HTMLElement
+          && legend instanceof HTMLOListElement
+          && legend.querySelectorAll('[data-category-legend-item]').length > 0
+          && table instanceof HTMLTableElement;
+      })()`,
+      'Final UI Polish P7 donut + leyenda + tabla exacta',
+    );
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Ocultar importes"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudieron ocultar importes en P7.');
+    await waitFor(
+      client,
+      `document.documentElement.dataset.balancesHidden === 'true'
+        && !document.querySelector('[data-category-legend-money]')
+        && [...document.querySelectorAll('[data-spending-money]')].every(node => node.textContent?.trim() === '••••••')`,
+      'Final UI Polish P7 privacidad de Reportes',
     );
 
     // Phase 20.8.8: exercise the complete Reports hierarchy at a mobile viewport.
@@ -1264,6 +1306,82 @@ async function main() {
           && document.documentElement.scrollWidth <= window.innerWidth + 1;
       })()`,
       'Reportes Prisma móvil',
+    );
+
+    // Final UI Polish P7: switch themes with the real Settings controls, then return to Home.
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Ajustes"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir Ajustes durante P7.');
+    await waitFor(client, `Boolean(document.querySelector('[data-settings-prisma="true"]'))`, 'Final UI Polish P7 Ajustes');
+
+    if (!await client.evaluate(setControlExpression('[data-settings-mobile-navigation="prisma"]', 'appearance'))) {
+      throw new Error('No se pudo abrir Apariencia durante P7.');
+    }
+    if (!await client.evaluate(`(() => {
+      const radio = document.querySelector('#theme-dark');
+      if (!(radio instanceof HTMLElement)) return false;
+      radio.click();
+      return true;
+    })()`)) throw new Error('No se pudo activar Neón durante P7.');
+    await waitFor(
+      client,
+      `document.documentElement.classList.contains('dark')
+        && document.documentElement.dataset.balancesHidden === 'true'
+        && document.documentElement.scrollWidth <= window.innerWidth + 1`,
+      'Final UI Polish P7 Neón',
+    );
+    if (!await client.evaluate(`(() => {
+      const radio = document.querySelector('#theme-light');
+      if (!(radio instanceof HTMLElement)) return false;
+      radio.click();
+      return true;
+    })()`)) throw new Error('No se pudo restaurar Prisma durante P7.');
+    await waitFor(
+      client,
+      `document.documentElement.classList.contains('light')
+        && !document.documentElement.classList.contains('dark')`,
+      'Final UI Polish P7 Prisma',
+    );
+    await client.evaluate(`document.querySelector('button[aria-label="Cerrar ajustes"]')?.click()`);
+    await waitFor(client, `!document.querySelector('[data-settings-prisma="true"]')`, 'Final UI Polish P7 cierre Ajustes');
+
+    if (!await client.evaluate(clickButtonExpression('Resumen'))) {
+      throw new Error('No se pudo volver a Resumen durante P7.');
+    }
+    await waitFor(
+      client,
+      `(() => {
+        const home = document.querySelector('[data-home-prisma="true"]');
+        const heading = home?.querySelector('h1');
+        const status = home?.querySelector('[data-home-status-pill]');
+        return home instanceof HTMLElement
+          && heading?.textContent?.trim() === 'Tu panorama financiero.'
+          && status instanceof HTMLElement
+          && status.innerText.trim().length > 0
+          && document.documentElement.dataset.balancesHidden === 'true'
+          && document.documentElement.scrollWidth <= window.innerWidth + 1;
+      })()`,
+      'Final UI Polish P7 regreso a Resumen',
+    );
+
+    if (!await client.evaluate(clickButtonExpression('Reportes'))) {
+      throw new Error('No se pudo volver a Reportes después de validar Resumen.');
+    }
+    await waitFor(client, `Boolean(document.querySelector('[data-reports-prisma="true"]'))`, 'Final UI Polish P7 retorno a Reportes');
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-label="Mostrar importes"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudieron restaurar importes en P7.');
+    await waitFor(
+      client,
+      `document.documentElement.dataset.balancesHidden === 'false'
+        && Boolean(document.querySelector('[data-category-legend-money]'))`,
+      'Final UI Polish P7 restaurar importes',
     );
 
     await client.command('Emulation.setDeviceMetricsOverride', {
