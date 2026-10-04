@@ -1,0 +1,6792 @@
+{
+  "fixture": {
+    "instant": "2026-10-04T12:00:00.000Z",
+    "timezone": "UTC",
+    "preset": "30d",
+    "scenarios": [
+      {
+        "name": "prev-zero",
+        "current": [
+          100
+        ],
+        "previous": [],
+        "total": 100,
+        "previousTotal": 0,
+        "variation": "Sin referencia anterior frente al rango comparable",
+        "rows": {
+          "accounts": [
+            {
+              "id": "p1-history-cash",
+              "name": "Cuenta de evidencia P1",
+              "type": "cash",
+              "currency": "DOP",
+              "openingBalance": 100000,
+              "startDate": "2026-08-01",
+              "isDefaultCash": true
+            }
+          ],
+          "incomes": [
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-current",
+              "accountId": "p1-history-cash",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            }
+          ],
+          "expenses": [
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            }
+          ]
+        }
+      },
+      {
+        "name": "up",
+        "current": [
+          200,
+          200,
+          200
+        ],
+        "previous": [
+          100,
+          100,
+          100
+        ],
+        "total": 600,
+        "previousTotal": 300,
+        "variation": "↑ +100% frente al rango comparable",
+        "rows": {
+          "accounts": [
+            {
+              "id": "p1-history-cash",
+              "name": "Cuenta de evidencia P1",
+              "type": "cash",
+              "currency": "DOP",
+              "openingBalance": 100000,
+              "startDate": "2026-08-01",
+              "isDefaultCash": true
+            }
+          ],
+          "incomes": [
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-current",
+              "accountId": "p1-history-cash",
+              "amount": 600,
+              "amountBase": 600,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-previous",
+              "accountId": "p1-history-cash",
+              "amount": 300,
+              "amountBase": 300,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ],
+          "expenses": [
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-1",
+              "accountId": "p1-history-cash",
+              "categoryId": "transporte",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-2",
+              "accountId": "p1-history-cash",
+              "categoryId": "alimentacion",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-1",
+              "accountId": "p1-history-cash",
+              "categoryId": "transporte",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-2",
+              "accountId": "p1-history-cash",
+              "categoryId": "alimentacion",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ]
+        }
+      },
+      {
+        "name": "down",
+        "current": [
+          100,
+          100,
+          100
+        ],
+        "previous": [
+          200,
+          200,
+          200
+        ],
+        "total": 300,
+        "previousTotal": 600,
+        "variation": "↓ -50% frente al rango comparable",
+        "rows": {
+          "accounts": [
+            {
+              "id": "p1-history-cash",
+              "name": "Cuenta de evidencia P1",
+              "type": "cash",
+              "currency": "DOP",
+              "openingBalance": 100000,
+              "startDate": "2026-08-01",
+              "isDefaultCash": true
+            }
+          ],
+          "incomes": [
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-current",
+              "accountId": "p1-history-cash",
+              "amount": 300,
+              "amountBase": 300,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-previous",
+              "accountId": "p1-history-cash",
+              "amount": 600,
+              "amountBase": 600,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ],
+          "expenses": [
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-1",
+              "accountId": "p1-history-cash",
+              "categoryId": "transporte",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-2",
+              "accountId": "p1-history-cash",
+              "categoryId": "alimentacion",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-1",
+              "accountId": "p1-history-cash",
+              "categoryId": "transporte",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-2",
+              "accountId": "p1-history-cash",
+              "categoryId": "alimentacion",
+              "amount": 200,
+              "amountBase": 200,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ]
+        }
+      },
+      {
+        "name": "stable",
+        "current": [
+          100
+        ],
+        "previous": [
+          100
+        ],
+        "total": 100,
+        "previousTotal": 100,
+        "variation": "↔ Sin cambio frente al rango comparable",
+        "rows": {
+          "accounts": [
+            {
+              "id": "p1-history-cash",
+              "name": "Cuenta de evidencia P1",
+              "type": "cash",
+              "currency": "DOP",
+              "openingBalance": 100000,
+              "startDate": "2026-08-01",
+              "isDefaultCash": true
+            }
+          ],
+          "incomes": [
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-current",
+              "accountId": "p1-history-cash",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "type": "extra",
+              "description": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "categoryId": "sueldo",
+              "id": "p2-income-previous",
+              "accountId": "p1-history-cash",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ],
+          "expenses": [
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-current-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-10-04",
+              "month": "2026-10"
+            },
+            {
+              "nature": "Variable",
+              "concept": "",
+              "currency": "DOP",
+              "fxRate": 1,
+              "paymentMethod": "cash",
+              "id": "p2-expense-previous-0",
+              "accountId": "p1-history-cash",
+              "categoryId": "vivienda",
+              "amount": 100,
+              "amountBase": 100,
+              "date": "2026-09-01",
+              "month": "2026-09"
+            }
+          ]
+        }
+      },
+      {
+        "name": "empty",
+        "current": [],
+        "previous": [],
+        "total": 0,
+        "previousTotal": 0,
+        "variation": "Sin referencia anterior frente al rango comparable",
+        "rows": {
+          "accounts": [
+            {
+              "id": "p1-history-cash",
+              "name": "Cuenta de evidencia P1",
+              "type": "cash",
+              "currency": "DOP",
+              "openingBalance": 100000,
+              "startDate": "2026-08-01",
+              "isDefaultCash": true
+            }
+          ],
+          "incomes": [],
+          "expenses": []
+        }
+      }
+    ]
+  },
+  "result": {
+    "cases": [
+      "prev-zero",
+      "up",
+      "down",
+      "stable",
+      "empty"
+    ],
+    "checks": 100,
+    "captures": 24,
+    "widths": [
+      320,
+      360,
+      390,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "legacyWidths": [
+      320,
+      1280
+    ],
+    "canonicalValues": "passed",
+    "privacy": "passed",
+    "neutralDirection": "passed",
+    "keyboard": "passed",
+    "touch": "passed",
+    "reducedMotion": "passed",
+    "empty": "passed",
+    "loadingObserved": true,
+    "disabled": "hero has no controls",
+    "restoredOriginalDataset": true
+  },
+  "records": [
+    {
+      "name": "prev-zero-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 119.625,
+          "width": 82.625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 126.546875,
+          "width": 89.546875,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 119.625,
+          "width": 82.625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 126.546875,
+          "width": 89.546875,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 213.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 198.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 485.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "prev-zero-serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 470.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.046875,
+          "width": 83.046875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 124.15625,
+          "width": 87.15625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 131.453125,
+          "width": 94.453125,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.609375,
+          "width": 207.609375,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.046875,
+          "width": 83.046875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 124.15625,
+          "width": 87.15625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 131.453125,
+          "width": 94.453125,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.609375,
+          "width": 207.609375,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.046875,
+          "width": 83.046875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 213.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 198.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 6.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 3.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.609375,
+          "width": 207.609375,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 485.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 3.00",
+        "current": "RD$ 6.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "up-serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↑ +100% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 470.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↑ +100% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.09375,
+          "width": 83.09375,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 124.203125,
+          "width": 87.203125,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 131.515625,
+          "width": 94.515625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.734375,
+          "width": 207.734375,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.09375,
+          "width": 83.09375,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 124.203125,
+          "width": 87.203125,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 131.515625,
+          "width": 94.515625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.734375,
+          "width": 207.734375,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 120.09375,
+          "width": 83.09375,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 213.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 269
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 198.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 3.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · RD$ 6.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 3.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 516.734375,
+          "width": 207.734375,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 6.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 485.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 6.00",
+        "current": "RD$ 3.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "down-serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↓ -50% frente al rango comparable\n\n3 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 470.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↓ -50% frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "3 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 119.625,
+          "width": 82.625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 126.546875,
+          "width": 89.546875,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 119.625,
+          "width": 82.625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 270.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 126.546875,
+          "width": 89.546875,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 273.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 115.734375,
+          "width": 78.734375,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 213.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 198.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 1.00\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · RD$ 1.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 505.8125,
+          "width": 196.8125,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 1.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 485.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 1.00",
+        "current": "RD$ 1.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "stable-serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\n↔ Sin cambio frente al rango comparable\n\n1 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 470.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "↔ Sin cambio frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "1 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 119.375,
+          "width": 82.375,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 123.453125,
+          "width": 86.453125,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 130.6875,
+          "width": 93.6875,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 514.921875,
+          "width": 205.921875,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(28, 49, 44)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(102, 112, 107)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(28, 49, 44)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(28, 49, 44)",
+        "rgb(102, 112, 107)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 119.375,
+          "width": 82.375,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 123.453125,
+          "width": 86.453125,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "bounds": {
+        "left": 16,
+        "right": 338,
+        "width": 322,
+        "height": 290.5
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 25.2,
+        "bounds": {
+          "left": 37,
+          "right": 78.40625,
+          "width": 41.40625,
+          "height": 34
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 317,
+        "width": 280,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 130.6875,
+          "width": 93.6875,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 215.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "bounds": {
+        "left": 16,
+        "right": 368,
+        "width": 352,
+        "height": 293.109375
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 27.3,
+        "bounds": {
+          "left": 37,
+          "right": 81.890625,
+          "width": 44.890625,
+          "height": 37
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 157.9375,
+          "right": 201.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 347,
+        "width": 310,
+        "height": 40
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 514.921875,
+          "width": 205.921875,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 487.546875,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(255, 255, 255)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 429.9375,
+          "right": 473.140625,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(163, 163, 163)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(255, 255, 255)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(255, 255, 255)",
+        "rgb(163, 163, 163)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 119.375,
+          "width": 82.375,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 213.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "bounds": {
+        "left": 16,
+        "right": 298,
+        "width": 282,
+        "height": 289
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 24,
+        "bounds": {
+          "left": 37,
+          "right": 76.46875,
+          "width": 39.46875,
+          "height": 33
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 155.734375,
+          "right": 198.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 37,
+        "right": 277,
+        "width": 240,
+        "height": 40
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\nRD$ 0.00\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · RD$ 0.00\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 514.921875,
+          "width": 205.921875,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "RD$ 0.00",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 485.34375,
+          "width": 57.609375,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "RD$ 0.00",
+        "current": "RD$ 0.00",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    },
+    {
+      "name": "empty-serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "bounds": {
+        "left": 284,
+        "right": 1234,
+        "width": 950,
+        "height": 322
+      },
+      "text": "GASTO DEL RANGO\n\n••••••\n\n5 sept de 2026 – 4 oct de 2026\n\nSin referencia anterior frente al rango comparable\n\n0 movimientos\n\nPeríodo comparable · ••••••\n\n6 ago de 2026 – 4 sept de 2026",
+      "total": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 60,
+        "bounds": {
+          "left": 309,
+          "right": 407.640625,
+          "width": 98.640625,
+          "height": 82
+        },
+        "color": "rgb(31, 31, 31)"
+      },
+      "previous": {
+        "text": "••••••",
+        "whiteSpace": "nowrap",
+        "lines": 1,
+        "fontSize": 12,
+        "bounds": {
+          "left": 427.734375,
+          "right": 470.9375,
+          "width": 43.203125,
+          "height": 16
+        },
+        "color": "rgb(115, 115, 115)"
+      },
+      "variation": "Sin referencia anterior frente al rango comparable",
+      "variationBounds": {
+        "left": 309,
+        "right": 1209,
+        "width": 900,
+        "height": 20
+      },
+      "variationColor": "rgb(31, 31, 31)",
+      "variationFontSize": 14,
+      "count": "0 movimientos",
+      "neutralColors": [
+        "rgb(31, 31, 31)",
+        "rgb(115, 115, 115)"
+      ],
+      "labels": "",
+      "prohibitedContent": 0,
+      "tabStops": 0,
+      "animated": 0,
+      "comparison": {
+        "previous": "••••••",
+        "current": "••••••",
+        "visible": true
+      },
+      "currentRange": "5 sept de 2026 – 4 oct de 2026",
+      "previousRange": "6 ago de 2026 – 4 sept de 2026"
+    }
+  ]
+}

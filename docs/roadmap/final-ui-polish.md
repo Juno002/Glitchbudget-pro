@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P1 Gate aprobado · PR #111
+**Estado:** EN EJECUCIÓN · P2 Gate aprobado · PR #115
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -146,7 +146,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 |---|---|---:|---|
 | P0 | Baseline + contratos de caracterización | No | Gate aprobado · PR #109 |
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
-| P2 | Hero de gasto sin tendencia | No | No iniciado |
+| P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | No iniciado |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
 | P5 | Comparación y análisis profundo | No | No iniciado |
@@ -409,6 +409,10 @@ GASTO DEL RANGO
 [flecha/signo] [variación] frente al rango comparable
 [número] movimientos
 ```
+
+Cuando `previousTotal === 0`, la variación presenta **«Sin referencia anterior frente al rango comparable»**, sin porcentaje ni flecha. Esta decisión de presentación incluye el rango vacío (actual y anterior en cero): conserva el `percentChange` canónico y la tabla de comparación sin alterarlos. Con base anterior distinta de cero se presenta el porcentaje canónico con signo y flecha neutral; cero conserva **«Sin cambio»**. Autorización explícita en la revisión del usuario del 4 de octubre de 2026.
+
+El total y el importe comparable se formatean en React mediante `usePrivateCurrency()` y permanecen indivisibles (`white-space: nowrap`). No se incorporan importes visibles ni preformateados a `aria-label` ni a descripciones accesibles.
 
 P2 NO crea:
 
@@ -1181,8 +1185,8 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 ```text
 P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
-P2 — SIGUIENTE AUTORIZADA (requiere P1 · PR #111 mergeado)
-P3 — BLOQUEADO POR P2
+P2 — Gate aprobado · PR #115
+P3 — SIGUIENTE AUTORIZADA (requiere P2 · PR #115 mergeado)
 P4 — BLOQUEADO POR P3
 P5 — BLOQUEADO POR P4
 P6 — BLOQUEADO POR P5
@@ -1253,3 +1257,19 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - [Sesenta capturas y registros reproducibles](final-ui-polish-p1-review-verification/README.md) en ruta nueva. Fixture histórico v2 incorpora negativo → positivo y conserva reloj/fecha UTC P0; perfil de test aislado, restauración exacta del dataset original. Capturas P0/P1 previas intactas. Entorno: Node v24.19.0, Chromium 151, Linux x64, executor cloud. Benchmark propio no exigido por P1; baseline y contrato P3 intactos.
 - Revisión completa de diff: solo contrato autorizado, presenter, cuerpo editorial, tests/fixture, helper y evidencia. Sin refactors fuera de alcance, hero de gasto, tablas/orden, mocks de producto, cálculos financieros React, dominio, schema/migraciones, backup/envelope, semánticas, navegación, red ni colores semánticos nuevos. Issue #112 permanece separado.
 - Bloqueantes: ninguno. La corrección se considera integrada únicamente tras confirmar `merged=true` de PR #114 en GitHub; no se documenta SHA de merge.
+
+
+## Registro P2 — 4 de octubre de 2026
+
+**Gate aprobado · PR #115** — [PR atómico](https://github.com/Juno002/Glitchbudget-pro/pull/115). P2 se considera completada únicamente cuando GitHub confirme `merged=true`. P3 no se inicia en esta ejecución.
+
+- Reanudación: `main` y contenido real verificados; GitHub confirma `merged=true` de P1 PR #111 y de sus correcciones PR #114. No había rama ni PR parcial de P2; rama única `final-ui-polish-p2-spending-hero` sincronizada con `main`.
+- Implementación: el hero integra gasto del rango, total protagonista, variación con signo/flecha neutral, movimientos y referencia comparable. Conserva `report.spending.total`, `previousTotal`, `percentChange`, `transactionCount`, etiquetas de ambos rangos y tablas exactas. Consume exclusivamente el facade existente; no hay cálculos financieros en React ni cambios de dominio, persistencia, backup, navegación o red.
+- Decisiones cerradas: base anterior cero presenta «Sin referencia anterior frente al rango comparable», sin flecha ni porcentaje, incluyendo actual/anterior en cero; en ese caso el porcentaje canónico cero y la tabla permanecen intactos. Con base distinta de cero se presenta el porcentaje canónico; igualdad conserva «Sin cambio». Importes mediante `usePrivateCurrency()` en spans indivisibles, sin importes en atributos accesibles. Variación y total usan tokens neutrales. Sin gráfico, placeholder, props de tendencia ni espacio reservado para P3.
+- Confirmación solicitada: `leadingCategorySharePercent` conserva **35 %**, prioridad y ranking P1 intactos; 25 % no activa `leading_category`. El copy editorial no sustituye ese filtro canónico.
+- `npm run check`: aprobado, **754/754 tests**. `tests/final-ui-polish-p2.test.ts` añade nueve pruebas: arquitectura/privacidad/alcance y seis snapshots de base cero, subida, bajada, igualdad, actual cero con base y rango vacío. Valores y comparación canónica protegidos.
+- `npm run build`: aprobado; output estático y guard CSP/local-only aprobados.
+- `npm run test:e2e`: aprobado; **100 comprobaciones P2** en cinco casos (base anterior cero, subida, bajada, igualdad y vacío), Prisma/Neón × 320/360/390/1280 px × importes visibles/ocultos, más legado 320/1280 px. Importes exactamente iguales a la tabla, nowrap/geometría, jerarquía, dirección neutral, texto/atributos/árbol accesible sin fugas, focus real, touch, reduced motion, loading real observado y restauración exacta de filas. Disabled: el hero no incorpora controles. Smoke global de navegación, mutaciones, cuatro tablas y offline aprobado.
+- Evidencia: [24 capturas y matriz reproducible](final-ui-polish-p2-verification/README.md), fecha **2026-10-04 UTC**, casos y filas fijos registrados en `verification.json`; Node **v24.19.0**, Chromium **151**, Linux x64, cloud executor. Capturas estabilizan fuentes/layout y ocultan scrollbars antes de medir el recorte. Referencias P0/P1 intactas.
+- Benchmark propio no exigido por P2; baseline P0 y contrato de rendimiento P3 intactos.
+- Revisión completa del diff: sin ampliación de alcance, importes filtrados, copy causal, datos ficticios en producto, reconstrucción de métricas, schema/backup ni invariantes alteradas. Sin bloqueantes reales. Merge condicionado a checks relevantes verdes y confirmación real de GitHub; próxima P autorizada después del merge: P3.
