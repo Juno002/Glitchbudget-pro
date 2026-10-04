@@ -4919,6 +4919,19 @@ Corrección de P2 solicitada explícitamente en la revisión del 4 de octubre de
 
 Correcciones de P3 solicitadas explícitamente al revisar PR #117: ocultar el gráfico y la lista duplicada cuando existan menos de dos ventanas, conservando «Historial parcial» accesible si corresponde; distinguir la barra parcial con un borde punteado neutral. El contrato exacto queda en `final-ui-polish.md`; se cierra en el mismo PR #117 sin modificar la agregación, rangos, totales, cobertura, semántica monetaria ni iniciar P4.
 
+### Política temporal de integración P4–P7 — autorizada el 4 de octubre de 2026
+
+Por instrucción explícita del usuario, **no se hará ningún merge adicional a `main` hasta cerrar P7**. Esta política modifica únicamente la mecánica de integración; no cambia el alcance funcional, los gates ni el orden P4 → P5 → P6 → P7.
+
+- P4 usa rama propia nacida del `main` que ya contiene P3.
+- P5 solo puede comenzar cuando P4 tenga su gate completo aprobado; su rama nace del HEAD exacto de P4 y su PR usa la rama P4 como base.
+- P6 solo puede comenzar cuando P5 tenga su gate completo aprobado; su rama nace del HEAD exacto de P5 y su PR usa la rama P5 como base.
+- P7 solo puede comenzar cuando P6 tenga su gate completo aprobado; su rama nace del HEAD exacto de P6 y su PR usa la rama P6 como base.
+- Ningún punto se considera integrado en `main` durante este tramo; se considera **cerrado y staged** cuando su gate real está aprobado y su PR atómico refleja únicamente su delta respecto de la rama anterior.
+- Tras aprobar P7, se integran P4, P5, P6 y P7 en orden, preservando la cadena de commits/árboles para que cada diff siga siendo revisable; solo después se limpian las ramas.
+- Si cualquier gate falla, la secuencia se detiene en ese punto. No se usa P5/P6/P7 para ocultar una regresión anterior.
+
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
