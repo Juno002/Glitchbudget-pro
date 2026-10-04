@@ -483,15 +483,13 @@ No usar `Account.startDate` como corte global del gráfico de gasto.
 
 Razón contractual: Reportes conserva movimientos históricos reportables incluso cuando no estén asociados a una cuenta actual; PR #104 no autoriza borrar ese historial.
 
-P3 debe derivar una fecha pura `reportHistoryStart` a partir de la historia reportable canónica disponible. Deben considerarse, según correspondan al reporte:
+P3 NO implementa una noción general y abstracta de `reportHistoryStart`. Para este alcance se define únicamente:
 
-- fechas canónicas de gastos;
-- fechas canónicas de ingresos;
-- fechas canónicas de pagos de deuda;
-- fechas canónicas de transferencias;
-- `Account.startDate` únicamente para métricas de posición donde tenga semántica real.
+```text
+spendingHistoryStart = fecha canónica del primer gasto reportable disponible
+```
 
-Para la primera implementación del gráfico del hero, que representa **gasto**, la cobertura debe partir de la primera fecha de gasto canónico disponible.
+No se calculan todavía fechas equivalentes para ingresos, pagos, transferencias o patrimonio. Si una futura intervención necesita tendencia de otra métrica, deberá definir su propia cobertura y obtener autorización explícita; no se anticipa esa implementación en P3.
 
 Cada punto/ventana debe declarar:
 
@@ -501,13 +499,19 @@ coverage: "full" | "partial"
 
 Reglas:
 
-- ventana totalmente anterior al primer gasto canónico → no se muestra;
-- ventana que cruza el inicio del historial → `partial`;
-- ventana completamente cubierta desde el inicio histórico → `full`;
+- ventana totalmente anterior a `spendingHistoryStart` → no se muestra;
+- ventana que cruza `spendingHistoryStart` → `partial`;
+- ventana completamente posterior o igual a `spendingHistoryStart` → `full`;
 - una ventana `partial` debe tener indicación accesible “Historial parcial”;
 - ausencia de historia no debe representarse como cero histórico ficticio.
 
-Un gasto real de 0 dentro de una ventana con cobertura completa sí es un cero válido.
+### Decisión explícita sobre ceros anteriores al primer gasto
+
+Antes de `spendingHistoryStart` el producto **no distingue** entre “el usuario realmente gastó cero” y “todavía no existe historial suficiente en la app”. Por decisión de producto, esas ventanas se tratan como **historia desconocida/no observada** y se ocultan; no se muestran como cero.
+
+Después de `spendingHistoryStart`, una ventana con cobertura `full` y sin gastos registrados sí representa un cero válido y puede mostrarse como tal.
+
+Esta decisión evita inventar historia financiera positiva o negativa donde la app no puede demostrar que exista.
 
 ## Selector autorizado
 
@@ -531,20 +535,30 @@ No debe depender de React, Dexie, browser, red, reloj ni locale.
 
 P3 debe ampliar la medición; `benchmark-ledger.mjs` por sí solo no mide la nueva tendencia.
 
+### Contrato algorítmico
+
+La implementación de tendencia debe construir primero las ventanas comparables y después agregar el gasto con **una sola pasada lógica sobre los gastos canónicos, o una estrategia de complejidad equivalente O(N + W)**, donde N es el número de gastos y W el número de ventanas.
+
+Está prohibido implementar la tendencia llamando una vez a `selectSpendingReport()` por ventana o realizando W escaneos completos independientes sobre el mismo conjunto de gastos. Con hasta seis ventanas, ese enfoque sería deliberadamente multiplicativo y no se considera una implementación válida aunque pase en datasets pequeños.
+
+Cada gasto canónico debe asignarse como máximo a una ventana de la serie, porque las ventanas derivadas sucesivamente de `previousComparableRange()` son contiguas y no se superponen.
+
 Procedimiento obligatorio:
 
 1. ejecutar benchmark de ledger existente y registrar baseline;
 2. añadir un benchmark reproducible de Reportes/tendencia con datasets 1k, 10k y 50k;
 3. medir una lectura de reporte de una ventana y la tendencia con el máximo de ventanas correspondiente;
-4. usar la misma generación de dataset y mismas muestras antes de decidir optimización.
+4. usar la misma generación de dataset y mismas muestras para comparar resultados.
 
-Regla de optimización:
+Regla de seguridad adicional:
 
 ```text
 si la mediana de tendencia 50k > 2 × mediana de una lectura equivalente de Reportes 50k
-→ no mergear la implementación por rescans sucesivos;
-→ implementar agregación más eficiente manteniendo exactamente el mismo resultado.
+→ no mergear;
+→ revisar la implementación o la agregación hasta mantener exactamente el mismo resultado con coste acotado.
 ```
+
+La regla 2× es un **gate de rendimiento**, no el mecanismo que decide si se usa agregación eficiente: la agregación eficiente ya es obligatoria por contrato.
 
 Además, el benchmark de ledger existente no puede empeorar simultáneamente más de 20% y más de 5 ms de mediana frente al baseline P0 en el mismo entorno.
 
@@ -802,6 +816,43 @@ No usar nombres ficticios como “Alex Rivera”.
 
 La fecha debe derivarse del reloj financiero local ya existente. El período debe venir del Period Engine actual.
 
+## Estado actual que P6 debe reconciliar
+
+Antes de P6, Resumen tiene dos avisos globales separados:
+
+1. `home.attentionCount > 0` → badge “N elementos requieren atención”;
+2. `quarantinedDebtPayments.length > 0` → badge específico de pagos inválidos.
+
+Además, `selectHomeReadModel()` calcula hoy `attentionCount` como la suma de:
+
+- movimientos planificados vencidos;
+- presupuestos excedidos;
+- metas activas con fecha límite vencida;
+- inversiones activas cuyo vencimiento ya fue alcanzado.
+
+El estado de presupuesto `alert` no forma parte de `attentionCount`, pero sí es una condición visible de atención dentro del módulo de presupuesto.
+
+## Decisión de composición global
+
+P6 **reemplaza los dos badges globales actuales por un único status pill editorial** en la cabecera de Resumen.
+
+No deben convivir en la parte superior:
+
+- el nuevo pill;
+- “N elementos requieren atención”;
+- el badge global de pagos inválidos.
+
+Eso produciría mensajes duplicados.
+
+Los badges y estados **dentro de cada módulo** sí permanecen como evidencia contextual. Ejemplos: estado del presupuesto, inversión vencida dentro de Inversiones, ocurrencias vencidas dentro de Próximos movimientos. La jerarquía será:
+
+```text
+pill global = conclusión priorizada
+módulos = evidencia y detalle
+```
+
+P6 puede conservar `attentionCount` en el read model por compatibilidad o tests, pero no debe usarlo como único origen semántico del pill porque no incluye presupuesto en alerta ni pagos cuarentenados.
+
 ## Selector de atención
 
 Crear un selector puro equivalente a:
@@ -812,15 +863,19 @@ selectHomeAttentionState(...)
 
 No construir prioridades mediante condicionales dispersos en JSX.
 
+El selector debe cubrir explícitamente **todos los contribuyentes que hoy pueden producir atención global**, más el estado de presupuesto en alerta.
+
 ## Prioridad EXACTA
 
 La primera condición activa gana:
 
-1. **integridad de datos**;
+1. **integridad de datos / pagos cuarentenados**;
 2. **movimientos planificados vencidos**;
 3. **presupuesto excedido**;
-4. **presupuesto en alerta/cerca del límite**;
-5. **neutral**.
+4. **metas vencidas**;
+5. **inversiones vencidas o maduras pendientes de revisión**;
+6. **presupuesto en alerta/cerca del límite**;
+7. **neutral**.
 
 No reordenar prioridades sin modificar este documento.
 
@@ -832,21 +887,37 @@ No reordenar prioridades sin modificar este documento.
 Revisa datos preservados
 ```
 
-Se activa solo cuando la fuente actual de integridad del producto indique datos cuarentenados/preservados que requieran atención. No inventar una nueva noción de integridad.
+Se activa solo cuando la fuente actual de integridad del producto indique pagos/datos cuarentenados o preservados que requieran atención. No inventar una nueva noción de integridad.
 
-### Vencidos
+### Movimientos planificados vencidos
 
 ```text
 Hay movimientos planificados vencidos
 ```
 
-Debe usar la semántica existente de `occurrenceDisplayStatus`/planned occurrences; no una comparación de fecha nueva en JSX.
+Debe reutilizar la semántica existente de agrupación/estado de planned occurrences; no una comparación de fecha nueva dispersa en JSX.
 
 ### Presupuesto excedido
 
 ```text
 Presupuesto excedido
 ```
+
+### Metas vencidas
+
+```text
+Hay metas con fecha límite vencida
+```
+
+Debe derivarse de la misma semántica que ya usa Home para detectar metas activas vencidas.
+
+### Inversiones vencidas
+
+```text
+Hay inversiones que requieren revisión
+```
+
+Debe derivarse de la misma semántica que ya alimenta `home.investments.maturedCount`.
 
 ### Presupuesto en alerta
 
@@ -860,22 +931,40 @@ Presupuesto cerca del límite
 Sin alertas destacadas
 ```
 
-Neutral significa únicamente que ninguna de las cuatro condiciones anteriores está activa. NO significa “tus finanzas están bien” ni “todo está en orden”.
+Neutral solo es válido cuando:
+
+- no hay pagos/datos cuarentenados relevantes;
+- no hay movimientos planificados vencidos;
+- no hay presupuestos excedidos;
+- no hay metas vencidas;
+- no hay inversiones vencidas/maduras pendientes de revisión;
+- no hay presupuestos en alerta.
+
+Por tanto, el pill **no puede** mostrar “Sin alertas destacadas” mientras `attentionCount > 0` o mientras exista un badge/estado global equivalente de integridad.
+
+NO significa “tus finanzas están bien” ni “todo está en orden”.
 
 ## Color
 
-Integridad/excedido/vencido pueden usar semántica de atención ya existente.
+Integridad/excedido/vencidos pueden usar semántica de atención ya existente.
 
 Neutral no debe parecer una celebración.
 
 ## Tests obligatorios
 
 - cada estado individual;
-- integridad + vencido → gana integridad;
-- vencido + excedido → gana vencido;
-- excedido + alerta → gana excedido;
+- integridad + cualquier otro estado → gana integridad;
+- vencidos + excedido → gana vencidos;
+- excedido + meta vencida → gana excedido;
+- meta vencida + inversión vencida → gana meta vencida;
+- inversión vencida + presupuesto en alerta → gana inversión vencida;
 - solo alerta;
 - ninguna condición → neutral;
+- `attentionCount > 0` nunca produce neutral;
+- pagos cuarentenados nunca producen neutral;
+- el badge global “N elementos requieren atención” desaparece;
+- el badge global separado de pagos inválidos desaparece;
+- los estados/badges contextuales dentro de módulos permanecen;
 - cambio de período;
 - fecha local;
 - 320 px;
@@ -970,10 +1059,10 @@ Cuando P7 cierre, Final UI Polish queda **COMPLETADO / Gate final aprobado**.
 
 # 9. Protocolo obligatorio por PR
 
-Cada P1–P6 debe seguir este orden:
+Cada P0–P7 debe seguir este orden:
 
 1. leer este documento completo;
-2. verificar que la P anterior esté mergeada en `main`;
+2. verificar que la P anterior, cuando exista, esté mergeada en `main`;
 3. sincronizar contra `main`;
 4. crear una rama específica de esa P;
 5. implementar solo el alcance autorizado;
@@ -981,9 +1070,13 @@ Cada P1–P6 debe seguir este orden:
 7. ejecutar su gate propio;
 8. revisar diff para detectar scope creep;
 9. abrir PR atómico;
-10. no mergear con checks rojos relevantes;
-11. registrar en este documento el estado y PR/evidencia;
-12. solo entonces comenzar la siguiente P.
+10. con el número de PR ya disponible, actualizar en la misma rama el registro de ejecución de esa P con `Gate aprobado · PR #N`, tests relevantes y benchmark si aplica;
+11. no mergear con checks rojos relevantes;
+12. mergear el PR;
+13. la P se considera **Completada / Gate aprobado** únicamente cuando GitHub confirme que ese PR está mergeado;
+14. solo entonces comenzar la siguiente P.
+
+No se exige escribir el SHA de merge dentro de este documento. El número de PR es el identificador canónico de evidencia y el estado `merged` de ese PR en GitHub es la fuente de verdad de que la intervención quedó integrada. Esto evita un commit documental posterior creado únicamente para registrar un hash que no existe antes del merge.
 
 Convención recomendada de ramas:
 
@@ -1000,14 +1093,19 @@ final-ui-polish-p7-final-gate
 
 # 10. Regla de documentación viva
 
-Después de cada merge se actualiza la tabla de estado de este documento con:
+Cada PR P0–P7 debe dejar su propio registro de ejecución **dentro del mismo PR antes del merge** con:
 
-- estado `Completado / Gate aprobado`;
+- estado de gate: `Gate aprobado`;
 - número de PR;
-- commit de merge;
 - tests relevantes;
 - benchmark si aplica;
-- cualquier decisión ya cerrada.
+- decisiones cerradas o desviaciones autorizadas.
+
+No registrar el commit de merge como requisito documental. Tras el merge, la combinación `PR #N + estado merged en GitHub` constituye evidencia suficiente y verificable.
+
+Para iniciar la siguiente P, el ejecutor debe comprobar el PR de la intervención anterior en GitHub y confirmar `merged=true`. No basta con que el documento diga `Gate aprobado`.
+
+La tabla/estado del documento puede expresar `Gate aprobado · PR #N`; su condición de completado se deriva del estado real del PR. No crear un commit directo posterior a `main` únicamente para cambiar esa etiqueta o insertar un SHA.
 
 No reescribir retrospectivamente contratos para justificar una implementación distinta.
 
@@ -1034,11 +1132,11 @@ Final UI Polish solo está terminado cuando:
 - ningún insight inventa causas;
 - hero usa datos canónicos;
 - tendencia usa ventanas comparables canónicas;
-- cobertura histórica distingue full/partial y no inventa ceros;
+- cobertura histórica distingue full/partial, trata la etapa anterior al primer gasto como historia desconocida y no inventa ceros;
 - donut usa composición pura y porcentajes que suman 100.0%;
 - tablas exactas permanecen visibles;
 - Home no usa perfil ficticio ni “Todo está en orden”;
-- status pill usa prioridad determinista;
+- status pill reemplaza los avisos globales duplicados, cubre todos los estados actuales de atención y usa prioridad determinista;
 - Prisma y Neón mantienen acabado premium;
 - 320 px no tiene overflow;
 - ocultar importes no filtra dinero;
