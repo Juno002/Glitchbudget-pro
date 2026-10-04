@@ -1435,7 +1435,7 @@ Reglas:
 
 ## Registro de ejecución — PR #122
 
-**Gate aprobado · pendiente de merge a `main`.**
+**Completado e integrado en `main` mediante PR #122.**
 
 - `npm run check`: **801/801**, 0 fallos.
 - Ledger benchmark: aprobado.
@@ -1444,4 +1444,4 @@ Reglas:
 - E2E: aprobado; valida estado compacto inicial, apertura del análisis detallado con cuatro tablas exactas, cierre de vuelta a lectura compacta, privacidad, 390 px, temas y recarga offline.
 - La corrección conserva `selectReportsSnapshot()` y los bindings financieros existentes; no añade cálculo financiero a React.
 - Sin schema, migración, backup, persistencia, red, IA ni cambios de navegación principal.
-- Integración deliberadamente diferida: PR #122 no debe mergearse sin revisión/autorización explícita del usuario.
+- PR #122 fue integrado en `main` tras aprobación explícita; merge commit inicial: `36ffa974648b17bb26195615f1ae087b9db14250`.
