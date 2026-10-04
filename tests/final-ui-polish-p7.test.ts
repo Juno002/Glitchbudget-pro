@@ -17,7 +17,9 @@ test('P7 integration smoke exercises every report range including custom', () =>
 
 test('P7 integration smoke covers donut legend exact evidence privacy themes mobile and Home return', () => {
   for (const marker of [
-    'Final UI Polish P7 donut + leyenda + tabla exacta',
+    'Reportes lectura progresiva compacta',
+    'Reportes análisis detallado completo',
+    'Reportes vuelve a lectura compacta',
     'data-category-legend',
     'Ocultar importes',
     'Final UI Polish P7 privacidad de Reportes',
