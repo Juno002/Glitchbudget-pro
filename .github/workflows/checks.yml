@@ -17,5 +17,7 @@ jobs:
       - run: npm run check
       - name: Ledger performance baseline
         run: npm run benchmark:ledger
+      - name: Reports spending trend performance
+        run: npm run benchmark:reports
       - run: npm run build
       - run: npm run test:e2e

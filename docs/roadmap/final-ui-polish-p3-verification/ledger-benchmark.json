@@ -1,0 +1,251 @@
+{
+  "environment": {
+    "origin": "managed cloud executor attached to this session; not GitHub Actions",
+    "node": "v24.19.0",
+    "platform": "Linux x64",
+    "executorId": "ccarenv_b64_Y2NhcmVudl9iYjg4MTg0YmQ4MDg4MTkxODM3NWY5ZWI2YWJiZTM2OA",
+    "identifiedOnRecheck": {
+      "os": "Debian GNU/Linux 13.6",
+      "kernel": "6.18.44",
+      "cpu": "AMD EPYC 9V74",
+      "visibleVcpus": 3,
+      "cgroupCpuQuota": "200000/100000 (2 CPUs)"
+    },
+    "measurementDate": "2026-10-04"
+  },
+  "command": "npm run benchmark:ledger",
+  "baselineP0": "../final-ui-polish-p0-baseline/ledger-benchmark.json",
+  "before": [
+    {
+      "movements": 1000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 1.0657870000000003,
+        "samplesMs": [
+          1.8301890000000043,
+          0.8990449999999868,
+          0.8316140000000019,
+          1.0657870000000003,
+          1.3541520000000133,
+          1.343644999999995,
+          0.7270859999999999
+        ]
+      },
+      "histories": {
+        "medianMs": 0.9177630000000079,
+        "samplesMs": [
+          1.138426999999993,
+          1.1308549999999968,
+          0.9177630000000079,
+          0.6857940000000013,
+          1.112766999999991,
+          0.7784440000000075,
+          0.7230710000000045
+        ]
+      }
+    },
+    {
+      "movements": 10000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 7.74443500000001,
+        "samplesMs": [
+          10.214208999999997,
+          9.710138999999998,
+          7.484734000000003,
+          7.74443500000001,
+          8.427025000000015,
+          7.4580740000000105,
+          7.463361999999989
+        ]
+      },
+      "histories": {
+        "medianMs": 7.64224200000001,
+        "samplesMs": [
+          7.1916319999999985,
+          7.64224200000001,
+          7.879570000000001,
+          7.425465000000003,
+          7.598756000000009,
+          8.287835000000001,
+          8.736380999999994
+        ]
+      }
+    },
+    {
+      "movements": 50000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 41.424893999999995,
+        "samplesMs": [
+          42.646525,
+          41.424893999999995,
+          38.53630899999996,
+          38.219070999999985,
+          40.58830300000005,
+          43.44843500000002,
+          45.592017000000055
+        ]
+      },
+      "histories": {
+        "medianMs": 39.81145200000003,
+        "samplesMs": [
+          39.81145200000003,
+          57.073676999999975,
+          42.37951300000009,
+          37.80660899999998,
+          48.810213999999974,
+          34.29976199999999,
+          33.64392299999997
+        ]
+      }
+    }
+  ],
+  "after": [
+    {
+      "movements": 1000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 1.1814409999999924,
+        "samplesMs": [
+          1.7748760000000061,
+          1.1814409999999924,
+          0.8338170000000105,
+          0.9779549999999944,
+          1.4764059999999972,
+          1.3847779999999972,
+          0.7417580000000044
+        ]
+      },
+      "histories": {
+        "medianMs": 0.7515729999999934,
+        "samplesMs": [
+          1.029851999999991,
+          0.9792659999999955,
+          0.9572730000000007,
+          0.7218489999999917,
+          0.7515729999999934,
+          0.658141999999998,
+          0.7269360000000091
+        ]
+      }
+    },
+    {
+      "movements": 10000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 7.56158099999999,
+        "samplesMs": [
+          9.11751700000002,
+          9.453812999999997,
+          7.423923000000002,
+          7.62520600000002,
+          7.338483999999994,
+          7.56158099999999,
+          7.333035999999993
+        ]
+      },
+      "histories": {
+        "medianMs": 7.766077999999993,
+        "samplesMs": [
+          7.465384999999998,
+          7.382460000000009,
+          7.450624000000005,
+          8.005289000000005,
+          8.171549999999996,
+          7.919370000000015,
+          7.766077999999993
+        ]
+      }
+    },
+    {
+      "movements": 50000,
+      "accounts": 8,
+      "position": {
+        "medianMs": 42.217130999999995,
+        "samplesMs": [
+          39.04642999999999,
+          42.217130999999995,
+          42.428589999999986,
+          48.574044999999956,
+          41.170312999999965,
+          49.26768000000004,
+          40.55800999999997
+        ]
+      },
+      "histories": {
+        "medianMs": 36.95520799999997,
+        "samplesMs": [
+          37.37307700000008,
+          37.17306599999995,
+          36.95520799999997,
+          35.32355699999994,
+          32.89571699999999,
+          36.00389299999995,
+          38.30166799999995
+        ]
+      }
+    }
+  ],
+  "measurementProcedure": "Existing script unchanged; before and after isolated; seven measured samples after warm-up. Reports benchmark executed afterward, without concurrent gates.",
+  "gate": {
+    "rule": "Reject if median exceeds P0 simultaneously by more than 20% and more than 5 ms.",
+    "comparisons": [
+      {
+        "movements": 1000,
+        "selector": "position",
+        "baselineMedianMs": 1.2076610000000016,
+        "afterMedianMs": 1.1814409999999924,
+        "changePercent": -2.1711390862178326,
+        "changeMs": -0.026220000000009236,
+        "passed": true
+      },
+      {
+        "movements": 1000,
+        "selector": "histories",
+        "baselineMedianMs": 0.7120239999999853,
+        "afterMedianMs": 0.7515729999999934,
+        "changePercent": 5.554447602891033,
+        "changeMs": 0.03954900000000805,
+        "passed": true
+      },
+      {
+        "movements": 10000,
+        "selector": "position",
+        "baselineMedianMs": 7.788727000000023,
+        "afterMedianMs": 7.56158099999999,
+        "changePercent": -2.9163430686430902,
+        "changeMs": -0.22714600000003315,
+        "passed": true
+      },
+      {
+        "movements": 10000,
+        "selector": "histories",
+        "baselineMedianMs": 9.350442000000015,
+        "afterMedianMs": 7.766077999999993,
+        "changePercent": -16.944268516932347,
+        "changeMs": -1.584364000000022,
+        "passed": true
+      },
+      {
+        "movements": 50000,
+        "selector": "position",
+        "baselineMedianMs": 42.62573600000002,
+        "afterMedianMs": 42.217130999999995,
+        "changePercent": -0.9585875537727273,
+        "changeMs": -0.40860500000002276,
+        "passed": true
+      },
+      {
+        "movements": 50000,
+        "selector": "histories",
+        "baselineMedianMs": 40.28844099999992,
+        "afterMedianMs": 36.95520799999997,
+        "changePercent": -8.273422642489336,
+        "changeMs": -3.33323299999995,
+        "passed": true
+      }
+    ],
+    "passed": true
+  }
+}

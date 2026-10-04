@@ -12,7 +12,7 @@ import { type BudgetOverspendingBehavior } from '@/policies/settings';
 import { withBudgetConfirmation } from '@/lib/expense-confirmation';
 import { useBudgetConfirmation } from '@/hooks/use-budget-confirmation';
 import { selectPosition } from '@/domain/ledger';
-import { selectReportsSnapshot } from '@/domain/reports';
+import { selectReportsSnapshot, selectSpendingTrend } from '@/domain/reports';
 import type { DateRange } from '@/domain/periods';
 import { rollBudgetsIntoMonth, rollBudgetsIntoPeriod, prepareBudgetPeriodsForDate } from '@/lib/budget-rollover';
 import { selectBudgetStatusDetails } from '@/domain/budgets';
@@ -118,6 +118,7 @@ interface FinanceContextType {
   getTotals: (periodId: string) => ReturnType<typeof selectPeriodMetrics>;
   getPosition: () => ReturnType<typeof selectPosition>;
   getReportSnapshot: (range: DateRange, through?: string) => ReturnType<typeof selectReportsSnapshot>;
+  getSpendingTrend: (range: DateRange, maxWindows: number) => ReturnType<typeof selectSpendingTrend>;
   getExpensesByCategory: (month: string) => { name: string; value: number }[];
   getIncomesByCategory: (month: string) => { name: string; value: number }[];
   getExpensesByType: (month: string) => { name: string; total: number; count: number; avg: number }[];
@@ -538,6 +539,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     debtPayments: debtPayments || [],
     transfers: transfers || [],
   }, range, through), [accounts, debts, incomes, expenses, debtPayments, transfers]);
+  const getSpendingTrend = useCallback((range: DateRange, maxWindows: number) => selectSpendingTrend(expenses || [], range, maxWindows), [expenses]);
   const getPosition = useCallback(
     () => selectPosition(accounts || [], debts || [], { incomes: incomes || [], expenses: expenses || [], payments: debtPayments || [], transfers: transfers || [] }, localDate()),
     [accounts, debts, incomes, expenses, debtPayments, transfers],
@@ -779,6 +781,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     getTotals,
     getPosition,
     getReportSnapshot,
+    getSpendingTrend,
     getSpentAmount,
     getExpensesByCategory,
     getIncomesByCategory,
@@ -810,7 +813,7 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     updateAllBudgets, transferBetweenBudgets, prepareBudgetPeriod, resetSettings,
     addCreditCard, updateDebt, deleteDebt, addDebtPayment, repairQuarantinedDebtPaymentDate, deleteQuarantinedDebtPayment,
     addRecurringRule, updateRecurringRule, deleteRecurringRule, confirmPlannedOccurrenceItem, skipPlannedOccurrenceItem,
-    getMonthlyAverages, getDisposable, getTotals, getPosition, getReportSnapshot, getSpentAmount,
+    getMonthlyAverages, getDisposable, getTotals, getPosition, getReportSnapshot, getSpendingTrend, getSpentAmount,
     getExpensesByCategory, getIncomesByCategory, getExpensesByType, getBudgetStatusDetails,
     addIncomeCategory, resetIncomeCategories, addExpenseCategory, resetExpenseCategories,
     currentMonth, setCurrentMonth, createBackup, listBackups, restoreBackup, deleteBackup, getBackupFile,

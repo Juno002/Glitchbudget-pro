@@ -92,7 +92,9 @@ async function readHero(client) {
       variationFontSize: parseFloat(getComputedStyle(variation).fontSize), count: count.textContent,
       neutralColors,
       labels: [...hero.querySelectorAll('[aria-label],[aria-description],[title],svg text')].map(node => [node.textContent,node.getAttribute('aria-label'),node.getAttribute('aria-description'),node.getAttribute('title')].join(' ')).join(' '),
-      prohibitedContent: hero.querySelectorAll('svg,canvas,table,button,input,[data-report-chart],[data-placeholder],.animate-pulse').length,
+      prohibitedContent: [...hero.querySelectorAll('svg,canvas,table,button,input,[data-report-chart],[data-placeholder],.animate-pulse')].filter(node => !node.closest('[data-report-chart="spending-trend"]')).length,
+      spendingTrendCharts: hero.querySelectorAll('[data-report-chart="spending-trend"]').length,
+      trendControls: hero.querySelectorAll('[data-report-chart="spending-trend"] button,[data-report-chart="spending-trend"] input,[data-report-chart="spending-trend"] table,[data-report-chart="spending-trend"] [data-placeholder]').length,
       tabStops: hero.querySelectorAll('[tabindex="0"],a[href],button,input,select,textarea').length,
       animated: hero.getAnimations({ subtree: true }).length,
       comparison: row ? { previous: row.children[1].textContent.trim(), current: row.children[2].textContent.trim(), visible: row.getClientRects().length > 0 } : null,
@@ -106,7 +108,9 @@ function assertHero(view, scenario, hidden) {
   assert.match(view.text, /Gasto del rango/i);
   assert.equal(normalize(view.variation), scenario.variation, 'P2 variación real y dirección explícita');
   assert.equal(normalize(view.count), scenario.current.length + (scenario.current.length === 1 ? ' movimiento' : ' movimientos'), 'P2 conteo canónico y concordancia');
-  assert.equal(view.prohibitedContent, 0, 'P2 sin chart, placeholder, controles ni tabla dentro del hero');
+  assert.equal(view.prohibitedContent, 0, 'P2 solo admite el chart canónico autorizado por P3, sin placeholders ni controles');
+  assert.equal(view.spendingTrendCharts, scenario.current.length || scenario.previous.length ? 1 : 0, 'P3 solo muestra tendencia cuando existe historia');
+  assert.equal(view.trendControls, 0, 'P3 tendencia sin tabla oculta, placeholders ni controles nuevos');
   assert.equal(view.tabStops, 0, 'P2 hero no añade controles');
   assert.ok(view.scrollWidth <= view.viewport + 1, 'P2 sin overflow horizontal');
   assert.ok(view.neutralColors.includes(view.variationColor), 'P2 variación neutral');
