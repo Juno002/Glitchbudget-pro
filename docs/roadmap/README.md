@@ -25,10 +25,18 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-ninguna — roadmap vigente cerrado
+Final UI Polish — P0 (baseline y contratos)
 ```
 
-No crear 20.11, Fase 21 ni microintervenciones nuevas sin modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) con aprobación explícita. Los documentos auxiliares, chats, ramas o README no pueden ampliar el roadmap por sí solos.
+No crear 20.11 ni Fase 21. Final UI Polish fue autorizado explícitamente el 4 de octubre de 2026 y no constituye una fase funcional nueva. Cualquier trabajo fuera de P0–P7 exige modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) y el documento ejecutable con aprobación explícita.
+
+## Final UI Polish — autorizado
+
+- **Documento ejecutable:** [Final UI Polish — Plan ejecutable y contrato de alcance](final-ui-polish.md)
+- **Estado:** autorizado / no iniciado.
+- **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`.
+- **Primera intervención habilitada:** P0 — baseline y contratos.
+- No crea 20.11 ni Fase 21; el roadmap funcional 0–20.10 permanece cerrado.
 
 ## Evaluación técnica externa al roadmap
 
@@ -155,4 +163,4 @@ El roadmap funcional 0–20.10 está cerrado y el hardening Post-roadmap 1–5 q
 | Post-roadmap 5 | Mantenibilidad, pruebas y pulido | **Completada / Gate aprobado** · [evidencia](post-roadmap-5.md) |
 | Post-roadmap 6 | Inicio retroactivo de cuentas | **Completada / Gate aprobado** · [evidencia](post-roadmap-6.md) · PR #104 |
 
-No existe Fase 20.11 ni Fase 21. No quedan intervenciones Post-roadmap autorizadas pendientes.
+No existe Fase 20.11 ni Fase 21. No quedan intervenciones Post-roadmap autorizadas pendientes. La única secuencia adicional autorizada pendiente es **Final UI Polish P0–P7**.
