@@ -10,8 +10,11 @@ test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
   const order=[
     'data-report-section="quick-read"',
     'data-report-section="spending"',
-    'data-report-section="comparison"',
     'data-report-section="spending-breakdown"',
+    'data-report-section="comparison"',
+    'data-report-section="analysis-access"',
+    'data-report-section="comparison-detail"',
+    'data-report-section="spending-detail"',
     'data-report-section="cash-flow"',
     'data-report-section="net-worth"',
     'data-report-section="detail"',
@@ -45,7 +48,7 @@ test('20.8.6 establishes one analytical hero without rebuilding finance semantic
   assert.doesNotMatch(hero,/\.reduce\(|selectSpendingReport|selectCashFlowReport|selectNetWorthReport|selectPosition/);
 });
 
-test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth visuals with exact data', () => {
+test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth visuals with exact data under progressive disclosure', () => {
   for(const visual of ['comparison','categories','nature','cash-flow','net-worth']){
     assert.ok(reports.includes('data-report-visual="'+visual+'"'),visual);
   }
@@ -56,7 +59,7 @@ test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth vis
   assert.match(reports,/<MetricCard/);
 });
 
-test('20.8.6 keeps detailed transactions after Net Worth instead of replacing them with insights', () => {
+test('20.8.6 keeps detailed transactions after Net Worth inside the audit block', () => {
   const netWorth=reports.indexOf('data-report-section="net-worth"');
   const detail=reports.indexOf('data-report-section="detail"');
   const largest=reports.indexOf('Movimientos de mayor importe');
