@@ -34,7 +34,7 @@ function roundPercentTenths(
     };
   });
 
-  let remaining = 1000 - allocations.reduce((sum, row) => sum + row.floor, 0);
+  const remaining = 1000 - allocations.reduce((sum, row) => sum + row.floor, 0);
   const order = [...allocations].sort((a, b) => b.remainder - a.remainder || a.index - b.index);
   for (let index = 0; index < remaining; index += 1) {
     allocations[order[index % order.length].index].floor += 1;
