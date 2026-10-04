@@ -32,12 +32,16 @@ test('20.8.8 exercises Home and Reports at desktop and mobile widths in browser 
   assert.match(e2e, /'Home Prisma móvil'/);
   assert.match(e2e, /'Reportes Prisma y gráficos'/);
   assert.match(e2e, /'Reportes Prisma móvil'/);
+  assert.match(e2e, /'Reportes lectura progresiva compacta'/);
+  assert.match(e2e, /'Reportes análisis detallado completo'/);
+  assert.match(e2e, /report-detailed-analysis/);
   assert.match(e2e, /width:\s*390/);
   assert.match(e2e, /requiredSections = \[/);
   assert.match(e2e, /'quick-read'/);
   assert.match(e2e, /'detail'/);
+  assert.match(e2e, /detail\.hidden/);
   assert.match(e2e, /sections\.every\(visibleAndContained\)/);
-  assert.match(e2e, /charts\.every\(visibleAndContained\)/);
+  assert.match(e2e, /primaryCharts\.every\(visibleAndContained\)/);
   assert.match(e2e, /presetButtons\.every\(usableControl\)/);
   assert.match(e2e, /document\.documentElement\.scrollWidth <= window\.innerWidth \+ 1/);
   assert.match(e2e, /externalRequests\.length/);
