@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { verifyFinalUiPolishP0 } from './final-ui-polish-p0-baseline.mjs';
 import { verifyFinalUiPolishP1 } from './final-ui-polish-p1-verification.mjs';
+import { verifyFinalUiPolishP2 } from './final-ui-polish-p2-verification.mjs';
 import { captureFixture, fixedClockSource } from './final-ui-polish-p0-fixture.mjs';
 
 const APP_PORT = 9011;
@@ -1130,6 +1131,7 @@ async function main() {
 
     await verifyFinalUiPolishP0(client, waitFor);
     await verifyFinalUiPolishP1(client, waitFor);
+    await verifyFinalUiPolishP2(client, waitFor);
 
     if (!await client.evaluate(`(() => {
       const button = document.querySelector('[data-report-preset="7d"]');

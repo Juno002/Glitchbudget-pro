@@ -187,26 +187,26 @@ export default function ReportsTab() {
           <section className="space-y-4" aria-labelledby="spending-title" data-report-section="spending">
             <SectionHeader title={<span id="spending-title">Gastos</span>} />
             <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-hero="spending">
-              <CardContent className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[1.35fr_2fr] lg:items-end">
+              <CardContent className="space-y-6 p-5 sm:p-6">
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground">Total gastado</p>
-                  <p className="mt-2 font-display text-4xl font-normal tracking-[-0.05em] text-bad">{money(report.spending.total)}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Gasto del rango</p>
+                  <p className="mt-2 font-display text-[clamp(1.5rem,7vw,3.75rem)] font-normal leading-tight tracking-[-0.05em] text-foreground">
+                    <span className="whitespace-nowrap" data-spending-money="total">{money(report.spending.total)}</span>
+                  </p>
                   <p className="mt-2 text-xs text-muted-foreground">{currentLabel}</p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-[var(--radius-interactive)] bg-muted/35 p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Período comparable</p>
-                    <p className="mt-2 font-mono text-sm font-semibold">{money(report.spending.previousTotal)}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">{previousLabel}</p>
-                  </div>
-                  <div className="rounded-[var(--radius-interactive)] bg-muted/35 p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Tendencia</p>
-                    <p className="mt-2 font-display text-xl font-normal">{percentLabel(report.spending.percentChange)}</p>
-                  </div>
-                  <div className="rounded-[var(--radius-interactive)] bg-muted/35 p-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Transacciones</p>
-                    <p className="mt-2 font-display text-xl font-normal">{report.spending.transactionCount}</p>
-                  </div>
+                <div className="space-y-2 text-sm">
+                  <p className="text-foreground" data-spending-variation>
+                    {report.spending.previousTotal!==0 && report.spending.percentChange!==null ? (
+                      <><span aria-hidden="true">{report.spending.percentChange>0?'↑':report.spending.percentChange<0?'↓':'↔'}</span>{' '}</>
+                    ) : null}
+                    {report.spending.previousTotal===0?'Sin referencia anterior':percentLabel(report.spending.percentChange)} frente al rango comparable
+                  </p>
+                  <p className="text-muted-foreground" data-spending-count>{report.spending.transactionCount} movimientos</p>
+                </div>
+                <div className="space-y-1 border-t border-[var(--border-subtle)] pt-4 text-xs text-muted-foreground">
+                  <p>Período comparable · <span className="whitespace-nowrap font-mono" data-spending-money="previous">{money(report.spending.previousTotal)}</span></p>
+                  <p>{previousLabel}</p>
                 </div>
               </CardContent>
             </Card>

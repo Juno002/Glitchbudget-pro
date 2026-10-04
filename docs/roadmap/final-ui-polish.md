@@ -410,6 +410,10 @@ GASTO DEL RANGO
 [número] movimientos
 ```
 
+Cuando `previousTotal === 0`, la variación presenta **«Sin referencia anterior frente al rango comparable»**, sin porcentaje ni flecha. Esta decisión de presentación incluye el rango vacío (actual y anterior en cero): conserva el `percentChange` canónico y la tabla de comparación sin alterarlos. Con base anterior distinta de cero se presenta el porcentaje canónico con signo y flecha neutral; cero conserva **«Sin cambio»**. Autorización explícita en la revisión del usuario del 4 de octubre de 2026.
+
+El total y el importe comparable se formatean en React mediante `usePrivateCurrency()` y permanecen indivisibles (`white-space: nowrap`). No se incorporan importes visibles ni preformateados a `aria-label` ni a descripciones accesibles.
+
 P2 NO crea:
 
 - sparkline;
