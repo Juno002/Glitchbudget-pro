@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P2 Gate aprobado · PR #115 · correcciones Gate aprobado · PR #116
+**Estado:** EN EJECUCIÓN · P3 Gate aprobado · PR #117 · pendiente de revisión e integración
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -147,7 +147,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P0 | Baseline + contratos de caracterización | No | Gate aprobado · PR #109 |
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
 | P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
-| P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | No iniciado |
+| P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
 | P5 | Comparación y análisis profundo | No | No iniciado |
 | P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
@@ -1188,7 +1188,7 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
 P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
-P3 — SIGUIENTE AUTORIZADA (requiere P2 · PR #115 y correcciones PR #116 mergeados)
+P3 — Gate aprobado · PR #117 (pendiente de revisión e integración)
 P4 — BLOQUEADO POR P3
 P5 — BLOQUEADO POR P4
 P6 — BLOQUEADO POR P5
@@ -1290,3 +1290,20 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Evidencia: [24 capturas y matriz reproducible de la revisión](final-ui-polish-p2-review-verification/README.md), mismos casos y reloj **2026-10-04 UTC** de PR #115. Referencias P0/P1/P2 originales intactas. Entorno: Node **v24.19.0**, Chromium **151.0.7922.173**, Linux x64, cloud executor.
 - Benchmark propio no exigido por P2; baseline P0 y contrato de rendimiento P3 intactos.
 - Diff completo revisado: sin ampliación de alcance, reconstrucción de métricas, fugas de importes, copy causal, colores direccionales semánticos ni cambios de schema/backup. Sin bloqueantes. Merge condicionado a checks relevantes verdes. Próxima P autorizada después del merge de esta revisión: P3, sin cambios en su contrato de historia desconocida/cero real.
+
+
+## Registro P3 — 4 de octubre de 2026
+
+**Gate aprobado · PR #117** — [PR atómico](https://github.com/Juno002/Glitchbudget-pro/pull/117). Pendiente de la revisión solicitada por el usuario; no mergeado. P3 solo se considera completada cuando GitHub confirme `merged=true`. P4 no se inicia y conserva su bloqueo.
+
+- Reanudación: `main` y contenido real verificados; GitHub confirma `merged=true` de P2 PR #115 y de las correcciones PR #116. No existía rama ni PR parcial de P3; rama única `final-ui-polish-p3-spending-trend`, sincronizada con `main`.
+- Selector puro `selectSpendingTrend()`: `spendingHistoryStart` es la fecha civil del primer gasto reportable disponible, con el mismo prefijo de fecha y `amount` que el reporte existente. Conserva gastos sin cuenta, con referencia a cuenta retirada y anteriores al `Account.startDate` activo. No introduce `reportHistoryStart`, conversión monetaria ni otra semántica financiera.
+- Agregación **O(N + W)**: construye primero los rangos mediante `previousComparableRange()` y recorre los gastos una vez, asignando cada uno como máximo a un bucket. Tests instrumentados comprueban N lecturas de fecha y como máximo N de importe con 1, 6 y 700 ventanas; ningún rescan por ventana. Las ventanas visibles mantienen los máximos 6/6/4/4/3/6 y los presets anclados canónicos.
+- Decisiones cerradas: ventanas anteriores al primer gasto omitidas como historia desconocida; cruce del primer gasto marcado `partial` con «Historial parcial» accesible; ventanas completas posteriores sin gastos conservan cero real. Serie cronológica estable y actual destacada con tokens neutrales. React recibe los puntos mediante la facade y formatea importes indivisibles con `usePrivateCurrency()`; tooltip y lista visible sin dinero crudo en SVG/ARIA. Sin historia no se fabrica gráfico, placeholder ni cero histórico.
+- `npm run check`: aprobado, **775/775 tests**. Incluye 18 pruebas nuevas de tendencia y tres del benchmark; bordes mes/año, leap year, custom, full/partial, ceros, historial sin cuenta, invariancia de entrada y una sola pasada. Guards P2 admiten únicamente el gráfico canónico autorizado por P3; copy, tipografía, privacidad y snapshots protegidos permanecen.
+- `npm run build`: aprobado; export estático y manifest offline generados, `connect-src 'none'` y ausencia de importer diagnóstico verificados.
+- `npm run test:e2e`: aprobado; **130 comprobaciones P3**, seis presets y seis escenarios, Prisma/Neón a 320/360/390/1280 px y legado a 320/1280, visible/oculto. Totales, rangos, coberturas, cero real/desconocido, actual igual al hero, neutralidad, geometría sin overflow, tooltip real —incluido parcial—, SVG/atributos/árbol accesible, focus y activación real por teclado, touch, reduced motion, loading y vacío aprobados. Disabled: el gráfico no añade controles. Smoke global, cuatro tablas exactas y offline aprobados; filas originales restauradas exactamente.
+- [Evidencia reproducible y doce capturas](final-ui-polish-p3-verification/README.md): dataset y reloj **2026-10-04 UTC** fijos, fuentes/layout estabilizados y avisos de logro descartados mediante su botón real. El harness de teclado envía el carácter nativo de Enter; sin cambios de producto para resolver la verificación. Referencias P0–P2 intactas.
+- `npm run benchmark:ledger`: script original intacto, siete muestras aisladas en el mismo **Node v24.19.0 / Linux x64 / cloud executor** que P0. Medianas 50k antes **41,425/39,811 ms**, después **42,217/36,955 ms**; baseline P0 **42,626/40,288 ms**. Cambios frente a P0 **−0,959 % / −8,273 %**; ninguna medición 1k/10k/50k excede simultáneamente 20 % y 5 ms. [Muestras y comparaciones completas](final-ui-polish-p3-verification/ledger-benchmark.json).
+- `npm run benchmark:reports`: **18 mediciones** (1k/10k/50k × seis presets), mismo dataset fijo y siete muestras emparejadas para `selectSpendingReport()` y tendencia máxima; oracle fuera del tiempo. En 50k, medianas de tendencia **8,325–9,301 ms**, ratios **0,488–0,545×**: seis gates **≤2×** aprobados. [Entorno, generación, muestras y medianas](final-ui-polish-p3-verification/reports-benchmark.json). CI ejecuta también `benchmark:reports` sin modificar los thresholds.
+- Diff completo revisado: selector y su facade, integración en hero, chart, benchmark, tests, evidencia y documentación P3. Sin cálculos financieros nuevos en React, mocks de producto, copy causal, colores de dirección semánticos, schema/migraciones, backup/envelope, ledger, deuda/currency/accounts, navegación principal, persistencia ni red. Sin bloqueantes técnicos. PR abierto para revisión; siguiente P de la secuencia, P4, requiere el merge real de PR #117.
