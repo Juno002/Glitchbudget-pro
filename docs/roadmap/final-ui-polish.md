@@ -839,7 +839,7 @@ Trasplantar dos decisiones del Prisma de Manus a Home sin perfiles ficticios ni 
 1. apertura editorial;
 2. status pill determinista.
 
-P6 no empieza hasta que P5 esté mergeada.
+P6 no empieza hasta que P5 tenga su gate completo aprobado. Bajo la política temporal P4–P7, P5 puede estar staged en su rama/PR apilada sin merge a `main`.
 
 ## Apertura editorial
 
@@ -1100,19 +1100,19 @@ Cuando P7 cierre, Final UI Polish queda **COMPLETADO / Gate final aprobado**.
 Cada P0–P7 debe seguir este orden:
 
 1. leer este documento completo;
-2. verificar que la P anterior, cuando exista, esté mergeada en `main`;
-3. sincronizar contra `main`;
+2. verificar que la P anterior haya satisfecho su dependencia real: normalmente `merged=true` en `main`; para P5–P7 bajo la política temporal P4–P7, gate completo aprobado y PR staged de la P anterior;
+3. sincronizar contra la base autorizada: normalmente `main`; para P5–P7, el HEAD exacto de la rama staged anterior;
 4. crear una rama específica de esa P;
 5. implementar solo el alcance autorizado;
 6. añadir/actualizar tests de esa P;
 7. ejecutar su gate propio;
 8. revisar diff para detectar scope creep;
-9. abrir PR atómico;
+9. abrir PR atómico contra la base autorizada;
 10. con el número de PR ya disponible, actualizar en la misma rama el registro de ejecución de esa P con `Gate aprobado · PR #N`, tests relevantes y benchmark si aplica;
-11. no mergear con checks rojos relevantes;
-12. mergear el PR;
-13. la P se considera **Completada / Gate aprobado** únicamente cuando GitHub confirme que ese PR está mergeado;
-14. solo entonces comenzar la siguiente P.
+11. no integrar con checks rojos relevantes;
+12. normalmente mergear el PR; para P4–P7, **diferir todos los merges a `main` hasta que P7 tenga su gate final aprobado**;
+13. normalmente la P se considera completada al confirmar `merged=true`; para P4–P7 antes de la integración final, se considera **cerrada y staged / Gate aprobado** cuando su gate real está verde y su PR atómico refleja únicamente su delta respecto de la base apilada;
+14. solo entonces comenzar la siguiente P; tras P7, integrar P4 → P5 → P6 → P7 en orden y limpiar ramas.
 
 No se exige escribir el SHA de merge dentro de este documento. El número de PR es el identificador canónico de evidencia y el estado `merged` de ese PR en GitHub es la fuente de verdad de que la intervención quedó integrada. Esto evita un commit documental posterior creado únicamente para registrar un hash que no existe antes del merge.
 
@@ -1141,7 +1141,7 @@ Cada PR P0–P7 debe dejar su propio registro de ejecución **dentro del mismo P
 
 No registrar el commit de merge como requisito documental. Tras el merge, la combinación `PR #N + estado merged en GitHub` constituye evidencia suficiente y verificable.
 
-Para iniciar la siguiente P, el ejecutor debe comprobar el PR de la intervención anterior en GitHub y confirmar `merged=true`. No basta con que el documento diga `Gate aprobado`.
+Para iniciar la siguiente P, el ejecutor debe comprobar el PR de la intervención anterior en GitHub y confirmar su dependencia real. Normalmente exige `merged=true`; durante la política temporal P4–P7 exige gate completo verde, PR staged y rama siguiente nacida del HEAD exacto anterior. No basta con que el documento diga `Gate aprobado`.
 
 La tabla/estado del documento puede expresar `Gate aprobado · PR #N`; su condición de completado se deriva del estado real del PR. No crear un commit directo posterior a `main` únicamente para cambiar esa etiqueta o insertar un SHA.
 
