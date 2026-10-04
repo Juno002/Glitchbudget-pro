@@ -1432,3 +1432,16 @@ Reglas:
 - el estado inicial es cerrado;
 - un solo control gobierna el bloque completo de auditoría;
 - gates: `npm run check`, `npm run benchmark:ledger`, `npm run benchmark:reports`, `npm run build`, `npm run test:e2e`.
+
+## Registro de ejecución — PR #122
+
+**Gate aprobado · pendiente de merge a `main`.**
+
+- `npm run check`: **801/801**, 0 fallos.
+- Ledger benchmark: aprobado.
+- Reports benchmark: **18 mediciones**, `gatePassed: true`.
+- Build: aprobado; export estático y guard local-only intactos.
+- E2E: aprobado; valida estado compacto inicial, apertura del análisis detallado con cuatro tablas exactas, cierre de vuelta a lectura compacta, privacidad, 390 px, temas y recarga offline.
+- La corrección conserva `selectReportsSnapshot()` y los bindings financieros existentes; no añade cálculo financiero a React.
+- Sin schema, migración, backup, persistencia, red, IA ni cambios de navegación principal.
+- Integración deliberadamente diferida: PR #122 no debe mergearse sin revisión/autorización explícita del usuario.
