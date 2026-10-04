@@ -87,6 +87,8 @@ test('P6 replaces duplicate global badges with one editorial header status while
   assert.match(source, /Tu panorama financiero/);
   assert.match(source, /financialDateLabel\(today,locale\)/);
   assert.match(source, /período \{formatPeriodRange\(currentPeriod\)\}/);
+  assert.match(source, /data-home-status-loading/);
+  assert.match(source, /loading \? \(/);
   assert.match(source, /data-home-status-pill=\{attentionState\.kind\}/);
   assert.match(source, /status=\{attentionState\.status\}/);
   assert.match(source, /label=\{attentionState\.label\}/);
