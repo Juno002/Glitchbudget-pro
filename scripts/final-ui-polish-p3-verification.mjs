@@ -154,7 +154,7 @@ async function readTrend(client) {
       heroText:hero?.innerText, heroMoney:hero?.querySelector('[data-spending-money="total"]')?.textContent,
       placeholderCount:hero?.querySelectorAll('[data-placeholder],.animate-pulse,canvas').length,
       controls:hero?.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]').length,
-      comparisonVisible:[...document.querySelectorAll('[data-report-section="comparison"] tbody tr')].some(node => node.firstElementChild.textContent.trim()==='Gasto' && node.getClientRects().length>0),
+      comparisonAvailable:[...document.querySelectorAll('[data-report-section="comparison-detail"] tbody tr')].some(node => node.firstElementChild.textContent.trim()==='Gasto'),
       pointCount:hero?.querySelectorAll('[data-spending-trend-point]').length,
       svgCount:hero?.querySelectorAll('svg').length,
       listCount:hero?.querySelectorAll('ol,ul').length,
@@ -190,7 +190,7 @@ function assertTrend(view, expected, hidden) {
   assert.ok(view.scrollWidth <= view.viewport + 1, 'P3 sin overflow horizontal');
   assert.equal(view.controls, 0, 'P3 no añade controles al hero');
   assert.equal(view.placeholderCount, 0, 'P3 no fabrica placeholder ni loading dentro del hero');
-  assert.equal(view.comparisonVisible, true, 'P3 tabla de comparación visible');
+  assert.equal(view.comparisonAvailable, true, 'P3 tabla exacta de comparación disponible bajo demanda');
   assert.equal(Boolean(view.chart), expected.length >= 2, 'P3 tendencia visual solo con dos o más ventanas observadas');
   const total = expected.find(point => point.isCurrent)?.total ?? 0;
   assert.equal(view.heroMoney, hidden ? '••••••' : money(total), 'P3 ventana actual igual al hero canónico');
