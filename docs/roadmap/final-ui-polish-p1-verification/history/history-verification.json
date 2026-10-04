@@ -1,0 +1,1863 @@
+{
+  "fixture": "tests/fixtures/final-ui-polish-p1-history.json",
+  "result": {
+    "fixtureVersion": 1,
+    "scenarios": [
+      "history-increase",
+      "history-decrease",
+      "category-stable",
+      "history-no-changes"
+    ],
+    "widths": [
+      320,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "modes": [
+      "visible",
+      "hidden"
+    ],
+    "checks": 32,
+    "captures": 32,
+    "privacy": "passed",
+    "rankingAndCopy": "passed",
+    "restoredOriginalDataset": true
+  },
+  "records": [
+    {
+      "name": "history-increase-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual RD$ 540.00 · anterior RD$ 270.00 · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual RD$ 60.00 · anterior RD$ 30.00 · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 540.00 · anterior RD$ 270.00 · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 60.00 · anterior RD$ 30.00 · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual •••••• · anterior •••••• · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual •••••• · anterior •••••• · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual •••••• · anterior •••••• · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual RD$ 540.00 · anterior RD$ 270.00 · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual RD$ 60.00 · anterior RD$ 30.00 · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ 540.00 · anterior RD$ 270.00 · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 60.00 · anterior RD$ 30.00 · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual •••••• · anterior •••••• · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual •••••• · anterior •••••• · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual •••••• · anterior •••••• · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual RD$ 540.00 · anterior RD$ 270.00 · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual RD$ 60.00 · anterior RD$ 30.00 · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 540.00 · anterior RD$ 270.00 · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 60.00 · anterior RD$ 30.00 · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual •••••• · anterior •••••• · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual •••••• · anterior •••••• · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual •••••• · anterior •••••• · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual RD$ 540.00 · anterior RD$ 270.00 · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual RD$ 60.00 · anterior RD$ 30.00 · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ 540.00 · anterior RD$ 270.00 · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 60.00 · anterior RD$ 30.00 · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 1,810.00 · anterior RD$ 1,270.00 · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-increase-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto aumentó\n\nActual •••••• · anterior •••••• · +100%\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual •••••• · anterior •••••• · +100%\n\nPATRIMONIO\n\nEl patrimonio registrado aumentó\n\nActual •••••• · anterior •••••• · +42.52%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +100%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado aumentó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · +42.52%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual RD$ -300.00 · anterior RD$ 100.00 · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual RD$ 300.00 · anterior RD$ 600.00 · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ -300.00 · anterior RD$ 100.00 · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 300.00 · anterior RD$ 600.00 · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual •••••• · anterior •••••• · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual •••••• · anterior •••••• · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual •••••• · anterior •••••• · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual RD$ -300.00 · anterior RD$ 100.00 · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual RD$ 300.00 · anterior RD$ 600.00 · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ -300.00 · anterior RD$ 100.00 · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 300.00 · anterior RD$ 600.00 · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual •••••• · anterior •••••• · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual •••••• · anterior •••••• · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual •••••• · anterior •••••• · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual RD$ -300.00 · anterior RD$ 100.00 · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual RD$ 300.00 · anterior RD$ 600.00 · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ -300.00 · anterior RD$ 100.00 · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 300.00 · anterior RD$ 600.00 · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual •••••• · anterior •••••• · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual •••••• · anterior •••••• · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual •••••• · anterior •••••• · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual RD$ -300.00 · anterior RD$ 100.00 · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual RD$ 300.00 · anterior RD$ 600.00 · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ -300.00 · anterior RD$ 100.00 · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 300.00 · anterior RD$ 600.00 · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 800.00 · anterior RD$ 1,100.00 · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-decrease-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nEl flujo neto disminuyó\n\nActual •••••• · anterior •••••• · -400%\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual •••••• · anterior •••••• · -50%\n\nPATRIMONIO\n\nEl patrimonio registrado disminuyó\n\nActual •••••• · anterior •••••• · -27.27%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "El flujo neto disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 117
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 48
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -400%"
+        },
+        {
+          "kind": "spending_below_previous",
+          "primary": false,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -50%"
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "El patrimonio registrado disminuyó",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · -27.27%"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · RD$ 80.00 · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 207.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Vivienda · RD$ 80.00 · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 125
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · •••••• · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual •••••• · anterior •••••• · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 181.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Vivienda · •••••• · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 125
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · RD$ 80.00 · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Vivienda · RD$ 80.00 · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · •••••• · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual •••••• · anterior •••••• · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Vivienda · •••••• · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · RD$ 80.00 · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 207.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Vivienda · RD$ 80.00 · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 125
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · •••••• · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual •••••• · anterior •••••• · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 181.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Vivienda · •••••• · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 125
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · RD$ 80.00 · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Vivienda · RD$ 80.00 · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nUna categoría concentró buena parte del gasto\n\nVivienda · •••••• · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual •••••• · anterior •••••• · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "Una categoría concentró buena parte del gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Vivienda · •••••• · 80% del gasto"
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior •••••• · Sin cambio"
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 233.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 233.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 233.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 233.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 112.5
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "history-no-changes-dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNingún umbral de cambio relevante se activó para este rango.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Ningún umbral de cambio relevante se activó para este rango."
+        }
+      ],
+      "animated": 0
+    }
+  ]
+}

@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { captureFixture } from './final-ui-polish-p0-fixture.mjs';
+
+const historyFixture = JSON.parse(readFileSync(new URL('../tests/fixtures/final-ui-polish-p1-history.json', import.meta.url), 'utf8'));
 
 const baseline = [
   ['cash_flow_change', 'Hay un nuevo flujo neto comparable'],
@@ -113,20 +116,26 @@ function assertEditorial(view, expected) {
 }
 
 async function assertPrivate(client, view) {
-  assert.ok(view.text.includes('••••••'), 'P1 control positivo de enmascarado');
+  if (view.articles.some(article => article.kind !== 'no_material_change')) {
+    assert.ok(view.text.includes('••••••'), 'P1 control positivo de enmascarado');
+  }
   assert.doesNotMatch(view.text + view.labels, moneyPattern, 'P1 sin importes en texto, SVG, labels ni tooltips');
   const ax = await client.command('Accessibility.getFullAXTree');
   assert.doesNotMatch(JSON.stringify(ax.nodes.map(node => ({ name: node.name?.value, description: node.description?.value, value: node.value?.value }))), moneyPattern, 'P1 sin importes en árbol accesible');
 }
 
-function scenarioRows(original, currentParts, previousParts) {
-  const account = { ...original.accounts[0], openingBalance: 100_000, startDate: '2026-08-01' };
+function scenarioRows(original, currentParts, previousParts, incomeAmounts = {}) {
+  const account = { ...original.accounts[0], openingBalance: historyFixture.accounts[0].openingBalance, startDate: historyFixture.accounts[0].startDate };
   const rows = { accounts: [account], incomes: [], expenses: [] };
-  for (const [period, date, parts] of [['current', captureFixture.date, currentParts], ['previous', '2026-09-01', previousParts]]) {
-    if (parts.length) rows.incomes.push({
+  for (const [period, date, parts, explicitIncome] of [
+    ['current', historyFixture.currentDate, currentParts, incomeAmounts.currentIncome],
+    ['previous', historyFixture.previousDate, previousParts, incomeAmounts.previousIncome],
+  ]) {
+    const income = explicitIncome ?? parts.reduce((total, part) => total + part[1], 0);
+    if (income > 0) rows.incomes.push({
       ...original.incomes[0], id: 'p1-income-' + period, accountId: account.id,
-      amount: parts.reduce((total, part) => total + part[1], 0),
-      amountBase: parts.reduce((total, part) => total + part[1], 0), date, month: date.slice(0, 7),
+      amount: income,
+      amountBase: income, date, month: date.slice(0, 7),
     });
     parts.forEach(([categoryId, amount], index) => rows.expenses.push({
       ...original.expenses[0], id: 'p1-expense-' + period + '-' + index, accountId: account.id,
@@ -139,11 +148,17 @@ function scenarioRows(original, currentParts, previousParts) {
 // Isolated test fixtures only; product selectors, schema and P0 evidence remain untouched.
 export async function verifyFinalUiPolishP1(client, waitFor) {
   const directory = process.env.FINAL_UI_POLISH_P1_CAPTURE_DIR;
+  const historyDirectory = process.env.FINAL_UI_POLISH_P1_HISTORY_CAPTURE_DIR;
   if (directory) await mkdir(directory, { recursive: true });
+  if (historyDirectory) await mkdir(historyDirectory, { recursive: true });
   const records = [];
+  const historyRecords = [];
   const covered = new Set();
   const original = await financialRows(client);
   assert.equal(await client.evaluate('new Date().toISOString()'), captureFixture.instant, 'P1 mismo reloj fijo P0');
+  assert.equal(historyFixture.instant, captureFixture.instant, 'P1 historia usa el reloj P0');
+  assert.equal(historyFixture.currentDate, captureFixture.date, 'P1 historia usa la fecha P0');
+  assert.equal(historyFixture.preset, captureFixture.preset, 'P1 historia conserva 30d');
   let loadingObserved = false;
   const observer = await client.command('Page.addScriptToEvaluateOnNewDocument', { source: `
     globalThis.__p1LoadingObserved = false;
@@ -240,6 +255,61 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
       }
       records.push({ name: scenario.name, ...view });
     }
+
+    const historySeed = {
+      accounts: historyFixture.accounts,
+      incomes: [historyFixture.incomeTemplate],
+      expenses: [historyFixture.expenseTemplate],
+    };
+    for (const scenario of historyFixture.scenarios) {
+      const rows = scenarioRows(historySeed, scenario.current, scenario.previous, scenario);
+      assert.deepEqual(rows, scenario.rows, 'P1 filas históricas versionadas ' + scenario.name);
+      await financialRows(client, rows);
+      await client.command('Page.reload', { ignoreCache: true });
+      await waitFor(client, `document.readyState === 'complete' && document.querySelector('[data-report-preset="30d"]')?.getAttribute('aria-pressed') === 'true' && JSON.stringify([...document.querySelectorAll('article[data-quick-read-kind]')].map(node => [node.dataset.quickReadKind, node.querySelector('h3').textContent.trim()])) === ${JSON.stringify(JSON.stringify(scenario.expected))}`, 'P1 historia ' + scenario.name);
+      loadingObserved ||= await client.evaluate('globalThis.__p1LoadingObserved === true');
+      for (const theme of ['light', 'dark']) {
+        await client.evaluate(`document.documentElement.classList.remove('light','dark','serious'); document.documentElement.classList.add('${theme}');`);
+        for (const width of [320, 1280]) {
+          await client.command('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: false });
+          await client.evaluate('window.scrollTo(0,0); new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))', { awaitPromise: true });
+          for (const hidden of [false, true]) {
+            await setHidden(client, waitFor, hidden);
+            // Chart containers settle asynchronously after the desktop/mobile resize.
+            await waitFor(client, 'document.documentElement.scrollWidth <= innerWidth + 1', 'P1 historia viewport asentado ' + scenario.name + ' ' + theme + ' ' + width);
+            const view = await readEditorial(client);
+            assertEditorial(view, scenario.expected);
+            view.articles.forEach(row => covered.add(row.kind));
+            if (scenario.name === 'history-no-changes') {
+              assert.equal(view.articles[0].body, 'Ningún umbral de cambio relevante se activó para este rango.');
+              assert.doesNotMatch(view.text, moneyPattern, 'P1 fallback histórico sin dinero fabricado');
+            } else if (!hidden) {
+              assert.match(view.text, moneyPattern, 'P1 historia con importes canónicos visibles');
+            }
+            if (hidden) await assertPrivate(client, view);
+            const name = `${scenario.name}-${theme}-${width}-${hidden ? 'hidden' : 'visible'}`;
+            historyRecords.push({ name, ...view });
+            if (historyDirectory) {
+              // Only the capture viewport changes; responsive assertions above retain height 844.
+              await client.command('Emulation.setDeviceMetricsOverride', { width, height: 1600, deviceScaleFactor: 1, mobile: false });
+              try {
+                await client.evaluate('window.scrollTo(0,0); new Promise(resolve => requestAnimationFrame(resolve))', { awaitPromise: true });
+                const clip = await client.evaluate(`(() => {
+                  const rect = document.querySelector('[data-report-section="quick-read"]').getBoundingClientRect();
+                  return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height, scale: 1 };
+                })()`);
+                const screenshot = await client.command('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip });
+                await writeFile(path.join(historyDirectory, name + '.png'), Buffer.from(screenshot.data, 'base64'));
+              } finally {
+                await client.command('Emulation.setDeviceMetricsOverride', { width, height: 844, deviceScaleFactor: 1, mobile: false });
+              }
+            }
+          }
+          await setHidden(client, waitFor, false);
+        }
+      }
+    }
+    assert.equal(historyRecords.length, 32, 'P1 matriz histórica completa');
     assert.deepEqual([...covered].sort(), ['cash_flow_change', 'leading_category', 'net_worth_change', 'no_material_change', 'spending_above_previous', 'spending_below_previous', 'spending_near_previous']);
   } finally {
     await client.command('Page.removeScriptToEvaluateOnNewDocument', { identifier: observer.identifier });
@@ -254,6 +324,9 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
     await client.command('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   }
   const result = { kinds: [...covered].sort(), widths: [320, 360, 390, 1280], themes: ['light', 'dark'], legacyWidths: [320, 1280], privacy: 'passed', keyboard: 'passed', touch: 'passed', reducedMotion: 'passed', empty: 'passed', loadingObserved, disabled: 'editorial has no controls' };
+  const historyResult = { fixtureVersion: historyFixture.version, scenarios: historyFixture.scenarios.map(scenario => scenario.name), widths: [320, 1280], themes: ['light', 'dark'], modes: ['visible', 'hidden'], checks: historyRecords.length, captures: historyDirectory ? historyRecords.length : 0, privacy: 'passed', rankingAndCopy: 'passed', restoredOriginalDataset: true };
   if (directory) await writeFile(path.join(directory, 'verification.json'), JSON.stringify({ result, records }, null, 2) + '\n');
+  if (historyDirectory) await writeFile(path.join(historyDirectory, 'history-verification.json'), JSON.stringify({ fixture: 'tests/fixtures/final-ui-polish-p1-history.json', result: historyResult, records: historyRecords }, null, 2) + '\n');
   process.stdout.write('FINAL_UI_POLISH_P1 ' + JSON.stringify(result) + '\n');
+  process.stdout.write('FINAL_UI_POLISH_P1_HISTORY ' + JSON.stringify(historyResult) + '\n');
 }
