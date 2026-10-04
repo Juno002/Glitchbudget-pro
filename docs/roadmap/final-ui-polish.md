@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P0 Gate aprobado · PR #109
+**Estado:** EN EJECUCIÓN · P1 Gate aprobado · PR #111
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -145,7 +145,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | Punto | Entregable | Cambios de dominio | Estado inicial |
 |---|---|---:|---|
 | P0 | Baseline + contratos de caracterización | No | Gate aprobado · PR #109 |
-| P1 | Lectura rápida editorial | No financiero | No iniciado |
+| P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
 | P2 | Hero de gasto sin tendencia | No | No iniciado |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | No iniciado |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
@@ -1162,8 +1162,8 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 
 ```text
 P0 — Gate aprobado · PR #109
-P1 — SIGUIENTE AUTORIZADA (P0 · PR #109 mergeado)
-P2 — BLOQUEADO POR P1
+P1 — Gate aprobado · PR #111
+P2 — SIGUIENTE AUTORIZADA (requiere P1 · PR #111 mergeado)
 P3 — BLOQUEADO POR P2
 P4 — BLOQUEADO POR P3
 P5 — BLOQUEADO POR P4
@@ -1195,3 +1195,18 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Capturas: reloj **2026-10-04T12:00:00.000Z**, fecha financiera **2026-10-04**, zona **UTC** y dataset versionado. Mismos movimientos del smoke original, categorías explícitas y verificación del dataset antes de capturar; doce PNG en la ruta estable `docs/roadmap/final-ui-polish-p0-baseline/`. Captura en reposo tras comprobar privacidad del tooltip.
 - Dos sesiones aisladas comprobaron contrato y geometría idénticos. Tests nuevos prueban reloj independiente del día del host y rechazo de fecha/categoría/importe/filas diferentes. `npm run check`: **735/735**; `npm run build`, `npm run test:e2e` y `npm run benchmark:ledger`: aprobados.
 - Bloqueantes de producto: ninguno. P1 permanece siguiente autorizada y sin iniciar en esta ejecución.
+
+
+## Registro P1 — 4 de octubre de 2026
+
+**Gate aprobado · PR #111** — [PR atómico](https://github.com/Juno002/Glitchbudget-pro/pull/111). La intervención solo se considera completada cuando GitHub confirme `merged=true`. P2 no se inicia en esta ejecución.
+
+- Reanudación: `main` y contenido real verificados; P0 conserva **Gate aprobado · PR #109** y GitHub confirma `merged=true` de PR #109 y de la corrección de evidencia PR #110. No existía rama ni PR parcial de P1; rama única `final-ui-polish-p1-editorial-quick-read` sincronizada con `main`.
+- `npm run check`: aprobado, **742/742** tests. Los siete tests de `tests/final-ui-polish-p1-editorial.test.ts` cubren los siete tipos, titulares exactos por dirección, base cero sin infinito, parámetros numéricos negativos/cero/null, pureza, determinismo, ranking y thresholds canónicos intactos. La caracterización de jerarquía existente consume ahora el presenter sin cambiar sus demás contratos.
+- `npm run build`: aprobado; export estático, manifiesto offline y guard CSP/local-only aprobados.
+- `npm run test:e2e`: aprobado; siete tipos renderizados desde los selectores reales, primer insight protagonista, secundarios de menor tamaño, copy exacto y sin cifras en titulares. Matriz **320/360/390/1280 px**, **Prisma/Neón**, importes visibles/ocultos; legado Minimalista a 320/1280. Sin overflow horizontal, titulares contenidos, privacidad en texto/SVG/atributos y árbol accesible completo. Foco por teclado, cambio de rango por touch y reduced motion aprobados. Loading observado con skeleton existente y sin artículos prematuros; vacío con explicación obligatoria. Disabled no aplica a la lectura editorial, que no añade controles. La caracterización P0 y smoke completo mantienen cuatro tablas visibles, tooltip privado, presets, navegación, mutaciones y recarga offline.
+- [Evidencia reproducible P1 y veinte capturas](final-ui-polish-p1-verification/README.md), con reloj/fecha/dataset P0 fijados y escenarios aislados restaurados exactamente. Entorno local: Node v24.19.0, Chromium 151, Linux x64, executor cloud. Baseline y doce capturas P0 intactas.
+- Benchmark: P1 no requiere benchmark propio. No se altera el script, las medianas baseline P0 ni la regla de rendimiento P3.
+- Decisiones cerradas: capa pura `report-editorial.ts` con claves/tipos y parámetros numéricos, sin dinero preformateado; React usa `usePrivateCurrency()` para todo importe. Titulares sin dinero y nombres accesibles derivados de esos titulares. `report.quickRead[0]` conserva protagonismo; un surface editorial con articles y secundarios de menor peso. Copy fallback explica el threshold, sin inferir causas ni valorar direcciones matemáticas.
+- Revisión completa de diff: solo lectura rápida, presenter, tests, verificación y documentación P1. Sin cambios en selector/ranking/thresholds, hero de gasto, tablas exactas, orden protegido, cálculos financieros React, dominio, schema/migraciones, backup/envelope, semánticas, navegación principal ni red. Fixtures solo en el perfil temporal de test, sin números demo en producto.
+- Bloqueantes de producto: ninguno. Publicación mediante la API de GitHub por el 401 Git conocido, verificando igualdad de árboles y reutilizando la misma rama.

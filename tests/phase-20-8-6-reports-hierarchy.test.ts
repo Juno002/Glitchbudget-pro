@@ -27,7 +27,8 @@ test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
 test('20.8.6 surfaces the deterministic quick read before exact analytics', () => {
   assert.match(reports,/report\.quickRead\.map\(/);
   assert.match(reports,/data-quick-read-kind=\{insight\.kind\}/);
-  assert.match(reports,/quickReadTitle\(insight\)/);
+  assert.match(reports,/report\.quickRead\.map\(presentReportInsight\)/);
+  assert.match(reports,/insight\.title/);
   assert.match(reports,/quickReadBody\(insight,money/);
   assert.ok(reports.indexOf('report.quickRead.map') < reports.indexOf('data-report-hero="spending"'));
   assert.doesNotMatch(reports,/Math\.random|Date\.now|fetch\(/);

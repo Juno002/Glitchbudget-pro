@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
-import type { QuickReadInsight } from '@/domain/report-insights';
+import { presentReportInsight, type ReportEditorialInsight } from '@/lib/report-editorial';
 import { localDate } from '@/lib/finance-calculations';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
@@ -42,48 +42,29 @@ function ComparisonValue({ value }: { value:number|null }) {
   return <span className="text-xs text-muted-foreground">{percentLabel(value)}</span>;
 }
 
-function quickReadTitle(insight:QuickReadInsight) {
-  switch (insight.kind) {
-    case 'spending_above_previous': return 'Gasto aumentó';
-    case 'spending_below_previous': return 'Gasto bajó';
-    case 'spending_near_previous': return 'Gasto estable';
-    case 'cash_flow_change': return 'Flujo neto cambió';
-    case 'net_worth_change': return 'Patrimonio cambió';
-    case 'leading_category': return 'Categoría dominante';
-    case 'no_material_change': return 'Sin cambios materiales';
-  }
-}
-
 function quickReadBody(
-  insight:QuickReadInsight,
+  insight:ReportEditorialInsight,
   money:(value:number)=>string,
   categoryName:(id:string)=>string,
 ) {
-  const params=insight.copy.params;
-  const number=(key:string)=>typeof params[key]==='number' ? params[key] as number : null;
-
-  if (insight.kind==='leading_category') {
-    const id=typeof params.categoryId==='string' ? params.categoryId : '';
-    const value=number('value');
-    const share=number('sharePercent');
+  if (insight.body.key==='category') {
+    const { categoryId,value,sharePercent }=insight.body.params;
     return [
-      categoryName(id),
+      categoryName(categoryId),
       value===null ? null : money(value),
-      share===null ? null : share.toLocaleString('es-DO',{maximumFractionDigits:2})+'% del gasto',
+      sharePercent===null ? null : sharePercent.toLocaleString('es-DO',{maximumFractionDigits:2})+'% del gasto',
     ].filter(Boolean).join(' · ');
   }
 
-  if (insight.kind==='no_material_change') {
+  if (insight.body.key==='no_material_change') {
     return 'Ningún umbral de cambio relevante se activó para este rango.';
   }
 
-  const current=number('current');
-  const previous=number('previous');
-  const percentage=number('percentageDelta');
+  const { current,previous,percentageDelta }=insight.body.params;
   return [
     current===null ? null : 'Actual '+money(current),
     previous===null ? null : 'anterior '+money(previous),
-    percentage===null ? null : percentLabel(percentage),
+    percentageDelta===null ? null : percentLabel(percentageDelta),
   ].filter(Boolean).join(' · ');
 }
 
@@ -107,6 +88,7 @@ export default function ReportsTab() {
   }
 
   const report=getReportSnapshot(range,range.end);
+  const editorialQuickRead=report.quickRead.map(presentReportInsight);
   const budgetDetails=getBudgetStatusDetails(currentMonth).filter(row=>row.configured);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
   const currentLabel=rangeLabel(range.start,range.end);
@@ -169,23 +151,32 @@ export default function ReportsTab() {
         <>
           <section className="space-y-4" aria-labelledby="quick-read-title" data-report-section="quick-read">
             <SectionHeader title={<span id="quick-read-title">Lo más relevante del rango</span>} />
-            <div className="grid gap-3 md:grid-cols-3">
-              {report.quickRead.map(insight=>(
-                <Card key={insight.kind} className="shadow-[var(--shadow-control)]" data-quick-read-kind={insight.kind}>
-                  <CardContent className="p-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                      {insight.focus==='cash-flow'?'Flujo de caja':insight.focus==='net-worth'?'Patrimonio':insight.focus==='categories'?'Categorías':insight.focus==='spending'?'Gastos':'Resumen'}
-                    </p>
-                    <p className="mt-2 font-display text-xl font-normal tracking-[-0.025em]">{quickReadTitle(insight)}</p>
-                    {insight.kind !== 'no_material_change' ? (
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            <Card>
+              <CardContent className="p-5 sm:p-6">
+                <div className="grid gap-6 md:grid-cols-2">
+                  {editorialQuickRead.map((insight,index)=>(
+                    <article
+                      key={insight.kind}
+                      className={index===0?'min-w-0 md:col-span-2':'min-w-0 border-t border-[var(--border-subtle)] pt-5'}
+                      aria-labelledby={'quick-read-'+insight.kind+'-title'}
+                      data-quick-read-kind={insight.kind}
+                      data-quick-read-primary={index===0?'true':undefined}
+                    >
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                        {insight.focus==='cash-flow'?'Flujo de caja':insight.focus==='net-worth'?'Patrimonio':insight.focus==='categories'?'Categorías':insight.focus==='spending'?'Gastos':'Resumen'}
+                      </p>
+                      <h3
+                        id={'quick-read-'+insight.kind+'-title'}
+                        className={index===0?'mt-3 max-w-[28ch] break-words font-display text-3xl font-normal leading-tight tracking-[-0.04em] sm:text-4xl lg:text-5xl':'mt-2 break-words font-display text-xl font-normal leading-snug tracking-[-0.025em]'}
+                      >{insight.title}</h3>
+                      <p className={index===0?'mt-4 break-words text-base leading-relaxed text-muted-foreground':'mt-2 break-words text-sm leading-relaxed text-muted-foreground'}>
                         {quickReadBody(insight,money,id=>getCategoryInfo(id)?.name || id)}
                       </p>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </article>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </section>
 
           <section className="space-y-4" aria-labelledby="spending-title" data-report-section="spending">
