@@ -86,6 +86,7 @@ export default function ReportsTab() {
   const [preset,setPreset]=useState<ReportRangePreset>('30d');
   const [customStart,setCustomStart]=useState(initial.start);
   const [customEnd,setCustomEnd]=useState(initial.end);
+  const [showDetailedAnalysis,setShowDetailedAnalysis]=useState(false);
 
   let range=initial;
   let rangeError='';
@@ -220,6 +221,19 @@ export default function ReportsTab() {
             </Card>
           </section>
 
+          <section className="space-y-4" aria-labelledby="spending-breakdown-title" data-report-section="spending-breakdown">
+            <SectionHeader title={<span id="spending-breakdown-title">Dónde se fue el gasto</span>} />
+            <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="categories">
+              <CardHeader>
+                <CardTitle className="font-display text-2xl font-normal">Distribución por categoría</CardTitle>
+                <CardDescription>Las categorías con mayor peso en el rango seleccionado.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ReportCategoryDonut data={categoryDistribution.segments} total={categoryDistribution.total} />
+              </CardContent>
+            </Card>
+          </section>
+
           <section className="space-y-4" aria-labelledby="comparison-title" data-report-section="comparison">
             <SectionHeader title={<span id="comparison-title">Comparación</span>} />
             <Card className="shadow-[var(--shadow-card)]" data-report-visual="comparison">
@@ -227,186 +241,222 @@ export default function ReportsTab() {
                 <CardTitle className="font-display text-xl font-normal">Actual vs. anterior</CardTitle>
                 <CardDescription>{currentLabel} comparado con {previousLabel}.</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
                 <ReportComparisonBars data={comparisonChartRows} />
-                <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Métrica</TableHead>
-                        <TableHead className="text-right">{previousLabel}</TableHead>
-                        <TableHead className="text-right">{currentLabel}</TableHead>
-                        <TableHead className="text-right">Cambio</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {comparisonRows.map(row=>(
-                        <TableRow key={row.label}>
-                          <TableCell>{row.label}</TableCell>
-                          <TableCell className="text-right font-mono">{money(row.data.previous)}</TableCell>
-                          <TableCell className="text-right font-mono">{money(row.data.current)}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="font-mono">{row.data.difference>=0?'+':''}{money(row.data.difference)}</div>
-                            <ComparisonValue value={row.data.percentChange} />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
               </CardContent>
             </Card>
           </section>
 
-          <section className="space-y-4" aria-labelledby="spending-breakdown-title" data-report-section="spending-breakdown">
-            <SectionHeader title={<span id="spending-breakdown-title">Categorías y naturaleza</span>} />
-            <div className="grid gap-4 xl:grid-cols-2">
-              <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="categories">
-                <CardHeader>
-                  <CardTitle className="font-display text-2xl font-normal">Distribución por categoría</CardTitle>
+          <section data-report-section="analysis-access">
+            <Card className="border-[var(--border-subtle)] bg-muted/10 shadow-none">
+              <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="min-w-0">
+                  <p className="font-display text-xl font-normal">¿Necesitas revisar los números?</p>
+                  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                    Abre las tablas exactas, flujo de caja, patrimonio, movimientos y presupuestos solo cuando necesites auditar el rango.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  aria-expanded={showDetailedAnalysis}
+                  aria-controls="report-detailed-analysis"
+                  onClick={()=>setShowDetailedAnalysis(value=>!value)}
+                >
+                  {showDetailedAnalysis?'Ocultar análisis detallado':'Ver análisis detallado'}
+                </Button>
+              </CardContent>
+            </Card>
+          </section>
+
+          <div
+            id="report-detailed-analysis"
+            hidden={!showDetailedAnalysis}
+            data-report-detail={showDetailedAnalysis?'expanded':'collapsed'}
+            className="space-y-8"
+          >
+            <section className="space-y-4" aria-labelledby="comparison-detail-title" data-report-section="comparison-detail">
+              <SectionHeader title={<span id="comparison-detail-title">Comparación exacta</span>} />
+              <Card className="shadow-[var(--shadow-card)]">
+                <CardContent className="pt-6">
+                  <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Métrica</TableHead>
+                          <TableHead className="text-right">{previousLabel}</TableHead>
+                          <TableHead className="text-right">{currentLabel}</TableHead>
+                          <TableHead className="text-right">Cambio</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {comparisonRows.map(row=>(
+                          <TableRow key={row.label}>
+                            <TableCell>{row.label}</TableCell>
+                            <TableCell className="text-right font-mono">{money(row.data.previous)}</TableCell>
+                            <TableCell className="text-right font-mono">{money(row.data.current)}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="font-mono">{row.data.difference>=0?'+':''}{money(row.data.difference)}</div>
+                              <ComparisonValue value={row.data.percentChange} />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            <section className="space-y-4" aria-labelledby="spending-detail-title" data-report-section="spending-detail">
+              <SectionHeader title={<span id="spending-detail-title">Detalle del gasto</span>} />
+              <div className="grid gap-4 xl:grid-cols-2">
+                <Card className="overflow-hidden shadow-[var(--shadow-card)]">
+                  <CardHeader>
+                    <CardTitle className="font-display text-xl font-normal">Categorías exactas</CardTitle>
                   </CardHeader>
-                <CardContent className="space-y-4">
-                  <ReportCategoryDonut data={categoryDistribution.segments} total={categoryDistribution.total} />
-                  {report.spending.categories.length ? (
+                  <CardContent>
+                    {report.spending.categories.length ? (
+                      <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
+                        <Table>
+                          <TableHeader><TableRow><TableHead>Categoría</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">%</TableHead></TableRow></TableHeader>
+                          <TableBody>
+                            {report.spending.categories.map(row=>(
+                              <TableRow key={row.categoryId}>
+                                <TableCell>{getCategoryInfo(row.categoryId)?.name || row.categoryId}</TableCell>
+                                <TableCell className="text-right font-mono">{money(row.value)}</TableCell>
+                                <TableCell className="text-right">{shareLabel(row.value,report.spending.total)}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : <EmptyState description="No hay gastos registrados dentro de este rango." />}
+                  </CardContent>
+                </Card>
+
+                <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="nature">
+                  <CardHeader>
+                    <CardTitle className="font-display text-xl font-normal">Fijo / Variable / Ocasional</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <ReportValueBars data={natureChartRows} />
                     <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
                       <Table>
-                        <TableHeader><TableRow><TableHead>Categoría</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">%</TableHead></TableRow></TableHeader>
+                        <TableHeader><TableRow><TableHead>Tipo</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">#</TableHead></TableRow></TableHeader>
                         <TableBody>
-                          {report.spending.categories.map(row=>(
-                            <TableRow key={row.categoryId}>
-                              <TableCell>{getCategoryInfo(row.categoryId)?.name || row.categoryId}</TableCell>
-                              <TableCell className="text-right font-mono">{money(row.value)}</TableCell>
-                              <TableCell className="text-right">{shareLabel(row.value,report.spending.total)}</TableCell>
+                          {report.spending.byNature.map(row=>(
+                            <TableRow key={row.nature}>
+                              <TableCell>{row.nature}</TableCell>
+                              <TableCell className="text-right font-mono">{money(row.total)}</TableCell>
+                              <TableCell className="text-right">{row.count}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
                     </div>
-                  ) : <EmptyState description="No hay gastos registrados dentro de este rango." />}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
 
-              <Card className="overflow-hidden shadow-[var(--shadow-card)]" data-report-visual="nature">
+            <section className="space-y-4" aria-labelledby="cashflow-title" data-report-section="cash-flow">
+              <SectionHeader title={<span id="cashflow-title">Flujo de caja</span>} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <MetricCard label="Ingresos" amount={report.cashFlow.income} tone="positive" />
+                <MetricCard label="Gastos en efectivo" amount={report.cashFlow.cashExpenses} tone="negative" />
+                <MetricCard label="Pagos de deuda" amount={report.cashFlow.debtPayments} tone="negative" />
+                <MetricCard label="Flujo neto" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
+              </div>
+              <Card className="shadow-[var(--shadow-card)]" data-report-visual="cash-flow">
                 <CardHeader>
-                  <CardTitle className="font-display text-2xl font-normal">Fijo / Variable / Ocasional</CardTitle>
-                  </CardHeader>
-                <CardContent className="space-y-4">
-                  <ReportValueBars data={natureChartRows} />
-                  <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
-                    <Table>
-                      <TableHeader><TableRow><TableHead>Tipo</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">#</TableHead></TableRow></TableHeader>
-                      <TableBody>
-                        {report.spending.byNature.map(row=>(
-                          <TableRow key={row.nature}>
-                            <TableCell>{row.nature}</TableCell>
-                            <TableCell className="text-right font-mono">{money(row.total)}</TableCell>
-                            <TableCell className="text-right">{row.count}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
+                  <CardTitle className="font-display text-xl font-normal">Flujo del rango</CardTitle>
+                </CardHeader>
+                <CardContent><ReportValueBars data={cashFlowChartRows} signed /></CardContent>
+              </Card>
+            </section>
+
+            <section className="space-y-4" aria-labelledby="networth-title" data-report-section="net-worth">
+              <SectionHeader title={<span id="networth-title">Patrimonio neto</span>} />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <MetricCard label="Efectivo" amount={report.netWorth.cash} tone="neutral" />
+                <MetricCard label="Bancos" amount={report.netWorth.banks} tone="neutral" />
+                <MetricCard label="Inversiones" amount={report.netWorth.investments} tone="neutral" />
+                <MetricCard label="Pasivos" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
+                <MetricCard label="Patrimonio neto" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
+              </div>
+              <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
+                <CardHeader>
+                  <CardTitle className="font-display text-xl font-normal">Composición registrada</CardTitle>
+                </CardHeader>
+                <CardContent><ReportValueBars data={netWorthChartRows} signed /></CardContent>
+              </Card>
+              {report.netWorth.cardPositiveBalance>0 && (
+                <p className="rounded-[var(--radius-interactive)] bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                  El patrimonio también incluye {money(report.netWorth.cardPositiveBalance)} de saldo a favor real en tarjetas; el crédito disponible nunca se trata como activo.
+                </p>
+              )}
+            </section>
+
+            <section className="space-y-4" aria-labelledby="detail-title" data-report-section="detail">
+              <SectionHeader title={<span id="detail-title">Movimientos destacados</span>} />
+              <Card className="shadow-[var(--shadow-card)]">
+                <CardHeader>
+                  <CardTitle className="font-display text-xl font-normal">Movimientos de mayor importe</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {report.spending.largestTransactions.length ? (
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Movimiento</TableHead><TableHead>Categoría</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
+                        <TableBody>
+                          {report.spending.largestTransactions.map(row=>(
+                            <TableRow key={row.id}>
+                              <TableCell>{row.date}</TableCell>
+                              <TableCell>{row.title}<span className="ml-2 text-xs text-muted-foreground">{row.nature}</span></TableCell>
+                              <TableCell>{getCategoryInfo(row.categoryId)?.name || row.categoryId}</TableCell>
+                              <TableCell className="text-right font-mono">{money(row.amount)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  ) : <EmptyState description="No hay gastos para ordenar en este rango." />}
                 </CardContent>
               </Card>
-            </div>
-          </section>
+            </section>
 
-          <section className="space-y-4" aria-labelledby="cashflow-title" data-report-section="cash-flow">
-            <SectionHeader title={<span id="cashflow-title">Flujo de caja</span>} />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <MetricCard label="Ingresos" amount={report.cashFlow.income} tone="positive" />
-              <MetricCard label="Gastos en efectivo" amount={report.cashFlow.cashExpenses} tone="negative" />
-              <MetricCard label="Pagos de deuda" amount={report.cashFlow.debtPayments} tone="negative" />
-              <MetricCard label="Flujo neto" amount={report.cashFlow.netCashFlow} tone={report.cashFlow.netCashFlow<0?'negative':'positive'} />
-            </div>
-            <Card className="shadow-[var(--shadow-card)]" data-report-visual="cash-flow">
-              <CardHeader>
-                <CardTitle className="font-display text-xl font-normal">Flujo del rango</CardTitle>
-              </CardHeader>
-              <CardContent><ReportValueBars data={cashFlowChartRows} signed /></CardContent>
-            </Card>
-          </section>
-
-          <section className="space-y-4" aria-labelledby="networth-title" data-report-section="net-worth">
-            <SectionHeader title={<span id="networth-title">Patrimonio neto</span>} />
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-              <MetricCard label="Efectivo" amount={report.netWorth.cash} tone="neutral" />
-              <MetricCard label="Bancos" amount={report.netWorth.banks} tone="neutral" />
-              <MetricCard label="Inversiones" amount={report.netWorth.investments} tone="neutral" />
-              <MetricCard label="Pasivos" amount={report.netWorth.liabilities} tone={report.netWorth.liabilities>0?'negative':'neutral'} />
-              <MetricCard label="Patrimonio neto" amount={report.netWorth.netWorth} tone={report.netWorth.netWorth<0?'negative':'positive'} />
-            </div>
-            <Card className="shadow-[var(--shadow-card)]" data-report-visual="net-worth">
-              <CardHeader>
-                <CardTitle className="font-display text-xl font-normal">Composición registrada</CardTitle>
-              </CardHeader>
-              <CardContent><ReportValueBars data={netWorthChartRows} signed /></CardContent>
-            </Card>
-            {report.netWorth.cardPositiveBalance>0 && (
-              <p className="rounded-[var(--radius-interactive)] bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                El patrimonio también incluye {money(report.netWorth.cardPositiveBalance)} de saldo a favor real en tarjetas; el crédito disponible nunca se trata como activo.
-              </p>
-            )}
-          </section>
-
-          <section className="space-y-4" aria-labelledby="detail-title" data-report-section="detail">
-            <SectionHeader title={<span id="detail-title">Movimientos destacados</span>} />
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardHeader>
-                <CardTitle className="font-display text-xl font-normal">Movimientos de mayor importe</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {report.spending.largestTransactions.length ? (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader><TableRow><TableHead>Fecha</TableHead><TableHead>Movimiento</TableHead><TableHead>Categoría</TableHead><TableHead className="text-right">Monto</TableHead></TableRow></TableHeader>
-                      <TableBody>
-                        {report.spending.largestTransactions.map(row=>(
-                          <TableRow key={row.id}>
-                            <TableCell>{row.date}</TableCell>
-                            <TableCell>{row.title}<span className="ml-2 text-xs text-muted-foreground">{row.nature}</span></TableCell>
-                            <TableCell>{getCategoryInfo(row.categoryId)?.name || row.categoryId}</TableCell>
-                            <TableCell className="text-right font-mono">{money(row.amount)}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                ) : <EmptyState description="No hay gastos para ordenar en este rango." />}
-              </CardContent>
-            </Card>
-          </section>
-
-          <section className="space-y-4" aria-labelledby="budget-followup-title" data-report-section="budget-followup">
-            <SectionHeader title={<span id="budget-followup-title">Presupuestos actuales</span>} />
-            <Card className="shadow-[var(--shadow-card)]">
-              <CardContent className="pt-6">
-                {budgetDetails.length ? (
-                  <div className="space-y-3">
-                    {budgetDetails.slice(0,5).map(row=>(
-                      <div key={row.categoryId} className="flex items-center justify-between gap-3 rounded-[var(--radius-interactive)] border bg-background/55 p-3">
-                        <span className="text-sm">{getCategoryInfo(row.categoryId)?.name || row.categoryId}</span>
-                        <span className="text-right text-sm font-mono">{money(row.spent)} / {money(row.limit)}</span>
-                      </div>
-                    ))}
-                    <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
-                      Gestionar presupuestos
-                    </Button>
-                  </div>
-                ) : (
-                  <EmptyState
-                    title="Aún no tienes presupuestos"
-                    description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
-                    action={(
+            <section className="space-y-4" aria-labelledby="budget-followup-title" data-report-section="budget-followup">
+              <SectionHeader title={<span id="budget-followup-title">Presupuestos actuales</span>} />
+              <Card className="shadow-[var(--shadow-card)]">
+                <CardContent className="pt-6">
+                  {budgetDetails.length ? (
+                    <div className="space-y-3">
+                      {budgetDetails.slice(0,5).map(row=>(
+                        <div key={row.categoryId} className="flex items-center justify-between gap-3 rounded-[var(--radius-interactive)] border bg-background/55 p-3">
+                          <span className="text-sm">{getCategoryInfo(row.categoryId)?.name || row.categoryId}</span>
+                          <span className="text-right text-sm font-mono">{money(row.spent)} / {money(row.limit)}</span>
+                        </div>
+                      ))}
                       <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
-                        Crear presupuesto
+                        Gestionar presupuestos
                       </Button>
-                    )}
-                  />
-                )}
-              </CardContent>
-            </Card>
-          </section>
+                    </div>
+                  ) : (
+                    <EmptyState
+                      title="Aún no tienes presupuestos"
+                      description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
+                      action={(
+                        <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
+                          Crear presupuesto
+                        </Button>
+                      )}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+          </div>
         </>
       )}
     </div>
