@@ -1396,3 +1396,39 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Revisión de alcance: sin cambios de schema, migraciones, backup/envelope, ledger, selectores financieros, persistencia, red, navegación primaria ni producto.
 - Con P7 aprobado, se autoriza la integración final P4 → P5 → P6 → P7. En `main`, Final UI Polish se considera **COMPLETADO / Gate final aprobado** cuando GitHub confirme `merged=true` de PR #118, #119, #120 y #121.
 
+
+# 14. Corrección posterior autorizada — Reportes con lectura progresiva
+
+Autorizada por el usuario el 4 de octubre de 2026 tras revisar el producto integrado. P0–P7 permanecen cerradas; esta corrección no se numera como P8 y no cambia el dominio financiero.
+
+La revisión concluyó que P5 preservó correctamente la evidencia exacta, pero mostrarla toda simultáneamente contradijo el objetivo original de este documento: **entender en 5 segundos → entender en 30 segundos → auditar cuando se quiera**.
+
+Nuevo contrato de composición:
+
+```text
+vista inicial
+→ quick-read
+→ spending + tendencia
+→ spending-breakdown protagonista (donut)
+→ comparison visual
+→ acceso único «Ver análisis detallado»
+
+análisis detallado bajo demanda
+→ tabla exacta de comparación
+→ tabla exacta por categoría + naturaleza
+→ cash-flow
+→ net-worth
+→ movimientos de mayor importe
+→ seguimiento de presupuestos
+```
+
+Reglas:
+
+- el disclosure no cambia cifras ni selectores; solo visibilidad/composición;
+- la evidencia exacta debe existir y ser accesible al abrirlo;
+- ninguna métrica financiera se recalcula en React;
+- ocultar importes debe cubrir la vista principal y el detalle;
+- el control expone `aria-expanded` y relación accesible con el bloque de detalle;
+- el estado inicial es cerrado;
+- un solo control gobierna el bloque completo de auditoría;
+- gates: `npm run check`, `npm run benchmark:ledger`, `npm run benchmark:reports`, `npm run build`, `npm run test:e2e`.
