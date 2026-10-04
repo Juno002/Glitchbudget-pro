@@ -13,7 +13,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import type { ReportCategoryVisualizationSegment } from '@/lib/report-visualization';
 import type { SpendingTrendPoint } from '@/domain/reports';
 
 const SEGMENT_COLORS = [
@@ -43,37 +44,85 @@ function EmptyChart({ label }: { label:string }) {
   return <div className="flex h-full min-h-56 items-center justify-center text-sm text-muted-foreground">{label}</div>;
 }
 
-export function ReportCategoryDonut({ data }: { data:ReportChartRow[] }) {
-  const money=usePrivateCurrency();
-  if (!data.length) return <EmptyChart label="Sin gastos para representar." />;
+export function ReportCategoryDonut({
+  data,
+  total,
+}: {
+  data: ReportCategoryVisualizationSegment[];
+  total: number;
+}) {
+  const money = usePrivateCurrency();
+  const { balancesHidden } = useBalanceVisibility();
+  if (!data.length || total <= 0) return <EmptyChart label="Sin gastos para representar." />;
 
   return (
-    <div className="h-[290px] w-full" data-report-chart="category-donut">
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Tooltip formatter={(value:number)=>money(value)} />
-          <Legend
-            verticalAlign="bottom"
-            formatter={(value)=>String(value)}
-            wrapperStyle={{ fontSize:11 }}
-          />
-          <Pie
-            data={data}
-            dataKey="value"
-            nameKey="label"
-            cx="50%"
-            cy="45%"
-            innerRadius={58}
-            outerRadius={92}
-            paddingAngle={2}
-            stroke="hsl(var(--card))"
-            strokeWidth={2}
-            isAnimationActive
+    <div className="grid min-w-0 gap-5 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center" data-report-chart="category-donut">
+      <div className="relative h-[250px] min-w-0" aria-hidden="true">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart accessibilityLayer={false}>
+            <Tooltip
+              isAnimationActive={false}
+              content={({ active, payload }) => {
+                const row = payload?.[0]?.payload as ReportCategoryVisualizationSegment | undefined;
+                if (!active || !row) return null;
+                return (
+                  <div className="rounded-[var(--radius-interactive)] border bg-card p-3 text-xs text-card-foreground shadow-[var(--shadow-control)]">
+                    <p className="font-medium">{row.label}</p>
+                    <p>{(row.percentTenths / 10).toFixed(1)}%</p>
+                    <p className="mt-1 whitespace-nowrap">{money(row.value)}</p>
+                  </div>
+                );
+              }}
+            />
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="label"
+              cx="50%"
+              cy="50%"
+              innerRadius={64}
+              outerRadius={96}
+              paddingAngle={2}
+              stroke="hsl(var(--card))"
+              strokeWidth={2}
+              isAnimationActive
+            >
+              {data.map((row,index)=><Cell key={row.key} fill={SEGMENT_COLORS[index%SEGMENT_COLORS.length]} />)}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="max-w-[9rem] text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Total</p>
+            <p className="mt-1 truncate font-display text-lg leading-tight text-foreground">{money(total)}</p>
+          </div>
+        </div>
+      </div>
+      <ol className="grid min-w-0 gap-2" aria-label="Distribución por categoría" data-category-legend>
+        {data.map((row,index) => (
+          <li
+            key={row.key}
+            className="min-w-0 rounded-[var(--radius-interactive)] border border-[var(--border-subtle)] px-3 py-2"
+            data-category-legend-item
+            data-category-other={row.isOther ? 'true' : undefined}
           >
-            {data.map((row,index)=><Cell key={row.label} fill={SEGMENT_COLORS[index%SEGMENT_COLORS.length]} />)}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
+            <div className="flex min-w-0 items-center gap-2">
+              <span
+                className="h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: SEGMENT_COLORS[index%SEGMENT_COLORS.length] }}
+                aria-hidden="true"
+              />
+              <span className="min-w-0 flex-1 truncate" title={row.label}>{row.label}</span>
+              <span className="shrink-0 tabular-nums">{(row.percentTenths / 10).toFixed(1)}%</span>
+            </div>
+            {!balancesHidden ? (
+              <p className="mt-1 whitespace-nowrap pl-[1.125rem] text-xs text-muted-foreground" data-category-legend-money>
+                {money(row.value)}
+              </p>
+            ) : null}
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
