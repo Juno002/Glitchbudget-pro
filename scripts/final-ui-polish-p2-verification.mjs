@@ -76,7 +76,7 @@ async function readHero(client) {
       const probe = document.createElement('span'); probe.className = className; hero.appendChild(probe);
       const color = getComputedStyle(probe).color; probe.remove(); return color;
     });
-    const row = [...document.querySelectorAll('[data-report-section="comparison"] table tbody tr')].find(node => node.firstElementChild.textContent.trim() === 'Gasto');
+    const row = [...document.querySelectorAll('[data-report-section="comparison-detail"] table tbody tr')].find(node => node.firstElementChild.textContent.trim() === 'Gasto');
     const formatter = new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric'});
     const rangeLabel = (start,end) => formatter.format(new Date(start+'T12:00:00'))+' – '+formatter.format(new Date(end+'T12:00:00'));
     const primary = document.querySelector('[data-quick-read-primary="true"]');
@@ -135,7 +135,7 @@ function assertHero(view, scenario, hidden) {
     assert.equal(view.previous.fontFamily, view.bodyFontFamily, 'P2 comparable visible hereda body sin mono');
   }
   assert.ok(view.text.includes(view.currentRange) && view.text.includes(view.previousRange), 'P2 etiquetas de ambos rangos conservadas');
-  assert.ok(view.comparison?.visible, 'P2 evidencia exacta permanece visible');
+  assert.ok(view.comparison && !view.comparison.visible, 'P2 evidencia exacta permanece disponible bajo demanda');
   assert.equal(view.total.text, view.comparison.current, 'P2 importe igual al canónico en tabla');
   assert.equal(view.previous.text, view.comparison.previous, 'P2 anterior igual al canónico en tabla');
   assert.equal(view.total.text, hidden ? '••••••' : money(scenario.total));
