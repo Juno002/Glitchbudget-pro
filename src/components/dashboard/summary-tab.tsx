@@ -563,13 +563,17 @@ export default function SummaryTab() {
           title={<><span>Tu panorama financiero</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
           description={<><span>{financialDateLabel(today,locale)}</span><span aria-hidden="true"> · </span><span>período {formatPeriodRange(currentPeriod)}</span></>}
           actions={<>
-            <span data-home-status-pill={attentionState.kind}>
-              <StatusBadge
-                status={attentionState.status}
-                label={attentionState.label}
-                className="min-h-7 px-3"
-              />
-            </span>
+            {loading ? (
+              <Skeleton className="h-7 w-36 rounded-full" data-home-status-loading />
+            ) : (
+              <span data-home-status-pill={attentionState.kind}>
+                <StatusBadge
+                  status={attentionState.status}
+                  label={attentionState.label}
+                  className="min-h-7 px-3"
+                />
+              </span>
+            )}
             <HomePreferencesDialog
               visibleOrder={preferences.visibleOrder}
               hidden={preferences.preferences.hidden}
