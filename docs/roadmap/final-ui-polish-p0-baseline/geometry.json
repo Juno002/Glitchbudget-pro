@@ -1,0 +1,974 @@
+[
+  {
+    "name": "light-320-visible",
+    "width": 320,
+    "scrollWidth": 314,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 509.5
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1140
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1303
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 290.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "light-320-hidden",
+    "width": 320,
+    "scrollWidth": 314,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1020
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1223
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 290.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  },
+  {
+    "name": "light-390-visible",
+    "width": 390,
+    "scrollWidth": 384,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1120
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1153
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 262.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "light-390-hidden",
+    "width": 390,
+    "scrollWidth": 384,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1000
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1153
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 262.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  },
+  {
+    "name": "light-1280-visible",
+    "width": 1280,
+    "scrollWidth": 1274,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 169.75
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 199
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 819.5
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 634.5
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 554
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 236.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "light-1280-hidden",
+    "width": 1280,
+    "scrollWidth": 1274,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 169.75
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 199
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 819.5
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 634.5
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 236.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  },
+  {
+    "name": "dark-320-visible",
+    "width": 320,
+    "scrollWidth": 314,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 509.5
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1140
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1303
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 290.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "dark-320-hidden",
+    "width": 320,
+    "scrollWidth": 314,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1020
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 1223
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 298,
+        "height": 290.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  },
+  {
+    "name": "dark-390-visible",
+    "width": 390,
+    "scrollWidth": 384,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1120
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1153
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 262.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "dark-390-hidden",
+    "width": 390,
+    "scrollWidth": 384,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 441.25
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 457
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1000
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 1153
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 846
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 955
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 16,
+        "right": 368,
+        "height": 262.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  },
+  {
+    "name": "dark-1280-visible",
+    "width": 1280,
+    "scrollWidth": 1274,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 169.75
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 199
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 819.5
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 634.5
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 554
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 236.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": false,
+    "masked": false,
+    "moneyLeaks": true
+  },
+  {
+    "name": "dark-1280-hidden",
+    "width": 1280,
+    "scrollWidth": 1274,
+    "sections": [
+      {
+        "name": "quick-read",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 169.75
+      },
+      {
+        "name": "spending",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 199
+      },
+      {
+        "name": "comparison",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 819.5
+      },
+      {
+        "name": "spending-breakdown",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 634.5
+      },
+      {
+        "name": "cash-flow",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "net-worth",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 519
+      },
+      {
+        "name": "detail",
+        "visible": true,
+        "x": 284,
+        "right": 1234,
+        "height": 236.5
+      }
+    ],
+    "tables": [
+      {
+        "visible": true,
+        "rows": 4,
+        "headers": "Métrica\t6 ago de 2026 – 4 sept de 2026\t5 sept de 2026 – 4 oct de 2026\tCambio\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Categoría\tTotal\t%\n"
+      },
+      {
+        "visible": true,
+        "rows": 3,
+        "headers": "Tipo\tTotal\t#\n"
+      },
+      {
+        "visible": true,
+        "rows": 1,
+        "headers": "Fecha\tMovimiento\tCategoría\tMonto\n"
+      }
+    ],
+    "hidden": true,
+    "masked": true,
+    "moneyLeaks": false
+  }
+]

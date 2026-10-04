@@ -2,6 +2,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { verifyFinalUiPolishP0 } from './final-ui-polish-p0-baseline.mjs';
 
 const APP_PORT = 9011;
 const DEBUG_PORT = 9223;
@@ -1120,6 +1121,8 @@ async function main() {
         && window.location.search === '?tab=reports'`,
       'adelante vuelve a Reportes',
     );
+
+    await verifyFinalUiPolishP0(client, waitFor);
 
     if (!await client.evaluate(`(() => {
       const button = document.querySelector('[data-report-preset="7d"]');
