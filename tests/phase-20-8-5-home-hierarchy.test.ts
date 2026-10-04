@@ -13,7 +13,7 @@ function sliceBetween(start:string,end:string) {
 }
 
 test('20.8.5 removes non-actionable Home prose while preserving period context and navigation', () => {
-  assert.doesNotMatch(source,/Tu panorama financiero/);
+  assert.match(source,/Tu panorama financiero/); // Final UI Polish P6 supersedes the old neutral heading.
   assert.doesNotMatch(source,/Dinero líquido, activos registrados y deuda real\./);
   assert.doesNotMatch(source,/eyebrow="/);
   assert.match(source,/formatPeriodRange\(currentPeriod\)/);
@@ -59,9 +59,11 @@ test('20.8.5 investments prioritize items requiring action instead of repeating 
   assert.doesNotMatch(investments,/sin proyecciones futuras/);
 });
 
-test('20.8.5 only surfaces the global attention badge when attention exists', () => {
-  assert.match(source,/\{home\.attentionCount>0 \? \(/);
-  assert.match(source,/elementos requieren atención/);
+test('20.8.5 contextual attention remains while Final UI Polish P6 owns the global summary', () => {
+  assert.match(source,/selectHomeAttentionState/);
+  assert.match(source,/data-home-status-pill/);
+  assert.doesNotMatch(source,/elementos requieren atención/);
+  assert.doesNotMatch(source,/pagos tienen datos inválidos y no se incluyen en saldos ni reportes/);
   assert.doesNotMatch(source,/Todo está en orden/);
 });
 
