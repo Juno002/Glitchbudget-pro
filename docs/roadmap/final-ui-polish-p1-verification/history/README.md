@@ -38,3 +38,6 @@ El caso sin cambios conserva historia e ingresos, con variaciones por debajo de 
 `npm run check`: **742/742**; `npm run build`: export estático y guard CSP/local-only aprobados; `npm run test:e2e`: **32/32** variantes históricas y smoke completo aprobados, además de los siete tipos y matriz original P1. Node v24.19.0 / Chromium 151 / Linux x64, mismo executor cloud. P1 no exige benchmark propio.
 
 El helper espera a que el ancho de página se ajuste tras cambiar entre escritorio y móvil antes de leer geometría y fotografiar. Usa el criterio de overflow existente y el timeout estándar del smoke; un overflow persistente continúa fallando el gate. No se modifica producto.
+
+
+**Gate aprobado · PR #113** — [PR de evidencia](https://github.com/Juno002/Glitchbudget-pro/pull/113). El cierre original P1 sigue en PR #111; esta ampliación se considera integrada únicamente con `merged=true` de PR #113. P2 no se inicia.
