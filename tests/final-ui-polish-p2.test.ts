@@ -9,8 +9,8 @@ const read = (file: string) => readFileSync(new URL('../' + file, import.meta.ur
 function heroSource() {
   const reports = read('src/components/dashboard/reports-tab.tsx');
   const start = reports.indexOf('data-report-hero="spending"');
-  const end = reports.indexOf('data-report-section="comparison"', start);
-  assert.ok(start >= 0 && end > start, 'P2 retains the spending hero before comparison');
+  const end = reports.indexOf('data-report-section="spending-breakdown"', start);
+  assert.ok(start >= 0 && end > start, 'P2 retains the spending hero before spending breakdown');
   return { reports, hero: reports.slice(start, end) };
 }
 
