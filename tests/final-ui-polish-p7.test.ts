@@ -33,20 +33,26 @@ test('P7 integration smoke covers donut legend exact evidence privacy themes mob
   ]) assert.ok(smoke.includes(marker), marker);
 });
 
-test('P7 retains exact Reports evidence and does not introduce disclosure', () => {
+test('P7 retains exact Reports evidence behind one progressive disclosure', () => {
   const order = [...reports.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(order, [
     'quick-read',
     'spending',
-    'comparison',
     'spending-breakdown',
+    'comparison',
+    'analysis-access',
+    'comparison-detail',
+    'spending-detail',
     'cash-flow',
     'net-worth',
     'detail',
     'budget-followup',
   ]);
   assert.equal([...reports.matchAll(/<Table>/g)].length, 4);
-  assert.doesNotMatch(reports, /Accordion|Collapsible|Ver tabla/);
+  assert.match(reports, /Ver análisis detallado/);
+  assert.match(reports, /Ocultar análisis detallado/);
+  assert.match(reports, /aria-expanded=\{showDetailedAnalysis\}/);
+  assert.match(reports, /hidden=\{!showDetailedAnalysis\}/);
   assert.match(reports, /projectReportCategoryDistribution/);
 });
 
