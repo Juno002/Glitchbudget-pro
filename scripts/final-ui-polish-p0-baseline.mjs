@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { captureFixture, assertCaptureDataset } from './final-ui-polish-p0-fixture.mjs';
 
 // Browser-only characterization. Never changes product data or financial selectors.
 export async function verifyFinalUiPolishP0(client, waitFor) {
@@ -20,6 +21,35 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
   }
   assert.equal(await client.evaluate(`document.querySelectorAll('[role="dialog"]').length`), 0);
   await client.evaluate('window.scrollTo(0, 0)');
+  assert.equal(await client.evaluate(`new Date().toISOString()`), captureFixture.instant, 'P0 reloj fijo');
+  const dataset = await client.evaluate(`(async () => {
+    const db = await new Promise((resolve, reject) => {
+      const request = indexedDB.open('GlitchBudgetDB');
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+    });
+    const fixture = ${JSON.stringify(captureFixture.dataset)};
+    const names = ['accounts', 'incomes', 'expenses', 'settings', ...fixture.emptyTables];
+    const tx = db.transaction(names, 'readonly');
+    const rows = await Promise.all(names.map(name => new Promise((resolve, reject) => {
+      const request = tx.objectStore(name).getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    })));
+    const data = Object.fromEntries(names.map((name, index) => [name, rows[index]]));
+    db.close();
+    const project = (row, expected) => Object.fromEntries(Object.keys(expected).map(key => [key, row[key]]));
+    const result = {
+      accounts: data.accounts.map(row => project(row, fixture.accounts[0])),
+      incomes: data.incomes.map(row => project(row, fixture.incomes[0])),
+      expenses: data.expenses.map(row => project(row, fixture.expenses[0])),
+      emptyTables: fixture.emptyTables.filter(name => data[name].length === 0),
+      settings: project(data.settings.find(row => row.id === 'general'), fixture.settings),
+    };
+    if (!data.incomes.concat(data.expenses).every(row => row.accountId === data.accounts[0]?.id)) throw new Error('P0 cuenta de movimientos distinta del fixture');
+    return result;
+  })()`, { awaitPromise: true });
+  assertCaptureDataset(dataset);
   const directory = process.env.FINAL_UI_POLISH_BASELINE_DIR;
   if (directory) await mkdir(directory, { recursive: true });
   const order = ['quick-read', 'spending', 'comparison', 'spending-breakdown', 'cash-flow', 'net-worth', 'detail'];
@@ -102,7 +132,8 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
           assert.doesNotMatch(JSON.stringify(ax.nodes.map(node => ({ name: node.name?.value, description: node.description?.value, value: node.value?.value }))), /(?:RD\$|DOP|US\$|USD|\$)\s*-?\d/, 'P0 árbol accesible');
         }
         await client.command('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 0, y: 0 });
-        await client.evaluate('window.scrollTo(0, 0)');
+        await client.evaluate('document.activeElement?.blur(); window.scrollTo(0, 0)');
+        await waitFor(client, `[...document.querySelectorAll('[data-reports-prisma] .recharts-tooltip-wrapper')].every(node => getComputedStyle(node).visibility !== 'visible')`, 'P0 captura en reposo sin tooltip');
         const name = `${theme}-${width}-${hidden ? 'hidden' : 'visible'}`;
         records.push({ name, ...geometry });
         if (directory) {
@@ -119,6 +150,9 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
   }
   await client.evaluate(`document.documentElement.className = ${JSON.stringify(originalTheme)}`);
   await client.command('Emulation.setDeviceMetricsOverride', { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  if (directory) await writeFile(path.join(directory, 'geometry.json'), JSON.stringify(records, null, 2) + '\n');
+  if (directory) {
+    await writeFile(path.join(directory, 'geometry.json'), JSON.stringify(records, null, 2) + '\n');
+    await writeFile(path.join(directory, 'capture-contract.json'), JSON.stringify(captureFixture, null, 2) + '\n');
+  }
   process.stdout.write('FINAL_UI_POLISH_P0 ' + JSON.stringify({ captures: records.length, widths: [320, 390, 1280], themes: ['light', 'dark'], presets: 6, exactTables: 4, privacy: 'passed' }) + '\n');
 }

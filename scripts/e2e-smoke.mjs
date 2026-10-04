@@ -3,6 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { verifyFinalUiPolishP0 } from './final-ui-polish-p0-baseline.mjs';
+import { captureFixture, fixedClockSource } from './final-ui-polish-p0-fixture.mjs';
 
 const APP_PORT = 9011;
 const DEBUG_PORT = 9223;
@@ -346,7 +347,7 @@ async function runPostRoadmap4Benchmark(client) {
   return results;
 }
 
-async function createMovement(client, type, amount) {
+async function createMovement(client, type, fixture) {
   if (!await client.evaluate(`(() => {
     const button = document.querySelector('[aria-label="Nuevo movimiento"]');
     if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
@@ -361,13 +362,14 @@ async function createMovement(client, type, amount) {
   if (!await client.evaluate(clickButtonExpression(type))) {
     throw new Error('No se pudo seleccionar ' + type + '.');
   }
-  await client.evaluate(setControlExpression('[aria-label="Monto"]', String(amount)));
+  await client.evaluate(setControlExpression('[aria-label="Monto"]', String(fixture.amount / 100)));
   await waitFor(
     client,
     `Boolean(document.querySelector('[aria-label="Categoría"] option:not([value=""])'))`,
     'categorías de ' + type,
   );
-  await client.evaluate(selectFirstOptionExpression('[aria-label="Categoría"]'));
+  await client.evaluate(setControlExpression('[aria-label="Categoría"]', fixture.categoryId));
+  await waitFor(client, `document.querySelector('[aria-label="Categoría"]').value === ${JSON.stringify(fixture.categoryId)}`, 'categoría fija de ' + type);
 
   await waitFor(
     client,
@@ -461,7 +463,7 @@ async function main() {
     await waitForHttp(APP_URL);
     await launchChrome();
     const targetResponse = await fetch(
-      DEBUG_URL + '/json/new?' + encodeURIComponent(APP_URL),
+      DEBUG_URL + '/json/new?' + encodeURIComponent('about:blank'),
       { method: 'PUT' },
     );
     if (!targetResponse.ok) throw new Error('No se pudo crear el target CDP.');
@@ -476,6 +478,9 @@ async function main() {
     const requests = [];
     client.on('Network.requestWillBeSent', params => requests.push(params.request.url));
 
+    await client.command('Emulation.setTimezoneOverride', { timezoneId: captureFixture.timezone });
+    await client.command('Page.addScriptToEvaluateOnNewDocument', { source: fixedClockSource() });
+    await client.command('Page.navigate', { url: APP_URL });
     await waitFor(client, `document.readyState === 'complete' && document.body.innerText.includes('Resumen')`, 'app inicial');
 
     // Phase 20.9.3: both premium themes must resolve the shared depth system.
@@ -671,7 +676,7 @@ async function main() {
     );
 
     // Fresh install: create actual data through the public UI, not by touching Dexie.
-    await createMovement(client, 'Ingreso', 1000);
+    await createMovement(client, 'Ingreso', captureFixture.dataset.incomes[0]);
 
     // Phase 20.9.5: the first-income achievement must remain readable and above mobile nav.
     await waitFor(
@@ -727,7 +732,7 @@ async function main() {
       'retorno desktop después de achievement toast',
     );
 
-    await createMovement(client, 'Gasto', 100);
+    await createMovement(client, 'Gasto', captureFixture.dataset.expenses[0]);
 
     if (!await client.evaluate(clickButtonExpression('Movimientos'))) {
       throw new Error('No se pudo abrir Movimientos.');

@@ -1,0 +1,13 @@
+{
+  "instant": "2026-10-04T12:00:00.000Z",
+  "date": "2026-10-04",
+  "timezone": "UTC",
+  "preset": "30d",
+  "dataset": {
+    "accounts": [{ "type": "cash", "currency": "DOP", "openingBalance": 0, "startDate": "2026-10-04", "isDefaultCash": true }],
+    "incomes": [{ "date": "2026-10-04", "amount": 100000, "amountBase": 100000, "currency": "DOP", "fxRate": 1, "categoryId": "sueldo", "description": "", "type": "extra" }],
+    "expenses": [{ "date": "2026-10-04", "amount": 10000, "amountBase": 10000, "currency": "DOP", "fxRate": 1, "categoryId": "vivienda", "concept": "", "nature": "Variable", "paymentMethod": "cash" }],
+    "emptyTables": ["debts", "debt_payments", "account_transfers", "plans", "goals", "investments"],
+    "settings": { "currency": "DOP", "locale": "es-DO", "periodStartDay": 1 }
+  }
+}

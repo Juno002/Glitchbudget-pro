@@ -1162,7 +1162,7 @@ La implementación no busca que ambas aplicaciones sean idénticas. Busca conser
 
 ```text
 P0 — Gate aprobado · PR #109
-P1 — Próxima intervención; requiere confirmar merged=true de PR #109
+P1 — SIGUIENTE AUTORIZADA (P0 · PR #109 mergeado)
 P2 — BLOQUEADO POR P1
 P3 — BLOQUEADO POR P2
 P4 — BLOQUEADO POR P3
@@ -1180,8 +1180,18 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - `npm run check`: aprobado, 733/733 tests. `tests/final-ui-polish-p0.test.ts` caracteriza el facade canónico, ausencia de cálculos/persistencia en React, orden protegido, cuatro tablas y rangos anclados de todos los presets.
 - `npm run build`: aprobado; output estático y guard CSP/local-only aprobados.
 - `npm run test:e2e`: aprobado; seis presets, custom válido, cuatro tablas con filas visibles, matriz 320/390/1280 px × Prisma/Neón × importes visibles/ocultos. Incluye tooltip real y árbol accesible sin fugas; smoke existente de interacción, mutaciones, navegación y offline aprobado.
-- `npm run benchmark:ledger`: aprobado, script existente sin cambios. Medianas posición/historiales: 1k **1.208/0.712 ms**, 10k **7.789/9.350 ms**, 50k **42.626/40.288 ms**. Medición aislada del resto de gates; ocho cuentas, siete muestras tras calentamiento; sin thresholds nuevos.
-- [Baseline reproducible, doce capturas, geometría y muestras completas](final-ui-polish-p0-baseline/README.md). Capturas sobre transacciones creadas por el compositor del smoke aislado, antes del benchmark de navegador existente; no se introducen datos demo en producto.
+- `npm run benchmark:ledger`: aprobado, script existente sin cambios. **Entorno: executor cloud adjunto (no GitHub Actions), Node v24.19.0, Linux x64**; identificado en `final-ui-polish-p0-baseline/ledger-benchmark.json`. Medianas posición/historiales: 1k **1.208/0.712 ms**, 10k **7.789/9.350 ms**, 50k **42.626/40.288 ms**. Medición aislada del resto de gates; ocho cuentas, siete muestras tras calentamiento; sin thresholds nuevos.
+- [Baseline reproducible, doce capturas, geometría y muestras completas](final-ui-polish-p0-baseline/README.md). Capturas sobre transacciones creadas por el compositor del smoke aislado, antes del benchmark de navegador existente; reloj/fecha UTC y dataset fijados en `tests/fixtures/final-ui-polish-p0-capture.json`. No se introducen datos demo en producto.
 - Decisiones cerradas: `selectReportsSnapshot()` conserva autoridad; tablas anchas mantienen scroll interno y evidencia visible; se conserva `budget-followup` tras detalle. P0 no aplica diseño ni copy de P1–P6.
 - Revisión de diff: solo documentación, tests y scripts de captura/verificación. Sin cambios en Reportes/Home, dominio financiero, schema, migraciones, backup/envelope, semánticas, navegación o red.
 - Bloqueantes de producto: ninguno. El push Git devolvió 401; se publicó la misma rama mediante la API de GitHub, verificando igualdad de árboles.
+
+### Verificación previa a P1 — evidencia P0
+
+**Gate aprobado · PR #110** — [Corrección de evidencia](https://github.com/Juno002/Glitchbudget-pro/pull/110), sin trabajo de P1 ni cambios de producto. El cierre original P0 conserva **Gate aprobado · PR #109**, confirmado mergeado en GitHub.
+
+- Entorno del ledger: executor cloud adjunto, no CI; Node v24.19.0 / Linux x64. El JSON conserva las muestras originales y registra por separado la huella observada en la repetición.
+- Unidad confirmada: `performance.now()` y `medianMs` son milisegundos. 50k original **42.626/40.288 ms**, no segundos. La repetición aislada dio **43.119/37.117 ms**, coherente con el coste existente; no reemplaza la baseline P0 ni modifica la regla 20% / 5 ms de P3.
+- Capturas: reloj **2026-10-04T12:00:00.000Z**, fecha financiera **2026-10-04**, zona **UTC** y dataset versionado. Mismos movimientos del smoke original, categorías explícitas y verificación del dataset antes de capturar; doce PNG en la ruta estable `docs/roadmap/final-ui-polish-p0-baseline/`. Captura en reposo tras comprobar privacidad del tooltip.
+- Dos sesiones aisladas comprobaron contrato y geometría idénticos. Tests nuevos prueban reloj independiente del día del host y rechazo de fecha/categoría/importe/filas diferentes. `npm run check`: **735/735**; `npm run build`, `npm run test:e2e` y `npm run benchmark:ledger`: aprobados.
+- Bloqueantes de producto: ninguno. P1 permanece siguiente autorizada y sin iniciar en esta ejecución.
