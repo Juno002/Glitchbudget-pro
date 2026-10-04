@@ -27,6 +27,53 @@ export type HomeReadModelInput = {
   periodStartDay: number;
 };
 
+export type HomeAttentionStateInput = {
+  quarantinedCount: number;
+  overduePlannedCount: number;
+  overBudgetCount: number;
+  overdueGoalCount: number;
+  maturedInvestmentCount: number;
+  alertBudgetCount: number;
+};
+
+export type HomeAttentionKind =
+  | 'integrity'
+  | 'planned_overdue'
+  | 'budget_over'
+  | 'goals_overdue'
+  | 'investments_matured'
+  | 'budget_alert'
+  | 'neutral';
+
+export type HomeAttentionState = {
+  kind: HomeAttentionKind;
+  label: string;
+  status: 'danger' | 'warning' | 'neutral';
+};
+
+export function selectHomeAttentionState(input: HomeAttentionStateInput): HomeAttentionState {
+  if (input.quarantinedCount > 0) {
+    return { kind: 'integrity', label: 'Revisa datos preservados', status: 'danger' };
+  }
+  if (input.overduePlannedCount > 0) {
+    return { kind: 'planned_overdue', label: 'Hay movimientos planificados vencidos', status: 'warning' };
+  }
+  if (input.overBudgetCount > 0) {
+    return { kind: 'budget_over', label: 'Presupuesto excedido', status: 'danger' };
+  }
+  if (input.overdueGoalCount > 0) {
+    return { kind: 'goals_overdue', label: 'Hay metas con fecha límite vencida', status: 'warning' };
+  }
+  if (input.maturedInvestmentCount > 0) {
+    return { kind: 'investments_matured', label: 'Hay inversiones que requieren revisión', status: 'warning' };
+  }
+  if (input.alertBudgetCount > 0) {
+    return { kind: 'budget_alert', label: 'Presupuesto cerca del límite', status: 'warning' };
+  }
+  return { kind: 'neutral', label: 'Sin alertas destacadas', status: 'neutral' };
+}
+
+
 export function selectHomeReadModel(input: HomeReadModelInput) {
   const trackedBudgets = input.budgetDetails.filter(row => row.configured);
   const budgetLimit = trackedBudgets.reduce((sum,row)=>sum+row.limit,0);
@@ -67,6 +114,13 @@ export function selectHomeReadModel(input: HomeReadModelInput) {
 
   return {
     attentionCount,
+    attentionSources:{
+      overduePlannedCount:grouped.overdue.length,
+      overBudgetCount,
+      overdueGoalCount,
+      maturedInvestmentCount,
+      alertBudgetCount,
+    },
     position:{
       liquidAssets:input.report.netWorth.liquidAssets,
       investments:input.report.netWorth.investments,

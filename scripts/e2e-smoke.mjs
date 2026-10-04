@@ -545,10 +545,16 @@ async function main() {
         const home = document.querySelector('[data-home-prisma="true"]');
         const modules = document.querySelector('[data-home-layout="module-grid"]');
         const metrics = document.querySelector('[data-home-layout="position-metrics"]');
-        if (!home || !modules || !metrics) return false;
+        const status = home?.querySelector('[data-home-status-pill]');
+        const heading = home?.querySelector('h1');
+        if (!home || !modules || !metrics || !(status instanceof HTMLElement) || !(heading instanceof HTMLElement)) return false;
         const moduleColumns = getComputedStyle(modules).gridTemplateColumns.split(' ').filter(Boolean).length;
         const metricColumns = getComputedStyle(metrics).gridTemplateColumns.split(' ').filter(Boolean).length;
-        return moduleColumns === 2 && metricColumns === 4;
+        return moduleColumns === 2
+          && metricColumns === 4
+          && heading.textContent?.trim() === 'Tu panorama financiero.'
+          && status.innerText.trim().length > 0
+          && home.textContent?.includes('período');
       })()`,
       'Home Prisma desktop',
     );
@@ -603,14 +609,53 @@ async function main() {
     await waitFor(
       client,
       `(() => {
+        const home = document.querySelector('[data-home-prisma="true"]');
         const modules = document.querySelector('[data-home-layout="module-grid"]');
         const metrics = document.querySelector('[data-home-layout="position-metrics"]');
-        if (!modules || !metrics) return false;
+        const status = home?.querySelector('[data-home-status-pill]');
+        if (!home || !modules || !metrics || !(status instanceof HTMLElement)) return false;
         const moduleColumns = getComputedStyle(modules).gridTemplateColumns.split(' ').filter(Boolean).length;
         const metricColumns = getComputedStyle(metrics).gridTemplateColumns.split(' ').filter(Boolean).length;
-        return moduleColumns === 1 && metricColumns === 1;
+        return moduleColumns === 1
+          && metricColumns === 1
+          && status.getBoundingClientRect().right <= window.innerWidth + 1;
       })()`,
       'Home Prisma móvil',
+    );
+
+    // Final UI Polish P6: editorial header and unified status must remain contained at the 320px gate.
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 320,
+      height: 800,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `(() => {
+        const home = document.querySelector('[data-home-prisma="true"]');
+        const heading = home?.querySelector('h1');
+        const status = home?.querySelector('[data-home-status-pill]');
+        if (!(home instanceof HTMLElement) || !(heading instanceof HTMLElement) || !(status instanceof HTMLElement)) return false;
+        const statusRect = status.getBoundingClientRect();
+        return heading.textContent?.trim() === 'Tu panorama financiero.'
+          && status.innerText.trim().length > 0
+          && statusRect.left >= -1
+          && statusRect.right <= window.innerWidth + 1
+          && document.documentElement.scrollWidth <= window.innerWidth + 1;
+      })()`,
+      'Final UI Polish P6 Home 320',
+    );
+    await client.command('Emulation.setDeviceMetricsOverride', {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: false,
+    });
+    await waitFor(
+      client,
+      `getComputedStyle(document.querySelector('[data-shell-nav="mobile"]')).display !== 'none'`,
+      'retorno Home móvil 390',
     );
 
     // Phase 20.9.8: the global composer must remain contained on mobile and request a decimal keyboard.

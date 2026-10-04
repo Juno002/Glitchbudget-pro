@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P5 Gate aprobado · PR #119 · staged
+**Estado:** EN EJECUCIÓN · P6 Gate aprobado · PR #120 · staged
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -150,7 +150,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 · staged |
 | P5 | Comparación y análisis profundo | No | Gate aprobado · PR #119 · staged |
-| P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
+| P6 | Transplante Prisma a Home | Selector puro de estado | Gate aprobado · PR #120 · staged |
 | P7 | Regresión global e integración | No | No iniciado |
 
 No se permite trabajo paralelo entre puntos. La regla normal exige integrar P(n) antes de P(n+1), salvo la política temporal P4–P7 autorizada abajo, que conserva la misma dependencia estricta mediante ramas apiladas y gates completos sin tocar `main`.
@@ -1205,8 +1205,8 @@ P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
 P3 — Gate aprobado · PR #117
 P4 — Gate aprobado · PR #118 · STAGED (sin merge por política P4–P7)
 P5 — Gate aprobado · PR #119 · STAGED (sin merge por política P4–P7)
-P6 — SIGUIENTE AUTORIZADA desde HEAD de P5
-P7 — BLOQUEADO POR P6
+P6 — Gate aprobado · PR #120 · STAGED (sin merge por política P4–P7)
+P7 — SIGUIENTE AUTORIZADA desde HEAD de P6
 ```
 
 No cambiar estos estados por anticipación. Solo el gate real de cada punto desbloquea el siguiente.
@@ -1363,4 +1363,22 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - `npm run test:e2e`: aprobado; smoke completo con responsive, temas, privacidad, navegación y offline.
 - Diff funcional de P5: ninguno; solo tests de cierre de Reportes.
 - Reportes queda **cerrado** dentro de Final UI Polish. Siguiente punto autorizado: **P6**, desde el HEAD staged de P5.
+
+
+## Registro P6 — 4 de octubre de 2026
+
+**Gate aprobado · PR #120 · STAGED** — PR apilado sobre P5, deliberadamente sin merge a `main`.
+
+- Home usa apertura editorial **«Tu panorama financiero.»** con fecha financiera local y período canónico.
+- Nuevo selector puro `selectHomeAttentionState()` aplica la prioridad contractual exacta: integridad → planificados vencidos → presupuesto excedido → metas vencidas → inversiones a revisar → presupuesto en alerta → neutral.
+- El read model expone conteos completos antes de recortes visuales. Se verificó el caso de tres metas vencidas con solo dos filas visibles: el pill sigue reportando metas vencidas y nunca cae en neutral.
+- Los dos badges globales previos fueron sustituidos por un único status pill; los estados contextuales dentro de módulos permanecen.
+- Durante loading se muestra skeleton y no «Sin alertas destacadas», evitando un neutral prematuro antes de resolver las fuentes.
+- `npm run check`: **795/795** tests, 0 fallos.
+- `npm run benchmark:ledger`: aprobado.
+- `npm run benchmark:reports`: **18/18** mediciones, gate aprobado.
+- `npm run build`: aprobado.
+- `npm run test:e2e`: aprobado; valida Home desktop/390 y gate específico a **320 px**, además del smoke global, privacidad, navegación y offline.
+- Diff revisado: solo Home/read-model/tests/E2E; sin cambios en Reportes, Movimientos, Plan, settings, schema, backup, persistencia, ledger ni red.
+- Siguiente punto autorizado: **P7**, desde el HEAD staged de P6.
 
