@@ -9,9 +9,8 @@ const home = read('src/components/dashboard/summary-tab.tsx');
 const workflow = read('.github/workflows/checks.yml');
 
 test('P7 integration smoke exercises every report range including custom', () => {
-  for (const preset of ['7d','30d','3m','6m','1y']) {
-    assert.match(smoke, new RegExp("data-report-preset=\\\"" + preset + "\\\""));
-  }
+  assert.match(smoke, /\['7d','30d','3m','6m','1y'\]/);
+  assert.match(smoke, /data-report-preset="\$\{preset\}"/);
   assert.match(smoke, /data-report-preset="custom"/);
   assert.match(smoke, /Final UI Polish P7 rango Custom/);
 });
