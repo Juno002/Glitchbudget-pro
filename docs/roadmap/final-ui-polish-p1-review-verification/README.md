@@ -37,3 +37,6 @@ Veinte variantes del dataset P0: Prisma/Neón 320/360/390/1280 y legado 320/1280
 `npm run check`: **745/745** (10 tests del presenter). `npm run build`: aprobado, export estático y CSP/local-only. `npm run test:e2e`: aprobado, **40/40** variantes históricas más matriz original de veinte, siete tipos, base cero, Prisma/Neón/legado, foco, touch, reduced motion, loading/vacío, cuatro tablas, tooltip privado, navegación y recarga offline. P1 no requiere benchmark propio; P0 y contrato P3 intactos.
 
 Entorno: Node v24.19.0, Chromium 151, Linux x64, executor cloud. Bloqueantes: ninguno. El formato “De” del shell sigue registrado aparte en issue #112 y no se modifica en este PR.
+
+
+**Gate aprobado · PR #114** — [PR de las cuatro correcciones](https://github.com/Juno002/Glitchbudget-pro/pull/114). Integración efectiva únicamente con `merged=true` en GitHub. Se conserva el cierre original P1 en #111; P2 no se inicia.
