@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P3 Gate aprobado · PR #117
+**Estado:** EN EJECUCIÓN · P4 Gate aprobado · PR #118 · staged
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -148,7 +148,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
 | P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
-| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
+| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 · staged |
 | P5 | Comparación y análisis profundo | No | No iniciado |
 | P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
 | P7 | Regresión global e integración | No | No iniciado |
@@ -1203,8 +1203,8 @@ P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
 P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
 P3 — Gate aprobado · PR #117
-P4 — SIGUIENTE AUTORIZADA (requiere PR #117 mergeado)
-P5 — BLOQUEADO POR P4
+P4 — Gate aprobado · PR #118 · STAGED (sin merge por política P4–P7)
+P5 — SIGUIENTE AUTORIZADA desde HEAD de P4
 P6 — BLOQUEADO POR P5
 P7 — BLOQUEADO POR P6
 ```
@@ -1331,3 +1331,20 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Moneda verificada: `amount` representa centavos de la base en los flujos soportados. Composer usa la moneda configurada; `transaction-service.ts` rechaza cuentas extranjeras y fija metadata de base en las escrituras con cuenta/crédito; `backup-json.ts` y `csv-backup.ts` normalizan importaciones. El fixture USD/FX59 es adversarial y comprueba compatibilidad con `selectSpendingReport()`, no soporte FX. Inspección estática separada: editar un gasto legado sin cuenta puede conservar `amountBase` previo, aunque `amount` actualizado sigue siendo el valor base que Reportes presenta; no se cambia esa metadata dentro de P3 ni impide este gate.
 - Composición debajo del período comparable intencional: el contrato vigente exige integración dentro del hero y no exige columnas de escritorio. Hero, lista y tooltip usan el mismo formato `es-DO` con día/mes corto/año y fecha civil al mediodía; los rangos de un día se colapsan de la misma forma. El cero completo conserva altura cero y valor exacto visible en la lista; una marca adicional en la línea base queda como observación posterior, sin implementar en esta revisión.
 - Evidencia compacta: `verification.json` conserva metadata del fixture y resumen del gate; `reports-benchmark.json`, entorno/configuración, las 18 medianas/ratios y el resultado. Escenarios, filas y comprobaciones se regeneran desde el harness fijo; las muestras se emiten al repetir `npm run benchmark:reports`. Se eliminan registros repetidos del PR, conservando baseline P0 y referencias P0–P2.
+
+
+## Registro P4 — 4 de octubre de 2026
+
+**Gate aprobado · PR #118 · STAGED** — PR atómico `final-ui-polish-p4-category-distribution`, abierto contra `main` y deliberadamente **sin merge** por la política temporal P4–P7.
+
+- Proyección pura `projectReportCategoryDistribution()`: top 4 por valor, `Otros` exacto para el resto, categorías con valor no positivo fuera del donut y orden estable con desempate canónico.
+- La leyenda usa mayor resto a una decimal y suma exactamente **100.0 %** cuando el total es positivo. `Otros` conserva la suma exacta de sus categorías fuente; la tabla detallada sigue mostrando todas las categorías originales sin agrupación.
+- Donut Prisma con total central y leyenda propia; no usa la leyenda automática de Recharts. Importe por fila solo visible con balances visibles; tooltip y total usan `usePrivateCurrency()`. El donut queda sin animación para respetar reduced motion de forma inequívoca.
+- `npm run check`: **783/783** tests, 0 fallos.
+- `npm run benchmark:ledger`: aprobado; 50k **37.062 ms** posición / **37.425 ms** historiales en CI.
+- `npm run benchmark:reports`: **18/18** mediciones con oracle aprobado; a 50k ratios **0.491–0.550×**, todas bajo el gate ≤2×.
+- `npm run build`: aprobado.
+- `npm run test:e2e`: aprobado; conserva P0–P3, 320/360/390/1280, Prisma/Neón, privacidad, teclado/touch, reduced motion, loading/vacío, navegación y recarga offline.
+- Diff revisado: sin cambios de schema, migraciones, backup/envelope, ledger, semánticas financieras, deuda/currency/accounts, red ni navegación principal.
+- Siguiente punto autorizado: **P5**, únicamente desde el HEAD staged de P4 y sin merge a `main`.
+
