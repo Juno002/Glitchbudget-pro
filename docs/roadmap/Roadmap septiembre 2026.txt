@@ -4917,6 +4917,8 @@ Corrección editorial de P1 solicitada explícitamente en la revisión del 4 de 
 
 Corrección de P2 solicitada explícitamente en la revisión del 4 de octubre de 2026: pluralización «1 movimiento» / «N movimientos», importe comparable con la fuente del texto conservando su formato indivisible, máscaras del hero con el glifo privado existente y tipografía/tamaño de texto consistentes, y copy «Sin gasto anterior con el que comparar» cuando el total anterior es cero. El contrato exacto queda en `final-ui-polish.md`; no modifica métricas, historia, tablas, privacidad ni la secuencia P0–P7. Se ejecuta como revisión de P2 antes de iniciar P3.
 
+Correcciones de P3 solicitadas explícitamente al revisar PR #117: ocultar el gráfico y la lista duplicada cuando existan menos de dos ventanas, conservando «Historial parcial» accesible si corresponde; distinguir la barra parcial con un borde punteado neutral. El contrato exacto queda en `final-ui-polish.md`; se cierra en el mismo PR #117 sin modificar la agregación, rangos, totales, cobertura, semántica monetaria ni iniciar P4.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:

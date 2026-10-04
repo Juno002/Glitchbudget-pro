@@ -14,6 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
+import type { SpendingTrendPoint } from '@/domain/reports';
 
 const SEGMENT_COLORS = [
   'hsl(var(--chart-1))',
@@ -139,6 +140,106 @@ export function ReportComparisonBars({ data }: { data:ReportComparisonChartRow[]
           <Bar name="Actual" dataKey="current" fill="hsl(var(--primary))" radius={[5,5,0,0]} />
         </BarChart>
       </ResponsiveContainer>
+    </div>
+  );
+}
+
+function spendingWindowLabel(point: SpendingTrendPoint) {
+  const formatter = new Intl.DateTimeFormat('es-DO', { day: 'numeric', month: 'short', year: 'numeric' });
+  const format = (date: string) => formatter.format(new Date(date + 'T12:00:00'));
+  return point.range.start === point.range.end ? format(point.range.start) : format(point.range.start) + ' – ' + format(point.range.end);
+}
+
+function SpendingTrendBar({
+  x, y, width, height, fill, fillOpacity, stroke, strokeWidth, strokeDasharray, payload,
+}: {
+  x?: number; y?: number; width?: number; height?: number;
+  fill?: string; fillOpacity?: number; stroke?: string; strokeWidth?: number; strokeDasharray?: string;
+  payload?: SpendingTrendPoint;
+}) {
+  return (
+    <rect
+      x={x} y={y} width={width} height={height} rx={4}
+      fill={fill} fillOpacity={fillOpacity} stroke={stroke} strokeWidth={strokeWidth} strokeDasharray={strokeDasharray}
+      data-spending-trend-bar
+      data-spending-coverage={payload?.coverage}
+      data-spending-current={payload?.isCurrent ? 'true' : 'false'}
+    >
+      {payload ? <title>{spendingWindowLabel(payload)} · {payload.isCurrent ? 'Actual' : 'Anterior'}{payload.coverage === 'partial' ? ' · Historial parcial' : ''}</title> : null}
+    </rect>
+  );
+}
+
+export function ReportSpendingTrend({ data }: { data: SpendingTrendPoint[] }) {
+  const money = usePrivateCurrency();
+  if (!data.length) return null;
+  if (data.length === 1) {
+    const point = data[0];
+    return point.coverage === 'partial' ? (
+      <p
+        className="text-xs text-muted-foreground"
+        data-spending-trend-partial
+        data-spending-window-start={point.range.start}
+        data-spending-window-end={point.range.end}
+        data-spending-coverage={point.coverage}
+        data-spending-current={point.isCurrent ? 'true' : 'false'}
+      >Historial parcial</p>
+    ) : null;
+  }
+
+  return (
+    <div className="min-w-0 space-y-3" data-report-chart="spending-trend">
+      <div className="h-44 w-full" aria-hidden="true">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 8 }} accessibilityLayer={false}>
+            <XAxis dataKey="range.start" hide />
+            <Tooltip
+              isAnimationActive={false}
+              content={({ active, payload }) => {
+                const point = payload?.[0]?.payload as SpendingTrendPoint | undefined;
+                if (!active || !point) return null;
+                return (
+                  <div className="rounded-[var(--radius-interactive)] border bg-card p-3 text-xs text-card-foreground shadow-[var(--shadow-control)]">
+                    <p>{spendingWindowLabel(point)} · {point.isCurrent ? 'Actual' : 'Anterior'}</p>
+                    {point.coverage === 'partial' ? <p>Historial parcial</p> : null}
+                    <p className="mt-1 whitespace-nowrap">{money(point.total)}</p>
+                  </div>
+                );
+              }}
+            />
+            <Bar dataKey="total" isAnimationActive={false} shape={<SpendingTrendBar />}>
+              {data.map(point => (
+                <Cell
+                  key={point.range.start}
+                  fill={point.isCurrent ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'}
+                  fillOpacity={point.isCurrent ? 1 : 0.55}
+                  stroke={point.isCurrent || point.coverage === 'partial' ? 'hsl(var(--foreground))' : 'none'}
+                  strokeWidth={point.isCurrent || point.coverage === 'partial' ? 2 : 0}
+                  strokeDasharray={point.coverage === 'partial' ? '4 3' : undefined}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <ol className="grid gap-2 text-xs sm:grid-cols-2 lg:grid-cols-3">
+        {data.map(point => (
+          <li
+            key={point.range.start}
+            className={'min-w-0 space-y-1 rounded-[var(--radius-interactive)] border p-2 ' + (point.isCurrent ? 'border-foreground/40 text-foreground' : 'border-[var(--border-subtle)] text-muted-foreground')}
+            data-spending-trend-point
+            data-spending-window-start={point.range.start}
+            data-spending-window-end={point.range.end}
+            data-spending-coverage={point.coverage}
+            data-spending-current={point.isCurrent ? 'true' : 'false'}
+          >
+            <p className={point.isCurrent ? 'font-semibold' : undefined}>{point.isCurrent ? 'Actual' : 'Anterior'}</p>
+            <p>{spendingWindowLabel(point)}</p>
+            {point.coverage === 'partial' ? <p>Historial parcial</p> : null}
+            <p className="whitespace-nowrap text-sm" data-spending-trend-money>{money(point.total)}</p>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }

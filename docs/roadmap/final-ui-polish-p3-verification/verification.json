@@ -1,0 +1,48 @@
+{
+  "fixture": {
+    "version": 1,
+    "instant": "2026-10-04T12:00:00.000Z",
+    "timezone": "UTC",
+    "sourcepath": "scripts/final-ui-polish-p3-verification.mjs"
+  },
+  "result": {
+    "presetCount": 6,
+    "scenarioCount": 6,
+    "checks": 130,
+    "captures": 16,
+    "widths": [
+      320,
+      360,
+      390,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "legacyWidths": [
+      320,
+      1280
+    ],
+    "windows": "passed",
+    "coverage": "passed",
+    "singlePartial": "passed",
+    "singleFull": "passed",
+    "partialOutline": "passed",
+    "unassignedAndRemovedAccountHistory": "passed",
+    "accountStartDateDoesNotCutSpending": "passed",
+    "noFakeZeros": "passed",
+    "realFullZeros": "passed",
+    "currentMatchesHero": "passed",
+    "privacy": "passed",
+    "tooltips": "passed",
+    "neutralCurrentHighlight": "passed",
+    "keyboard": "passed",
+    "touch": "passed",
+    "reducedMotion": "passed",
+    "loadingObserved": true,
+    "empty": "passed",
+    "disabled": "chart has no controls; existing range presets remain enabled",
+    "restoredOriginalDataset": true
+  }
+}

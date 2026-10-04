@@ -210,3 +210,55 @@ export function selectReportsSnapshot(input:ReportsSnapshotInput, range:DateRang
     quickRead,
   };
 }
+
+export const SPENDING_TREND_MAX_WINDOWS: Record<ReportRangePreset, number> = {
+  '7d': 6, '30d': 6, '3m': 4, '6m': 4, '1y': 3, custom: 6,
+};
+
+export type SpendingTrendPoint = {
+  range: DateRange;
+  total: number;
+  coverage: 'full' | 'partial';
+  isCurrent: boolean;
+};
+
+/** Comparable spending windows over canonical Expense rows, aggregated in O(N + W). */
+export function selectSpendingTrend(expenses: readonly Expense[], range: DateRange, maxWindows: number): {
+  spendingHistoryStart: string | null;
+  windows: SpendingTrendPoint[];
+} {
+  if (!Number.isInteger(maxWindows) || maxWindows <= 0) throw new Error('El número de ventanas debe ser un entero positivo.');
+  const days = rangeDays(range);
+  const currentEnd = ordinal(range.end);
+  const newestFirst: SpendingTrendPoint[] = [];
+  let windowRange = { ...range };
+  for (let index = 0; index < maxWindows; index += 1) {
+    newestFirst.push({ range: windowRange, total: 0, coverage: 'full', isCurrent: index === 0 });
+    if (index + 1 < maxWindows) windowRange = previousComparableRange(windowRange);
+  }
+
+  let spendingHistoryStart: string | null = null;
+  let historyStartDay: number | null = null;
+  for (const expense of expenses) {
+    const date = expense.date.slice(0, 10);
+    const day = ordinal(date);
+    if (historyStartDay === null || day < historyStartDay) {
+      historyStartDay = day;
+      spendingHistoryStart = date;
+    }
+    // Contiguous, equal-duration windows give every expense one possible bucket.
+    const index = Math.floor((currentEnd - day) / days);
+    if (index >= 0 && index < maxWindows) newestFirst[index].total += expense.amount;
+  }
+
+  const windows: SpendingTrendPoint[] = [];
+  if (historyStartDay !== null) {
+    for (let index = newestFirst.length - 1; index >= 0; index -= 1) {
+      const point = newestFirst[index];
+      if (ordinal(point.range.end) < historyStartDay) continue;
+      point.coverage = ordinal(point.range.start) < historyStartDay ? 'partial' : 'full';
+      windows.push(point);
+    }
+  }
+  return { spendingHistoryStart, windows };
+}

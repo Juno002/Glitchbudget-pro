@@ -1,0 +1,411 @@
+{
+  "environment": {
+    "executor": "cloud executor",
+    "node": "v24.19.0",
+    "platform": "linux",
+    "arch": "x64",
+    "timezone": "UTC"
+  },
+  "command": "npm run benchmark:reports",
+  "source": "scripts/benchmark-reports.mjs",
+  "configuration": {
+    "benchmark": "reports-spending-trend",
+    "type": "environment",
+    "node": "v24.19.0",
+    "platform": "linux",
+    "arch": "x64",
+    "datasetTimeZone": "UTC",
+    "config": {
+      "anchor": "2026-10-04",
+      "historyStart": "2023-01-01",
+      "customStart": "2026-08-17",
+      "sizes": [
+        1000,
+        10000,
+        50000
+      ],
+      "presets": [
+        "7d",
+        "30d",
+        "3m",
+        "6m",
+        "1y",
+        "custom"
+      ],
+      "samples": 7,
+      "warmups": 1,
+      "dateStep": 37,
+      "trendRatioLimit": 2
+    },
+    "singleWindowSelector": "selectSpendingReport",
+    "trendSelector": "selectSpendingTrend"
+  },
+  "measurements": [
+    {
+      "expenses": 1000,
+      "preset": "7d",
+      "range": {
+        "start": "2026-09-28",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.6730364403147389,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.42230700000000354,
+      "trendMedianMs": 0.2842279999999988
+    },
+    {
+      "expenses": 1000,
+      "preset": "30d",
+      "range": {
+        "start": "2026-09-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5859904771410572,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.3406540000000007,
+      "trendMedianMs": 0.19962000000001012
+    },
+    {
+      "expenses": 1000,
+      "preset": "3m",
+      "range": {
+        "start": "2026-07-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5155030147253423,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.3330320000000029,
+      "trendMedianMs": 0.17167900000001168
+    },
+    {
+      "expenses": 1000,
+      "preset": "6m",
+      "range": {
+        "start": "2026-04-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.6037913277110049,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.334975,
+      "trendMedianMs": 0.20225499999999386
+    },
+    {
+      "expenses": 1000,
+      "preset": "1y",
+      "range": {
+        "start": "2025-10-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 3,
+      "windows": 3,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5565170330714948,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.3418350000000032,
+      "trendMedianMs": 0.19023699999999621
+    },
+    {
+      "expenses": 1000,
+      "preset": "custom",
+      "range": {
+        "start": "2026-08-17",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5268383380525404,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 0.32915599999998335,
+      "trendMedianMs": 0.17341200000001322
+    },
+    {
+      "expenses": 10000,
+      "preset": "7d",
+      "range": {
+        "start": "2026-09-28",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5264934934212178,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.1989930000000015,
+      "trendMedianMs": 1.6842490000000225
+    },
+    {
+      "expenses": 10000,
+      "preset": "30d",
+      "range": {
+        "start": "2026-09-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.46999329154281816,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.4463960000000213,
+      "trendMedianMs": 1.6197830000000124
+    },
+    {
+      "expenses": 10000,
+      "preset": "3m",
+      "range": {
+        "start": "2026-07-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5203879700345329,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.3720129999999813,
+      "trendMedianMs": 1.7547550000000456
+    },
+    {
+      "expenses": 10000,
+      "preset": "6m",
+      "range": {
+        "start": "2026-04-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.47940397760546827,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.444232999999997,
+      "trendMedianMs": 1.6511790000000133
+    },
+    {
+      "expenses": 10000,
+      "preset": "1y",
+      "range": {
+        "start": "2025-10-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 3,
+      "windows": 3,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.4936239314522794,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.4854550000000017,
+      "trendMedianMs": 1.7205040000000054
+    },
+    {
+      "expenses": 10000,
+      "preset": "custom",
+      "range": {
+        "start": "2026-08-17",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.49902798880732263,
+      "gate": {
+        "required": false,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 3.2453330000000165,
+      "trendMedianMs": 1.619512000000043
+    },
+    {
+      "expenses": 50000,
+      "preset": "7d",
+      "range": {
+        "start": "2026-09-28",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5076888761019284,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 16.395178999999985,
+      "trendMedianMs": 8.32364999999993
+    },
+    {
+      "expenses": 50000,
+      "preset": "30d",
+      "range": {
+        "start": "2026-09-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.5083438152811594,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 16.593608000000017,
+      "trendMedianMs": 8.435257999999976
+    },
+    {
+      "expenses": 50000,
+      "preset": "3m",
+      "range": {
+        "start": "2026-07-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.49784885434760007,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 17.053470999999945,
+      "trendMedianMs": 8.490050999999994
+    },
+    {
+      "expenses": 50000,
+      "preset": "6m",
+      "range": {
+        "start": "2026-04-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 4,
+      "windows": 4,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.47396848994549107,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 17.77680199999986,
+      "trendMedianMs": 8.42564399999992
+    },
+    {
+      "expenses": 50000,
+      "preset": "1y",
+      "range": {
+        "start": "2025-10-05",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 3,
+      "windows": 3,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.4562868969750218,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 19.003421000000117,
+      "trendMedianMs": 8.671012000000019
+    },
+    {
+      "expenses": 50000,
+      "preset": "custom",
+      "range": {
+        "start": "2026-08-17",
+        "end": "2026-10-04"
+      },
+      "maxWindows": 6,
+      "windows": 6,
+      "spendingHistoryStart": "2023-01-01",
+      "oracle": "passed",
+      "ratio": 0.4973798664450381,
+      "gate": {
+        "required": true,
+        "limit": 2,
+        "passed": true
+      },
+      "singleWindowMedianMs": 16.572055999999975,
+      "trendMedianMs": 8.24260699999968
+    }
+  ],
+  "summary": {
+    "benchmark": "reports-spending-trend",
+    "type": "summary",
+    "measurements": 18,
+    "gatePassed": true
+  }
+}

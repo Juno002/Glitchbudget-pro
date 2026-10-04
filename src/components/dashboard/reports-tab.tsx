@@ -2,7 +2,7 @@
 
 import { Fragment, useState, type ReactNode } from 'react';
 import { useFinances } from '@/contexts/finance-context';
-import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
+import { resolveReportRange, SPENDING_TREND_MAX_WINDOWS, type ReportRangePreset } from '@/domain/reports';
 import { presentReportInsight, type ReportEditorialInsight } from '@/lib/report-editorial';
 import { localDate } from '@/lib/finance-calculations';
 import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
@@ -16,6 +16,7 @@ import { ReportRangeControls } from './report-range-controls';
 import {
   ReportCategoryDonut,
   ReportComparisonBars,
+  ReportSpendingTrend,
   ReportValueBars,
   type ReportChartRow,
   type ReportComparisonChartRow,
@@ -74,7 +75,7 @@ function quickReadBody(
 }
 
 export default function ReportsTab() {
-  const { getReportSnapshot, getBudgetStatusDetails, currentMonth, loading } = useFinances();
+  const { getReportSnapshot, getSpendingTrend, getBudgetStatusDetails, currentMonth, loading } = useFinances();
   const { setActiveTab, setPlanningTab } = useTabs();
   const money = usePrivateCurrency();
   const { balancesHidden } = useBalanceVisibility();
@@ -94,6 +95,7 @@ export default function ReportsTab() {
   }
 
   const report=getReportSnapshot(range,range.end);
+  const spendingTrend=getSpendingTrend(range,SPENDING_TREND_MAX_WINDOWS[preset]);
   const editorialQuickRead=report.quickRead.map(presentReportInsight);
   const budgetDetails=getBudgetStatusDetails(currentMonth).filter(row=>row.configured);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
@@ -209,6 +211,7 @@ export default function ReportsTab() {
                   <p>Período comparable · <span className={'whitespace-nowrap'+(balancesHidden?' text-base leading-normal tracking-normal':'')} data-spending-money="previous">{money(report.spending.previousTotal)}</span></p>
                   <p>{previousLabel}</p>
                 </div>
+                <ReportSpendingTrend data={spendingTrend.windows} />
               </CardContent>
             </Card>
           </section>

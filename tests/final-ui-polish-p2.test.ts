@@ -29,9 +29,10 @@ test('P2 spending hero presents the canonical snapshot without financial reconst
   assert.doesNotMatch(hero, /amountBase|fxRate|openingBalance|JSON\.stringify|backup|migration|schema/i);
 });
 
-test('P2 is a completed hero without charts, historical inputs, placeholders or semantic direction colors', () => {
+test('P2 retains a completed hero with only the canonical chart authorized by P3 and no semantic direction colors', () => {
   const { hero } = heroSource();
-  assert.doesNotMatch(hero, /<Report\w*Chart|<Report\w*Bars|<Report\w*Donut|ResponsiveContainer|recharts|sparkline|placeholder|spendingHistoryStart|reportHistoryStart|historyWindows|spendingTrend/i);
+  const withoutAuthorizedTrend = hero.replace(/<ReportSpendingTrend\s+data=\{[^}]+\}\s*\/>/g, '');
+  assert.doesNotMatch(withoutAuthorizedTrend, /<Report\w*Chart|<Report\w*Bars|<Report\w*Donut|ResponsiveContainer|recharts|sparkline|placeholder|spendingHistoryStart|reportHistoryStart|historyWindows|spendingTrend/i);
   assert.doesNotMatch(hero, /text-(?:bad|good|success|destructive)|brand-(?:mint|coral)|--(?:positive|negative)|(?:mint|coral)/);
 });
 
