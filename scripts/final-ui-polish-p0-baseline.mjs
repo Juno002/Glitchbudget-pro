@@ -52,7 +52,9 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
   assertCaptureDataset(dataset);
   const directory = process.env.FINAL_UI_POLISH_BASELINE_DIR;
   if (directory) await mkdir(directory, { recursive: true });
-  const order = ['quick-read', 'spending', 'comparison', 'spending-breakdown', 'cash-flow', 'net-worth', 'detail'];
+  const primaryOrder = ['quick-read', 'spending', 'spending-breakdown', 'comparison', 'analysis-access'];
+  const detailOrder = ['comparison-detail', 'spending-detail', 'cash-flow', 'net-worth', 'detail'];
+  const order = [...primaryOrder, ...detailOrder];
   const originalTheme = await client.evaluate('document.documentElement.className');
   const records = [];
   for (const preset of ['7d', '30d', '3m', '6m', '1y', 'custom']) {
@@ -105,10 +107,11 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
           };
         })()`);
         assert.deepEqual(geometry.sections.map(section => section.name), order);
-        assert.ok(geometry.sections.every(section => section.visible && section.x >= -1 && section.right <= width + 1));
+        assert.ok(geometry.sections.filter(section => primaryOrder.includes(section.name)).every(section => section.visible && section.x >= -1 && section.right <= width + 1), 'P0 lectura primaria visible y contenida');
+        assert.ok(geometry.sections.filter(section => detailOrder.includes(section.name)).every(section => !section.visible), 'P0 auditoría cerrada por defecto');
         assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal');
         assert.equal(geometry.tables.length, 4, 'P0 comparación, categorías, naturaleza y detalle');
-        assert.ok(geometry.tables.every(table => table.visible && table.rows > 0), 'P0 evidencia exacta visible');
+        assert.ok(geometry.tables.every(table => !table.visible && table.rows > 0), 'P0 evidencia exacta preservada bajo demanda');
         assert.equal(geometry.hidden, hidden);
         if (!hidden) assert.equal(geometry.moneyLeaks, true, 'P0 control positivo de importes visibles');
         if (hidden) {

@@ -18,13 +18,26 @@ test('P0 Reports delegates canonical financial reads through the existing facade
   }
 });
 
-test('P0 protects editorial order and keeps all four exact tables outside disclosure', () => {
+test('P0 preserves exact report evidence under the authorized progressive disclosure', () => {
   const source = read('src/components/dashboard/reports-tab.tsx');
-  const order = ['quick-read', 'spending', 'comparison', 'spending-breakdown', 'cash-flow', 'net-worth', 'detail'];
   const sections = [...source.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
-  assert.deepEqual(sections, [...order, 'budget-followup']);
+  assert.deepEqual(sections, [
+    'quick-read',
+    'spending',
+    'spending-breakdown',
+    'comparison',
+    'analysis-access',
+    'comparison-detail',
+    'spending-detail',
+    'cash-flow',
+    'net-worth',
+    'detail',
+    'budget-followup',
+  ]);
   assert.equal([...source.matchAll(/<Table>/g)].length, 4);
-  assert.doesNotMatch(source, /Accordion|Collapsible|Ver tabla/);
+  assert.match(source, /Ver análisis detallado/);
+  assert.match(source, /aria-expanded=\{showDetailedAnalysis\}/);
+  assert.match(source, /hidden=\{!showDetailedAnalysis\}/);
   for (const binding of ['comparisonRows.map', 'report.spending.categories.map', 'report.spending.byNature.map', 'report.spending.largestTransactions.map']) {
     assert.ok(source.includes(binding), binding);
   }

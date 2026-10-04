@@ -1227,14 +1227,49 @@ async function main() {
         const visual = document.querySelector('[data-report-visual="categories"]');
         const donut = visual?.querySelector('[data-report-chart="category-donut"]');
         const legend = visual?.querySelector('[data-category-legend]');
-        const table = visual?.querySelector('table');
+        const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
+        const detail = document.querySelector('#report-detailed-analysis');
         return visual instanceof HTMLElement
           && donut instanceof HTMLElement
           && legend instanceof HTMLOListElement
           && legend.querySelectorAll('[data-category-legend-item]').length > 0
-          && table instanceof HTMLTableElement;
+          && !visual.querySelector('table')
+          && button instanceof HTMLButtonElement
+          && button.getAttribute('aria-expanded') === 'false'
+          && detail instanceof HTMLElement
+          && detail.hidden;
       })()`,
-      'Final UI Polish P7 donut + leyenda + tabla exacta',
+      'Reportes lectura progresiva compacta',
+    );
+
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir el análisis detallado.');
+
+    await waitFor(
+      client,
+      `(() => {
+        const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
+        const detail = document.querySelector('#report-detailed-analysis');
+        const requiredSections = [
+          'comparison-detail',
+          'spending-detail',
+          'cash-flow',
+          'net-worth',
+          'detail',
+          'budget-followup',
+        ];
+        return button instanceof HTMLButtonElement
+          && button.getAttribute('aria-expanded') === 'true'
+          && detail instanceof HTMLElement
+          && !detail.hidden
+          && detail.querySelectorAll('table').length === 4
+          && requiredSections.every(section => detail.querySelector('[data-report-section="' + section + '"]'));
+      })()`,
+      'Reportes análisis detallado completo',
     );
 
     if (!await client.evaluate(`(() => {
@@ -1251,7 +1286,20 @@ async function main() {
       'Final UI Polish P7 privacidad de Reportes',
     );
 
-    // Phase 20.8.8: exercise the complete Reports hierarchy at a mobile viewport.
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
+      if (!(button instanceof HTMLButtonElement)) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo cerrar el análisis detallado.');
+    await waitFor(
+      client,
+      `document.querySelector('button[aria-controls="report-detailed-analysis"]')?.getAttribute('aria-expanded') === 'false'
+        && document.querySelector('#report-detailed-analysis')?.hidden === true`,
+      'Reportes vuelve a lectura compacta',
+    );
+
+    // Mobile validates the compact reading surface, not the optional audit sheet.
     await client.command('Emulation.setDeviceMetricsOverride', {
       width: 390,
       height: 844,
@@ -1264,19 +1312,21 @@ async function main() {
         const reports = document.querySelector('[data-reports-prisma="true"]');
         const controls = document.querySelector('[data-report-range-controls="prisma"]');
         const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
+        const detail = document.querySelector('#report-detailed-analysis');
         const requiredSections = [
           'quick-read',
           'spending',
-          'comparison',
           'spending-breakdown',
-          'cash-flow',
-          'net-worth',
-          'detail',
+          'comparison',
+          'analysis-access',
         ];
         const sections = requiredSections
           .map(section => document.querySelector('[data-report-section="' + section + '"]'));
-        const charts = [...document.querySelectorAll('[data-report-chart]')];
+        const primaryCharts = [...document.querySelectorAll(
+          '[data-report-section="spending"] [data-report-chart], [data-report-section="spending-breakdown"] [data-report-chart], [data-report-section="comparison"] [data-report-chart]'
+        )];
         const presetButtons = [...document.querySelectorAll('[data-report-preset]')];
+        const detailButton = document.querySelector('button[aria-controls="report-detailed-analysis"]');
         const visibleAndContained = node => {
           if (!(node instanceof HTMLElement)) return false;
           const style = getComputedStyle(node);
@@ -1299,10 +1349,13 @@ async function main() {
           && visibleAndContained(controls)
           && getComputedStyle(mobileNav).display !== 'none'
           && sections.every(visibleAndContained)
-          && charts.length >= 5
-          && charts.every(visibleAndContained)
+          && detail instanceof HTMLElement
+          && detail.hidden
+          && primaryCharts.length >= 2
+          && primaryCharts.every(visibleAndContained)
           && presetButtons.length === 6
           && presetButtons.every(usableControl)
+          && usableControl(detailButton)
           && document.documentElement.scrollWidth <= window.innerWidth + 1;
       })()`,
       'Reportes Prisma móvil',

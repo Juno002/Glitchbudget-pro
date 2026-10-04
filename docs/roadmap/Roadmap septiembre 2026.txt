@@ -4932,6 +4932,34 @@ Por instrucción explícita del usuario, **no se hará ningún merge adicional a
 - Si cualquier gate falla, la secuencia se detiene en ese punto. No se usa P5/P6/P7 para ocultar una regresión anterior.
 
 
+## Corrección de producto autorizada — lectura progresiva de Reportes
+
+**Estado: GATE APROBADO · PR #122 / pendiente de integración a `main`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 después de revisar el resultado de Final UI Polish.
+
+Esta corrección **no crea P8, Fase 20.11 ni Fase 21** y no reabre el motor financiero. P0–P7 permanecen completadas. Corrige exclusivamente una decisión de composición de P5 que, aunque técnicamente válida, dejó Reportes como una hoja demasiado larga y convirtió la auditoría opcional en contenido siempre visible.
+
+Contrato autorizado:
+
+- conservar `selectReportsSnapshot()`, Quick Read, hero/tendencia, donut, comparación, cash flow, patrimonio, tablas exactas y movimientos sin modificar sus cálculos;
+- vista inicial: conclusión editorial → gasto/tendencia → distribución por categoría → comparación visual;
+- mover la evidencia profunda a un único disclosure explícito **«Ver análisis detallado»**;
+- al abrirlo deben seguir disponibles las tablas exactas, naturaleza del gasto, cash flow, patrimonio, movimientos destacados y seguimiento de presupuestos;
+- no introducir IA, causalidad inventada, nuevas métricas, schema, migraciones, persistencia, red ni navegación principal;
+- privacidad, 320/390/desktop, Prisma/Neón, teclado, reduced motion, build y E2E siguen siendo gates;
+- no mergear a `main` hasta que la corrección esté verde y revisada.
+
+Esta autorización supersede únicamente las frases de P5/P7 que exigían que toda tabla/evidencia permaneciera visible simultáneamente o prohibían disclosure. La auditabilidad se conserva **bajo demanda**, no se elimina.
+
+Registro de ejecución de PR #122:
+
+- `npm run check`: **801/801**, 0 fallos;
+- `npm run benchmark:ledger`: aprobado;
+- `npm run benchmark:reports`: **18 mediciones**, `gatePassed: true`;
+- `npm run build`: aprobado, export estático/local-only intacto;
+- `npm run test:e2e`: aprobado, incluyendo lectura compacta, apertura/cierre del análisis detallado, privacidad, responsive y offline;
+- sin cambios de schema, migración, backup, persistencia, red, selectores financieros ni navegación principal;
+- PR #122 permanece sin merge hasta revisión/autorización explícita.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
@@ -4951,7 +4979,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = ninguna
+intervenciones pendientes autorizadas = ninguna; corrección «lectura progresiva de Reportes» con Gate aprobado en PR #122, pendiente de integración explícita
 ```
 
 No existe una Fase 20.11.

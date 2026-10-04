@@ -293,7 +293,7 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
               const flow = view.articles.find(article => article.kind === 'cash_flow_change');
               assert.ok(flow && flow.moneyTokens.length === 2, 'P1 cruce conserva ambos importes privados');
               assert.doesNotMatch(flow.body, /%/, 'P1 cruce sin porcentaje editorial');
-              const comparison = await client.evaluate(`document.querySelector('[data-report-section="comparison"] tbody')?.textContent`);
+              const comparison = await client.evaluate(`document.querySelector('[data-report-section="comparison-detail"] tbody')?.textContent`);
               assert.ok(comparison.includes(scenario.name === 'history-decrease' ? '-400%' : '+133.33%'), 'P1 tabla conserva porcentaje canónico del cruce');
             }
             view.articles.forEach(row => covered.add(row.kind));
