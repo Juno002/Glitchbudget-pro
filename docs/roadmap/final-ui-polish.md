@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P4 Gate aprobado · PR #118 · staged
+**Estado:** EN EJECUCIÓN · P5 Gate aprobado · PR #119 · staged
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -149,7 +149,7 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
 | P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 · staged |
-| P5 | Comparación y análisis profundo | No | No iniciado |
+| P5 | Comparación y análisis profundo | No | Gate aprobado · PR #119 · staged |
 | P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
 | P7 | Regresión global e integración | No | No iniciado |
 
@@ -1204,8 +1204,8 @@ P1 — Gate aprobado · PR #111
 P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
 P3 — Gate aprobado · PR #117
 P4 — Gate aprobado · PR #118 · STAGED (sin merge por política P4–P7)
-P5 — SIGUIENTE AUTORIZADA desde HEAD de P4
-P6 — BLOQUEADO POR P5
+P5 — Gate aprobado · PR #119 · STAGED (sin merge por política P4–P7)
+P6 — SIGUIENTE AUTORIZADA desde HEAD de P5
 P7 — BLOQUEADO POR P6
 ```
 
@@ -1347,4 +1347,20 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - `npm run test:e2e`: aprobado; conserva P0–P3, 320/360/390/1280, Prisma/Neón, privacidad, teclado/touch, reduced motion, loading/vacío, navegación y recarga offline.
 - Diff revisado: sin cambios de schema, migraciones, backup/envelope, ledger, semánticas financieras, deuda/currency/accounts, red ni navegación principal.
 - Siguiente punto autorizado: **P5**, únicamente desde el HEAD staged de P4 y sin merge a `main`.
+
+
+## Registro P5 — 4 de octubre de 2026
+
+**Gate aprobado · PR #119 · STAGED** — PR apilado sobre P4, deliberadamente sin merge a `main`.
+
+- Auditoría de código: la composición staged de P4 ya cumple el contrato P5; no se añadieron métricas, narrativa ni rediseño extra.
+- Caracterización nueva protege orden editorial, comparación visual seguida por tabla exacta, categorías antes de naturaleza, cash flow, patrimonio, detalle y las cuatro tablas visibles.
+- Los tests también bloquean agregación financiera nueva en React y cualquier disclosure que esconda evidencia.
+- `npm run check`: **789/789** tests, 0 fallos.
+- `npm run benchmark:ledger`: aprobado.
+- `npm run benchmark:reports`: **18/18** mediciones, gate aprobado.
+- `npm run build`: aprobado.
+- `npm run test:e2e`: aprobado; smoke completo con responsive, temas, privacidad, navegación y offline.
+- Diff funcional de P5: ninguno; solo tests de cierre de Reportes.
+- Reportes queda **cerrado** dentro de Final UI Polish. Siguiente punto autorizado: **P6**, desde el HEAD staged de P5.
 

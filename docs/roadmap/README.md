@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-Final UI Polish — P5 (comparación y análisis profundo), desde el HEAD staged de P4 · PR #118
+Final UI Polish — P6 (Home editorial + status pill), desde el HEAD staged de P5 · PR #119
 ```
 
 No crear 20.11 ni Fase 21. Final UI Polish fue autorizado explícitamente el 4 de octubre de 2026 y no constituye una fase funcional nueva. Cualquier trabajo fuera de P0–P7 exige modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) y el documento ejecutable con aprobación explícita.
@@ -33,9 +33,9 @@ No crear 20.11 ni Fase 21. Final UI Polish fue autorizado explícitamente el 4 d
 ## Final UI Polish — autorizado
 
 - **Documento ejecutable:** [Final UI Polish — Plan ejecutable y contrato de alcance](final-ui-polish.md)
-- **Estado:** en ejecución; P0 **Gate aprobado · PR #109**; P1 **Gate aprobado · PR #111**; P2 **Gate aprobado · PR #115**; correcciones P2 **Gate aprobado · PR #116**; P3 **Gate aprobado · PR #117**; P4 **Gate aprobado · PR #118 · staged**.
+- **Estado:** en ejecución; P0 **Gate aprobado · PR #109**; P1 **Gate aprobado · PR #111**; P2 **Gate aprobado · PR #115**; correcciones P2 **Gate aprobado · PR #116**; P3 **Gate aprobado · PR #117**; P4 **Gate aprobado · PR #118 · staged**; P5 **Gate aprobado · PR #119 · staged**.
 - **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`.
-- **Próxima intervención:** P5 — comparación y análisis profundo, únicamente desde el HEAD staged de [P4 · PR #118](https://github.com/Juno002/Glitchbudget-pro/pull/118). Por política temporal P4–P7 no se integra a `main` hasta cerrar P7.
+- **Próxima intervención:** P6 — Home editorial + status pill determinista, únicamente desde el HEAD staged de [P5 · PR #119](https://github.com/Juno002/Glitchbudget-pro/pull/119). Por política temporal P4–P7 no se integra a `main` hasta cerrar P7.
 - No crea 20.11 ni Fase 21; el roadmap funcional 0–20.10 permanece cerrado.
 
 ## Evaluación técnica externa al roadmap
