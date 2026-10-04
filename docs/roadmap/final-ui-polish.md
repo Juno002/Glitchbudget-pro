@@ -296,7 +296,14 @@ Debe respetar el threshold existente; P1 no lo modifica.
 
 ### `cash_flow_change`
 
-El titular debe derivarse de `direction`:
+Antes del titular general por `direction`, un cruce estricto de signo usa estos hechos observables a partir de los parámetros canónicos `previous` y `current`:
+
+- `previous > 0` y `current < 0` → `El flujo neto pasó de positivo a negativo`;
+- `previous < 0` y `current > 0` → `El flujo neto pasó de negativo a positivo`.
+
+Solo en esos dos casos se omite el porcentaje del cuerpo editorial. Los importes actual/anterior siguen pasando por `usePrivateCurrency()` y la tabla exacta conserva su comparación canónica. No se recalcula porcentaje, no se modifica `direction`, ranking ni thresholds. Cero no es un cruce estricto: mantiene las reglas existentes de base cero y dirección.
+
+En los demás casos, el titular debe derivarse de `direction`:
 
 - increase → `El flujo neto aumentó`;
 - decrease → `El flujo neto disminuyó`;
@@ -319,10 +326,10 @@ No usar “tu situación está mejor/peor”.
 ### `leading_category`
 
 ```text
-Una categoría concentró buena parte del gasto
+La categoría con mayor participación en el gasto
 ```
 
-El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de React.
+El titular es válido para todo el rango del threshold canónico, incluido 100%, y no introduce tramos ni thresholds nuevos. El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de React.
 
 ### `no_material_change`
 
@@ -330,7 +337,13 @@ El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de 
 No hay cambios destacados en este rango
 ```
 
-El cuerpo explica que ningún threshold editorial se activó. No afirmar que “todo está bien”.
+El cuerpo explica la ausencia de cambios destacados sin exponer terminología del sistema:
+
+```text
+Ninguna métrica principal cambió lo suficiente para destacarla.
+```
+
+No afirmar que “todo está bien”.
 
 ## Composición visual
 
@@ -339,6 +352,8 @@ El insight `report.quickRead[0]` es el protagonista, respetando la prioridad ya 
 Los insights secundarios, si existen, se muestran con menor peso visual y sin competir con el principal.
 
 No usar tres cards idénticas como tres titulares equivalentes.
+
+Todo importe de la lectura rápida conserva símbolo y número como una unidad indivisible, también a 320 px. Aplicar `white-space: nowrap` al token formateado por `usePrivateCurrency()`; no cambiar formato monetario, locale ni semánticas de currency.
 
 ## Archivos previstos
 
@@ -353,6 +368,9 @@ No tocar `src/domain/report-insights.ts` salvo que un test demuestre un bug prev
 
 - siete `kind` cubiertos;
 - variante `previous=0` cubierta;
+- cruces estrictos de signo en ambas direcciones, sin porcentaje editorial y con tabla exacta intacta;
+- categoría con copy válido de 35% a 100%, sin tramos nuevos;
+- símbolo e importe indivisibles a 320 px;
 - importes ocultos sin fuga;
 - 320/390/desktop;
 - Prisma/Neón;
