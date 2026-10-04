@@ -132,14 +132,17 @@ async function selectPreset(client, waitFor, preset, expected) {
       })()`), true, 'P3 fecha custom real');
     }
   }
-  const ranges = expected.map(point => [point.range.start, point.range.end, point.coverage, String(point.isCurrent)]);
+  const ranges = expected.length>=2 ? expected.map(point => [point.range.start, point.range.end, point.coverage, String(point.isCurrent)]) : [];
+  const partial = expected.length===1 && expected[0].coverage==='partial' ? [expected[0].range.start,expected[0].range.end,'partial',String(expected[0].isCurrent)] : null;
   await waitFor(client, `document.querySelector('[data-report-preset="${preset.name}"]')?.getAttribute('aria-pressed') === 'true' && JSON.stringify([...document.querySelectorAll('[data-spending-trend-point]')].map(node => [node.dataset.spendingWindowStart,node.dataset.spendingWindowEnd,node.dataset.spendingCoverage,node.dataset.spendingCurrent])) === ${JSON.stringify(JSON.stringify(ranges))}`, 'P3 ventanas ' + preset.name);
+  await waitFor(client, `(() => { const node=document.querySelector('[data-spending-trend-partial]'); const partial=node ? [node.dataset.spendingWindowStart,node.dataset.spendingWindowEnd,node.dataset.spendingCoverage,node.dataset.spendingCurrent] : null; return JSON.stringify(partial)===${JSON.stringify(JSON.stringify(partial))} && Boolean(document.querySelector('[data-report-chart="spending-trend"]'))===${expected.length>=2}; })()`, 'P3 representación con historia suficiente '+preset.name);
 }
 
 async function readTrend(client) {
   return client.evaluate(`(() => {
     const hero = document.querySelector('[data-report-hero="spending"]');
     const chart = hero?.querySelector('[data-report-chart="spending-trend"]');
+    const partial = hero?.querySelector('[data-spending-trend-partial]');
     const bounds = node => { const rect = node.getBoundingClientRect(); return {left:rect.left,right:rect.right,width:rect.width,height:rect.height}; };
     const neutralColors = ['text-foreground','text-muted-foreground'].map(className => {
       const probe = document.createElement('span'); probe.className = className; hero.appendChild(probe);
@@ -152,6 +155,10 @@ async function readTrend(client) {
       placeholderCount:hero?.querySelectorAll('[data-placeholder],.animate-pulse,canvas').length,
       controls:hero?.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]').length,
       comparisonVisible:[...document.querySelectorAll('[data-report-section="comparison"] tbody tr')].some(node => node.firstElementChild.textContent.trim()==='Gasto' && node.getClientRects().length>0),
+      pointCount:hero?.querySelectorAll('[data-spending-trend-point]').length,
+      svgCount:hero?.querySelectorAll('svg').length,
+      listCount:hero?.querySelectorAll('ol,ul').length,
+      partial:partial ? {text:partial.textContent,range:{start:partial.dataset.spendingWindowStart,end:partial.dataset.spendingWindowEnd},coverage:partial.dataset.spendingCoverage,isCurrent:partial.dataset.spendingCurrent==='true',bounds:bounds(partial),ariaHidden:Boolean(partial.closest('[aria-hidden="true"]')),attributes:attributes(partial)} : null,
       chart:chart ? {
         text:chart.innerText, bounds:bounds(chart), attributes:attributes(chart),
         svgHidden:[...chart.querySelectorAll('svg')].every(node => node.closest('[aria-hidden="true"]')),
@@ -169,6 +176,7 @@ async function readTrend(client) {
           isCurrent:node.dataset.spendingCurrent==='true',coverage:node.dataset.spendingCoverage,
           fill:getComputedStyle(node).fill,opacity:node.getAttribute('fill-opacity') || getComputedStyle(node).fillOpacity,
           strokeWidth:node.getAttribute('stroke-width') || getComputedStyle(node).strokeWidth,
+          stroke:getComputedStyle(node).stroke,dash:node.getAttribute('stroke-dasharray') || getComputedStyle(node).strokeDasharray,
           title:node.querySelector('title')?.textContent || '',bounds:bounds(node),
         })),
       } : null,
@@ -183,10 +191,27 @@ function assertTrend(view, expected, hidden) {
   assert.equal(view.controls, 0, 'P3 no añade controles al hero');
   assert.equal(view.placeholderCount, 0, 'P3 no fabrica placeholder ni loading dentro del hero');
   assert.equal(view.comparisonVisible, true, 'P3 tabla de comparación visible');
-  assert.equal(Boolean(view.chart), expected.length > 0, 'P3 historia desconocida sin chart ni ceros ficticios');
+  assert.equal(Boolean(view.chart), expected.length >= 2, 'P3 tendencia visual solo con dos o más ventanas observadas');
   const total = expected.find(point => point.isCurrent)?.total ?? 0;
   assert.equal(view.heroMoney, hidden ? '••••••' : money(total), 'P3 ventana actual igual al hero canónico');
-  if (!view.chart) return;
+  if (!view.chart) {
+    assert.equal(view.pointCount,0,'P3 una ventana o ninguna sin lista de tendencia');
+    assert.equal(view.listCount,0,'P3 una ventana o ninguna sin lista anticipada');
+    assert.equal(view.svgCount,0,'P3 una ventana o ninguna sin SVG de tendencia');
+    const point = expected.length===1 && expected[0].coverage==='partial' ? expected[0] : null;
+    assert.equal(Boolean(view.partial),Boolean(point),'P3 fallback solo para una ventana parcial');
+    if(point) {
+      assert.deepEqual({range:view.partial.range,coverage:view.partial.coverage,isCurrent:view.partial.isCurrent},{range:point.range,coverage:point.coverage,isCurrent:point.isCurrent},'P3 indicador parcial conserva ventana canónica');
+      assert.equal(view.partial.text,'Historial parcial','P3 copy exacto del indicador parcial');
+      assert.equal(view.partial.ariaHidden,false,'P3 indicador parcial accesible');
+      const rect=view.partial.bounds;
+      assert.ok(rect.width>0 && rect.height>0 && rect.left>=-1 && rect.right<=view.viewport+1,'P3 indicador parcial visible y contenido');
+      assert.doesNotMatch(view.partial.text+JSON.stringify(view.partial.attributes),moneyPattern,'P3 indicador parcial sin importes');
+    }
+    if(hidden) assert.doesNotMatch(view.heroText,moneyPattern,'P3 hero privado también sin gráfico');
+    return;
+  }
+  assert.equal(view.partial,null,'P3 gráfico con lista conserva indicador parcial dentro del punto');
   assert.equal(view.chart.svgHidden, true, 'P3 SVG decorativo fuera del árbol accesible');
   assert.equal(view.chart.attributes.some(([name,value])=>/^(?:aria-value(?:now|min|max)|data-(?:amount|total|value|payload))$/.test(name) && /\d/.test(value)),false,'P3 no serializa importes crudos en atributos del chart');
   assert.deepEqual(view.chart.points.map(({range,coverage,isCurrent})=>({range,coverage,isCurrent})), expected.map(({range,coverage,isCurrent})=>({range,coverage,isCurrent})), 'P3 orden, rangos y cobertura canónicos');
@@ -208,7 +233,12 @@ function assertTrend(view, expected, hidden) {
   if(previousPoint) assert.ok(currentPoint.markerWeight!==previousPoint.markerWeight || currentPoint.color!==previousPoint.color || currentPoint.borderColor!==previousPoint.borderColor,'P3 actual destacada también con cero real');
   for (const bar of view.chart.bars) {
     assert.ok(view.neutralColors.includes(bar.fill), 'P3 barras neutrales sin semántica good/bad');
-    if (bar.coverage==='partial') assert.match(bar.title, /Historial parcial/);
+    if (bar.coverage==='partial') {
+      assert.match(bar.title, /Historial parcial/);
+      assert.equal(bar.dash,'4 3','P3 borde parcial discontinuo exacto');
+      assert.ok(view.neutralColors.includes(bar.stroke),'P3 borde parcial neutral');
+      assert.equal(Number.parseFloat(bar.strokeWidth),2,'P3 borde parcial visible');
+    } else assert.ok(!bar.dash || bar.dash==='none','P3 cobertura full sin borde discontinuo');
     assert.match(bar.title, bar.isCurrent ? /Actual/ : /Anterior/);
   }
   if (current && previous) assert.ok(current.fill!==previous.fill || current.opacity!==previous.opacity || current.strokeWidth!==previous.strokeWidth, 'P3 ventana actual visualmente destacada');
@@ -223,14 +253,15 @@ async function assertPrivate(client) {
 async function hoverCurrent(client, waitFor, expected, hidden) {
   await client.evaluate(`document.querySelector('[data-report-chart="spending-trend"]').scrollIntoView({block:'center'});`);
   const target = await client.evaluate(`(() => {
-    const rect = document.querySelector('[data-spending-trend-bar][data-spending-current="true"]')?.getBoundingClientRect();
+    const rect = document.querySelector('[data-spending-trend-bar][data-spending-current="${expected.isCurrent}"]${expected.coverage==='partial' ? '[data-spending-coverage="partial"]' : ''}')?.getBoundingClientRect();
     return rect ? {x:rect.x+rect.width/2,y:rect.y+rect.height/2,width:rect.width,height:rect.height} : null;
   })()`);
-  assert.ok(target && target.width>0 && target.height>0, 'P3 hover sobre barra actual real');
+  assert.ok(target && target.width>0 && target.height>0, 'P3 hover sobre barra canónica real');
   await client.command('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
-  await waitFor(client, `(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return node && getComputedStyle(node).visibility!=='hidden' && node.innerText.includes('Actual') && node.innerText.includes(${JSON.stringify(hidden ? '••••••' : money(expected.total))}); })()`, 'P3 tooltip real privado');
+  await waitFor(client, `(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return node && getComputedStyle(node).visibility!=='hidden' && node.innerText.includes(${JSON.stringify(expected.isCurrent ? 'Actual' : 'Anterior')}) && node.innerText.includes(${JSON.stringify(windowLabel(expected.range))}) && node.innerText.includes(${JSON.stringify(hidden ? '••••••' : money(expected.total))}); })()`, 'P3 tooltip real privado');
   const tooltip = await client.evaluate(`(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return {text:node.innerText,attributes:[node,...node.querySelectorAll('*')].flatMap(element=>[...element.attributes].map(attribute=>[attribute.name,attribute.value]))}; })()`);
   assert.ok(tooltip.text.includes(hidden ? '••••••' : money(expected.total)), 'P3 tooltip muestra el importe canónico con el hook');
+  assert.ok(tooltip.text.includes(windowLabel(expected.range)) && tooltip.text.includes(expected.isCurrent ? 'Actual' : 'Anterior'),'P3 tooltip conserva rango y marcador canónicos');
   if (expected.coverage==='partial') assert.match(tooltip.text,/Historial parcial/);
   if (hidden) {
     assert.doesNotMatch(tooltip.text+JSON.stringify(tooltip.attributes),moneyPattern,'P3 tooltip sin fuga monetaria');
@@ -299,9 +330,11 @@ export async function verifyFinalUiPolishP3(client, waitFor) {
               if (hidden) await assertPrivate(client);
               const name = `${scenario.name}-${preset.name}-${theme}-${width}-${hidden?'hidden':'visible'}`;
               const record = {name,expected,...view};
-              if (preset.name==='30d' && (scenario.name==='long-history' || (scenario.name==='current-partial' && theme==='light' && width===390))) record.tooltip=await hoverCurrent(client,waitFor,expected.find(point=>point.isCurrent),hidden);
+              if (preset.name==='30d' && (scenario.name==='long-history' || (scenario.name==='partial-then-zero' && theme==='light' && width===390))) record.tooltip=await hoverCurrent(client,waitFor,expected.find(point=>scenario.name==='partial-then-zero' ? point.coverage==='partial' : point.isCurrent),hidden);
               records.push(record);
-              if (directory && scenario.name==='long-history' && preset.name==='30d' && theme!=='serious' && [320,390,1280].includes(width)) {
+              const captureLongHistory = scenario.name==='long-history' && preset.name==='30d' && theme!=='serious' && [320,390,1280].includes(width);
+              const capturePartial = ['current-partial','partial-then-zero'].includes(scenario.name) && preset.name==='30d' && ((theme==='light' && width===320 && !hidden) || (theme==='dark' && width===390 && hidden));
+              if (directory && (captureLongHistory || capturePartial)) {
                 await captureHero(client,directory,name,width); captures+=1;
               }
             }
@@ -309,6 +342,22 @@ export async function verifyFinalUiPolishP3(client, waitFor) {
             assertTrend(await readTrend(client),expected,false);
           }
         }
+      }
+      if(scenario.name==='current-partial') {
+        const preset={name:'custom',range:{start:'2026-09-18',end:'2026-10-04'},max:6};
+        const expected=expectedWindows(scenario.rows,preset);
+        assert.equal(expected.length,1,'P3 probe de una única ventana full');
+        assert.equal(expected[0].coverage,'full','P3 probe empieza en el primer gasto');
+        await selectPreset(client,waitFor,preset,expected);
+        await client.command('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+        await client.evaluate('window.scrollTo(0,0); new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))',{awaitPromise:true});
+        await waitFor(client,'document.documentElement.scrollWidth<=innerWidth+1','P3 una ventana full layout estable');
+        for(const hidden of [false,true]) {
+          await setHidden(client,waitFor,hidden);
+          assertTrend(await readTrend(client),expected,hidden);
+          if(hidden) await assertPrivate(client);
+        }
+        await setHidden(client,waitFor,false);
       }
     }
     // Real keyboard/touch interaction remains on the existing range controls.
@@ -342,7 +391,7 @@ export async function verifyFinalUiPolishP3(client, waitFor) {
     assert.equal(reduced.chart.animated,0,'P3 sin animaciones con reduced motion');
     assert.equal(loadingObserved,true,'P3 loading real observado antes del hero');
     assert.equal(records.length,130,'P3 matriz completa');
-    if(directory) assert.equal(captures,12,'P3 doce capturas reproducibles');
+    if(directory) assert.equal(captures,16,'P3 dieciséis capturas reproducibles');
   } finally {
     await client.command('Page.removeScriptToEvaluateOnNewDocument',{identifier:observer.identifier});
     await financialRows(client,original);
@@ -355,13 +404,7 @@ export async function verifyFinalUiPolishP3(client, waitFor) {
     await client.command('Emulation.setEmulatedMedia',{features:[]});
     await client.command('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   }
-  const result = {presets:presets.map(preset=>preset.name),scenarios:scenarios.map(scenario=>scenario.name),checks:records.length,captures,widths:[320,360,390,1280],themes:['light','dark'],legacyWidths:[320,1280],windows:'passed',coverage:'passed',unassignedAndRemovedAccountHistory:'passed',accountStartDateDoesNotCutSpending:'passed',noFakeZeros:'passed',realFullZeros:'passed',currentMatchesHero:'passed',privacy:'passed',tooltips:'passed',neutralCurrentHighlight:'passed',keyboard:'passed',touch:'passed',reducedMotion:'passed',loadingObserved,empty:'passed',disabled:'chart has no controls; existing range presets remain enabled',restoredOriginalDataset:true};
-  // Keep verified results; repeated SVG attributes and per-point geometry need not inflate the PR.
-  const evidence = records.map(({chart,tooltip,...record}) => ({
-    ...record,
-    chart: chart ? {...chart,attributes:undefined,points:chart.points.map(({bounds,moneyBounds,...point})=>point),bars:chart.bars.map(({bounds,...bar})=>bar)} : null,
-    ...(tooltip ? {tooltip:{text:tooltip.text}} : {}),
-  }));
-  if (directory) await writeFile(path.join(directory,'verification.json'),JSON.stringify({fixture:{version:1,instant:captureFixture.instant,timezone:captureFixture.timezone,presets,scenarios},result,records:evidence},null,2)+'\n');
+  const result = {presetCount:presets.length,scenarioCount:scenarios.length,checks:records.length,captures,widths:[320,360,390,1280],themes:['light','dark'],legacyWidths:[320,1280],windows:'passed',coverage:'passed',singlePartial:'passed',singleFull:'passed',partialOutline:'passed',unassignedAndRemovedAccountHistory:'passed',accountStartDateDoesNotCutSpending:'passed',noFakeZeros:'passed',realFullZeros:'passed',currentMatchesHero:'passed',privacy:'passed',tooltips:'passed',neutralCurrentHighlight:'passed',keyboard:'passed',touch:'passed',reducedMotion:'passed',loadingObserved,empty:'passed',disabled:'chart has no controls; existing range presets remain enabled',restoredOriginalDataset:true};
+  if (directory) await writeFile(path.join(directory,'verification.json'),JSON.stringify({fixture:{version:1,instant:captureFixture.instant,timezone:captureFixture.timezone,sourcepath:'scripts/final-ui-polish-p3-verification.mjs'},result},null,2)+'\n');
   process.stdout.write('FINAL_UI_POLISH_P3 '+JSON.stringify(result)+'\n');
 }

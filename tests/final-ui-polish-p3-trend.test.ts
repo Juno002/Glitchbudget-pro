@@ -119,7 +119,9 @@ test('P3 keeps historical unassigned spending even when all current accounts sta
   assert.equal(trend.windows[0].coverage, 'partial');
 });
 
-test('P3 preserves existing purchase, credit and currency amount semantics without using amountBase or FX', () => {
+test('P3 matches existing Reports for credit purchases and adversarial noncanonical FX metadata', () => {
+  // Amounts in supported flows are base cents; the FX metadata below is deliberately inconsistent.
+  // This inconsistent USD row checks parity with existing Reports, not supported FX behavior.
   const expenses = [
     expense('2026-09-05', 12_345, { currency: 'USD', fxRate: 59, amountBase: 728_355 }),
     expense('2026-10-04', 7_655, { paymentMethod: 'credit', debtId: 'card' }),

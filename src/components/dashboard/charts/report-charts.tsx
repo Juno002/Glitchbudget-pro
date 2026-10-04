@@ -151,16 +151,16 @@ function spendingWindowLabel(point: SpendingTrendPoint) {
 }
 
 function SpendingTrendBar({
-  x, y, width, height, fill, fillOpacity, stroke, strokeWidth, payload,
+  x, y, width, height, fill, fillOpacity, stroke, strokeWidth, strokeDasharray, payload,
 }: {
   x?: number; y?: number; width?: number; height?: number;
-  fill?: string; fillOpacity?: number; stroke?: string; strokeWidth?: number;
+  fill?: string; fillOpacity?: number; stroke?: string; strokeWidth?: number; strokeDasharray?: string;
   payload?: SpendingTrendPoint;
 }) {
   return (
     <rect
       x={x} y={y} width={width} height={height} rx={4}
-      fill={fill} fillOpacity={fillOpacity} stroke={stroke} strokeWidth={strokeWidth}
+      fill={fill} fillOpacity={fillOpacity} stroke={stroke} strokeWidth={strokeWidth} strokeDasharray={strokeDasharray}
       data-spending-trend-bar
       data-spending-coverage={payload?.coverage}
       data-spending-current={payload?.isCurrent ? 'true' : 'false'}
@@ -173,6 +173,19 @@ function SpendingTrendBar({
 export function ReportSpendingTrend({ data }: { data: SpendingTrendPoint[] }) {
   const money = usePrivateCurrency();
   if (!data.length) return null;
+  if (data.length === 1) {
+    const point = data[0];
+    return point.coverage === 'partial' ? (
+      <p
+        className="text-xs text-muted-foreground"
+        data-spending-trend-partial
+        data-spending-window-start={point.range.start}
+        data-spending-window-end={point.range.end}
+        data-spending-coverage={point.coverage}
+        data-spending-current={point.isCurrent ? 'true' : 'false'}
+      >Historial parcial</p>
+    ) : null;
+  }
 
   return (
     <div className="min-w-0 space-y-3" data-report-chart="spending-trend">
@@ -200,8 +213,9 @@ export function ReportSpendingTrend({ data }: { data: SpendingTrendPoint[] }) {
                   key={point.range.start}
                   fill={point.isCurrent ? 'hsl(var(--foreground))' : 'hsl(var(--muted-foreground))'}
                   fillOpacity={point.isCurrent ? 1 : 0.55}
-                  stroke={point.isCurrent ? 'hsl(var(--foreground))' : 'none'}
-                  strokeWidth={point.isCurrent ? 2 : 0}
+                  stroke={point.isCurrent || point.coverage === 'partial' ? 'hsl(var(--foreground))' : 'none'}
+                  strokeWidth={point.isCurrent || point.coverage === 'partial' ? 2 : 0}
+                  strokeDasharray={point.coverage === 'partial' ? '4 3' : undefined}
                 />
               ))}
             </Bar>
