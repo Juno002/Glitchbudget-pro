@@ -25,7 +25,7 @@ Este archivo es un **índice de estado y navegación**. No reemplaza la especifi
 ## Próxima intervención autorizada
 
 ```text
-Final UI Polish — P0 (baseline y contratos)
+Final UI Polish — P1 (lectura rápida editorial), tras confirmar merged=true de PR #109
 ```
 
 No crear 20.11 ni Fase 21. Final UI Polish fue autorizado explícitamente el 4 de octubre de 2026 y no constituye una fase funcional nueva. Cualquier trabajo fuera de P0–P7 exige modificar primero [`Roadmap septiembre 2026.txt`](Roadmap%20septiembre%202026.txt) y el documento ejecutable con aprobación explícita.
@@ -33,9 +33,9 @@ No crear 20.11 ni Fase 21. Final UI Polish fue autorizado explícitamente el 4 d
 ## Final UI Polish — autorizado
 
 - **Documento ejecutable:** [Final UI Polish — Plan ejecutable y contrato de alcance](final-ui-polish.md)
-- **Estado:** autorizado / no iniciado.
+- **Estado:** en ejecución; P0 **Gate aprobado · PR #109**.
 - **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`.
-- **Primera intervención habilitada:** P0 — baseline y contratos.
+- **Próxima intervención:** P1 — lectura rápida editorial; requiere confirmar `merged=true` de [PR #109](https://github.com/Juno002/Glitchbudget-pro/pull/109).
 - No crea 20.11 ni Fase 21; el roadmap funcional 0–20.10 permanece cerrado.
 
 ## Evaluación técnica externa al roadmap
