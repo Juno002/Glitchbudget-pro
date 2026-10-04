@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Fragment, useState, type ReactNode } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { resolveReportRange, type ReportRangePreset } from '@/domain/reports';
 import { presentReportInsight, type ReportEditorialInsight } from '@/lib/report-editorial';
@@ -47,25 +47,30 @@ function quickReadBody(
   money:(value:number)=>string,
   categoryName:(id:string)=>string,
 ) {
+  const currency=(value:number)=><span className="whitespace-nowrap" data-quick-read-money>{money(value)}</span>;
+  const join=(parts:ReactNode[])=>parts.filter(Boolean).map((part,index)=>(
+    <Fragment key={index}>{index>0?' · ':null}{part}</Fragment>
+  ));
+
   if (insight.body.key==='category') {
     const { categoryId,value,sharePercent }=insight.body.params;
-    return [
+    return join([
       categoryName(categoryId),
-      value===null ? null : money(value),
+      value===null ? null : currency(value),
       sharePercent===null ? null : sharePercent.toLocaleString('es-DO',{maximumFractionDigits:2})+'% del gasto',
-    ].filter(Boolean).join(' · ');
+    ]);
   }
 
   if (insight.body.key==='no_material_change') {
-    return 'Ningún umbral de cambio relevante se activó para este rango.';
+    return 'Ninguna métrica principal cambió lo suficiente para destacarla.';
   }
 
   const { current,previous,percentageDelta }=insight.body.params;
-  return [
-    current===null ? null : 'Actual '+money(current),
-    previous===null ? null : 'anterior '+money(previous),
-    percentageDelta===null ? null : percentLabel(percentageDelta),
-  ].filter(Boolean).join(' · ');
+  return join([
+    current===null ? null : <>Actual {currency(current)}</>,
+    previous===null ? null : <>anterior {currency(previous)}</>,
+    insight.body.key==='cash_flow_sign_change' || percentageDelta===null ? null : percentLabel(percentageDelta),
+  ]);
 }
 
 export default function ReportsTab() {

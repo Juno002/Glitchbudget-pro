@@ -4913,6 +4913,8 @@ Contrato de autoridad:
 - no se autoriza ningún punto adicional por interpretación de una IA, chat, comentario, rama o README;
 - cualquier ampliación exige aprobación explícita y modificación previa del roadmap canónico y del documento ejecutable.
 
+Corrección editorial de P1 solicitada explícitamente en la revisión del 4 de octubre de 2026: importes indivisibles, copy observable en cruces estrictos de signo con porcentaje omitido solo en la lectura rápida, titular de categoría válido en todo el threshold existente y cuerpo de ausencia de cambios en lenguaje de usuario. El contrato exacto queda en `final-ui-polish.md`; no modifica cálculos, ranking, thresholds, tablas canónicas ni la secuencia P0–P7 y no inicia P2.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:

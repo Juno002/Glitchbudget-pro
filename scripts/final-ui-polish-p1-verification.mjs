@@ -89,6 +89,11 @@ async function readEditorial(client) {
           fontSize: parseFloat(style.fontSize),
           fontWeight: parseFloat(style.fontWeight),
           body: article.querySelector('h3 + p')?.textContent.trim(),
+          moneyTokens: [...article.querySelectorAll('[data-quick-read-money]')].map(node => {
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            return { text: node.textContent, whiteSpace: getComputedStyle(node).whiteSpace, lines: range.getClientRects().length, bounds: bounds(node) };
+          }),
         };
       }),
       animated: root.getAnimations({ subtree: true }).length,
@@ -105,6 +110,11 @@ function assertEditorial(view, expected) {
   for (const article of view.articles) {
     assert.equal(article.labelled, true, 'P1 article nombrado por su titular');
     assert.doesNotMatch(article.title, /[0-9]|RD\$|DOP|USD|\$/, 'P1 titular sin dinero ni cifras');
+    for (const token of article.moneyTokens) {
+      assert.equal(token.whiteSpace, 'nowrap', 'P1 símbolo e importe indivisibles');
+      assert.equal(token.lines, 1, 'P1 dinero completo en una línea');
+      assert.ok(token.bounds.left >= -1 && token.bounds.right <= view.viewport + 1, 'P1 token monetario contenido');
+    }
     for (const rect of [article.articleBounds, article.headingBounds]) {
       assert.ok(rect.width > 0 && rect.height > 0 && rect.left >= -1 && rect.right <= view.viewport + 1, 'P1 límites responsive del titular y article');
     }
@@ -229,7 +239,7 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
 
     const split = value => [['vivienda', value], ['transporte', value], ['alimentacion', value]];
     const scenarios = [
-      { name: 'category-stable', current: [['vivienda', 8_000], ['transporte', 2_000]], previous: [['vivienda', 10_000]], expected: [['leading_category', 'Una categoría concentró buena parte del gasto'], ['spending_near_previous', 'El gasto se mantuvo estable']] },
+      { name: 'category-stable', current: [['vivienda', 8_000], ['transporte', 2_000]], previous: [['vivienda', 10_000]], expected: [['leading_category', 'La categoría con mayor participación en el gasto'], ['spending_near_previous', 'El gasto se mantuvo estable']] },
       { name: 'above', current: split(2_000), previous: split(1_000), expected: [['spending_above_previous', 'Gastaste más que en el rango anterior']] },
       { name: 'below', current: split(1_000), previous: split(2_000), expected: [['spending_below_previous', 'Gastaste menos que en el rango anterior']] },
       { name: 'new', current: split(1_000), previous: [], expected: [['spending_above_previous', 'Hay gasto nuevo en este rango']] },
@@ -244,7 +254,7 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
       assertEditorial(view, scenario.expected);
       view.articles.forEach(row => covered.add(row.kind));
       if (scenario.name === 'empty') {
-        assert.equal(view.articles[0].body, 'Ningún umbral de cambio relevante se activó para este rango.');
+        assert.equal(view.articles[0].body, 'Ninguna métrica principal cambió lo suficiente para destacarla.');
       } else {
         assert.match(view.text, moneyPattern, 'P1 fixture con dinero canónico visible');
         await setHidden(client, waitFor, true);
@@ -279,9 +289,16 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
             await waitFor(client, 'document.documentElement.scrollWidth <= innerWidth + 1', 'P1 historia viewport asentado ' + scenario.name + ' ' + theme + ' ' + width);
             const view = await readEditorial(client);
             assertEditorial(view, scenario.expected);
+            if (scenario.name === 'history-decrease' || scenario.name === 'history-sign-recovery') {
+              const flow = view.articles.find(article => article.kind === 'cash_flow_change');
+              assert.ok(flow && flow.moneyTokens.length === 2, 'P1 cruce conserva ambos importes privados');
+              assert.doesNotMatch(flow.body, /%/, 'P1 cruce sin porcentaje editorial');
+              const comparison = await client.evaluate(`document.querySelector('[data-report-section="comparison"] tbody')?.textContent`);
+              assert.ok(comparison.includes(scenario.name === 'history-decrease' ? '-400%' : '+133.33%'), 'P1 tabla conserva porcentaje canónico del cruce');
+            }
             view.articles.forEach(row => covered.add(row.kind));
             if (scenario.name === 'history-no-changes') {
-              assert.equal(view.articles[0].body, 'Ningún umbral de cambio relevante se activó para este rango.');
+              assert.equal(view.articles[0].body, 'Ninguna métrica principal cambió lo suficiente para destacarla.');
               assert.doesNotMatch(view.text, moneyPattern, 'P1 fallback histórico sin dinero fabricado');
             } else if (!hidden) {
               assert.match(view.text, moneyPattern, 'P1 historia con importes canónicos visibles');
@@ -309,7 +326,7 @@ export async function verifyFinalUiPolishP1(client, waitFor) {
         }
       }
     }
-    assert.equal(historyRecords.length, 32, 'P1 matriz histórica completa');
+    assert.equal(historyRecords.length, 40, 'P1 matriz histórica completa');
     assert.deepEqual([...covered].sort(), ['cash_flow_change', 'leading_category', 'net_worth_change', 'no_material_change', 'spending_above_previous', 'spending_below_previous', 'spending_near_previous']);
   } finally {
     await client.command('Page.removeScriptToEvaluateOnNewDocument', { identifier: observer.identifier });

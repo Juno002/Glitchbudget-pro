@@ -1,0 +1,3222 @@
+{
+  "result": {
+    "kinds": [
+      "cash_flow_change",
+      "leading_category",
+      "net_worth_change",
+      "no_material_change",
+      "spending_above_previous",
+      "spending_below_previous",
+      "spending_near_previous"
+    ],
+    "widths": [
+      320,
+      360,
+      390,
+      1280
+    ],
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "legacyWidths": [
+      320,
+      1280
+    ],
+    "privacy": "passed",
+    "keyboard": "passed",
+    "touch": "passed",
+    "reducedMotion": "passed",
+    "empty": "passed",
+    "loadingObserved": true,
+    "disabled": "editorial has no controls"
+  },
+  "records": [
+    {
+      "name": "light-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 105.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 97.171875,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 97.171875,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 105.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 220.71875,
+                "right": 280.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 225.140625,
+                "right": 285.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 252,
+                "right": 320.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 220.71875,
+                "right": 280.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 225.140625,
+                "right": 285.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 360.09375,
+                "right": 449.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 524,
+                "right": 592.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 353.703125,
+                "right": 427.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 492.71875,
+                "right": 552.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 815.703125,
+                "right": 894.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 959.140625,
+                "right": 1019.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "light-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 360.09375,
+                "right": 394.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 468.796875,
+                "right": 503.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 353.703125,
+                "right": 383.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 448.84375,
+                "right": 479.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 815.703125,
+                "right": 845.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 910.84375,
+                "right": 941.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 105.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 97.171875,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 97.171875,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-360-visible",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 105.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 220.71875,
+                "right": 280.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 225.140625,
+                "right": 285.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-360-hidden",
+      "viewport": 360,
+      "scrollWidth": 354,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 317,
+            "width": 280,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-390-visible",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 177.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 252,
+                "right": 320.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 220.71875,
+                "right": 280.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 160.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 225.140625,
+                "right": 285.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-390-hidden",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 122.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 196.796875,
+                "right": 231.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 111.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 176.84375,
+                "right": 207.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 360.09375,
+                "right": 449.859375,
+                "width": 89.765625,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 524,
+                "right": 592.78125,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 353.703125,
+                "right": 427.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 492.71875,
+                "right": 552.890625,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 815.703125,
+                "right": 894.25,
+                "width": 78.546875,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 959.140625,
+                "right": 1019.3125,
+                "width": 60.171875,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "dark-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 360.09375,
+                "right": 394.65625,
+                "width": 34.5625,
+                "height": 21
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 468.796875,
+                "right": 503.359375,
+                "width": 34.5625,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 353.703125,
+                "right": 383.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 448.84375,
+                "right": 479.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 815.703125,
+                "right": 845.953125,
+                "width": 30.25,
+                "height": 18
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 910.84375,
+                "right": 941.09375,
+                "width": 30.25,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "serious-320-visible",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 85.921875,
+                "right": 171.3125,
+                "width": 85.390625,
+                "height": 17
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 104.59375,
+                "width": 67.59375,
+                "height": 17
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 79.8125,
+                "right": 154.53125,
+                "width": 74.71875,
+                "height": 16
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 96.15625,
+                "width": 59.15625,
+                "height": 16
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 152.5
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 79.8125,
+                "right": 154.53125,
+                "width": 74.71875,
+                "height": 16
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 37,
+                "right": 96.15625,
+                "width": 59.15625,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "serious-320-hidden",
+      "viewport": 320,
+      "scrollWidth": 314,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 85.921875,
+                "right": 119.53125,
+                "width": 33.609375,
+                "height": 17
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 192.453125,
+                "right": 226.0625,
+                "width": 33.609375,
+                "height": 17
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 79.8125,
+                "right": 109.234375,
+                "width": 29.421875,
+                "height": 16
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 173.046875,
+                "right": 202.46875,
+                "width": 29.421875,
+                "height": 16
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 129.75
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 277,
+            "width": 240,
+            "height": 55
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 79.8125,
+                "right": 109.234375,
+                "width": 29.421875,
+                "height": 16
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 173.046875,
+                "right": 202.46875,
+                "width": 29.421875,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "serious-1280-visible",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual RD$ 900.00 · anterior RD$ 0.00\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 100.00 · anterior RD$ 0.00\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual RD$ 900.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 357.921875,
+                "right": 443.3125,
+                "width": 85.390625,
+                "height": 17
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 516.234375,
+                "right": 583.828125,
+                "width": 67.59375,
+                "height": 17
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 351.8125,
+                "right": 426.53125,
+                "width": 74.71875,
+                "height": 16
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 490.34375,
+                "right": 549.5,
+                "width": 59.15625,
+                "height": 16
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 900.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 900.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 813.8125,
+                "right": 888.53125,
+                "width": 74.71875,
+                "height": 16
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 952.34375,
+                "right": 1011.5,
+                "width": 59.15625,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "serious-1280-hidden",
+      "viewport": 1280,
+      "scrollWidth": 1274,
+      "text": "Lo más relevante del rango\n\nFLUJO DE CAJA\n\nHay un nuevo flujo neto comparable\n\nActual •••••• · anterior ••••••\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual •••••• · anterior ••••••\n\nPATRIMONIO\n\nHay una nueva base de patrimonio registrada\n\nActual •••••• · anterior ••••••",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "cash_flow_change",
+          "primary": true,
+          "title": "Hay un nuevo flujo neto comparable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 1209,
+            "width": 900,
+            "height": 165
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 983.6875,
+            "width": 674.6875,
+            "height": 96
+          },
+          "fontSize": 48,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 357.921875,
+                "right": 391.53125,
+                "width": 33.609375,
+                "height": 17
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 464.453125,
+                "right": 498.0625,
+                "width": 33.609375,
+                "height": 17
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_above_previous",
+          "primary": false,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 309,
+            "right": 747,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 351.8125,
+                "right": 381.234375,
+                "width": 29.421875,
+                "height": 16
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 445.046875,
+                "right": 474.46875,
+                "width": 29.421875,
+                "height": 16
+              }
+            }
+          ]
+        },
+        {
+          "kind": "net_worth_change",
+          "primary": false,
+          "title": "Hay una nueva base de patrimonio registrada",
+          "labelled": true,
+          "articleBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 102.25
+          },
+          "headingBounds": {
+            "left": 771,
+            "right": 1209,
+            "width": 438,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual •••••• · anterior ••••••",
+          "moneyTokens": [
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 813.8125,
+                "right": 843.234375,
+                "width": 29.421875,
+                "height": 16
+              }
+            },
+            {
+              "text": "••••••",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 907.046875,
+                "right": 936.46875,
+                "width": 29.421875,
+                "height": 16
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "category-stable",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nCATEGORÍAS\n\nLa categoría con mayor participación en el gasto\n\nVivienda · RD$ 80.00 · 80% del gasto\n\nGASTOS\n\nEl gasto se mantuvo estable\n\nActual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "leading_category",
+          "primary": true,
+          "title": "La categoría con mayor participación en el gasto",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Vivienda · RD$ 80.00 · 80% del gasto",
+          "moneyTokens": [
+            {
+              "text": "RD$ 80.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 112.515625,
+                "right": 191.015625,
+                "width": 78.5,
+                "height": 21
+              }
+            }
+          ]
+        },
+        {
+          "kind": "spending_near_previous",
+          "primary": false,
+          "title": "El gasto se mantuvo estable",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 125
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 27.5
+          },
+          "fontSize": 20,
+          "fontWeight": 400,
+          "body": "Actual RD$ 100.00 · anterior RD$ 100.00 · Sin cambio",
+          "moneyTokens": [
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 81.703125,
+                "right": 155.828125,
+                "width": 74.125,
+                "height": 18
+              }
+            },
+            {
+              "text": "RD$ 100.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 220.71875,
+                "right": 294.84375,
+                "width": 74.125,
+                "height": 18
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "above",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nGASTOS\n\nGastaste más que en el rango anterior\n\nActual RD$ 60.00 · anterior RD$ 30.00 · +100%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "spending_above_previous",
+          "primary": true,
+          "title": "Gastaste más que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 60.00 · anterior RD$ 30.00 · +100%",
+          "moneyTokens": [
+            {
+              "text": "RD$ 60.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 166.921875,
+                "width": 78.828125,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 30.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 241.0625,
+                "right": 319.296875,
+                "width": 78.234375,
+                "height": 21
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "below",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nGASTOS\n\nGastaste menos que en el rango anterior\n\nActual RD$ 30.00 · anterior RD$ 60.00 · -50%",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "spending_below_previous",
+          "primary": true,
+          "title": "Gastaste menos que en el rango anterior",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 30.00 · anterior RD$ 60.00 · -50%",
+          "moneyTokens": [
+            {
+              "text": "RD$ 30.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 166.328125,
+                "width": 78.234375,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 60.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 240.46875,
+                "right": 319.296875,
+                "width": 78.828125,
+                "height": 21
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "new",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nGASTOS\n\nHay gasto nuevo en este rango\n\nActual RD$ 30.00 · anterior RD$ 0.00",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "spending_above_previous",
+          "primary": true,
+          "title": "Hay gasto nuevo en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 144
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Actual RD$ 30.00 · anterior RD$ 0.00",
+          "moneyTokens": [
+            {
+              "text": "RD$ 30.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 88.09375,
+                "right": 166.328125,
+                "width": 78.234375,
+                "height": 21
+              }
+            },
+            {
+              "text": "RD$ 0.00",
+              "whiteSpace": "nowrap",
+              "lines": 1,
+              "bounds": {
+                "left": 240.46875,
+                "right": 309.25,
+                "width": 68.78125,
+                "height": 21
+              }
+            }
+          ]
+        }
+      ],
+      "animated": 0
+    },
+    {
+      "name": "empty",
+      "viewport": 390,
+      "scrollWidth": 384,
+      "text": "Lo más relevante del rango\n\nRESUMEN\n\nNo hay cambios destacados en este rango\n\nNinguna métrica principal cambió lo suficiente para destacarla.",
+      "labels": "",
+      "articles": [
+        {
+          "kind": "no_material_change",
+          "primary": true,
+          "title": "No hay cambios destacados en este rango",
+          "labelled": true,
+          "articleBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 170
+          },
+          "headingBounds": {
+            "left": 37,
+            "right": 347,
+            "width": 310,
+            "height": 75
+          },
+          "fontSize": 30,
+          "fontWeight": 400,
+          "body": "Ninguna métrica principal cambió lo suficiente para destacarla.",
+          "moneyTokens": []
+        }
+      ],
+      "animated": 0
+    }
+  ]
+}

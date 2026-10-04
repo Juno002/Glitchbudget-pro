@@ -296,7 +296,14 @@ Debe respetar el threshold existente; P1 no lo modifica.
 
 ### `cash_flow_change`
 
-El titular debe derivarse de `direction`:
+Antes del titular general por `direction`, un cruce estricto de signo usa estos hechos observables a partir de los parámetros canónicos `previous` y `current`:
+
+- `previous > 0` y `current < 0` → `El flujo neto pasó de positivo a negativo`;
+- `previous < 0` y `current > 0` → `El flujo neto pasó de negativo a positivo`.
+
+Solo en esos dos casos se omite el porcentaje del cuerpo editorial. Los importes actual/anterior siguen pasando por `usePrivateCurrency()` y la tabla exacta conserva su comparación canónica. No se recalcula porcentaje, no se modifica `direction`, ranking ni thresholds. Cero no es un cruce estricto: mantiene las reglas existentes de base cero y dirección.
+
+En los demás casos, el titular debe derivarse de `direction`:
 
 - increase → `El flujo neto aumentó`;
 - decrease → `El flujo neto disminuyó`;
@@ -319,10 +326,10 @@ No usar “tu situación está mejor/peor”.
 ### `leading_category`
 
 ```text
-Una categoría concentró buena parte del gasto
+La categoría con mayor participación en el gasto
 ```
 
-El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de React.
+El titular es válido para todo el rango del threshold canónico, incluido 100%, y no introduce tramos ni thresholds nuevos. El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de React.
 
 ### `no_material_change`
 
@@ -330,7 +337,13 @@ El cuerpo muestra nombre, share y, si corresponde, importe mediante formateo de 
 No hay cambios destacados en este rango
 ```
 
-El cuerpo explica que ningún threshold editorial se activó. No afirmar que “todo está bien”.
+El cuerpo explica la ausencia de cambios destacados sin exponer terminología del sistema:
+
+```text
+Ninguna métrica principal cambió lo suficiente para destacarla.
+```
+
+No afirmar que “todo está bien”.
 
 ## Composición visual
 
@@ -339,6 +352,8 @@ El insight `report.quickRead[0]` es el protagonista, respetando la prioridad ya 
 Los insights secundarios, si existen, se muestran con menor peso visual y sin competir con el principal.
 
 No usar tres cards idénticas como tres titulares equivalentes.
+
+Todo importe de la lectura rápida conserva símbolo y número como una unidad indivisible, también a 320 px. Aplicar `white-space: nowrap` al token formateado por `usePrivateCurrency()`; no cambiar formato monetario, locale ni semánticas de currency.
 
 ## Archivos previstos
 
@@ -353,6 +368,9 @@ No tocar `src/domain/report-insights.ts` salvo que un test demuestre un bug prev
 
 - siete `kind` cubiertos;
 - variante `previous=0` cubierta;
+- cruces estrictos de signo en ambas direcciones, sin porcentaje editorial y con tabla exacta intacta;
+- categoría con copy válido de 35% a 100%, sin tramos nuevos;
+- símbolo e importe indivisibles a 320 px;
 - importes ocultos sin fuga;
 - 320/390/desktop;
 - Prisma/Neón;
@@ -1222,3 +1240,16 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Decisiones cerradas: P1 no exige el literal `✦ Lectura rápida` para el título de sección. `Lo más relevante del rango` y kicker por foco ya existían antes de PR #111; se mantienen. Los titulares “nuevo” son el copy obligatorio del contrato y el cuerpo `Actual … · anterior …` presenta datos canónicos. En escritorio, article principal a ambas columnas con titular limitado a **28ch**, intencional para controlar longitud de línea; no se añade contenido para rellenar el espacio derecho.
 - Hallazgo separado: [issue #112](https://github.com/Juno002/Glitchbudget-pro/issues/112) registra `De` en mayúscula en el selector global. `formatPeriodRange()` devuelve `de`; CSS `capitalize` del header transforma la palabra. Header/formatter idénticos al padre de PR #111: incidencia estilística previa que no impide el gate. No se implementa ni se incorpora a P2/P7 sin autorización de alcance.
 - Revisión completa de diff: solo helper, fixture y evidencia/documentación. Producto, copy, ranking/thresholds, dominio/schema/backup, navegación, veinte PNG iniciales P1, doce PNG P0 y benchmarks sin cambios. Bloqueantes: ninguno. La ampliación solo se considera integrada tras confirmar `merged=true` de PR #113 en GitHub.
+
+
+### Correcciones de la revisión P1 — importes y copy
+
+**Gate aprobado · PR #114** — [PR atómico de correcciones](https://github.com/Juno002/Glitchbudget-pro/pull/114), solicitado explícitamente en la revisión del 4 de octubre. Contrato P1 y autorización del roadmap actualizados antes de implementar las cuatro correcciones. El cierre original P1 conserva **Gate aprobado · PR #111**; PR #111 y la evidencia PR #113 confirmados `merged=true` en GitHub. P2 no se inicia. Estas correcciones de copy no añaden un bloqueo ni dependencia de P2.
+
+- Importes indivisibles: spans `white-space: nowrap` exclusivamente en el cuerpo de lectura rápida; `usePrivateCurrency()` sigue formateando el dinero. Símbolo y número permanecen en una línea, sin cambiar currency/locale, con geometría contenida a 320/360/390/escritorio.
+- Cruces estrictos de signo: ambos titulares observables y key `cash_flow_sign_change` con parámetros numéricos intactos. React omite porcentaje solo en esa variante; tabla exacta conserva −400% y +133.33%. Cero y signos iguales mantienen copy/porcentaje anteriores; ranking, thresholds y cálculos canónicos sin cambios.
+- Categoría: titular universal `La categoría con mayor participación en el gasto`, válido de 35% a 100%, probado a 35/80/100; sin tramos nuevos. Fallback: `Ninguna métrica principal cambió lo suficiente para destacarla.`, con titular original preservado y sin causalidad/reaseguro.
+- `npm run check`: **745/745** aprobado, incluidos diez tests del presenter (cruces en ambos sentidos, ceros/signos iguales, rango completo del titular de categoría, pureza y contratos anteriores). `npm run build`: aprobado, export estático y guard CSP/local-only. `npm run test:e2e`: aprobado; **40/40** variantes históricas más veinte variantes de la matriz original, siete tipos, base cero, 320/360/390/1280, Prisma/Neón/legado, privacidad texto/atributos/árbol accesible, una línea por token monetario, comparación exacta, foco, touch, reduced motion, loading/vacío, cuatro tablas, tooltip privado, navegación y recarga offline. Disabled no aplica a la lectura editorial sin controles propios.
+- [Sesenta capturas y registros reproducibles](final-ui-polish-p1-review-verification/README.md) en ruta nueva. Fixture histórico v2 incorpora negativo → positivo y conserva reloj/fecha UTC P0; perfil de test aislado, restauración exacta del dataset original. Capturas P0/P1 previas intactas. Entorno: Node v24.19.0, Chromium 151, Linux x64, executor cloud. Benchmark propio no exigido por P1; baseline y contrato P3 intactos.
+- Revisión completa de diff: solo contrato autorizado, presenter, cuerpo editorial, tests/fixture, helper y evidencia. Sin refactors fuera de alcance, hero de gasto, tablas/orden, mocks de producto, cálculos financieros React, dominio, schema/migraciones, backup/envelope, semánticas, navegación, red ni colores semánticos nuevos. Issue #112 permanece separado.
+- Bloqueantes: ninguno. La corrección se considera integrada únicamente tras confirmar `merged=true` de PR #114 en GitHub; no se documenta SHA de merge.

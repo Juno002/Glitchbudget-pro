@@ -32,7 +32,7 @@ test('P1 presents all seven canonical kinds with their exact editorial copy and 
     ['spending_near_previous', 'El gasto se mantuvo estable', 'comparison'],
     ['cash_flow_change', 'El flujo neto aumentó', 'comparison'],
     ['net_worth_change', 'El patrimonio registrado aumentó', 'comparison'],
-    ['leading_category', 'Una categoría concentró buena parte del gasto', 'category'],
+    ['leading_category', 'La categoría con mayor participación en el gasto', 'category'],
     ['no_material_change', 'No hay cambios destacados en este rango', 'no_material_change'],
   ];
 
@@ -72,6 +72,60 @@ test('P1 derives cash-flow and net-worth headlines from each comparable directio
   }
   for (const kind of ['cash_flow_change', 'net_worth_change'] as const) {
     assert.throws(() => presentReportInsight(insight(kind, 'none')), /dirección comparable/);
+  }
+});
+
+test('P1 presents both strict cash-flow sign crossings with structured canonical parameters', () => {
+  const cases: Array<[number, number, number, QuickReadDirection, string]> = [
+    [-30_000, 10_000, -400, 'decrease', 'El flujo neto pasó de positivo a negativo'],
+    [10_000, -25_000, 140, 'increase', 'El flujo neto pasó de negativo a positivo'],
+  ];
+  for (const [current, previous, percentageDelta, direction, title] of cases) {
+    const input = insight('cash_flow_change', direction);
+    input.copy.params = { current, previous, percentageDelta };
+    const before = structuredClone(input);
+    Object.freeze(input.copy.params);
+    Object.freeze(input.copy);
+    Object.freeze(input);
+
+    const result = presentReportInsight(input);
+    assert.equal(result.title, title);
+    assert.equal(result.kind, 'cash_flow_change');
+    assert.equal(result.focus, input.focus);
+    assert.deepEqual(result.body, { key: 'cash_flow_sign_change', params: { current, previous, percentageDelta } });
+    assert.deepEqual(input, before);
+    assert.deepEqual(result, presentReportInsight(structuredClone(input)));
+    assert.doesNotMatch(result.title, /\d|RD\$|\$|€|£/);
+  }
+});
+
+test('P1 keeps zero and same-sign cash-flow values on their existing direction and percentage copy', () => {
+  const cases: Array<[number, number, number | null, QuickReadDirection, string]> = [
+    [-25_000, 0, null, 'new', 'Hay un nuevo flujo neto comparable'],
+    [25_000, 0, null, 'new', 'Hay un nuevo flujo neto comparable'],
+    [0, 25_000, -100, 'decrease', 'El flujo neto disminuyó'],
+    [0, -25_000, 100, 'increase', 'El flujo neto aumentó'],
+    [0, 0, 0, 'stable', 'El flujo neto se mantuvo estable'],
+    [-10_000, -25_000, 60, 'increase', 'El flujo neto aumentó'],
+    [-25_000, -10_000, -150, 'decrease', 'El flujo neto disminuyó'],
+  ];
+  for (const [current, previous, percentageDelta, direction, title] of cases) {
+    const input = insight('cash_flow_change', direction);
+    input.copy.params = { current, previous, percentageDelta };
+    const result = presentReportInsight(input);
+    assert.equal(result.title, title);
+    assert.deepEqual(result.body, { key: 'comparison', params: { current, previous, percentageDelta } });
+    assert.equal(input.direction, direction);
+  }
+});
+
+test('P1 uses one category headline across the full canonical threshold range', () => {
+  for (const sharePercent of [35, 80, 100]) {
+    const input = insight('leading_category', 'none');
+    input.copy.params = { categoryId: 'vivienda', value: 35_000, sharePercent };
+    const result = presentReportInsight(input);
+    assert.equal(result.title, 'La categoría con mayor participación en el gasto');
+    assert.deepEqual(result.body, { key: 'category', params: { categoryId: 'vivienda', value: 35_000, sharePercent } });
   }
 });
 
