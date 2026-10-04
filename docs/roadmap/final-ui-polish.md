@@ -1,6 +1,6 @@
 # Final UI Polish — Plan ejecutable y contrato de alcance
 
-**Estado:** EN EJECUCIÓN · P3 Gate aprobado · PR #117
+**Estado:** EN EJECUCIÓN · P4 Gate aprobado · PR #118 · staged
 **Fecha de autorización:** 4 de octubre de 2026  
 **Repositorio:** `Juno002/Glitchbudget-pro`  
 **Secuencia obligatoria:** `P0 → P1 → P2 → P3 → P4 → P5 → P6 → P7`  
@@ -148,14 +148,26 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P1 | Lectura rápida editorial | No financiero | Gate aprobado · PR #111 |
 | P2 | Hero de gasto sin tendencia | No | Gate aprobado · PR #115; correcciones Gate aprobado · PR #116 |
 | P3 | Tendencia histórica real + integración en hero | Sí, selector puro de lectura | Gate aprobado · PR #117 |
-| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | No iniciado |
+| P4 | Donut + leyenda + agrupación determinista | Proyección pura de presentación | Gate aprobado · PR #118 · staged |
 | P5 | Comparación y análisis profundo | No | No iniciado |
 | P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
 | P7 | Regresión global e integración | No | No iniciado |
 
-No se permite trabajo paralelo entre puntos. P(n+1) empieza únicamente después de que P(n) esté mergeada en `main` con su gate aprobado.
+No se permite trabajo paralelo entre puntos. La regla normal exige integrar P(n) antes de P(n+1), salvo la política temporal P4–P7 autorizada abajo, que conserva la misma dependencia estricta mediante ramas apiladas y gates completos sin tocar `main`.
 
 Cada punto usa una rama y PR atómicos propios. No agrupar dos puntos en un mismo PR.
+
+### Política temporal de integración P4–P7 — autorizada el 4 de octubre de 2026
+
+Por instrucción explícita del usuario, **no se hará ningún merge adicional a `main` hasta cerrar P7**. Esta política modifica únicamente la mecánica de integración; no cambia el alcance funcional, los gates ni el orden P4 → P5 → P6 → P7.
+
+- P4 usa rama propia nacida del `main` que ya contiene P3.
+- P5 solo puede comenzar cuando P4 tenga su gate completo aprobado; su rama nace del HEAD exacto de P4 y su PR usa la rama P4 como base.
+- P6 solo puede comenzar cuando P5 tenga su gate completo aprobado; su rama nace del HEAD exacto de P5 y su PR usa la rama P5 como base.
+- P7 solo puede comenzar cuando P6 tenga su gate completo aprobado; su rama nace del HEAD exacto de P6 y su PR usa la rama P6 como base.
+- Ningún punto se considera integrado en `main` durante este tramo; se considera **cerrado y staged** cuando su gate real está aprobado y su PR atómico refleja únicamente su delta respecto de la rama anterior.
+- Tras aprobar P7, se integran P4, P5, P6 y P7 en orden, preservando la cadena de commits/árboles para que cada diff siga siendo revisable; solo después se limpian las ramas.
+- Si cualquier gate falla, la secuencia se detiene en ese punto. No se usa P5/P6/P7 para ocultar una regresión anterior.
 
 ---
 
@@ -827,7 +839,7 @@ Trasplantar dos decisiones del Prisma de Manus a Home sin perfiles ficticios ni 
 1. apertura editorial;
 2. status pill determinista.
 
-P6 no empieza hasta que P5 esté mergeada.
+P6 no empieza hasta que P5 tenga su gate completo aprobado. Bajo la política temporal P4–P7, P5 puede estar staged en su rama/PR apilada sin merge a `main`.
 
 ## Apertura editorial
 
@@ -1088,19 +1100,19 @@ Cuando P7 cierre, Final UI Polish queda **COMPLETADO / Gate final aprobado**.
 Cada P0–P7 debe seguir este orden:
 
 1. leer este documento completo;
-2. verificar que la P anterior, cuando exista, esté mergeada en `main`;
-3. sincronizar contra `main`;
+2. verificar que la P anterior haya satisfecho su dependencia real: normalmente `merged=true` en `main`; para P5–P7 bajo la política temporal P4–P7, gate completo aprobado y PR staged de la P anterior;
+3. sincronizar contra la base autorizada: normalmente `main`; para P5–P7, el HEAD exacto de la rama staged anterior;
 4. crear una rama específica de esa P;
 5. implementar solo el alcance autorizado;
 6. añadir/actualizar tests de esa P;
 7. ejecutar su gate propio;
 8. revisar diff para detectar scope creep;
-9. abrir PR atómico;
+9. abrir PR atómico contra la base autorizada;
 10. con el número de PR ya disponible, actualizar en la misma rama el registro de ejecución de esa P con `Gate aprobado · PR #N`, tests relevantes y benchmark si aplica;
-11. no mergear con checks rojos relevantes;
-12. mergear el PR;
-13. la P se considera **Completada / Gate aprobado** únicamente cuando GitHub confirme que ese PR está mergeado;
-14. solo entonces comenzar la siguiente P.
+11. no integrar con checks rojos relevantes;
+12. normalmente mergear el PR; para P4–P7, **diferir todos los merges a `main` hasta que P7 tenga su gate final aprobado**;
+13. normalmente la P se considera completada al confirmar `merged=true`; para P4–P7 antes de la integración final, se considera **cerrada y staged / Gate aprobado** cuando su gate real está verde y su PR atómico refleja únicamente su delta respecto de la base apilada;
+14. solo entonces comenzar la siguiente P; tras P7, integrar P4 → P5 → P6 → P7 en orden y limpiar ramas.
 
 No se exige escribir el SHA de merge dentro de este documento. El número de PR es el identificador canónico de evidencia y el estado `merged` de ese PR en GitHub es la fuente de verdad de que la intervención quedó integrada. Esto evita un commit documental posterior creado únicamente para registrar un hash que no existe antes del merge.
 
@@ -1129,7 +1141,7 @@ Cada PR P0–P7 debe dejar su propio registro de ejecución **dentro del mismo P
 
 No registrar el commit de merge como requisito documental. Tras el merge, la combinación `PR #N + estado merged en GitHub` constituye evidencia suficiente y verificable.
 
-Para iniciar la siguiente P, el ejecutor debe comprobar el PR de la intervención anterior en GitHub y confirmar `merged=true`. No basta con que el documento diga `Gate aprobado`.
+Para iniciar la siguiente P, el ejecutor debe comprobar el PR de la intervención anterior en GitHub y confirmar su dependencia real. Normalmente exige `merged=true`; durante la política temporal P4–P7 exige gate completo verde, PR staged y rama siguiente nacida del HEAD exacto anterior. No basta con que el documento diga `Gate aprobado`.
 
 La tabla/estado del documento puede expresar `Gate aprobado · PR #N`; su condición de completado se deriva del estado real del PR. No crear un commit directo posterior a `main` únicamente para cambiar esa etiqueta o insertar un SHA.
 
@@ -1191,8 +1203,8 @@ P0 — Gate aprobado · PR #109
 P1 — Gate aprobado · PR #111
 P2 — Gate aprobado · PR #115; correcciones Gate aprobado · PR #116
 P3 — Gate aprobado · PR #117
-P4 — SIGUIENTE AUTORIZADA (requiere PR #117 mergeado)
-P5 — BLOQUEADO POR P4
+P4 — Gate aprobado · PR #118 · STAGED (sin merge por política P4–P7)
+P5 — SIGUIENTE AUTORIZADA desde HEAD de P4
 P6 — BLOQUEADO POR P5
 P7 — BLOQUEADO POR P6
 ```
@@ -1319,3 +1331,20 @@ No cambiar estos estados por anticipación. Solo el gate real de cada punto desb
 - Moneda verificada: `amount` representa centavos de la base en los flujos soportados. Composer usa la moneda configurada; `transaction-service.ts` rechaza cuentas extranjeras y fija metadata de base en las escrituras con cuenta/crédito; `backup-json.ts` y `csv-backup.ts` normalizan importaciones. El fixture USD/FX59 es adversarial y comprueba compatibilidad con `selectSpendingReport()`, no soporte FX. Inspección estática separada: editar un gasto legado sin cuenta puede conservar `amountBase` previo, aunque `amount` actualizado sigue siendo el valor base que Reportes presenta; no se cambia esa metadata dentro de P3 ni impide este gate.
 - Composición debajo del período comparable intencional: el contrato vigente exige integración dentro del hero y no exige columnas de escritorio. Hero, lista y tooltip usan el mismo formato `es-DO` con día/mes corto/año y fecha civil al mediodía; los rangos de un día se colapsan de la misma forma. El cero completo conserva altura cero y valor exacto visible en la lista; una marca adicional en la línea base queda como observación posterior, sin implementar en esta revisión.
 - Evidencia compacta: `verification.json` conserva metadata del fixture y resumen del gate; `reports-benchmark.json`, entorno/configuración, las 18 medianas/ratios y el resultado. Escenarios, filas y comprobaciones se regeneran desde el harness fijo; las muestras se emiten al repetir `npm run benchmark:reports`. Se eliminan registros repetidos del PR, conservando baseline P0 y referencias P0–P2.
+
+
+## Registro P4 — 4 de octubre de 2026
+
+**Gate aprobado · PR #118 · STAGED** — PR atómico `final-ui-polish-p4-category-distribution`, abierto contra `main` y deliberadamente **sin merge** por la política temporal P4–P7.
+
+- Proyección pura `projectReportCategoryDistribution()`: top 4 por valor, `Otros` exacto para el resto, categorías con valor no positivo fuera del donut y orden estable con desempate canónico.
+- La leyenda usa mayor resto a una decimal y suma exactamente **100.0 %** cuando el total es positivo. `Otros` conserva la suma exacta de sus categorías fuente; la tabla detallada sigue mostrando todas las categorías originales sin agrupación.
+- Donut Prisma con total central y leyenda propia; no usa la leyenda automática de Recharts. Importe por fila solo visible con balances visibles; tooltip y total usan `usePrivateCurrency()`. El donut queda sin animación para respetar reduced motion de forma inequívoca.
+- `npm run check`: **783/783** tests, 0 fallos.
+- `npm run benchmark:ledger`: aprobado; 50k **37.062 ms** posición / **37.425 ms** historiales en CI.
+- `npm run benchmark:reports`: **18/18** mediciones con oracle aprobado; a 50k ratios **0.491–0.550×**, todas bajo el gate ≤2×.
+- `npm run build`: aprobado.
+- `npm run test:e2e`: aprobado; conserva P0–P3, 320/360/390/1280, Prisma/Neón, privacidad, teclado/touch, reduced motion, loading/vacío, navegación y recarga offline.
+- Diff revisado: sin cambios de schema, migraciones, backup/envelope, ledger, semánticas financieras, deuda/currency/accounts, red ni navegación principal.
+- Siguiente punto autorizado: **P5**, únicamente desde el HEAD staged de P4 y sin merge a `main`.
+

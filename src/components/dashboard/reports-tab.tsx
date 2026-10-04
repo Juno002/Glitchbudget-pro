@@ -4,6 +4,7 @@ import { Fragment, useState, type ReactNode } from 'react';
 import { useFinances } from '@/contexts/finance-context';
 import { resolveReportRange, SPENDING_TREND_MAX_WINDOWS, type ReportRangePreset } from '@/domain/reports';
 import { presentReportInsight, type ReportEditorialInsight } from '@/lib/report-editorial';
+import { projectReportCategoryDistribution } from '@/lib/report-visualization';
 import { localDate } from '@/lib/finance-calculations';
 import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
@@ -108,10 +109,13 @@ export default function ReportsTab() {
     {label:'Patrimonio neto',data:report.comparison.netWorth},
   ];
 
-  const categoryChartRows:ReportChartRow[]=report.spending.categories.map(row=>({
-    label:getCategoryInfo(row.categoryId)?.name || row.categoryId,
-    value:row.value,
-  }));
+  const categoryDistribution=projectReportCategoryDistribution(
+    report.spending.categories.map(row=>({
+      key:row.categoryId,
+      label:getCategoryInfo(row.categoryId)?.name || row.categoryId,
+      value:row.value,
+    })),
+  );
   const natureChartRows:ReportChartRow[]=report.spending.byNature.map(row=>({
     label:row.nature,
     value:row.total,
@@ -262,7 +266,7 @@ export default function ReportsTab() {
                   <CardTitle className="font-display text-2xl font-normal">Distribución por categoría</CardTitle>
                   </CardHeader>
                 <CardContent className="space-y-4">
-                  <ReportCategoryDonut data={categoryChartRows} />
+                  <ReportCategoryDonut data={categoryDistribution.segments} total={categoryDistribution.total} />
                   {report.spending.categories.length ? (
                     <div className="overflow-x-auto rounded-[var(--radius-interactive)] border">
                       <Table>
