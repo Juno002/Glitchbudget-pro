@@ -153,9 +153,21 @@ Mint/success se reserva para estados explícitamente definidos como éxito por c
 | P6 | Transplante Prisma a Home | Selector puro de estado | No iniciado |
 | P7 | Regresión global e integración | No | No iniciado |
 
-No se permite trabajo paralelo entre puntos. P(n+1) empieza únicamente después de que P(n) esté mergeada en `main` con su gate aprobado.
+No se permite trabajo paralelo entre puntos. La regla normal exige integrar P(n) antes de P(n+1), salvo la política temporal P4–P7 autorizada abajo, que conserva la misma dependencia estricta mediante ramas apiladas y gates completos sin tocar `main`.
 
 Cada punto usa una rama y PR atómicos propios. No agrupar dos puntos en un mismo PR.
+
+### Política temporal de integración P4–P7 — autorizada el 4 de octubre de 2026
+
+Por instrucción explícita del usuario, **no se hará ningún merge adicional a `main` hasta cerrar P7**. Esta política modifica únicamente la mecánica de integración; no cambia el alcance funcional, los gates ni el orden P4 → P5 → P6 → P7.
+
+- P4 usa rama propia nacida del `main` que ya contiene P3.
+- P5 solo puede comenzar cuando P4 tenga su gate completo aprobado; su rama nace del HEAD exacto de P4 y su PR usa la rama P4 como base.
+- P6 solo puede comenzar cuando P5 tenga su gate completo aprobado; su rama nace del HEAD exacto de P5 y su PR usa la rama P5 como base.
+- P7 solo puede comenzar cuando P6 tenga su gate completo aprobado; su rama nace del HEAD exacto de P6 y su PR usa la rama P6 como base.
+- Ningún punto se considera integrado en `main` durante este tramo; se considera **cerrado y staged** cuando su gate real está aprobado y su PR atómico refleja únicamente su delta respecto de la rama anterior.
+- Tras aprobar P7, se integran P4, P5, P6 y P7 en orden, preservando la cadena de commits/árboles para que cada diff siga siendo revisable; solo después se limpian las ramas.
+- Si cualquier gate falla, la secuencia se detiene en ese punto. No se usa P5/P6/P7 para ocultar una regresión anterior.
 
 ---
 
