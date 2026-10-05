@@ -77,7 +77,7 @@ test('deep analysis preserves every canonical cash-flow and net-worth binding', 
     'label="Pasivos" amount={report.netWorth.liabilities}',
     'label="Patrimonio neto" amount={report.netWorth.netWorth}',
   ]) assert.ok(netWorth.includes(binding), binding);
-  assert.match(netWorth, /el crédito disponible no es un activo/);
+  assert.match(netWorth, /el crédito disponible nunca se trata como activo/);
 });
 
 test('largest movements remain exact and available as editorial evidence inside detailed analysis', () => {
