@@ -31,7 +31,7 @@ test('P2 spending hero presents the canonical snapshot without financial reconst
 
 test('P2 retains a completed hero with only the canonical chart authorized by P3 and no semantic direction colors', () => {
   const { hero } = heroSource();
-  const withoutAuthorizedTrend = hero.replace(/<ReportSpendingTrend\s+data=\{[^}]+\}\s*\/>/g, '');
+  const withoutAuthorizedTrend = hero.replace(/<ReportSpendingTrend\s+data=\{[^}]+\}(?:\s+variant="hero")?\s*\/>/g, '');
   assert.doesNotMatch(withoutAuthorizedTrend, /<Report\w*Chart|<Report\w*Bars|<Report\w*Donut|ResponsiveContainer|recharts|sparkline|placeholder|spendingHistoryStart|reportHistoryStart|historyWindows|spendingTrend/i);
   assert.doesNotMatch(hero, /text-(?:bad|good|success|destructive)|brand-(?:mint|coral)|--(?:positive|negative)|(?:mint|coral)/);
 });
