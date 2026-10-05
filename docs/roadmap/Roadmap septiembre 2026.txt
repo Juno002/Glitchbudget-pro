@@ -4898,6 +4898,7 @@ Contrato:
 - el nuevo `startDate` sigue limitado a la ventana retroactiva canónica vigente (inicio del mes calendario anterior → hoy);
 - mover el inicio hacia atrás no crea ingresos, gastos, transferencias ni ajustes sintéticos;
 - el usuario debe indicar el `openingBalance` real al inicio de la nueva fecha; ese saldo sigue sin contar como ingreso ni cash flow;
+- durante un rebase hacia atrás se permite que el saldo calculado quede temporalmente negativo mientras se reconstruyen los movimientos históricos faltantes; esta excepción no aplica a gastos, transferencias, pagos ni correcciones ordinarias de saldo inicial;
 - todos los movimientos ya registrados permanecen intactos;
 - tras ampliar el inicio, pueden registrarse movimientos reales con fecha `>= startDate` y estos sí afectan saldo/reportes normalmente;
 - no se permite adelantar el inicio de una cuenta con actividad porque podría excluir historial ya registrado;
