@@ -156,6 +156,14 @@ test('account with activity can rebase backward and then register a real retroac
   }, today), 40_000);
 
   await addAccount({ ...account, startDate:bounds.min, openingBalance:0 }, true);
+  const rebasedBeforeHistory = (await db.accounts.get('bank'))!;
+  assert.equal(selectAccountBalance(rebasedBeforeHistory, {
+    incomes:[],
+    expenses:await db.expenses.toArray(),
+    payments:[],
+    transfers:[],
+  }, today), -10_000);
+
   await db.categories.add({
     id:'salary',
     name:'Sueldo',
@@ -214,7 +222,7 @@ test('movement dates before account start remain invalid', async () => {
   await assert.rejects(requireAccount('bank', previousMonthEnd), /anterior al inicio/i);
 });
 
-test('cash uses the same retroactive start rule while it has no activity', async () => {
+test('cash can rebase backward and blocks moving forward after activity', async () => {
   const cash = await ensureCashAccount();
   await addAccount({ ...cash, startDate: bounds.min, openingBalance: 35_000 }, true);
   const stored = (await db.accounts.get(cash.id))!;
@@ -224,7 +232,7 @@ test('cash uses the same retroactive start rule while it has no activity', async
   await db.expenses.add({ id:'cash-expense', date:today, month:today.slice(0,7), amount:5_000, categoryId:'food', concept:'Compra', nature:'Variable', paymentMethod:'cash', accountId:cash.id });
   await assert.rejects(
     addAccount({ ...stored, startDate: today }, true),
-    /movimientos registrados/i,
+    /solo puede moverse hacia atrás/i,
   );
 });
 
@@ -322,7 +330,7 @@ test('pure activity selector includes every account-affecting movement family', 
 test('UI preserves an unchanged historical startDate outside the rolling edit window', () => {
   const source = readFileSync(new URL('../src/components/dashboard/accounts-overview.tsx', import.meta.url), 'utf8');
   assert.match(source, /startInputMin = editingAccountRecord && editingAccountRecord\.startDate < startBounds\.min/);
-  assert.match(source, /min=\{startInputMin\} max=\{startBounds\.max\}/);
+  assert.match(source, /min=\{startInputMin\} max=\{startInputMax\}/);
 });
 
 
