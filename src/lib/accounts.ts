@@ -7,7 +7,7 @@ import { db, type Account, type Income, type Expense, type DebtPayment, type Acc
 import { isValidDate, localDate } from './finance-calculations';
 import { normalizeCurrencyCode, requireCurrencyCode } from '../domain/currency';
 import { classifyDebtPaymentIntegrity, type RawDebtPayment } from '../domain/data-integrity';
-import { assertAccountStartDateAllowed } from '../domain/account-start';
+import { assertAccountStartDateAllowed, assertEditedAccountStartDateAllowed } from '../domain/account-start';
 const cents = z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const date = z.string().refine(isValidDate, 'Fecha inválida');
 const commonAccountFields = {
@@ -93,7 +93,9 @@ export async function requireAccount(id: string | undefined, movementDate: strin
   if (!id) throw new Error('Selecciona una cuenta del movimiento.');
   const account = await db.accounts.get(id);
   if (!account) throw new Error('La cuenta ya no existe.');
-  if (movementDate < account.startDate) throw new Error('La fecha es anterior al inicio del seguimiento de esta cuenta.');
+  if (movementDate < account.startDate) {
+    throw new Error('La fecha es anterior al inicio del seguimiento de esta cuenta. Edita la cuenta y amplía «Llevar esta cuenta desde» hacia atrás antes de registrar este movimiento.');
+  }
   return account;
 }
 export async function addAccount(input: Account, editing = false) {
@@ -110,10 +112,12 @@ export async function addAccount(input: Account, editing = false) {
       const existing = await db.accounts.get(account.id);
       if (!existing) throw new Error('La cuenta ya no existe. Actualiza la lista.');
       if (existing.startDate !== account.startDate) {
-        assertAccountStartDateAllowed(account.startDate, localDate());
-        if (await hasAccountActivity(account.id)) {
-          throw new Error('La fecha inicial no se puede cambiar porque la cuenta ya tiene movimientos registrados.');
-        }
+        assertEditedAccountStartDateAllowed(
+          existing.startDate,
+          account.startDate,
+          localDate(),
+          await hasAccountActivity(account.id),
+        );
       }
       if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
       if (normalizeCurrencyCode(existing.currency, baseCurrency) !== account.currency) throw new Error('La moneda de una cuenta con historial no se puede reinterpretar.');
