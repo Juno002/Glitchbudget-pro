@@ -1449,6 +1449,61 @@ async function main() {
       'retorno a Reportes desktop',
     );
 
+    // Retroactive income regression: extend account history and save the real income atomically.
+    if (!await client.evaluate(`(() => {
+      const button = document.querySelector('[aria-label="Nuevo movimiento"]');
+      if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
+      button.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir Nuevo movimiento para ingreso retroactivo.');
+    await waitFor(client, `Boolean(document.querySelector('[data-global-composer="prisma"]'))`, 'compositor ingreso retroactivo');
+
+    if (!await client.evaluate(clickButtonExpression('Ingreso'))) {
+      throw new Error('No se pudo seleccionar Ingreso retroactivo.');
+    }
+    await client.evaluate(setControlExpression('[aria-label="Monto"]', '500'));
+    await waitFor(client, `Boolean(document.querySelector('[aria-label="Categoría"] option:not([value=""])'))`, 'categoría ingreso retroactivo');
+    if (!await client.evaluate(selectFirstOptionExpression('[aria-label="Categoría"]'))) {
+      throw new Error('No se pudo seleccionar categoría de ingreso retroactivo.');
+    }
+    if (!await client.evaluate(`(() => {
+      const summary = document.querySelector('[data-quick-add-details="prisma"] summary');
+      if (!(summary instanceof HTMLElement)) return false;
+      summary.click();
+      return true;
+    })()`)) throw new Error('No se pudo abrir Más detalles para ingreso retroactivo.');
+    await waitFor(client, `Boolean(document.querySelector('[aria-label="Fecha del movimiento"]'))`, 'fecha ingreso retroactivo');
+    await client.evaluate(setControlExpression('[aria-label="Fecha del movimiento"]', '2026-09-30'));
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-retroactive-income-extension="true"]'))
+        && Boolean(document.querySelector('[aria-label="Saldo al inicio de la fecha retroactiva"]'))`,
+      'extensión histórica desde compositor',
+    );
+    await client.evaluate(setControlExpression('[aria-label="Saldo al inicio de la fecha retroactiva"]', '0'));
+    await waitFor(
+      client,
+      `[...document.querySelectorAll('button')].some(node => node.textContent?.trim() === 'Guardar' && !node.disabled)`,
+      'Guardar ingreso retroactivo habilitado',
+    );
+    await client.evaluate(clickButtonExpression('Guardar'));
+    await waitFor(client, `document.body.innerText.includes('Ingreso registrado')`, 'ingreso retroactivo registrado');
+    await waitFor(client, `!document.querySelector('[data-global-composer="prisma"]')`, 'cierre compositor retroactivo', 5_000);
+
+    if (!await client.evaluate(clickButtonExpression('Movimientos'))) {
+      throw new Error('No se pudo abrir Movimientos tras ingreso retroactivo.');
+    }
+    await waitFor(
+      client,
+      `Boolean(document.querySelector('[data-accounts-prisma="true"]'))
+        && document.querySelector('[data-accounts-prisma="true"]')?.innerText.includes('Desde 2026-09-30')`,
+      'cuenta ampliada a fecha retroactiva',
+    );
+    if (!await client.evaluate(clickButtonExpression('Reportes'))) {
+      throw new Error('No se pudo volver a Reportes tras ingreso retroactivo.');
+    }
+    await waitFor(client, `Boolean(document.querySelector('[data-reports-prisma="true"]'))`, 'retorno a Reportes tras ingreso retroactivo');
+
     const postRoadmap4Results = await runPostRoadmap4Benchmark(client);
     if (postRoadmap4Results.length !== 3) throw new Error('Benchmark Post-roadmap 4 incompleto.');
     await client.command('Page.navigate', { url: APP_URL + '?tab=reports' });
