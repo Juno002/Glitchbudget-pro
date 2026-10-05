@@ -193,5 +193,5 @@ test('Investments 1.0 UI exposes the roadmap fields and labels projections as es
   assert.match(ui, /Estimado · no forma parte del patrimonio real/);
   assert.match(ui, /Ya la tenía/);
   assert.match(ui, /La acabo de abrir/);
-  assert.match(ui, /transferencia patrimonial/);
+  assert.match(ui, /Se registra como transferencia, no gasto/);
 });
