@@ -1453,3 +1453,5 @@ Autorizada el 5 de octubre de 2026 y registrada en el roadmap canónico. 20.6 y 
 La apertura pasa a período/controles → gasto dominante con cambio y tendencia → lectura principal cálida → categorías y comparación → análisis detallado opcional. Sustituye únicamente el orden y tratamiento visual anteriores. Conserva todos los insights, rangos, datos reales, cuatro tablas exactas y el disclosure cerrado por defecto, sin cambios financieros ni de persistencia.
 
 Auditoría, archivos, invariantes y evidencia de cierre: [Reportes — composición editorial final](reports-editorial-composition.md).
+
+**Completado e integrado mediante PR #127**, con los cinco gates exactos y Quality checks verdes sobre `a4831de92fb60e8b7814c70629edae229d0d60e0`. Merge: `7d6cfeb5f14fbd7155d0214a43ddd8cc6e84322d`. 20.6 y Final UI Polish permanecen cerrados.

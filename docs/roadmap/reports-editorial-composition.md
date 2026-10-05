@@ -39,7 +39,7 @@ Sin cambios en dominio, queries/selectors, `getReportSnapshot`, definiciones de 
 
 ## Registro de ejecución
 
-Rama: `reports-editorial-composition-final`, desde el main auditado. PR: [#127](https://github.com/Juno002/Glitchbudget-pro/pull/127). La rama de ejemplo y PR #126 ya existían; se conservan intactas. Merge SHA pendiente del gate completo.
+**COMPLETADO / integrado en main.** Rama: `reports-editorial-composition-final`, desde el main auditado. PR: [#127](https://github.com/Juno002/Glitchbudget-pro/pull/127). Merge confirmado: `7d6cfeb5f14fbd7155d0214a43ddd8cc6e84322d`. La rama de ejemplo y PR #126 ya existían; se conservan intactas.
 
 Hallazgos financieros fuera de alcance: ninguno confirmado en la auditoría inicial.
 
@@ -86,6 +86,29 @@ La prueba de tooltip usa un punto dentro del anillo real de la dona. Las etiquet
 - Benchmark ledger por loader nativo: aprobado; medianas 50k de posición 62.501982 ms e historiales 51.145766 ms.
 - Benchmark reports por loader nativo: **18 mediciones**, `gatePassed: true`; ratios 50k ≤0.539 frente al baseline ≤2×.
 - El smoke completo local con Chromium disponible reproduce un overflow de Home a 320 px antes de Reportes, también presente al ejecutar main sin estos cambios. No se modifica Home en esta intervención. El Quality checks del main exacto auditado está aprobado en GitHub; el resultado local no se presenta como un gate verde.
-- Antes de integrar se requieren los cinco comandos exactos verdes en GitHub Quality checks sobre el HEAD de esta PR. Registro definitivo pendiente de esa ejecución.
+- Los cinco comandos exactos aprobaron en GitHub sobre el HEAD final antes del merge; el registro oficial se detalla a continuación. No se sustituyeron los gates por los equivalentes locales ni se cambiaron thresholds para aprobar.
 
 Sin cambios en `src/domain/**`, `src/application/**`, engine, context/selectors, `src/lib/report-editorial.ts`, persistencia, dependencias, scripts npm ni workflow. La aritmética nueva produce solo geometría o tamaño tipográfico sobre strings formateados; los resultados y porcentajes financieros se reciben ya calculados.
+
+## Gate oficial y cierre
+
+HEAD exacto de PR #127: `a4831de92fb60e8b7814c70629edae229d0d60e0`.
+[Quality checks aprobado](https://github.com/Juno002/Glitchbudget-pro/actions/runs/37335908950), job `111850513483`, Node 22 / Ubuntu. El run de push `37335900685` sobre el mismo HEAD también aprobó. Se consultaron los check-runs del commit y el estado Vercel: todos verdes antes del merge.
+
+| Gate exacto | Resultado verificado |
+| --- | --- |
+| `npm run check` | **817/817**, 0 fallos; local-only, typecheck y lint aprobados |
+| `npm run benchmark:ledger` | Aprobado; posición 50k **36.505033 ms**, historiales 50k **37.501726 ms** (medianas de este CI) |
+| `npm run benchmark:reports` | **18 mediciones**, `gatePassed: true`; máximo ratio 50k **0.565412× ≤ 2×** |
+| `npm run build` | Aprobado; 45 recursos estáticos, sin importador diagnóstico, CSP local-only intacta |
+| `npm run test:e2e` | Aprobado; smoke completo de producto y recarga offline |
+
+Evidencia E2E: 12 combinaciones de apertura/privacidad; siete tipos de insight y 40 escenarios históricos de ranking/copy; 100 comprobaciones del hero; 130 de tendencia en seis presets y seis escenarios; 32 de composición, ecuaciones y lista móvil. Se verificaron estados vacíos/loading reales, ventanas únicas parciales/completas, cobertura histórica, ceros reales, historial sin cuenta/removido, teclado/touch, Prisma/Neón/legado, privacidad visual/AX y reduced motion. Los datasets originales se restauraron exactamente.
+
+El smoke global terminó con `E2E smoke passed`, incluyendo shell responsive, Home, Movimientos/composer, Plan, Reportes/gráficos, mutación de movimiento, navegación y offline. Conserva el bloqueo de requests externos y la verificación estática de `connect-src 'none'`.
+
+Merge de implementación confirmado por GitHub (`merged: true`): **`7d6cfeb5f14fbd7155d0214a43ddd8cc6e84322d`**, PR #127. El registro documental posterior utiliza la rama `reports-editorial-composition-closeout`, sin cambios de producto.
+
+**Hallazgos excluidos:** ningún bug financiero confirmado. El overflow de Home del Chromium local se documentó y quedó fuera; el CI oficial pasó también Home a 320 px. La PR #126 y sus commits no se reemplazaron ni se cerraron. No hay migración ni cambio de arquitectura requerido por esta composición.
+
+La lectura principal comunica período → gasto → cambio → insight → evidencia. El detalle exacto permanece bajo demanda. **Cero nuevas métricas, fórmulas financieras, cambios financieros/persistencia, datos demo de producto o pérdida de información.**
