@@ -5019,7 +5019,7 @@ Registro de cierre de PR #124:
 - sin cambios de schema, migraciones, backup ni fórmulas financieras.
 ## Corrección editorial autorizada — limpieza global del «efecto maqueta»
 
-**Estado: EN IMPLEMENTACIÓN.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 tras detectar residuos de sobreexplicación en Cuentas, Presupuestos y Metas.
+**Estado: IMPLEMENTADO / gate pendiente.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 tras detectar residuos de sobreexplicación en Cuentas, Presupuestos y Metas. Inventario y criterio: `docs/roadmap/editorial-secondary-surfaces.md`.
 
 Esta corrección no crea P8, Fase 20.11 ni Fase 21. Extiende la intención ya cerrada de 20.8.1, 20.8.5 y 20.9.4 a superficies secundarias, ocultas y de gestión que no quedaron suficientemente depuradas.
 
@@ -5033,7 +5033,8 @@ Contrato:
 - conservar `DialogDescription` solo cuando aporte contexto real; cuando sea necesario únicamente para accesibilidad puede quedar `sr-only`;
 - no eliminar labels, estados, errores accionables, consecuencias destructivas ni semántica de planificación vs. dinero real;
 - no tocar cálculos, selectors, commands, persistencia, schema, migraciones, backups, red ni navegación principal;
-- documentar el inventario auditado y añadir regresión para evitar que reaparezcan los textos explícitamente retirados;
+- inventario auditado documentado en `docs/roadmap/editorial-secondary-surfaces.md`;
+- regresión añadida en `tests/editorial-secondary-surfaces.test.ts` para impedir el retorno del copy retirado y preservar advertencias críticas;
 - gates obligatorios: `npm run check`, benchmarks vigentes, `npm run build` y `npm run test:e2e`.
 
 Criterio editorial:
