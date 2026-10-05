@@ -34,7 +34,8 @@ test('P0 preserves exact report evidence under the authorized progressive disclo
     'detail',
     'budget-followup',
   ]);
-  assert.equal([...source.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...source.matchAll(/<Table>/g)].length, 3);
+  assert.match(source, /data-report-largest-list="editorial"/);
   assert.match(source, /Ver análisis detallado/);
   assert.match(source, /aria-expanded=\{showDetailedAnalysis\}/);
   assert.match(source, /hidden=\{!showDetailedAnalysis\}/);
