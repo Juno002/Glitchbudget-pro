@@ -65,8 +65,8 @@ test('20.8.6 keeps detailed transactions after Net Worth inside the audit block'
   const largest=reports.indexOf('Movimientos de mayor importe');
   assert.ok(netWorth>=0 && detail>netWorth && largest>detail);
   assert.match(reports,/report\.spending\.largestTransactions\.map/);
-  assert.match(reports,/<TableHead>Fecha<\/TableHead>/);
-  assert.match(reports,/<TableHead>Movimiento<\/TableHead>/);
+  assert.match(reports,/<TransactionRow/);
+  assert.match(reports,/data-report-largest-list="editorial"/);
   assert.doesNotMatch(reports,/El resumen editorial no reemplaza los importes y filas exactas del rango\./);
 });
 
