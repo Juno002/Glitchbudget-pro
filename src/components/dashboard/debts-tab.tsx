@@ -82,7 +82,6 @@ export default function DebtsTab() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Crédito</p><h2 className="mt-1 font-display text-xl font-normal tracking-[-0.025em]">Tarjetas</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Límites, saldo pendiente y pagos registrados.</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={open => { if (!savingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
@@ -133,7 +132,6 @@ export default function DebtsTab() {
         <EmptyState
           icon={<CreditCard className="h-10 w-10" />}
           title="Aún no tienes tarjetas"
-          description="Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente."
         />
       ) : (
         <div className="grid gap-4">
