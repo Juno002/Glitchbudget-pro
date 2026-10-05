@@ -5057,7 +5057,7 @@ Registro de cierre de PR #125:
 
 ## Corrección visual autorizada — composición editorial final de Reportes
 
-**Estado: EN IMPLEMENTACIÓN.** Autorizada explícitamente por el usuario el 5 de octubre de 2026 tras revisar la implementación actual, el contrato Prisma y la referencia visual congelada `Juno002/Prisma@dc4310040f42cefd74cf41bad75152902e549c24`.
+**Estado: IMPLEMENTADO / gate pendiente.** Autorizada explícitamente por el usuario el 5 de octubre de 2026 tras revisar la implementación actual, el contrato Prisma y la referencia visual congelada `Juno002/Prisma@dc4310040f42cefd74cf41bad75152902e549c24`.
 
 Esta corrección no crea P8, Fase 20.11 ni Fase 21. No añade funcionalidad financiera. Recompone exclusivamente la presentación de Reportes sobre los mismos selectors, read models y datos reales ya aprobados.
 
