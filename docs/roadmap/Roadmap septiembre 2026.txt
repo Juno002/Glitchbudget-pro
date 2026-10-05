@@ -5019,7 +5019,7 @@ Registro de cierre de PR #124:
 - sin cambios de schema, migraciones, backup ni fórmulas financieras.
 ## Corrección editorial autorizada — limpieza global del «efecto maqueta»
 
-**Estado: IMPLEMENTADO / gate pendiente.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 tras detectar residuos de sobreexplicación en Cuentas, Presupuestos y Metas. Inventario y criterio: `docs/roadmap/editorial-secondary-surfaces.md`.
+**Estado: COMPLETADO / integrado en `main` · PR #125.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 tras detectar residuos de sobreexplicación en Cuentas, Presupuestos y Metas. Inventario y criterio: `docs/roadmap/editorial-secondary-surfaces.md`.
 
 Esta corrección no crea P8, Fase 20.11 ni Fase 21. Extiende la intención ya cerrada de 20.8.1, 20.8.5 y 20.9.4 a superficies secundarias, ocultas y de gestión que no quedaron suficientemente depuradas.
 
@@ -5044,6 +5044,17 @@ la interfaz debe indicar qué hacer y qué significa una consecuencia importante
 sin narrar cómo funciona cada control cuando el propio control ya lo comunica
 ```
 
+Registro de cierre de PR #125:
+
+- `npm run check`: **809/809**, 0 fallos;
+- `npm run benchmark:ledger`: aprobado;
+- `npm run benchmark:reports`: **18 mediciones**, `gatePassed: true`;
+- `npm run build`: aprobado;
+- `npm run test:e2e`: aprobado;
+- regresión editorial añadida para impedir el retorno del copy retirado y preservar advertencias críticas;
+- sin cambios de cálculo, selectors, commands, schema, migraciones, backup, persistencia, red ni navegación principal;
+- merge commit: `482f2ead53ae0e1919a29225cf18b42a87cc9b2c`.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
@@ -5063,7 +5074,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = ninguna; corrección «lectura progresiva de Reportes» completada e integrada mediante PR #122
+intervenciones pendientes autorizadas = ninguna; lectura progresiva de Reportes, ingreso retroactivo y limpieza editorial global completados e integrados
 ```
 
 No existe una Fase 20.11.
