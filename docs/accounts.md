@@ -39,6 +39,8 @@ CSV de ingresos/gastos conserva `accountId`, `currency`, `fxRate` y `amountBase`
 
 Una vez guardado el nuevo inicio, un ingreso, gasto, pago o transferencia con fecha igual o posterior a `startDate` usa el flujo normal y afecta saldo/reportes según su semántica. Adelantar `startDate` con actividad permanece bloqueado porque podría excluir historial ya registrado.
 
+Durante la reconstrucción, reducir el saldo inicial al ampliar la fecha puede dejar un saldo calculado temporalmente negativo hasta que se registren los movimientos históricos que faltan. Esa tolerancia pertenece solo al rebase administrativo; las operaciones financieras normales conservan las protecciones de saldo negativo.
+
 ## Validación
 
 Pruebas de retiro sin ingresos/gastos artificiales, saldos iniciales sin duplicar historial, gasto real frente a proyección, concurrencia, edición de transferencia, pago de tarjeta, ida/vuelta de respaldo v4 y migración desde v7. Los datos usados para verificar son ficticios.
