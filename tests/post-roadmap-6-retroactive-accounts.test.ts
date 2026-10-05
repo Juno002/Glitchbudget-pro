@@ -206,6 +206,98 @@ test('account with activity can rebase backward and then register a real retroac
   assert.equal(report.cashFlow.netCashFlow, 40_000);
 });
 
+
+test('new income can atomically extend account history when opening balance is supplied', async () => {
+  const account = { ...baseAccount(), openingBalance:50_000 };
+  await addAccount(account);
+  await db.expenses.add({
+    id:'current-expense',
+    date:today,
+    month:today.slice(0,7),
+    amount:10_000,
+    amountBase:10_000,
+    currency:'DOP',
+    fxRate:1,
+    categoryId:'food',
+    concept:'Gasto existente',
+    nature:'Variable',
+    paymentMethod:'cash',
+    accountId:'bank',
+  });
+  await db.categories.add({
+    id:'salary-direct',
+    name:'Sueldo directo',
+    type:'income',
+    iconName:'landmark',
+    archived:false,
+    incomeOrder:0,
+  });
+
+  await saveIncome({
+    id:'retro-income-direct',
+    date:bounds.min,
+    amount:asCents(50_000),
+    amountBase:50_000,
+    currency:'DOP',
+    fxRate:1,
+    categoryId:'salary-direct',
+    description:'Ingreso retroactivo directo',
+    type:'extra',
+    accountId:'bank',
+  }, false, { accountHistoryOpeningBalance:asCents(0) });
+
+  const stored = (await db.accounts.get('bank'))!;
+  const snapshot: AccountSnapshot = {
+    incomes:await db.incomes.toArray(),
+    expenses:await db.expenses.toArray(),
+    payments:[],
+    transfers:[],
+  };
+  assert.equal(stored.startDate, bounds.min);
+  assert.equal(stored.openingBalance, 0);
+  assert.equal(selectAccountBalance(stored, snapshot, today), 40_000);
+
+  const report = selectReportsSnapshot(
+    { accounts:[stored], debts:[], incomes:snapshot.incomes, expenses:snapshot.expenses, debtPayments:[], transfers:[] },
+    { start:bounds.min, end:today },
+  );
+  assert.equal(report.cashFlow.income, 50_000);
+  assert.equal(report.spending.total, 10_000);
+  assert.equal(report.cashFlow.netCashFlow, 40_000);
+});
+
+test('retroactive income without explicit historical opening balance remains blocked and atomic', async () => {
+  const account = { ...baseAccount(), openingBalance:50_000 };
+  await addAccount(account);
+  await db.categories.add({
+    id:'salary-blocked',
+    name:'Sueldo bloqueado',
+    type:'income',
+    iconName:'landmark',
+    archived:false,
+    incomeOrder:0,
+  });
+
+  await assert.rejects(
+    saveIncome({
+      id:'retro-income-blocked',
+      date:bounds.min,
+      amount:asCents(50_000),
+      amountBase:50_000,
+      currency:'DOP',
+      fxRate:1,
+      categoryId:'salary-blocked',
+      description:'Ingreso sin apertura',
+      type:'extra',
+      accountId:'bank',
+    }),
+    /anterior al inicio/i,
+  );
+
+  assert.equal((await db.accounts.get('bank'))?.startDate, today);
+  assert.equal(await db.incomes.get('retro-income-blocked'), undefined);
+});
+
 test('openingBalance remains correctable after activity while startDate stays fixed', async () => {
   const account = baseAccount();
   await addAccount(account);
@@ -313,6 +405,17 @@ test('UI exposes retroactive tracking date and explicit opening-balance correcti
   assert.match(source, /Saldo al inicio de esa fecha/);
   assert.match(source, /startInputMax/);
   assert.doesNotMatch(source, /disabled=\{Boolean\(editingAccount && editingAccountHasActivity\)\}/);
+});
+
+
+test('global composer exposes one-step historical extension for a retroactive income', () => {
+  const source = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
+  assert.match(source, /needsIncomeHistoryExtension/);
+  assert.match(source, /Este ingreso es anterior al inicio de/);
+  assert.match(source, /Saldo al inicio de esa fecha/);
+  assert.match(source, /accountHistoryOpeningBalance/);
+  assert.match(source, /Solo puedes ampliar el historial desde/);
+  assert.match(source, /data-retroactive-income-extension="true"/);
 });
 
 test('pure activity selector includes every account-affecting movement family', () => {
