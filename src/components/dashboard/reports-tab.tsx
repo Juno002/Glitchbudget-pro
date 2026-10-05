@@ -8,7 +8,7 @@ import { projectReportCategoryDistribution } from '@/lib/report-visualization';
 import { localDate } from '@/lib/finance-calculations';
 import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState, MetricCard, PageHeader, SectionHeader, TransactionRow } from '@/components/finance-ui';
@@ -172,7 +172,7 @@ export default function ReportsTab() {
               aria-labelledby="quick-read-title"
               data-report-section="quick-read"
             >
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--warning))]">Lectura rápida</p>
+              <p id="quick-read-title" className="text-[9px] font-bold uppercase tracking-[0.16em] text-[hsl(var(--warning))]">Lectura rápida</p>
               <div className="mt-4 divide-y divide-[hsl(var(--brand-gold)/0.24)]">
                 {editorialQuickRead.map((insight,index)=>(
                   <article
@@ -186,7 +186,7 @@ export default function ReportsTab() {
                       {insight.focus==='cash-flow'?'Flujo de caja':insight.focus==='net-worth'?'Patrimonio':insight.focus==='categories'?'Categorías':insight.focus==='spending'?'Gastos':'Resumen'}
                     </p>
                     <h2
-                      id={index===0?'quick-read-title':undefined}
+                      id={'quick-read-'+insight.kind+'-title'}
                       className={index===0?'mt-2 max-w-[20ch] break-words font-display text-3xl font-normal leading-[1.02] tracking-[-0.04em]':'mt-1.5 break-words font-display text-lg font-normal leading-snug tracking-[-0.02em]'}
                     >{insight.title}</h2>
                     <p className={index===0?'mt-3 text-sm leading-relaxed text-muted-foreground':'mt-2 text-xs leading-relaxed text-muted-foreground'}>
@@ -462,25 +462,6 @@ export default function ReportsTab() {
               )}
             </section>
           </div>
-                      ))}
-                      <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
-                        Gestionar presupuestos
-                      </Button>
-                    </div>
-                  ) : (
-                    <EmptyState
-                      title="Aún no tienes presupuestos"
-                      description="Crea un presupuesto en Plan → Presupuestos para comparar límite, gasto y restante en este reporte."
-                      action={(
-                        <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
-                          Crear presupuesto
-                        </Button>
-                      )}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            </section>
           </div>
         </>
       )}
