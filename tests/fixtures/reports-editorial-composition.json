@@ -1,0 +1,363 @@
+{
+  "range": {
+    "start": "2026-09-05",
+    "end": "2026-10-04"
+  },
+  "rows": {
+    "accounts": [
+      {
+        "id": "editorial-cash",
+        "name": "Efectivo",
+        "type": "cash",
+        "currency": "DOP",
+        "openingBalance": 1000000,
+        "startDate": "2026-08-01",
+        "isDefaultCash": true
+      },
+      {
+        "id": "editorial-bank",
+        "name": "Banco",
+        "type": "bank",
+        "currency": "DOP",
+        "openingBalance": 200000,
+        "startDate": "2026-08-01"
+      },
+      {
+        "id": "editorial-investment",
+        "name": "Inversión",
+        "type": "investment",
+        "currency": "DOP",
+        "openingBalance": 300000,
+        "startDate": "2026-08-01"
+      }
+    ],
+    "incomes": [
+      {
+        "id": "editorial-income-current",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 300000,
+        "amountBase": 300000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "sueldo",
+        "description": "Ingreso de prueba",
+        "type": "extra",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-income-previous",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 200000,
+        "amountBase": 200000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "sueldo",
+        "description": "Ingreso de prueba",
+        "type": "extra",
+        "accountId": "editorial-cash"
+      }
+    ],
+    "expenses": [
+      {
+        "id": "editorial-current-0",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 40000,
+        "amountBase": 40000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "vivienda",
+        "concept": "Movimiento de prueba con un concepto extenso",
+        "nature": "Fijo",
+        "paymentMethod": "credit",
+        "debtId": "editorial-card"
+      },
+      {
+        "id": "editorial-current-1",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 20000,
+        "amountBase": 20000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "alimentacion",
+        "concept": "Movimiento alimentacion",
+        "nature": "Variable",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-current-2",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 10000,
+        "amountBase": 10000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "transporte",
+        "concept": "Movimiento transporte",
+        "nature": "Ocasional",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-current-3",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 5000,
+        "amountBase": 5000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "salud",
+        "concept": "Movimiento salud",
+        "nature": "Fijo",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-current-4",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 3000,
+        "amountBase": 3000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "educacion",
+        "concept": "Movimiento educacion",
+        "nature": "Variable",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-current-5",
+        "date": "2026-10-04",
+        "month": "2026-10",
+        "amount": 2000,
+        "amountBase": 2000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "ocio",
+        "concept": "Movimiento ocio",
+        "nature": "Ocasional",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-previous-0",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 20000,
+        "amountBase": 20000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "vivienda",
+        "concept": "Movimiento de prueba con un concepto extenso",
+        "nature": "Fijo",
+        "paymentMethod": "credit",
+        "debtId": "editorial-card"
+      },
+      {
+        "id": "editorial-previous-1",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 10000,
+        "amountBase": 10000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "alimentacion",
+        "concept": "Movimiento alimentacion",
+        "nature": "Variable",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-previous-2",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 5000,
+        "amountBase": 5000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "transporte",
+        "concept": "Movimiento transporte",
+        "nature": "Ocasional",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-previous-3",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 2500,
+        "amountBase": 2500,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "salud",
+        "concept": "Movimiento salud",
+        "nature": "Fijo",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-previous-4",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 1500,
+        "amountBase": 1500,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "educacion",
+        "concept": "Movimiento educacion",
+        "nature": "Variable",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      },
+      {
+        "id": "editorial-previous-5",
+        "date": "2026-09-04",
+        "month": "2026-09",
+        "amount": 1000,
+        "amountBase": 1000,
+        "currency": "DOP",
+        "fxRate": 1,
+        "categoryId": "ocio",
+        "concept": "Movimiento ocio",
+        "nature": "Ocasional",
+        "paymentMethod": "cash",
+        "accountId": "editorial-cash"
+      }
+    ],
+    "debts": [
+      {
+        "id": "editorial-card",
+        "name": "editorial-card",
+        "type": "credit_card",
+        "principal": 500000,
+        "openingAdjustment": 0,
+        "apr": 0,
+        "minPayment": 0,
+        "createdAt": "2026-08-01T12:00:00.000Z",
+        "status": "active"
+      },
+      {
+        "id": "editorial-loan",
+        "name": "editorial-loan",
+        "type": "loan",
+        "principal": 120000,
+        "openingAdjustment": 5000,
+        "apr": 0,
+        "minPayment": 0,
+        "createdAt": "2026-08-01T12:00:00.000Z",
+        "status": "active"
+      }
+    ],
+    "debt_payments": [
+      {
+        "id": "editorial-payment-editorial-card",
+        "debtId": "editorial-card",
+        "accountId": "editorial-cash",
+        "date": "2026-10-04",
+        "amount": 90000,
+        "currency": "DOP",
+        "amountBase": 90000,
+        "fxRate": 1
+      },
+      {
+        "id": "editorial-payment-editorial-loan",
+        "debtId": "editorial-loan",
+        "accountId": "editorial-cash",
+        "date": "2026-10-04",
+        "amount": 25000,
+        "currency": "DOP",
+        "amountBase": 25000,
+        "fxRate": 1
+      }
+    ],
+    "account_transfers": [],
+    "plans": [
+      {
+        "month": "2026-10",
+        "categoryId": "vivienda",
+        "limit": 25000
+      }
+    ]
+  },
+  "expected": {
+    "spending": 80000,
+    "previousSpending": 40000,
+    "cashFlow": {
+      "income": 300000,
+      "cashExpenses": 40000,
+      "debtPayments": 115000,
+      "netCashFlow": 145000
+    },
+    "netWorth": {
+      "cash": 1325000,
+      "banks": 200000,
+      "investments": 300000,
+      "liabilities": 100000,
+      "cardPositiveBalance": 30000,
+      "netWorth": 1755000
+    },
+    "comparison": [
+      {
+        "label": "Gasto",
+        "previous": 40000,
+        "current": 80000,
+        "difference": 40000,
+        "percentChange": 100
+      },
+      {
+        "label": "Ingreso",
+        "previous": 200000,
+        "current": 300000,
+        "difference": 100000,
+        "percentChange": 50
+      },
+      {
+        "label": "Flujo neto",
+        "previous": 180000,
+        "current": 145000,
+        "difference": -35000,
+        "percentChange": -19.44
+      },
+      {
+        "label": "Patrimonio neto",
+        "previous": 1535000,
+        "current": 1755000,
+        "difference": 220000,
+        "percentChange": 14.33
+      }
+    ],
+    "categoryValues": [
+      40000,
+      20000,
+      10000,
+      5000,
+      5000
+    ],
+    "categoryPercentages": [
+      "50.0%",
+      "25.0%",
+      "12.5%",
+      "6.3%",
+      "6.2%"
+    ],
+    "quickRead": [
+      {
+        "kind": "cash_flow_change",
+        "title": "El flujo neto disminuyó"
+      },
+      {
+        "kind": "spending_above_previous",
+        "title": "Gastaste más que en el rango anterior"
+      },
+      {
+        "kind": "net_worth_change",
+        "title": "El patrimonio registrado aumentó"
+      }
+    ]
+  }
+}

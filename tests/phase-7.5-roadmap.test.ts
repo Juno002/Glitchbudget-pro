@@ -122,8 +122,8 @@ test('roadmap gate contains the exact ten requested deliverable sections', () =>
 test('roadmap 7.5 empty states and destructive confirmations explain the next consequence', () => {
   const reports = read('src/components/dashboard/reports-tab.tsx');
   assert.match(reports, /Aún no tienes presupuestos/);
-  assert.match(reports, /Crea un presupuesto en Plan → Presupuestos/);
-  assert.match(reports, /Crear presupuesto/);
+  assert.match(reports, /Ir a Plan/);
+  assert.match(reports, /setActiveTab\('planning'\)/);
   assert.match(reports, /setPlanningTab\('budgets'\)/);
   assert.doesNotMatch(reports, /No hay presupuestos configurados para este período/);
 

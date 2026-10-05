@@ -12,7 +12,7 @@ const date = value => new Date(value + 'T12:00:00.000Z');
 const shift = (value, days) => new Date(date(value).getTime() + days * day).toISOString().slice(0, 10);
 const windowLabel = range => {
   const formatter = new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
-  return range.start===range.end ? formatter.format(date(range.start)) : formatter.format(date(range.start))+' – '+formatter.format(date(range.end));
+  return range.start===range.end ? formatter.format(date(range.start)) : formatter.formatRange(date(range.start),date(range.end));
 };
 // Independent fixed ranges, rather than importing the selector being verified.
 const presets = [
@@ -144,7 +144,7 @@ async function readTrend(client) {
     const chart = hero?.querySelector('[data-report-chart="spending-trend"]');
     const partial = hero?.querySelector('[data-spending-trend-partial]');
     const bounds = node => { const rect = node.getBoundingClientRect(); return {left:rect.left,right:rect.right,width:rect.width,height:rect.height}; };
-    const neutralColors = ['text-foreground','text-muted-foreground'].map(className => {
+    const neutralColors = ['text-foreground','text-muted-foreground','report-hero-muted'].map(className => {
       const probe = document.createElement('span'); probe.className = className; hero.appendChild(probe);
       const color = getComputedStyle(probe).color; probe.remove(); return color;
     });
@@ -180,7 +180,7 @@ async function readTrend(client) {
           title:node.querySelector('title')?.textContent || '',bounds:bounds(node),
         })),
       } : null,
-      neutralColors,
+      neutralColors:[...neutralColors,getComputedStyle(hero).color],
     };
   })()`);
 }

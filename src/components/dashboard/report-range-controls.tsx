@@ -3,7 +3,6 @@
 import type { ReportRangePreset } from '@/domain/reports';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { SectionHeader } from '@/components/finance-ui';
 import { FeedbackMessage } from '@/components/finance-ui';
 
 const presets: Array<{ value:ReportRangePreset; label:string }> = [
@@ -35,16 +34,15 @@ export function ReportRangeControls({
   onCustomEndChange: (value: string) => void;
 }) {
   return (
-    <section className="space-y-4 rounded-[var(--radius-card)] border bg-card p-4 shadow-[var(--shadow-card)]" aria-labelledby="range-title" data-report-range-controls="prisma">
-      <SectionHeader title={<span id="range-title">Rango</span>} />
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="min-w-0 space-y-3" data-report-range-controls="prisma">
+      <div className="report-range-presets" role="group" aria-label="Rango de Reportes">
         {presets.map(option=>(
           <Button
             key={option.value}
             type="button"
             size="sm"
             variant={preset===option.value?'default':'outline'}
-            className="min-h-10 rounded-[var(--radius-interactive)]"
+            className="min-h-11 min-w-11 rounded-[var(--radius-interactive)] px-2 text-xs shadow-none"
             data-report-preset={option.value}
             aria-pressed={preset===option.value}
             onClick={()=>onPresetChange(option.value)}
@@ -54,16 +52,16 @@ export function ReportRangeControls({
         ))}
       </div>
       {preset==='custom' && (
-        <div className="grid gap-3 rounded-[var(--radius-interactive)] bg-muted/30 p-3 sm:grid-cols-2">
-          <label className="text-sm">Desde
-            <Input type="date" max={customEnd || today} value={customStart} onChange={event=>onCustomStartChange(event.target.value)} />
+        <div className="grid min-w-0 gap-3 sm:grid-cols-2">
+          <label className="min-w-0 text-xs text-muted-foreground">Desde
+            <Input className="mt-1 min-h-11 min-w-0" type="date" max={customEnd || today} value={customStart} onChange={event=>onCustomStartChange(event.target.value)} />
           </label>
-          <label className="text-sm">Hasta
-            <Input type="date" min={customStart} max={today} value={customEnd} onChange={event=>onCustomEndChange(event.target.value)} />
+          <label className="min-w-0 text-xs text-muted-foreground">Hasta
+            <Input className="mt-1 min-h-11 min-w-0" type="date" min={customStart} max={today} value={customEnd} onChange={event=>onCustomEndChange(event.target.value)} />
           </label>
         </div>
       )}
       {rangeError ? <FeedbackMessage tone="error" description={rangeError} /> : null}
-    </section>
+    </div>
   );
 }

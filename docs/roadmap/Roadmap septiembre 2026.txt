@@ -5057,7 +5057,7 @@ Registro de cierre de PR #125:
 
 ## Corrección visual autorizada — Reportes: composición editorial final
 
-**Estado: autorizada / en ejecución.** Autorización explícita del usuario el 5 de octubre de 2026. Rama dedicada: `reports-editorial-composition`. Evidencia y registro de cierre: `docs/roadmap/reports-editorial-composition.md`.
+**Estado: autorizada / en ejecución.** Autorización explícita del usuario el 5 de octubre de 2026. Rama dedicada: `reports-editorial-composition-final` (la rama de ejemplo ya pertenece a la PR #126, que se conserva intacta). Evidencia y registro de cierre: `docs/roadmap/reports-editorial-composition.md`.
 
 **20.6 permanece cerrado. Final UI Polish P0–P7 permanece cerrado.** Esta es una corrección visual posterior autocontenida; no crea P8, Fase 20.11, Fase 21 ni una fase funcional nueva.
 
@@ -5231,4 +5231,3 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 ↓
 Post-roadmap 1–5 Hardening técnico
 ```
-

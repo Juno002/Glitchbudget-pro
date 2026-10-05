@@ -1445,3 +1445,11 @@ Reglas:
 - La corrección conserva `selectReportsSnapshot()` y los bindings financieros existentes; no añade cálculo financiero a React.
 - Sin schema, migración, backup, persistencia, red, IA ni cambios de navegación principal.
 - PR #122 fue integrado en `main` tras aprobación explícita; merge commit inicial: `36ffa974648b17bb26195615f1ae087b9db14250`.
+
+## Corrección visual posterior autorizada — composición editorial final
+
+Autorizada el 5 de octubre de 2026 y registrada en el roadmap canónico. 20.6 y Final UI Polish permanecen cerrados; no crea P8 ni otra fase.
+
+La apertura pasa a período/controles → gasto dominante con cambio y tendencia → lectura principal cálida → categorías y comparación → análisis detallado opcional. Sustituye únicamente el orden y tratamiento visual anteriores. Conserva todos los insights, rangos, datos reales, cuatro tablas exactas y el disclosure cerrado por defecto, sin cambios financieros ni de persistencia.
+
+Auditoría, archivos, invariantes y evidencia de cierre: [Reportes — composición editorial final](reports-editorial-composition.md).

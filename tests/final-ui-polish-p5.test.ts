@@ -15,8 +15,8 @@ function section(name: string, next: string) {
 test('Reports now prioritizes progressive reading before on-demand audit detail', () => {
   const order = [...source.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(order, [
-    'quick-read',
     'spending',
+    'quick-read',
     'spending-breakdown',
     'comparison',
     'analysis-access',
@@ -63,18 +63,18 @@ test('category composition stays primary while exact categories and nature move 
 test('deep analysis preserves every canonical cash-flow and net-worth binding', () => {
   const cashFlow = section('cash-flow', 'net-worth');
   for (const binding of [
-    'label="Ingresos" amount={report.cashFlow.income}',
-    'label="Gastos en efectivo" amount={report.cashFlow.cashExpenses}',
-    'label="Pagos de deuda" amount={report.cashFlow.debtPayments}',
+    "label:'Ingresos',value:report.cashFlow.income",
+    "label:'Gastos en efectivo',value:report.cashFlow.cashExpenses",
+    "label:'Pagos de deuda',value:report.cashFlow.debtPayments",
     'label="Flujo neto" amount={report.cashFlow.netCashFlow}',
   ]) assert.ok(cashFlow.includes(binding), binding);
 
   const netWorth = section('net-worth', 'detail');
   for (const binding of [
-    'label="Efectivo" amount={report.netWorth.cash}',
-    'label="Bancos" amount={report.netWorth.banks}',
-    'label="Inversiones" amount={report.netWorth.investments}',
-    'label="Pasivos" amount={report.netWorth.liabilities}',
+    "label:'Efectivo',value:report.netWorth.cash",
+    "label:'Bancos',value:report.netWorth.banks",
+    "label:'Inversiones',value:report.netWorth.investments",
+    "label:'Pasivos',value:report.netWorth.liabilities",
     'label="Patrimonio neto" amount={report.netWorth.netWorth}',
   ]) assert.ok(netWorth.includes(binding), binding);
   assert.match(netWorth, /el crédito disponible nunca se trata como activo/);

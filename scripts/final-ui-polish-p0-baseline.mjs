@@ -52,7 +52,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
   assertCaptureDataset(dataset);
   const directory = process.env.FINAL_UI_POLISH_BASELINE_DIR;
   if (directory) await mkdir(directory, { recursive: true });
-  const primaryOrder = ['quick-read', 'spending', 'spending-breakdown', 'comparison', 'analysis-access'];
+  const primaryOrder = ['spending', 'quick-read', 'spending-breakdown', 'comparison', 'analysis-access'];
   const detailOrder = ['comparison-detail', 'spending-detail', 'cash-flow', 'net-worth', 'detail'];
   const order = [...primaryOrder, ...detailOrder];
   const originalTheme = await client.evaluate('document.documentElement.className');
@@ -119,7 +119,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
           assert.equal(geometry.moneyLeaks, false, 'P0 importes en texto/SVG/labels/tooltips');
           // Hover a real rendered chart to cover tooltip monetary formatting too.
           const point = await client.evaluate(`(() => {
-            const shape = document.querySelector('[data-report-chart="comparison-bars"] .recharts-bar-rectangle path');
+            const shape = document.querySelector('[data-report-chart="category-donut"] .recharts-sector');
             if (!shape) return null;
             shape.scrollIntoView({ block: 'center' });
             const rect = shape.getBoundingClientRect();

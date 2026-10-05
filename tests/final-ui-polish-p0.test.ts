@@ -22,8 +22,8 @@ test('P0 preserves exact report evidence under the authorized progressive disclo
   const source = read('src/components/dashboard/reports-tab.tsx');
   const sections = [...source.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(sections, [
-    'quick-read',
     'spending',
+    'quick-read',
     'spending-breakdown',
     'comparison',
     'analysis-access',
