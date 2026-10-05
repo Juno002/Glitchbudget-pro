@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { NativeSelect } from '@/components/ui/native-select';
 import { TrendingUp, TrendingDown, Trash2, CreditCard, Banknote, ArrowRightLeft, ChevronDown } from 'lucide-react';
 import { localDate, isValidDate } from '@/lib/finance-calculations';
+import { accountStartDateBounds } from '@/domain/account-start';
 import { parseTransactionLabelsInput } from '@/domain/transaction-metadata';
 import { evaluateTransactionRules, type RuleMatch } from '@/domain/rule-engine';
 import { quickAddRuleSuggestions, resolveAutomaticRuleSuggestion } from '@/domain/rule-suggestions';
@@ -74,6 +75,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   const [transferNote, setTransferNote] = useState('');
   const [necessity, setNecessity] = useState<'' | 'must' | 'need' | 'want'>('');
   const [labelsInput, setLabelsInput] = useState('');
+  const [historyOpeningBalance, setHistoryOpeningBalance] = useState('');
   const [dismissedRuleIds, setDismissedRuleIds] = useState<string[]>([]);
   const [storedRules, setStoredRules] = useState<TransactionRule[]>([]);
   const [automaticRuleId, setAutomaticRuleId] = useState<string | null>(null);
@@ -118,6 +120,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setTransferNote('');
       setNecessity(editingExpense.necessity || '');
       setLabelsInput((editingExpense.labels || []).join(', '));
+      setHistoryOpeningBalance('');
     } else if (mode === 'edit' && editingIncome) {
       setTxType('income');
       setAmount(String(editingIncome.amount / 100));
@@ -132,6 +135,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setTransferNote('');
       setNecessity('');
       setLabelsInput((editingIncome.labels || []).join(', '));
+      setHistoryOpeningBalance('');
     } else {
       setTxType('expense');
       setAmount('');
@@ -147,6 +151,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
       setTransferNote('');
       setNecessity('');
       setLabelsInput('');
+      setHistoryOpeningBalance('');
       if (typeof window !== 'undefined') {
         setTemplates(loadQuickAddTemplates(window.localStorage));
         setStoredRules(loadTransactionRules(window.localStorage));
@@ -206,8 +211,19 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
   }, [automaticRuleSuggestion, txType, categoryEditedManually, necessityEditedManually]);
 
   const validAmount = Number.isFinite(Number(amount)) && Number(amount) >= 0.01;
+  const selectedAccount = (accounts || []).find(account => account.id === accountId);
+  const historyBounds = accountStartDateBounds(localDate());
+  const needsIncomeHistoryExtension = Boolean(
+    txType === 'income'
+    && !isEditing
+    && selectedAccount
+    && date < selectedAccount.startDate
+  );
+  const validHistoryOpeningBalance = Number.isFinite(Number(historyOpeningBalance))
+    && Number(historyOpeningBalance) >= 0;
+  const historyExtensionDateAllowed = date >= historyBounds.min && date <= historyBounds.max;
   const hasAccountForActual = !!accountId || isEditing;
-  const canSave = canSaveTransactionDraft({
+  const baseCanSave = canSaveTransactionDraft({
     type:txType,
     validAmount,
     validDate:isValidDate(date),
@@ -220,6 +236,10 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     saved,
     saving:isSaving,
   });
+  const canSave = baseCanSave && (
+    !needsIncomeHistoryExtension
+    || (validHistoryOpeningBalance && historyExtensionDateAllowed)
+  );
 
   const templateReady = !isEditing && validAmount && (
     txType === 'transfer'
@@ -235,6 +255,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setAutomaticRuleId(null);
     setCategoryEditedManually(false);
     setNecessityEditedManually(false);
+    setHistoryOpeningBalance('');
     setSubmitError(null);
     if (type === 'transfer') {
       setPaymentMethod('cash');
@@ -267,6 +288,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
     setNecessity(template.type === 'expense' ? (template.necessity || '') : '');
     setNecessityEditedManually(template.type === 'expense' && Boolean(template.necessity));
     setLabelsInput((template.labels || []).join(', '));
+    setHistoryOpeningBalance('');
     setDate(localDate());
     setSelectedTemplateId(template.id);
     setDismissedRuleIds([]);
@@ -374,7 +396,12 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
         };
         success = editingIncome
           ? await updateIncomeItem({ ...editingIncome, ...fields })
-          : await addIncomeItem(fields);
+          : await addIncomeItem(
+              fields,
+              needsIncomeHistoryExtension
+                ? { accountHistoryOpeningBalance: toCents(historyOpeningBalance) }
+                : undefined,
+            );
       }
       if (!success) {
         setSubmitError('No se guardó el movimiento. Revisa el aviso y corrige los datos; el formulario conserva lo que escribiste.');
@@ -534,6 +561,36 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                   <span className="text-muted-foreground">Fecha</span>
                   <Input type="date" aria-label="Fecha del movimiento" value={date} onChange={event => { if (event.target.value) setDate(event.target.value); }} />
                 </label>
+
+                {needsIncomeHistoryExtension && selectedAccount && (
+                  <div className="space-y-2 rounded-[var(--radius-interactive)] border bg-muted/25 p-3" data-retroactive-income-extension="true">
+                    <p className="text-sm font-medium">Este ingreso es anterior al inicio de {selectedAccount.name}.</p>
+                    {historyExtensionDateAllowed ? (
+                      <>
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                          Prisma ampliará el historial de la cuenta hasta {date} y guardará el ingreso en la misma operación. Indica cuánto había en la cuenta al comenzar ese día, antes de este ingreso.
+                        </p>
+                        <label className="block space-y-1 text-sm">
+                          <span className="text-muted-foreground">Saldo al inicio de esa fecha</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            inputMode="decimal"
+                            aria-label="Saldo al inicio de la fecha retroactiva"
+                            value={historyOpeningBalance}
+                            onChange={event => setHistoryOpeningBalance(event.target.value)}
+                            placeholder="0.00"
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <p className="text-xs text-destructive" role="alert">
+                        Solo puedes ampliar el historial desde {historyBounds.min}.
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {txType === 'transfer' ? (
                   <label className="block space-y-1 text-sm">
