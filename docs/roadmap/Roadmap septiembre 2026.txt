@@ -4886,6 +4886,39 @@ Contrato:
 - fuera de alcance: importación masiva de historial, préstamos y edición de `startDate` con actividad existente;
 - entregar un PR atómico y no mergear antes de revisión final.
 
+## Corrección de producto autorizada — ampliación retroactiva de cuentas con actividad
+
+**Estado: GATE APROBADO · PR #123 / pendiente de integración a `main`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 al reproducirse el error al registrar un ingreso retroactivo.
+
+Esta corrección no crea una fase nueva. Extiende únicamente el contrato de Post-roadmap 6 — Inicio retroactivo de cuentas.
+
+Contrato:
+
+- una cuenta con movimientos existentes puede mover `startDate` únicamente hacia atrás, nunca hacia adelante;
+- el nuevo `startDate` sigue limitado a la ventana retroactiva canónica vigente (inicio del mes calendario anterior → hoy);
+- mover el inicio hacia atrás no crea ingresos, gastos, transferencias ni ajustes sintéticos;
+- el usuario debe indicar el `openingBalance` real al inicio de la nueva fecha; ese saldo sigue sin contar como ingreso ni cash flow;
+- durante un rebase hacia atrás se permite que el saldo calculado quede temporalmente negativo mientras se reconstruyen los movimientos históricos faltantes; esta excepción no aplica a gastos, transferencias, pagos ni correcciones ordinarias de saldo inicial;
+- todos los movimientos ya registrados permanecen intactos;
+- tras ampliar el inicio, pueden registrarse movimientos reales con fecha `>= startDate` y estos sí afectan saldo/reportes normalmente;
+- no se permite adelantar el inicio de una cuenta con actividad porque podría excluir historial ya registrado;
+- Efectivo y bancos usan exactamente la misma regla;
+- el error de movimiento anterior al inicio debe indicar el camino de corrección en la UI;
+- sin schema, migración, backup nuevo, red, IA ni cambio de semántica de Reportes;
+- gates obligatorios: `npm run check`, benchmarks, `npm run build`, `npm run test:e2e`.
+
+El objetivo es permitir reconstrucción histórica real sin doble conteo ni reinterpretar el saldo inicial.
+
+Registro de ejecución de PR #123:
+
+- `npm run check`: **803/803**, 0 fallos;
+- `npm run benchmark:ledger`: aprobado;
+- `npm run benchmark:reports`: **18 mediciones**, `gatePassed: true`;
+- `npm run build`: aprobado, export estático/local-only intacto;
+- `npm run test:e2e`: aprobado;
+- regresión específica aprobada: cuenta con actividad → rebase hacia atrás → ingreso retroactivo por `saveIncome()` → saldo y Reportes correctos;
+- sin cambios de schema, migración, backup, red ni navegación principal;
+- PR #123 permanece sin merge hasta integración final.
 ## Final UI Polish — secuencia autorizada
 
 **Estado: COMPLETADO / Gate final aprobado · PR #121.** Autorización explícita del 4 de octubre de 2026; P0–P7 cerradas en orden.

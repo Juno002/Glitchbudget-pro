@@ -6,7 +6,7 @@ Inicio elegido: saldos actuales y movimientos desde ahora. Todo sigue guardándo
 
 1. Efectivo se crea automáticamente en cero; si ya existía una cuenta de efectivo, se conserva su saldo y se usa como predeterminada. Cada cuenta tiene una moneda explícita y, en Fase 11, todas las cuentas operativas usan la moneda base. En Movimientos, pulsa esa cuenta y Editar cuenta para indicar el dinero que tenías al iniciar el seguimiento. Crea cada banco desde Gestionar bancos con su saldo actual. No hacen falta números de cuenta ni credenciales.
 2. Incluye en el saldo inicial las operaciones que ya hiciste hoy. Los movimientos antiguos quedan sin cuenta para no contarlos dos veces.
-3. Todo ingreso nuevo usa Efectivo por defecto, pero puede elegirse otra cuenta de destino. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar dinero entre cuentas, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
+3. Todo ingreso nuevo usa Efectivo por defecto, pero puede elegirse otra cuenta de destino. Si necesitas reconstruir un movimiento real anterior al inicio de una cuenta, abre esa cuenta, edita **Llevar esta cuenta desde** hacia una fecha anterior dentro de la ventana permitida e indica el saldo real que tenías al inicio de ese día. Aunque la cuenta ya tenga movimientos, el inicio puede ampliarse hacia atrás; nunca adelantarse. Después registra normalmente el ingreso/gasto histórico. El saldo inicial no cuenta como ingreso y no se crea ningún movimiento sintético. Los gastos y pagos de tarjeta usan Efectivo por defecto y permiten elegir otra cuenta de origen. Para llevar dinero entre cuentas, registra una transferencia. Las compras a crédito piden la tarjeta y no descuentan bancos.
 4. Para sacar efectivo del banco, usa Gestionar bancos → Mover dinero entre mis cuentas. Para depositarlo, invierte origen y destino. En Fase 11 la transferencia exige que origen y destino tengan la misma moneda; una futura transferencia cross-currency necesitará una tasa manual. Una comisión se registra como gasto separado.
 5. Conciliar deuda actual permite introducir lo que debes en cada tarjeta, independientemente de sus movimientos anteriores. Un saldo negativo significa saldo a favor.
 6. Pulsa una cuenta para consultar sus 50 movimientos recientes y editar sus datos. Las transferencias se pueden editar desde ese historial.
@@ -32,6 +32,14 @@ El esquema Dexie actual es **v14**. Históricamente, v8 introdujo `accounts` y `
 El respaldo JSON canónico actual es **v10** y mantiene lectura de v3–v9. JSON v10 conserva el contrato de moneda de Fase 11 y añade las cuentas de inversión y sus metadatos. Los backups v9 y anteriores restauran sin inventar inversiones.
 
 CSV de ingresos/gastos conserva `accountId`, `currency`, `fxRate` y `amountBase`; al importar, la moneda se normaliza a la cuenta/base y no puede inyectarse una moneda distinta. Para trasladar cuentas y transferencias usa el JSON completo. Las referencias a cuentas desconocidas se rechazan antes de reemplazar datos.
+
+## Historial retroactivo de una cuenta existente
+
+`Account.startDate` sigue siendo el límite inferior del ledger de la cuenta. Una cuenta con actividad puede ampliar ese límite **solo hacia atrás** dentro de la ventana retroactiva vigente. El usuario confirma `openingBalance` como el saldo real al inicio de la nueva fecha; los movimientos existentes no se modifican.
+
+Una vez guardado el nuevo inicio, un ingreso, gasto, pago o transferencia con fecha igual o posterior a `startDate` usa el flujo normal y afecta saldo/reportes según su semántica. Adelantar `startDate` con actividad permanece bloqueado porque podría excluir historial ya registrado.
+
+Durante la reconstrucción, reducir el saldo inicial al ampliar la fecha puede dejar un saldo calculado temporalmente negativo hasta que se registren los movimientos históricos que faltan. Esa tolerancia pertenece solo al rebase administrativo; las operaciones financieras normales conservan las protecciones de saldo negativo.
 
 ## Validación
 

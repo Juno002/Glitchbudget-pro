@@ -18,6 +18,19 @@ export function assertAccountStartDateAllowed(startDate: string, today: string):
 }
 
 
+export function assertEditedAccountStartDateAllowed(
+  persistedStartDate: string,
+  nextStartDate: string,
+  today: string,
+  hasActivity: boolean,
+): string {
+  const allowed = assertAccountStartDateAllowed(nextStartDate, today);
+  if (hasActivity && allowed > persistedStartDate) {
+    throw new Error('La fecha inicial de una cuenta con movimientos solo puede moverse hacia atrás.');
+  }
+  return allowed;
+}
+
 export function resolveEditedAccountStartDate(
   persistedStartDate: string,
   draftStartDate: string,
