@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { after, beforeEach, test } from 'node:test';
 
-import { accountStartDateBounds, assertAccountStartDateAllowed, resolveEditedAccountStartDate } from '../src/domain/account-start';
+import { accountStartDateBounds, assertAccountStartDateAllowed, assertEditedAccountStartDateAllowed, resolveEditedAccountStartDate } from '../src/domain/account-start';
 import { selectAccountBalance, selectAccountHasActivity, selectPosition, type AccountSnapshot } from '../src/domain/ledger';
 import type { Account, Expense, Income } from '../src/domain/models';
 import { selectReportsSnapshot } from '../src/domain/reports';
@@ -12,6 +12,7 @@ import { db } from '../src/lib/db';
 import { addAccount, ensureCashAccount, hasAccountActivity, requireAccount } from '../src/lib/accounts';
 import { exportDataJSON, importDataJSON } from '../src/lib/backup-json';
 import { localDate } from '../src/lib/finance-calculations';
+import { saveIncome } from '../src/lib/transaction-service';
 
 const today = localDate();
 const bounds = accountStartDateBounds(today);
@@ -97,18 +98,104 @@ const activityCases: Array<[string, () => Promise<void>]> = [
 ];
 
 for (const [label, addActivity] of activityCases) {
-  test(`startDate is immutable after ${label}`, async () => {
+  test(`startDate may move backward after ${label} but never forward`, async () => {
     const account = baseAccount();
     await addAccount(account);
     await addActivity();
     assert.equal(await hasAccountActivity(account.id), true);
+
+    await addAccount({ ...account, startDate: bounds.min }, true);
+    assert.equal((await db.accounts.get(account.id))?.startDate, bounds.min);
+
     await assert.rejects(
-      addAccount({ ...account, startDate: bounds.min }, true),
-      /fecha inicial.*movimientos registrados/i,
+      addAccount({ ...account, startDate: today }, true),
+      /solo puede moverse hacia atrás/i,
     );
-    assert.equal((await db.accounts.get(account.id))?.startDate, today);
+    assert.equal((await db.accounts.get(account.id))?.startDate, bounds.min);
   });
 }
+
+test('edited start-date policy allows a backward rebase with activity and rejects a forward move', () => {
+  assert.equal(
+    assertEditedAccountStartDateAllowed('2026-10-02', '2026-09-30', '2026-10-04', true),
+    '2026-09-30',
+  );
+  assert.throws(
+    () => assertEditedAccountStartDateAllowed('2026-09-30', '2026-10-02', '2026-10-04', true),
+    /solo puede moverse hacia atrás/i,
+  );
+  assert.equal(
+    assertEditedAccountStartDateAllowed('2026-10-02', '2026-10-04', '2026-10-04', false),
+    '2026-10-04',
+  );
+});
+
+test('account with activity can rebase backward and then register a real retroactive income', async () => {
+  const account = { ...baseAccount(), openingBalance:50_000 };
+  await addAccount(account);
+  await db.expenses.add({
+    id:'current-expense',
+    date:today,
+    month:today.slice(0,7),
+    amount:10_000,
+    amountBase:10_000,
+    currency:'DOP',
+    fxRate:1,
+    categoryId:'food',
+    concept:'Gasto existente',
+    nature:'Variable',
+    paymentMethod:'cash',
+    accountId:'bank',
+  });
+  assert.equal(selectAccountBalance(account, {
+    incomes:[],
+    expenses:await db.expenses.toArray(),
+    payments:[],
+    transfers:[],
+  }, today), 40_000);
+
+  await addAccount({ ...account, startDate:bounds.min, openingBalance:0 }, true);
+  await db.categories.add({
+    id:'salary',
+    name:'Sueldo',
+    type:'income',
+    iconName:'landmark',
+    archived:false,
+    incomeOrder:0,
+  });
+
+  await saveIncome({
+    id:'retro-income',
+    date:bounds.min,
+    amount:50_000,
+    amountBase:50_000,
+    currency:'DOP',
+    fxRate:1,
+    categoryId:'salary',
+    description:'Ingreso retroactivo',
+    type:'extra',
+    accountId:'bank',
+  });
+
+  const stored = (await db.accounts.get('bank'))!;
+  const snapshot: AccountSnapshot = {
+    incomes:await db.incomes.toArray(),
+    expenses:await db.expenses.toArray(),
+    payments:[],
+    transfers:[],
+  };
+  assert.equal(stored.startDate, bounds.min);
+  assert.equal(stored.openingBalance, 0);
+  assert.equal(selectAccountBalance(stored, snapshot, today), 40_000);
+
+  const report = selectReportsSnapshot(
+    { accounts:[stored], debts:[], incomes:snapshot.incomes, expenses:snapshot.expenses, debtPayments:[], transfers:[] },
+    { start:bounds.min, end:today },
+  );
+  assert.equal(report.cashFlow.income, 50_000);
+  assert.equal(report.spending.total, 10_000);
+  assert.equal(report.cashFlow.netCashFlow, 40_000);
+});
 
 test('openingBalance remains correctable after activity while startDate stays fixed', async () => {
   const account = baseAccount();
@@ -213,7 +300,10 @@ test('UI exposes retroactive tracking date and explicit opening-balance correcti
   assert.match(source, /Saldo al inicio de ese día/);
   assert.match(source, /Corregir saldo inicial/);
   assert.match(source, /Saldo calculado hoy/);
-  assert.match(source, /La fecha inicial está bloqueada porque/);
+  assert.match(source, /solo puedes ampliar esta fecha hacia atrás/);
+  assert.match(source, /Saldo al inicio de esa fecha/);
+  assert.match(source, /startInputMax/);
+  assert.doesNotMatch(source, /disabled=\{Boolean\(editingAccount && editingAccountHasActivity\)\}/);
 });
 
 test('pure activity selector includes every account-affecting movement family', () => {
