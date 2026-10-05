@@ -429,7 +429,7 @@ export default function MovementsView() {
             <p className="mt-1 text-xs text-muted-foreground">{detailItem?.date}</p>
             {detailItem?.detail ? <p className="mt-3 text-sm text-muted-foreground">{detailItem.detail}</p> : null}
           </div>
-          {detailItem?.kind==='transfer' && <p className="text-sm text-muted-foreground">Puedes editar la transferencia desde Cuentas, abriendo la cuenta de origen o destino.</p>}
+          {detailItem?.kind==='transfer' && <p className="text-sm text-muted-foreground">La transferencia se edita desde Cuentas.</p>}
         </DialogContent>
       </Dialog>
 
