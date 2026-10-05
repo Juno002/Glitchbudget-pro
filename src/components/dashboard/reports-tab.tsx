@@ -207,6 +207,7 @@ export default function ReportsTab() {
                 <div className="min-w-0">
                   <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-primary-foreground/60">Análisis del período</p>
                   <h2 id="spending-title" className="mt-2 font-display text-2xl font-normal tracking-[-0.035em]">Gastos</h2>
+                  <p className="mt-1 text-[10px] text-primary-foreground/55">{currentLabel}</p>
                   <p className={'mt-5 font-normal '+(balancesHidden?'text-base leading-normal tracking-normal':'font-display text-[clamp(2.25rem,8vw,4.75rem)] leading-[0.92] tracking-[-0.055em]')}>
                     <span className="whitespace-nowrap" data-spending-money="total">{money(report.spending.total)}</span>
                   </p>
@@ -215,7 +216,7 @@ export default function ReportsTab() {
                       {report.spending.previousTotal!==0 && report.spending.percentChange!==null ? (
                         <><span aria-hidden="true">{report.spending.percentChange>0?'↑':report.spending.percentChange<0?'↓':'↔'}</span>{' '}</>
                       ) : null}
-                      {report.spending.previousTotal===0?'Sin base anterior':percentLabel(report.spending.percentChange)+' vs. anterior'}
+                      {report.spending.previousTotal===0?'Sin gasto anterior con el que comparar':percentLabel(report.spending.percentChange)+' vs. anterior'}
                     </p>
                     <p className="text-primary-foreground/60" data-spending-count>{report.spending.transactionCount} {report.spending.transactionCount===1?'movimiento':'movimientos'}</p>
                   </div>
@@ -237,7 +238,7 @@ export default function ReportsTab() {
               data-report-visual="categories"
             >
               <SectionHeader
-                eyebrow="Distribución"
+                eyebrow="Distribución por categoría"
                 title={<span id="spending-breakdown-title">Dónde se fue el gasto</span>}
               />
               <ReportCategoryDonut data={categoryDistribution.segments} total={categoryDistribution.total} />
@@ -249,11 +250,11 @@ export default function ReportsTab() {
               data-report-section="comparison"
               data-report-visual="comparison"
             >
-              <SectionHeader
-                eyebrow="Cambio"
-                title={<span id="comparison-title">Actual vs. anterior</span>}
-                description={<span>{currentLabel}<br className="hidden sm:block" /> {previousLabel}</span>}
-              />
+              <div className="min-w-0">
+                <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Comparación</p>
+                <h2 id="comparison-title" className="font-headline text-[length:var(--text-section-title)] font-normal tracking-[-0.02em]">Actual vs. anterior</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{currentLabel}<br className="hidden sm:block" /> {previousLabel}</p>
+              </div>
               <ReportComparisonBars data={comparisonChartRows} />
             </section>
           </div>
@@ -402,7 +403,7 @@ export default function ReportsTab() {
               </div>
               {report.netWorth.cardPositiveBalance>0 && (
                 <p className="text-xs text-muted-foreground">
-                  Incluye {money(report.netWorth.cardPositiveBalance)} de saldo a favor real en tarjetas; el crédito disponible no es un activo.
+                  Incluye {money(report.netWorth.cardPositiveBalance)} de saldo a favor real en tarjetas; el crédito disponible nunca se trata como activo.
                 </p>
               )}
             </section>
@@ -452,7 +453,8 @@ export default function ReportsTab() {
                 </div>
               ) : (
                 <EmptyState
-                  description="Sin presupuestos configurados."
+                  title="Aún no tienes presupuestos"
+                  description="Crea un presupuesto en Plan → Presupuestos para compararlo aquí."
                   action={(
                     <Button type="button" variant="outline" onClick={()=>{ setPlanningTab('budgets'); setActiveTab('planning'); }}>
                       Crear presupuesto
