@@ -5055,6 +5055,50 @@ Registro de cierre de PR #125:
 - sin cambios de cálculo, selectors, commands, schema, migraciones, backup, persistencia, red ni navegación principal;
 - merge commit: `482f2ead53ae0e1919a29225cf18b42a87cc9b2c`.
 
+## Corrección visual autorizada — composición editorial final de Reportes
+
+**Estado: EN IMPLEMENTACIÓN.** Autorizada explícitamente por el usuario el 5 de octubre de 2026 tras revisar la implementación actual, el contrato Prisma y la referencia visual congelada `Juno002/Prisma@dc4310040f42cefd74cf41bad75152902e549c24`.
+
+Esta corrección no crea P8, Fase 20.11 ni Fase 21. No añade funcionalidad financiera. Recompone exclusivamente la presentación de Reportes sobre los mismos selectors, read models y datos reales ya aprobados.
+
+Contrato:
+
+- conservar `getReportSnapshot()`, `getSpendingTrend()`, `getBudgetStatusDetails()` y `showDetailedAnalysis` como fuentes/flujo existentes;
+- no introducir fórmulas financieras nuevas en React ni recalcular significado financiero dentro de charts;
+- convertir gasto del rango en el centro de gravedad visual de la apertura;
+- integrar título, período y selector de rango en una cabecera más compacta;
+- mantener Lectura rápida determinista, con un insight principal y secundarios claramente subordinados;
+- reducir el patrón repetitivo `SectionHeader → Card → CardContent` donde no aporta jerarquía;
+- mantener la dona de categorías como composición única con leyenda editorial;
+- simplificar comparación y barras eliminando ruido de ejes/grid/leyendas genéricas cuando el valor pueda leerse directamente;
+- usar una paleta contenida: colores de identidad para categorías/series y colores semánticos solo para estados reales;
+- expresar Flujo de caja y Patrimonio como composiciones visuales de sus componentes sin alterar los importes canónicos;
+- convertir movimientos destacados en evidencia editorial reutilizando el lenguaje visual de Movimientos;
+- mantener tablas exactas donde siguen siendo útiles para auditoría;
+- mantener el bloque detallado bajo una única divulgación accesible;
+- preservar privacidad de importes, Prisma/Neón, reduced motion, responsive, offline y cero tráfico financiero de red;
+- no tocar schema, migraciones, backup, persistencia, commands ni navegación principal.
+
+Referencia visual permitida:
+
+```text
+Prisma original
+→ roles de superficie, contraste, ritmo y composición
+→ NO datos demo
+→ NO fórmulas
+→ NO dominio/persistencia
+```
+
+Gate obligatorio:
+
+```text
+npm run check
+npm run benchmark:ledger
+npm run benchmark:reports
+npm run build
+npm run test:e2e
+```
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
