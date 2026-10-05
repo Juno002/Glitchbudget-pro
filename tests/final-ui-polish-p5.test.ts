@@ -77,15 +77,17 @@ test('deep analysis preserves every canonical cash-flow and net-worth binding', 
     'label="Pasivos" amount={report.netWorth.liabilities}',
     'label="Patrimonio neto" amount={report.netWorth.netWorth}',
   ]) assert.ok(netWorth.includes(binding), binding);
-  assert.match(netWorth, /el crédito disponible nunca se trata como activo/);
+  assert.match(netWorth, /el crédito disponible no es un activo/);
 });
 
-test('largest movements remain exact and available inside detailed analysis', () => {
+test('largest movements remain exact and available as editorial evidence inside detailed analysis', () => {
   const detail = section('detail', 'budget-followup');
   assert.match(detail, /Movimientos de mayor importe/);
-  assert.match(detail, /report\.spending\.largestTransactions\.map\(row=>\(/);
-  assert.match(detail, /money\(row\.amount\)/);
-  assert.match(detail, /<Table>/);
+  assert.match(detail, /report\.spending\.largestTransactions\.map\(row=>/);
+  assert.match(detail, /<TransactionRow/);
+  assert.match(detail, /amount=\{row\.amount\}/);
+  assert.match(detail, /data-report-largest-list="editorial"/);
+  assert.doesNotMatch(detail, /<Table>/);
 });
 
 test('one accessible disclosure controls the audit block without rebuilding finance semantics', () => {
@@ -95,7 +97,7 @@ test('one accessible disclosure controls the audit block without rebuilding fina
   assert.match(source, /hidden=\{!showDetailedAnalysis\}/);
   assert.match(source, /Ver análisis detallado/);
   assert.match(source, /Ocultar análisis detallado/);
-  assert.equal([...source.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...source.matchAll(/<Table>/g)].length, 3);
   assert.doesNotMatch(source, /\.reduce\s*\(|(?:expenses|incomes|debtPayments|transfers)\.filter\s*\(/);
   assert.doesNotMatch(source, /selectSpendingReport|selectCashFlowReport|selectNetWorthReport|@\/lib\/db|Dexie|IndexedDB/);
 });
