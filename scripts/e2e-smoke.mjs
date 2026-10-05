@@ -1266,7 +1266,8 @@ async function main() {
           && button.getAttribute('aria-expanded') === 'true'
           && detail instanceof HTMLElement
           && !detail.hidden
-          && detail.querySelectorAll('table').length === 4
+          && detail.querySelectorAll('table').length === 3
+          && detail.querySelector('[data-report-largest-list="editorial"]')
           && requiredSections.every(section => detail.querySelector('[data-report-section="' + section + '"]'));
       })()`,
       'Reportes análisis detallado completo',
