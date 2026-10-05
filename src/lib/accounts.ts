@@ -122,7 +122,12 @@ export async function addAccount(input: Account, editing = false) {
       if (existing.isDefaultCash && account.type !== 'cash') throw new Error('La cuenta Efectivo predeterminada no puede convertirse en banco.');
       if (normalizeCurrencyCode(existing.currency, baseCurrency) !== account.currency) throw new Error('La moneda de una cuenta con historial no se puede reinterpretar.');
       account.isDefaultCash = existing.isDefaultCash;
-      if ((await readFinancialPolicies()).preventNegativeAccountBalance && account.openingBalance < existing.openingBalance) {
+      const isBackwardRebase = account.startDate < existing.startDate;
+      if (
+        !isBackwardRebase
+        && (await readFinancialPolicies()).preventNegativeAccountBalance
+        && account.openingBalance < existing.openingBalance
+      ) {
         const snapshot = await readAccountSnapshot();
         if (accountFundsWorsen(existing, account, snapshot, snapshot, localDate())) {
           throw new Error('Saldo insuficiente: el saldo inicial dejaría sin fondos movimientos registrados.');
