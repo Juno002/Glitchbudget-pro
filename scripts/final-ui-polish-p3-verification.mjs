@@ -12,7 +12,8 @@ const date = value => new Date(value + 'T12:00:00.000Z');
 const shift = (value, days) => new Date(date(value).getTime() + days * day).toISOString().slice(0, 10);
 const windowLabel = range => {
   const formatter = new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
-  return range.start===range.end ? formatter.format(date(range.start)) : formatter.formatRange(date(range.start),date(range.end));
+  const first = new Date(range.start+'T12:00:00.000Z');
+  return range.start===range.end ? formatter.format(first) : formatter.formatRange(first,new Date(range.end+'T12:00:00.000Z'));
 };
 // Independent fixed ranges, rather than importing the selector being verified.
 const presets = [
@@ -140,6 +141,7 @@ async function selectPreset(client, waitFor, preset, expected) {
 
 async function readTrend(client) {
   return client.evaluate(`(() => {
+    const windowLabel = ${windowLabel.toString()};
     const hero = document.querySelector('[data-report-hero="spending"]');
     const chart = hero?.querySelector('[data-report-chart="spending-trend"]');
     const partial = hero?.querySelector('[data-spending-trend-partial]');
@@ -166,6 +168,8 @@ async function readTrend(client) {
         animated:chart.getAnimations({subtree:true}).length,
         points:[...chart.querySelectorAll('[data-spending-trend-point]')].map(node => ({
           range:{start:node.dataset.spendingWindowStart,end:node.dataset.spendingWindowEnd},
+          rangeLabel:node.querySelector('p:nth-child(2)')?.textContent,
+          expectedRangeLabel:windowLabel({start:node.dataset.spendingWindowStart,end:node.dataset.spendingWindowEnd}),
           coverage:node.dataset.spendingCoverage,isCurrent:node.dataset.spendingCurrent==='true',
           text:node.innerText,money:node.querySelector('[data-spending-trend-money]')?.textContent,
           moneyBounds:node.querySelector('[data-spending-trend-money]') ? bounds(node.querySelector('[data-spending-trend-money]')) : null,
@@ -220,7 +224,9 @@ function assertTrend(view, expected, hidden) {
     const point = view.chart.points[index];
     assert.equal(point.money, hidden ? '••••••' : money(expected[index].total), 'P3 importe canónico privado del punto');
     assert.match(point.text, point.isCurrent ? /Actual/ : /Anterior/, 'P3 marcador de ventana');
-    assert.ok(point.text.includes(windowLabel(point.range)), 'P3 etiqueta visible del rango canónico');
+    // Canonical ISO ranges are checked independently above. Intl typography is
+    // checked in the browser's locale runtime, without Node/Chrome CLDR drift.
+    assert.equal(point.rangeLabel, point.expectedRangeLabel, 'P3 etiqueta visible del rango canónico');
     if (point.coverage === 'partial') assert.match(point.text, /Historial parcial/, 'P3 indicación accesible exacta de cobertura parcial');
     else assert.doesNotMatch(point.text, /Historial parcial/, 'P3 full sin etiqueta parcial');
     for (const rect of [point.bounds,point.moneyBounds]) assert.ok(rect && rect.width>0 && rect.height>0 && rect.left>=-1 && rect.right<=view.viewport+1, 'P3 lista exacta contenida');
@@ -251,6 +257,7 @@ async function assertPrivate(client) {
 }
 
 async function hoverCurrent(client, waitFor, expected, hidden) {
+  const rangeLabel = await client.evaluate(`(${windowLabel.toString()})(${JSON.stringify(expected.range)})`);
   await client.evaluate(`document.querySelector('[data-report-chart="spending-trend"]').scrollIntoView({block:'center'});`);
   const target = await client.evaluate(`(() => {
     const rect = document.querySelector('[data-spending-trend-bar][data-spending-current="${expected.isCurrent}"]${expected.coverage==='partial' ? '[data-spending-coverage="partial"]' : ''}')?.getBoundingClientRect();
@@ -258,10 +265,10 @@ async function hoverCurrent(client, waitFor, expected, hidden) {
   })()`);
   assert.ok(target && target.width>0 && target.height>0, 'P3 hover sobre barra canónica real');
   await client.command('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
-  await waitFor(client, `(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return node && getComputedStyle(node).visibility!=='hidden' && node.innerText.includes(${JSON.stringify(expected.isCurrent ? 'Actual' : 'Anterior')}) && node.innerText.includes(${JSON.stringify(windowLabel(expected.range))}) && node.innerText.includes(${JSON.stringify(hidden ? '••••••' : money(expected.total))}); })()`, 'P3 tooltip real privado');
-  const tooltip = await client.evaluate(`(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return {text:node.innerText,attributes:[node,...node.querySelectorAll('*')].flatMap(element=>[...element.attributes].map(attribute=>[attribute.name,attribute.value]))}; })()`);
+  await waitFor(client, `(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return node && getComputedStyle(node).visibility!=='hidden' && node.textContent.includes(${JSON.stringify(expected.isCurrent ? 'Actual' : 'Anterior')}) && node.textContent.includes(${JSON.stringify(rangeLabel)}) && node.textContent.includes(${JSON.stringify(hidden ? '••••••' : money(expected.total))}); })()`, 'P3 tooltip real privado');
+  const tooltip = await client.evaluate(`(() => { const node=document.querySelector('[data-report-chart="spending-trend"] .recharts-tooltip-wrapper'); return {text:node.textContent,attributes:[node,...node.querySelectorAll('*')].flatMap(element=>[...element.attributes].map(attribute=>[attribute.name,attribute.value]))}; })()`);
   assert.ok(tooltip.text.includes(hidden ? '••••••' : money(expected.total)), 'P3 tooltip muestra el importe canónico con el hook');
-  assert.ok(tooltip.text.includes(windowLabel(expected.range)) && tooltip.text.includes(expected.isCurrent ? 'Actual' : 'Anterior'),'P3 tooltip conserva rango y marcador canónicos');
+  assert.ok(tooltip.text.includes(rangeLabel) && tooltip.text.includes(expected.isCurrent ? 'Actual' : 'Anterior'),'P3 tooltip conserva rango y marcador canónicos');
   if (expected.coverage==='partial') assert.match(tooltip.text,/Historial parcial/);
   if (hidden) {
     assert.doesNotMatch(tooltip.text+JSON.stringify(tooltip.attributes),moneyPattern,'P3 tooltip sin fuga monetaria');

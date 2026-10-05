@@ -39,7 +39,7 @@ Sin cambios en dominio, queries/selectors, `getReportSnapshot`, definiciones de 
 
 ## Registro de ejecución
 
-Rama: `reports-editorial-composition-final`, desde el main auditado. La rama de ejemplo y PR #126 ya existían; se conservan intactas. PR y merge SHA de esta intervención se completan al cerrar.
+Rama: `reports-editorial-composition-final`, desde el main auditado. PR: [#127](https://github.com/Juno002/Glitchbudget-pro/pull/127). La rama de ejemplo y PR #126 ya existían; se conservan intactas. Merge SHA pendiente del gate completo.
 
 Hallazgos financieros fuera de alcance: ninguno confirmado en la auditoría inicial.
 
@@ -74,6 +74,8 @@ Hallazgos financieros fuera de alcance: ninguno confirmado en la auditoría inic
 Ocho regresiones nuevas protegen apertura, jerarquía, categorías/comparación, ecuaciones, auditoría/movimientos, privacidad/invariantes, geometría firmada y un fixture contrastado contra el selector canónico intacto. Los tests antiguos se adaptan al orden expresamente autorizado y a los nuevos bindings visuales, sin retirar la caracterización financiera. El fixture vive solo en tests; no se incorpora a la aplicación.
 
 El verificador nuevo recorre 320/360/390/1280 px × Prisma/Neón × importes visibles/ocultos × detalle cerrado/abierto. Comprueba geometría, targets de 44 px, ranking canónico, Otros, comparación, ecuaciones, saldo positivo de tarjetas, metadata móvil, árbol accesible privado, teclado, Custom, reduced motion y restauración exacta del dataset aislado de prueba.
+
+La prueba de tooltip usa un punto dentro del anillo real de la dona. Las etiquetas compactas se verifican con Intl en el runtime del navegador y textContent, sin congelar espacios tipográficos o diferencias de locale entre Node y Chrome. El oracle independiente sigue verificando los rangos ISO exactos, importes, cobertura, ranking y copy financiero; no se reduce su cobertura.
 
 ## Validación y límites del entorno local
 
