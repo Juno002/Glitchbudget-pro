@@ -16,6 +16,21 @@ export type ReportCategoryVisualization = {
   segments: ReportCategoryVisualizationSegment[];
 };
 
+/** Geometry only: a shared zero and widths for already calculated signed values. */
+export function projectReportBarGeometry(values: readonly number[]) {
+  const minimum = Math.min(0, ...values);
+  const maximum = Math.max(0, ...values);
+  const extent = maximum - minimum;
+  const zeroPercent = minimum === 0 ? 0 : -minimum / extent * 100;
+  return {
+    zeroPercent,
+    bars: values.map(value => ({
+      leftPercent: extent === 0 ? 0 : (Math.min(0, value) - minimum) / extent * 100,
+      widthPercent: extent === 0 ? 0 : Math.abs(value) / extent * 100,
+    })),
+  };
+}
+
 type IndexedCategory = ReportCategoryVisualizationInput & {
   canonicalIndex: number;
 };

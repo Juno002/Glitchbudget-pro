@@ -72,13 +72,13 @@ async function readHero(client) {
     };
     const variation = hero.querySelector('[data-spending-variation]');
     const count = hero.querySelector('[data-spending-count]');
-    const neutralColors = ['text-foreground','text-muted-foreground'].map(className => {
+    const neutralColors = ['text-foreground','text-muted-foreground','report-hero-muted'].map(className => {
       const probe = document.createElement('span'); probe.className = className; hero.appendChild(probe);
       const color = getComputedStyle(probe).color; probe.remove(); return color;
     });
     const row = [...document.querySelectorAll('[data-report-section="comparison-detail"] table tbody tr')].find(node => node.firstElementChild.textContent.trim() === 'Gasto');
     const formatter = new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short',year:'numeric'});
-    const rangeLabel = (start,end) => formatter.format(new Date(start+'T12:00:00'))+' – '+formatter.format(new Date(end+'T12:00:00'));
+    const rangeLabel = (start,end) => formatter.formatRange(new Date(start+'T12:00:00'),new Date(end+'T12:00:00'));
     const primary = document.querySelector('[data-quick-read-primary="true"]');
     const primaryBodyStyle = getComputedStyle(primary.querySelector('h3 + p'));
     return {
@@ -90,7 +90,7 @@ async function readHero(client) {
       quickReadBody: { fontFamily: primaryBodyStyle.fontFamily, fontSize: parseFloat(primaryBodyStyle.fontSize), moneyTokens: [...primary.querySelectorAll('[data-quick-read-money]')].map(node => node.textContent) },
       variation: variation.textContent, variationBounds: bounds(variation), variationColor: getComputedStyle(variation).color,
       variationFontSize: parseFloat(getComputedStyle(variation).fontSize), count: count.textContent,
-      neutralColors,
+      neutralColors:[...neutralColors,getComputedStyle(hero).color],
       labels: [...hero.querySelectorAll('[aria-label],[aria-description],[title],svg text')].map(node => [node.textContent,node.getAttribute('aria-label'),node.getAttribute('aria-description'),node.getAttribute('title')].join(' ')).join(' '),
       prohibitedContent: [...hero.querySelectorAll('svg,canvas,table,button,input,[data-report-chart],[data-placeholder],.animate-pulse')].filter(node => !node.closest('[data-report-chart="spending-trend"]')).length,
       spendingTrendCharts: hero.querySelectorAll('[data-report-chart="spending-trend"]').length,

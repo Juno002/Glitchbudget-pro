@@ -14,11 +14,11 @@ test('20.9.6 Reportes exposes Spanish section and metric labels', () => {
     '>Comparación<',
     '>Flujo de caja<',
     '>Patrimonio neto<',
-    'label="Ingresos"',
-    'label="Pagos de deuda"',
+    "label:'Ingresos'",
+    "label:'Pagos de deuda'",
     'label="Flujo neto"',
     'label="Patrimonio neto"',
-    '>Movimientos de mayor importe<',
+    'Movimientos de mayor importe',
   ]) assert.ok(reports.includes(expected), expected);
 
   for (const forbidden of [

@@ -5055,6 +5055,30 @@ Registro de cierre de PR #125:
 - sin cambios de cálculo, selectors, commands, schema, migraciones, backup, persistencia, red ni navegación principal;
 - merge commit: `482f2ead53ae0e1919a29225cf18b42a87cc9b2c`.
 
+## Corrección visual autorizada — Reportes: composición editorial final
+
+**Estado: autorizada / en ejecución.** Autorización explícita del usuario el 5 de octubre de 2026. Rama dedicada: `reports-editorial-composition-final` (la rama de ejemplo ya pertenece a la PR #126, que se conserva intacta). Evidencia y registro de cierre: `docs/roadmap/reports-editorial-composition.md`.
+
+**20.6 permanece cerrado. Final UI Polish P0–P7 permanece cerrado.** Esta es una corrección visual posterior autocontenida; no crea P8, Fase 20.11, Fase 21 ni una fase funcional nueva.
+
+Contrato autorizado:
+
+- apertura: período y controles compactos → gasto dominante con cambio/tendencia → lectura rápida → categorías y comparación → análisis exacto opcional;
+- sustituir la homogeneidad de cards por un hero verde Prisma, una superficie cálida para la lectura y evidencia neutra; adaptar Neón mediante tokens existentes;
+- conservar todos los insights canónicos, ranking, copy financiero, donut top 4 + Otros, porcentajes de proyección y tablas exactas;
+- conservar `showDetailedAnalysis`, cerrado por defecto, y su control accesible «Ver análisis detallado»;
+- recomponer cash flow y patrimonio como ecuaciones visuales, sin recalcular sus resultados; representar explícitamente el saldo a favor real de tarjetas cuando exista;
+- presentar movimientos destacados con concepto, categoría, naturaleza, fecha e importe exactos; reutilizar `TransactionRow` en móvil;
+- presupuestos siguen siendo contexto secundario del mes seleccionado por `currentMonth`, con acceso a Plan; no se sustituyen por presupuestos del rango de Reportes;
+- cero nuevas métricas, fórmulas financieras, selectors, datos demo, schema, migraciones, backup, persistencia, red o cambios offline;
+- la única aritmética nueva permitida es geometría de representación, nunca agregación ni porcentajes financieros canónicos;
+- privacidad, accesibilidad, reduced motion, estados vacíos, seis rangos, 320/360/390 px y escritorio se mantienen;
+- actualizar regresiones de composición antiguas que contradigan este orden explícitamente autorizado sin reducir cobertura semántica;
+- gates obligatorios antes del merge: `npm run check`, `npm run benchmark:ledger`, `npm run benchmark:reports`, `npm run build`, `npm run test:e2e` y Quality checks sobre el HEAD exacto de la PR;
+- cualquier bug financiero real encontrado se documenta y queda fuera de esta intervención.
+
+El registro de cierre debe incluir diagnóstico contra `main`, archivos, antes/después, invariantes, tests, resultados de gates, PR y merge SHA.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
@@ -5074,7 +5098,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = ninguna; lectura progresiva de Reportes, ingreso retroactivo y limpieza editorial global completados e integrados
+intervenciones pendientes autorizadas = únicamente Reportes — composición editorial final; lectura progresiva de Reportes, ingreso retroactivo y limpieza editorial global completados e integrados
 ```
 
 No existe una Fase 20.11.
@@ -5207,5 +5231,3 @@ Si encuentra que una fase posterior requiere cambiar una decisión estructural a
 ↓
 Post-roadmap 1–5 Hardening técnico
 ```
-
-

@@ -39,13 +39,13 @@ test('20.6 chart renderers receive derived values only and never access finance 
   assert.doesNotMatch(charts, /selectReportsSnapshot|selectPosition|selectCashFlowReport|selectSpendingReport/);
 });
 
-test('20.6 Reports keeps visual charts paired with exact tables or metric cards', () => {
+test('20.6 Reports keeps visual charts paired with exact tables or financial equations', () => {
   const reports = read('src/components/dashboard/reports-tab.tsx');
   for (const visual of ['categories','nature','cash-flow','net-worth','comparison']) {
     assert.ok(reports.includes('data-report-visual="' + visual + '"'), visual);
   }
   assert.match(reports, /<Table>/);
-  assert.match(reports, /<MetricCard/);
+  assert.match(reports, /<ReportFinancialEquation/);
   assert.match(reports, /ReportCategoryDonut/);
   assert.match(reports, /ReportComparisonBars/);
   assert.match(reports, /ReportValueBars/);

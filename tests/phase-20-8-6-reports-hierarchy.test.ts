@@ -8,8 +8,8 @@ const ranges=read('src/components/dashboard/report-range-controls.tsx');
 
 test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
   const order=[
-    'data-report-section="quick-read"',
     'data-report-section="spending"',
+    'data-report-section="quick-read"',
     'data-report-section="spending-breakdown"',
     'data-report-section="comparison"',
     'data-report-section="analysis-access"',
@@ -56,7 +56,7 @@ test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth vis
   assert.match(reports,/ReportCategoryDonut/);
   assert.match(reports,/ReportValueBars/);
   assert.match(reports,/<Table>/);
-  assert.match(reports,/<MetricCard/);
+  assert.match(reports,/<ReportFinancialEquation/);
 });
 
 test('20.8.6 keeps detailed transactions after Net Worth inside the audit block', () => {

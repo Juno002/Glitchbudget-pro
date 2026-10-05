@@ -38,8 +38,8 @@ test('P7 integration smoke covers donut legend exact evidence privacy themes mob
 test('P7 retains exact Reports evidence behind one progressive disclosure', () => {
   const order = [...reports.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(order, [
-    'quick-read',
     'spending',
+    'quick-read',
     'spending-breakdown',
     'comparison',
     'analysis-access',

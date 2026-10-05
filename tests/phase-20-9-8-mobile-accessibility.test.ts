@@ -20,7 +20,7 @@ test('20.9.8 keeps dialogs inside the visible viewport and device safe areas', (
   assert.match(css, /\.viewport-sheet/);
   assert.match(css, /left: calc\([\s\S]*safe-area-inset-left[\s\S]*safe-area-inset-right/);
   assert.match(css, /\.viewport-sheet\[data-sheet-side='left'\]/);
-  assert.doesNotMatch(css, /\.viewport-sheet \{[\s\S]*?padding-(?:top|right|bottom|left):/);
+  assert.doesNotMatch(css, /\.viewport-sheet \{[^}]*padding-(?:top|right|bottom|left):/);
   assert.match(dialog, /viewport-dialog/);
   assert.match(alertDialog, /viewport-dialog/);
   assert.match(sheet, /viewport-sheet/);
