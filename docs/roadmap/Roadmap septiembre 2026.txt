@@ -4888,7 +4888,7 @@ Contrato:
 
 ## Corrección de producto autorizada — ampliación retroactiva de cuentas con actividad
 
-**Estado: EN IMPLEMENTACIÓN / rama `retroactive-account-rebase`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 al reproducirse el error al registrar un ingreso retroactivo.
+**Estado: GATE APROBADO · PR #123 / pendiente de integración a `main`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 al reproducirse el error al registrar un ingreso retroactivo.
 
 Esta corrección no crea una fase nueva. Extiende únicamente el contrato de Post-roadmap 6 — Inicio retroactivo de cuentas.
 
@@ -4908,6 +4908,17 @@ Contrato:
 - gates obligatorios: `npm run check`, benchmarks, `npm run build`, `npm run test:e2e`.
 
 El objetivo es permitir reconstrucción histórica real sin doble conteo ni reinterpretar el saldo inicial.
+
+Registro de ejecución de PR #123:
+
+- `npm run check`: **803/803**, 0 fallos;
+- `npm run benchmark:ledger`: aprobado;
+- `npm run benchmark:reports`: **18 mediciones**, `gatePassed: true`;
+- `npm run build`: aprobado, export estático/local-only intacto;
+- `npm run test:e2e`: aprobado;
+- regresión específica aprobada: cuenta con actividad → rebase hacia atrás → ingreso retroactivo por `saveIncome()` → saldo y Reportes correctos;
+- sin cambios de schema, migración, backup, red ni navegación principal;
+- PR #123 permanece sin merge hasta integración final.
 ## Final UI Polish — secuencia autorizada
 
 **Estado: COMPLETADO / Gate final aprobado · PR #121.** Autorización explícita del 4 de octubre de 2026; P0–P7 cerradas en orden.
