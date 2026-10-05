@@ -4886,6 +4886,27 @@ Contrato:
 - fuera de alcance: importación masiva de historial, préstamos y edición de `startDate` con actividad existente;
 - entregar un PR atómico y no mergear antes de revisión final.
 
+## Corrección de producto autorizada — ampliación retroactiva de cuentas con actividad
+
+**Estado: EN IMPLEMENTACIÓN / rama `retroactive-account-rebase`.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 al reproducirse el error al registrar un ingreso retroactivo.
+
+Esta corrección no crea una fase nueva. Extiende únicamente el contrato de Post-roadmap 6 — Inicio retroactivo de cuentas.
+
+Contrato:
+
+- una cuenta con movimientos existentes puede mover `startDate` únicamente hacia atrás, nunca hacia adelante;
+- el nuevo `startDate` sigue limitado a la ventana retroactiva canónica vigente (inicio del mes calendario anterior → hoy);
+- mover el inicio hacia atrás no crea ingresos, gastos, transferencias ni ajustes sintéticos;
+- el usuario debe indicar el `openingBalance` real al inicio de la nueva fecha; ese saldo sigue sin contar como ingreso ni cash flow;
+- todos los movimientos ya registrados permanecen intactos;
+- tras ampliar el inicio, pueden registrarse movimientos reales con fecha `>= startDate` y estos sí afectan saldo/reportes normalmente;
+- no se permite adelantar el inicio de una cuenta con actividad porque podría excluir historial ya registrado;
+- Efectivo y bancos usan exactamente la misma regla;
+- el error de movimiento anterior al inicio debe indicar el camino de corrección en la UI;
+- sin schema, migración, backup nuevo, red, IA ni cambio de semántica de Reportes;
+- gates obligatorios: `npm run check`, benchmarks, `npm run build`, `npm run test:e2e`.
+
+El objetivo es permitir reconstrucción histórica real sin doble conteo ni reinterpretar el saldo inicial.
 ## Final UI Polish — secuencia autorizada
 
 **Estado: COMPLETADO / Gate final aprobado · PR #121.** Autorización explícita del 4 de octubre de 2026; P0–P7 cerradas en orden.
