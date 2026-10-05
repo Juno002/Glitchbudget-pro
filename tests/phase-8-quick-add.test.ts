@@ -23,7 +23,7 @@ test('Phase 8 keeps transfer in the same composer without a consumption category
   assert.match(source, /txType !== 'transfer'/);
   assert.match(source, /Cuenta de origen/);
   assert.match(source, /Cuenta de destino/);
-  assert.match(source, /no crea ingreso ni gasto/);
+  assert.match(source, /No afecta ingresos ni gastos/);
 });
 
 test('Phase 8 preselects the real default cash account instead of a visual-only default', () => {
@@ -38,7 +38,7 @@ test('Phase 8 preselects the real default cash account instead of a visual-only 
 
 test('Phase 8 templates are local presets and do not add a Dexie table', () => {
   const source = [read('src/components/dashboard/TransactionModal.tsx'), read('src/components/dashboard/transaction-modal-automation.tsx')].join('\n');
-  assert.match(source, /Guarda estos valores para reutilizarlos/);
+  assert.match(source, /La fecha se completa al usar la plantilla/);
   assert.match(source, /loadQuickAddTemplates\(window\.localStorage\)/);
   assert.match(source, /upsertQuickAddTemplate\(window\.localStorage/);
   assert.match(source, /Guardar como plantilla/);
