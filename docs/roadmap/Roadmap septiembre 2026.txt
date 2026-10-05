@@ -5057,7 +5057,7 @@ Registro de cierre de PR #125:
 
 ## Corrección visual autorizada — Reportes: composición editorial final
 
-**Estado: autorizada / en ejecución.** Autorización explícita del usuario el 5 de octubre de 2026. Rama dedicada: `reports-editorial-composition-final` (la rama de ejemplo ya pertenece a la PR #126, que se conserva intacta). Evidencia y registro de cierre: `docs/roadmap/reports-editorial-composition.md`.
+**Estado: COMPLETADO / integrado en `main` · PR #127.** Autorización explícita del usuario el 5 de octubre de 2026. Rama dedicada: `reports-editorial-composition-final` (la rama de ejemplo ya pertenece a la PR #126, que se conserva intacta). Evidencia y registro de cierre: `docs/roadmap/reports-editorial-composition.md`.
 
 **20.6 permanece cerrado. Final UI Polish P0–P7 permanece cerrado.** Esta es una corrección visual posterior autocontenida; no crea P8, Fase 20.11, Fase 21 ni una fase funcional nueva.
 
@@ -5079,6 +5079,18 @@ Contrato autorizado:
 
 El registro de cierre debe incluir diagnóstico contra `main`, archivos, antes/después, invariantes, tests, resultados de gates, PR y merge SHA.
 
+Registro de cierre de PR #127:
+
+- `npm run check`: **817/817**, 0 fallos; ocho regresiones nuevas, caracterización semántica anterior conservada.
+- `npm run benchmark:ledger`: aprobado; medianas 50k de posición **36.505033 ms** e historiales **37.501726 ms** en el CI verificado.
+- `npm run benchmark:reports`: **18 mediciones**, `gatePassed: true`; ratio máximo 50k **0.565412×**, límite existente **2×** intacto.
+- `npm run build`: aprobado; 45 recursos estáticos, sin importador diagnóstico y `connect-src 'none'` intacto.
+- `npm run test:e2e`: aprobado; smoke completo de producto, seis rangos, cuatro tablas exactas, privacidad visual/AX, temas, teclado/touch, reduced motion, 130 verificaciones de tendencia, 32 de composición y recarga offline.
+- **Quality checks aprobado sobre el HEAD exacto `a4831de92fb60e8b7814c70629edae229d0d60e0`**: run `37335908950`, job `111850513483`; también aprobó el run de push del mismo HEAD. Todos los checks y el estado Vercel estaban verdes antes del merge.
+- Sin nuevas métricas, fórmulas financieras, datos demo de producto, cambios de dominio/selectors/engine, persistencia, schema, migraciones, backup, red ni offline.
+- PR: `https://github.com/Juno002/Glitchbudget-pro/pull/127`; merge confirmado: **`7d6cfeb5f14fbd7155d0214a43ddd8cc6e84322d`**.
+- Sin bugs financieros confirmados. Se dejó fuera el overflow de Home reproducido en el Chromium local también sobre main, y el trabajo preexistente de PR #126; no se alteraron gates para sortearlos.
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
@@ -5098,7 +5110,7 @@ Roadmap septiembre 2026.txt = única fuente de verdad
 El roadmap funcional 0–20.10 está **cerrado**. La secuencia Post-roadmap 1–6 está cerrada. **Final UI Polish P0–P7 está COMPLETADO / Gate final aprobado**, definido en `docs/roadmap/final-ui-polish.md`.
 
 ```text
-intervenciones pendientes autorizadas = únicamente Reportes — composición editorial final; lectura progresiva de Reportes, ingreso retroactivo y limpieza editorial global completados e integrados
+intervenciones pendientes autorizadas = ninguna; composición editorial final de Reportes, lectura progresiva de Reportes, ingreso retroactivo y limpieza editorial global completados e integrados
 ```
 
 No existe una Fase 20.11.
