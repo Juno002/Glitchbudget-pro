@@ -5017,6 +5017,32 @@ Registro de cierre de PR #124:
 - `npm run test:e2e`: aprobado, incluyendo el recorrido real Nuevo movimiento → Ingreso → 2026-09-30 → saldo inicial 0 → Guardar → cuenta «Desde 2026-09-30»;
 - merge commit: `d883889b700054c533e8ecae20d3a395696ba83f`;
 - sin cambios de schema, migraciones, backup ni fórmulas financieras.
+## Corrección editorial autorizada — limpieza global del «efecto maqueta»
+
+**Estado: EN IMPLEMENTACIÓN.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 tras detectar residuos de sobreexplicación en Cuentas, Presupuestos y Metas.
+
+Esta corrección no crea P8, Fase 20.11 ni Fase 21. Extiende la intención ya cerrada de 20.8.1, 20.8.5 y 20.9.4 a superficies secundarias, ocultas y de gestión que no quedaron suficientemente depuradas.
+
+Contrato:
+
+- auditar todas las superficies React visibles del producto, incluidos dialogs, sheets, details, popovers, formularios de gestión, empty states y confirmaciones;
+- clasificar copy visible como **imprescindible**, **contextual** o **redundante**;
+- eliminar copy redundante que explique obviedades ya expresadas por título, campo, cifra o acción;
+- compactar copy contextual y moverlo a `ContextHelp` cuando pueda quedar bajo demanda sin perder comprensión;
+- conservar siempre visibles advertencias que cambien una decisión financiera, eviten doble conteo, expliquen una consecuencia destructiva o sean necesarias para accesibilidad/estado;
+- conservar `DialogDescription` solo cuando aporte contexto real; cuando sea necesario únicamente para accesibilidad puede quedar `sr-only`;
+- no eliminar labels, estados, errores accionables, consecuencias destructivas ni semántica de planificación vs. dinero real;
+- no tocar cálculos, selectors, commands, persistencia, schema, migraciones, backups, red ni navegación principal;
+- documentar el inventario auditado y añadir regresión para evitar que reaparezcan los textos explícitamente retirados;
+- gates obligatorios: `npm run check`, benchmarks vigentes, `npm run build` y `npm run test:e2e`.
+
+Criterio editorial:
+
+```text
+la interfaz debe indicar qué hacer y qué significa una consecuencia importante
+sin narrar cómo funciona cada control cuando el propio control ya lo comunica
+```
+
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:
