@@ -462,7 +462,6 @@ export default function ReportsTab() {
               )}
             </section>
           </div>
-          </div>
         </>
       )}
     </div>
