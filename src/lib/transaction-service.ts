@@ -5,8 +5,10 @@ import { evaluateBudgetOverspendingSet, BudgetWarning } from '../policies/budget
 import { accountTables, readAccountSnapshot, requireAccount, requirePreservedAccountFunds, ensureCashAccount } from './accounts';
 import { z } from 'zod';
 import { db, type Expense, type Income } from './db';
-import { isValidDate } from './finance-calculations';
+import { isValidDate, localDate } from './finance-calculations';
 import { budgetPlansForDate } from '../domain/budgets';
+import { accountFundsWorsen } from '../policies/account-protection';
+import { assertAccountStartDateAllowed } from '../domain/account-start';
 import { prepareBudgetPeriodsForDate } from './budget-rollover';
 import { recordGoalContribution } from './goal-service';
 import { normalizeCurrencyCode } from '../domain/currency';
@@ -31,6 +33,11 @@ const incomeSchema = z.object({ ...fields, type: z.enum(['extra', 'gift']), desc
 export interface ActualSaveOptions {
   /** Existing materialized occurrences may be confirmed after their rule is deactivated. */
   allowInactiveRecurringRule?: boolean;
+  /**
+   * Explicit balance at the start of a new historical tracking date.
+   * Only used when creating an income before the selected account.startDate.
+   */
+  accountHistoryOpeningBalance?: Cents;
 }
 const expenseSchema = z.object({
   ...fields, nature: z.enum(['Fijo', 'Variable', 'Ocasional']), concept: z.string().trim(),
@@ -53,7 +60,33 @@ export async function saveIncome(input: IncomeWriteInput, editing = false, optio
     if (!editing) row.accountId = row.accountId || (await ensureCashAccount(row.date)).id;
     else row.accountId = row.accountId || existing?.accountId;
     if (row.accountId) {
-      const account = await requireAccount(row.accountId, row.date);
+      let account = await db.accounts.get(row.accountId);
+      if (!account) throw new Error('La cuenta ya no existe.');
+
+      if (row.date < account.startDate) {
+        if (editing || options.accountHistoryOpeningBalance === undefined) {
+          throw new Error('La fecha es anterior al inicio del seguimiento de esta cuenta.');
+        }
+        assertAccountStartDateAllowed(row.date, localDate());
+        const rebasedAccount = {
+          ...account,
+          startDate: row.date,
+          openingBalance: options.accountHistoryOpeningBalance,
+        };
+        const before = await readAccountSnapshot();
+        const after = { ...before, incomes: [...before.incomes, row] };
+        if (
+          (await readFinancialPolicies()).preventNegativeAccountBalance
+          && accountFundsWorsen(account, rebasedAccount, before, after, localDate())
+        ) {
+          throw new Error('El saldo inicial indicado no alcanza para reconstruir este ingreso y los movimientos posteriores.');
+        }
+        await db.accounts.put(rebasedAccount);
+        account = rebasedAccount;
+      } else {
+        account = await requireAccount(row.accountId, row.date);
+      }
+
       if (account.type === 'investment') throw new Error('Las cuentas de inversión no reciben ingresos operativos en Investments 1.0.');
       const baseCurrency = normalizeCurrencyCode((await db.settings.get('general'))?.currency);
       if (account.currency !== baseCurrency) throw new Error('Esta cuenta necesita una conversión manual antes de registrar movimientos.');

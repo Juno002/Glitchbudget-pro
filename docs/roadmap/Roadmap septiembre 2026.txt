@@ -4993,6 +4993,20 @@ Registro de ejecución de PR #122:
 - sin cambios de schema, migración, backup, persistencia, red, selectores financieros ni navegación principal;
 - PR #122 fue integrado en `main` tras aprobación explícita; merge commit inicial: `36ffa974648b17bb26195615f1ae087b9db14250`.
 
+## Corrección de producto autorizada — ampliación retroactiva de historial de cuenta
+
+**Estado: EN IMPLEMENTACIÓN.** Autorizada explícitamente por el usuario el 4 de octubre de 2026 para resolver el bloqueo al registrar movimientos reales anteriores al `Account.startDate` cuando la cuenta ya tiene actividad.
+
+Esta corrección no crea una fase nueva ni modifica el modelo persistente. Extiende la Intervención 6 del post-roadmap con estas reglas:
+
+- con actividad existente, `startDate` puede moverse únicamente hacia atrás y solo dentro de la ventana retroactiva ya autorizada;
+- con actividad existente, nunca se permite adelantar `startDate`;
+- `openingBalance` pasa a representar explícitamente el saldo al inicio de la nueva fecha elegida;
+- la ampliación histórica puede reducir temporalmente el saldo calculado mientras el usuario reconstruye movimientos anteriores; por eso la protección de saldo negativo no bloquea exclusivamente este rebase hacia atrás;
+- movimientos posteriores, reportes, patrimonio, backup, schema y persistencia conservan su semántica existente;
+- el compositor sigue exigiendo `movement.date >= account.startDate`; una vez ampliado el historial, el ingreso retroactivo se registra por el flujo normal;
+- no se crean movimientos sintéticos, ajustes automáticos ni ingresos de apertura;
+- gate completo obligatorio antes de integrar.
 ## Pendientes sin autorizar
 
 Estos puntos quedan registrados para no perderlos, pero **no autorizan implementación ni crean una fase nueva**:

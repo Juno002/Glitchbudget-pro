@@ -83,7 +83,10 @@ interface FinanceContextType {
   setRolloverStrategy: (strategy: RolloverStrategy) => void;
   setPeriodStartDay: (day: number) => Promise<void>;
   setBaseIncome: (baseIncome: { freq: 'mensual' | 'quincenal' | 'semanal', amount: number }) => void;
-  addIncomeItem: (income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents }) => Promise<boolean>;
+  addIncomeItem: (
+    income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents },
+    options?: { accountHistoryOpeningBalance?: Cents },
+  ) => Promise<boolean>;
   updateIncomeItem: (income: Omit<Income, "amount"> & { amount: Cents }) => Promise<boolean>;
   deleteIncomeItem: (id: string) => Promise<boolean>;
   addExpense: (expense: Omit<Expense, "id" | "month" | "amount"> & { amount: Cents }) => Promise<boolean>;
@@ -348,9 +351,12 @@ export function FinanceProvider({ children }: { children: ReactNode }) {
     }
   }, [toast]);
 
-  const addIncomeItem = useCallback(async (income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents }) => {
+  const addIncomeItem = useCallback(async (
+    income: Omit<Income, "id" | "month" | "amount"> & { amount: Cents },
+    options: { accountHistoryOpeningBalance?: Cents } = {},
+  ) => {
     try {
-      await saveIncome({ ...income, id: crypto.randomUUID() });
+      await saveIncome({ ...income, id: crypto.randomUUID() }, false, options);
       playIncome();
       toast({ title: 'Ingreso agregado' });
       return true;
