@@ -37,7 +37,7 @@ test('20.5 goals render canonical goal read models and preserve contribution sem
   assert.match(goals, /goalWouldComplete/);
   assert.match(goals, /contributeToGoal/);
   assert.match(goals, /Aporte mensual requerido/);
-  assert.match(goals, /El efectivo y los saldos bancarios no cambian/);
+  assert.match(goals, /Este aporte no mueve dinero entre cuentas/);
   assert.doesNotMatch(goals, /goal\.target\s*-\s*goal\.saved/);
 });
 

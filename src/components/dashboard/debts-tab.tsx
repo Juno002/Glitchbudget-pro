@@ -82,7 +82,6 @@ export default function DebtsTab() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Crédito</p><h2 className="mt-1 font-display text-xl font-normal tracking-[-0.025em]">Tarjetas</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Límites, saldo pendiente y pagos registrados.</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={open => { if (!savingRef.current) setIsAddOpen(open); }}>
           <DialogTrigger asChild>
@@ -133,7 +132,6 @@ export default function DebtsTab() {
         <EmptyState
           icon={<CreditCard className="h-10 w-10" />}
           title="Aún no tienes tarjetas"
-          description="Registra una tarjeta de crédito para monitorear límites y pagos sin afectar tu efectivo disponible inmediatamente."
         />
       ) : (
         <div className="grid gap-4">
@@ -227,11 +225,11 @@ export default function DebtsTab() {
                     {isSurplus ? (
                        <div className="bg-primary/10 p-3 rounded-md mb-2 flex items-start gap-2">
                           <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          <p className="text-xs text-primary dark:text-primary/80">Tienes saldo a favor de {money(absoluteDebt)}. Cualquier pago adicional aumentará este colchón temporal en la tarjeta.</p>
+                          <p className="text-xs text-primary dark:text-primary/80">Saldo a favor: {money(absoluteDebt)}. Otro abono lo aumentará.</p>
                        </div>
                     ) : (
                        <div className="bg-black/5 dark:bg-[rgba(255,255,255,0.05)] p-3 rounded-md mb-2">
-                          <p className="text-xs text-muted-foreground">Tu deuda actual con esta tarjeta es de <span className="text-rose-500 dark:text-rose-400 font-bold">{money(currentDebt)}</span>.</p>
+                          <p className="text-xs text-muted-foreground">Deuda actual: <span className="text-rose-500 dark:text-rose-400 font-bold">{money(currentDebt)}</span></p>
                        </div>
                     )}
                     <form onSubmit={handlePaymentSubmit} className="space-y-4">
@@ -240,9 +238,7 @@ export default function DebtsTab() {
                          <Label>Monto a Pagar o Abonar</Label>
                          <Input type="number" min="0.01" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder="0.00" autoFocus required />
                       </div>
-                      <p className="text-[11px] text-muted-foreground italic">
-                        Los pagos reducen tu efectivo disponible global para saldar la deuda o aumentar tu límite temporal.
-                      </p>
+                      <p className="text-[11px] text-muted-foreground">El pago se descuenta de la cuenta seleccionada.</p>
                       <Button disabled={saving} type="submit" className="w-full">{saving ? 'Registrando…' : 'Confirmar pago'}</Button>
                     </form>
                   </DialogContent>

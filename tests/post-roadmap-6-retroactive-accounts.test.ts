@@ -400,8 +400,8 @@ test('UI exposes retroactive tracking date and explicit opening-balance correcti
   assert.match(source, /Llevar esta cuenta desde/);
   assert.match(source, /Saldo al inicio de ese día/);
   assert.match(source, /Corregir saldo inicial/);
-  assert.match(source, /Saldo calculado hoy/);
-  assert.match(source, /solo puedes ampliar esta fecha hacia atrás/);
+  assert.match(source, /Saldo hoy/);
+  assert.match(source, /Con historial existente, la fecha solo puede moverse hacia atrás/);
   assert.match(source, /Saldo al inicio de esa fecha/);
   assert.match(source, /startInputMax/);
   assert.doesNotMatch(source, /disabled=\{Boolean\(editingAccount && editingAccountHasActivity\)\}/);
@@ -411,7 +411,7 @@ test('UI exposes retroactive tracking date and explicit opening-balance correcti
 test('global composer exposes one-step historical extension for a retroactive income', () => {
   const source = readFileSync(new URL('../src/components/dashboard/TransactionModal.tsx', import.meta.url), 'utf8');
   assert.match(source, /needsIncomeHistoryExtension/);
-  assert.match(source, /Este ingreso es anterior al inicio de/);
+  assert.match(source, /Ampliará el historial de/);
   assert.match(source, /Saldo al inicio de esa fecha/);
   assert.match(source, /accountHistoryOpeningBalance/);
   assert.match(source, /Solo puedes ampliar el historial desde/);

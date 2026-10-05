@@ -514,7 +514,7 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
                 <>
                   <AccountSelect cashDefault value={accountId} onChange={setAccountId} label="Cuenta de origen" disabled={isSaving} />
                   <AccountSelect value={toAccountId} onChange={setToAccountId} label="Cuenta de destino" disabled={isSaving} />
-                  <p className="text-xs text-muted-foreground">La transferencia mueve dinero entre tus cuentas y no crea ingreso ni gasto.</p>
+                  <p className="text-xs text-muted-foreground">No afecta ingresos ni gastos.</p>
                 </>
               ) : txType === 'expense' && paymentMethod === 'credit' ? (
                 <div className="rounded-lg border bg-muted/20 p-3 text-sm">
@@ -564,12 +564,9 @@ export default function TransactionModal({ open, onClose, mode, editingExpense, 
 
                 {needsIncomeHistoryExtension && selectedAccount && (
                   <div className="space-y-2 rounded-[var(--radius-interactive)] border bg-muted/25 p-3" data-retroactive-income-extension="true">
-                    <p className="text-sm font-medium">Este ingreso es anterior al inicio de {selectedAccount.name}.</p>
+                    <p className="text-sm font-medium">Ampliará el historial de {selectedAccount.name} hasta {date}.</p>
                     {historyExtensionDateAllowed ? (
                       <>
-                        <p className="text-xs leading-relaxed text-muted-foreground">
-                          Prisma ampliará el historial de la cuenta hasta {date} y guardará el ingreso en la misma operación. Indica cuánto había en la cuenta al comenzar ese día, antes de este ingreso.
-                        </p>
                         <label className="block space-y-1 text-sm">
                           <span className="text-muted-foreground">Saldo al inicio de esa fecha</span>
                           <Input

@@ -79,9 +79,7 @@ export default function TransferDialog({ budgetPeriod }: { budgetPeriod?: Budget
       <DialogContent className="sm:max-w-[425px]" data-budget-transfer-dialog="prisma">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Reasignar presupuesto</DialogTitle>
-          <DialogDescription>
-            Reasigna límite entre categorías del mismo período. Esto no mueve dinero entre cuentas ni crea movimientos reales.
-          </DialogDescription>
+          <DialogDescription>Reasigna límites; no mueve dinero entre cuentas.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">

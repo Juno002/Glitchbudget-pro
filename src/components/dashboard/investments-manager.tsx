@@ -92,8 +92,8 @@ export default function InvestmentsManager() {
       toast({
         title:'Inversión registrada',
         description:mode === 'new'
-          ? 'El principal se movió como transferencia patrimonial; no se creó un gasto.'
-          : 'El valor actual quedó como saldo inicial; no se creó un ingreso.',
+          ? 'Principal transferido desde la cuenta seleccionada.'
+          : 'Valor registrado como saldo inicial.',
       });
       reset();
       setOpen(false);
@@ -114,7 +114,7 @@ export default function InvestmentsManager() {
           <DialogContent className="sm:max-w-2xl" data-investment-dialog="prisma">
             <DialogHeader>
               <DialogTitle className="font-display text-2xl font-normal">Registrar inversión</DialogTitle>
-              <DialogDescription>Elige si ya existía al empezar a usar Prisma o si la financias ahora desde una cuenta registrada.</DialogDescription>
+              <DialogDescription className="sr-only">Registra una inversión existente o nueva.</DialogDescription>
             </DialogHeader>
             <form className="space-y-4" onSubmit={submit}>
               <label className="block text-sm">Origen del valor
@@ -147,11 +147,9 @@ export default function InvestmentsManager() {
                 </label>
               </div>
               <label className="block text-sm">Notas<Input value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Opcional" /></label>
-              <div className="rounded-[var(--radius-interactive)] border p-3 text-xs text-muted-foreground">
-                {mode === 'new'
-                  ? 'El principal saldrá de la cuenta elegida mediante una transferencia. El patrimonio neto no cambia por abrir la inversión.'
-                  : 'El valor actual se registra como saldo inicial del activo. No se crea ingreso ni transferencia para evitar doble contabilización.'}
-              </div>
+              <p className="text-xs text-muted-foreground">
+                {mode === 'new' ? 'Se registra como transferencia, no gasto.' : 'Se registra como saldo inicial, no ingreso.'}
+              </p>
               <Button type="submit" disabled={busy || (mode === 'new' && !source)}>{busy ? 'Guardando…' : 'Registrar inversión'}</Button>
             </form>
           </DialogContent>

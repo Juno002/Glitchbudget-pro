@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import IconPicker from './icon-picker';
+import { ContextHelp } from '@/components/finance-ui';
 
 export default function CategoryMaintenance({direction}:{direction:CategoryDirection}) {
   const rows=useCategoriesData();
@@ -33,7 +34,9 @@ export default function CategoryMaintenance({direction}:{direction:CategoryDirec
 
   return (
     <div className="mt-4 space-y-3 border-t border-border/70 pt-4" data-category-maintenance="prisma">
-      <label className="block text-sm">Editar categoría
+      <div className="flex items-center gap-1 text-sm">Editar categoría <ContextHelp label="Acerca de editar categorías">Renombrar o archivar no altera el historial.</ContextHelp></div>
+      <label className="block">
+        <span className="sr-only">Editar categoría</span>
         <select
           disabled={busy}
           className="mt-1 h-10 w-full rounded-[var(--radius-interactive)] border bg-background px-3 shadow-[var(--shadow-control)]"
@@ -59,7 +62,7 @@ export default function CategoryMaintenance({direction}:{direction:CategoryDirec
             <Button onClick={()=>void save()}>Guardar cambios</Button>
             <Button variant="outline" onClick={()=>void save(!row.archived)}>{row.archived?'Reactivar':'Archivar'}</Button>
           </div>
-          <p className="text-xs text-muted-foreground">El historial conserva esta categoría aunque cambies su nombre o la archives.{row.type==='both'?' Se utiliza en ingresos y gastos.':''}</p>
+          {row.type==='both' && <p className="text-xs text-muted-foreground">Ingresos y gastos</p>}
         </fieldset>
       )}
     </div>

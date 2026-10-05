@@ -128,7 +128,7 @@ export function QuickAddTemplateSave({
   return (
     <div className="space-y-2 border-t border-border/70 pt-4" data-template-save="prisma">
       <span className="text-sm font-medium">Plantilla</span>
-      <p className="text-xs text-muted-foreground">Guarda estos valores para reutilizarlos. La fecha siempre se restablece al día en que uses la plantilla.</p>
+      <p className="text-xs text-muted-foreground">La fecha se completa al usar la plantilla.</p>
       <div className="flex gap-2">
         <Input
           aria-label="Nombre de plantilla"

@@ -91,7 +91,7 @@ function BudgetItem({
       {editing && <form onSubmit={event => void save(event)} className="flex flex-wrap items-end gap-2 border-t pt-3">
         <label className="min-w-0 flex-1 space-y-1 text-sm"><span>Nuevo límite (RD$)</span><Input type="number" aria-label={'Límite de ' + category.name} required min="0" step="0.01" inputMode="decimal" value={inputValue} disabled={saving} onChange={event => setInputValue(event.target.value)} /></label>
         <Button type="submit" disabled={saving}>{saving ? 'Guardando…' : 'Guardar límite'}</Button>
-        <p className="w-full text-xs text-muted-foreground">Un límite de 0 mantiene el presupuesto activo sin margen para gastar. Se aplica tu política de excesos.</p>
+        <p className="w-full text-xs text-muted-foreground">Límite 0 = presupuesto activo sin margen.</p>
       </form>}
     </motion.article>
   );
@@ -134,7 +134,7 @@ function NewBudgetDialog({
       <DialogContent className="sm:max-w-[420px]">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Añadir presupuesto</DialogTitle>
-          <DialogDescription>Asigna un límite a una categoría para el rango seleccionado.</DialogDescription>
+          <DialogDescription className="sr-only">Añade un límite de presupuesto.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <label className="block space-y-1 text-sm">
@@ -270,7 +270,7 @@ export default function PlanningTab() {
 
                   {active.length === 0 && !showAll && (
                     <div className="rounded-[var(--radius-card)] border border-dashed p-5 text-center text-sm text-muted-foreground">
-                      No hay límites configurados en este rango. Añade un presupuesto o muestra todas las categorías.
+                      Sin límites configurados en este rango.
                     </div>
                   )}
 

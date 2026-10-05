@@ -41,7 +41,7 @@ function ContributeDialog({ goal, model }: { goal:GoalView; model:ReturnType<typ
   return <Dialog open={open} onOpenChange={value => { setOpen(value); if (value) form.reset({ amount:model.suggestedContribution / 100 }); }}>
     <DialogTrigger asChild><Button variant="outline" size="sm"><PlusCircle className="mr-2 h-4 w-4" />Aportar</Button></DialogTrigger>
     <DialogContent className="sm:max-w-md" data-goal-contribution-dialog="prisma">
-      <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Aportar a {goal.name}</DialogTitle><DialogDescription>Registrarás una reserva para esta meta. El efectivo y los saldos bancarios no cambian.</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle className="font-display text-2xl font-normal">Aportar a {goal.name}</DialogTitle><DialogDescription>Este aporte no mueve dinero entre cuentas.</DialogDescription></DialogHeader>
       <p className="text-sm text-muted-foreground">Ahorrado: {money(model.saved)} · Restante: {money(model.remaining)}</p>
       <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4">
         <FormField control={form.control} name="amount" render={({field}) => <FormItem><FormLabel>Importe del aporte</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0.01" step="0.01" autoFocus /></FormControl><FormMessage /></FormItem>} />
@@ -85,7 +85,7 @@ export default function GoalsManager() {
         </div>
         {metrics.overdue && metrics.requiredMonthly !== null && metrics.remaining > 0 && <p className="text-xs text-warning">El plazo terminó; queda por reservar el importe restante.</p>}
         {goal.quota > 0 && <p className="text-xs text-muted-foreground">Aporte planificado: {money(goal.quota)} por período.</p>}
-        {metrics.legacyBalance > 0 && <p className="text-xs text-muted-foreground">Incluye {money(metrics.legacyBalance)} de progreso anterior recuperado. No se cuenta como una nueva reserva mensual.</p>}
+        {metrics.legacyBalance > 0 && <p className="text-xs text-muted-foreground">Incluye {money(metrics.legacyBalance)} de progreso histórico.</p>}
         <div className="flex flex-wrap items-center justify-end gap-2">
           {metrics.status === 'active' && <ContributeDialog goal={goal} model={metrics} />}
           <Button variant="ghost" size="icon" aria-label={'Editar meta ' + goal.name} onClick={() => { setEditing(goal); form.reset({name:goal.name,target:goal.target/100,date:goal.date || '',quota:goal.quota/100}); setOpen(true); }}><Pencil className="h-4 w-4" /></Button>
@@ -96,12 +96,12 @@ export default function GoalsManager() {
       </article>;
     })}</div> : <EmptyState title="Todavía no tienes metas" />}
     <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { form.reset(); setEditing(null); } }}><DialogTrigger asChild><Button variant="outline" className="min-h-12 w-full rounded-[var(--radius-interactive)] border-dashed"><PlusCircle className="mr-2 h-4 w-4" />Nueva meta</Button></DialogTrigger>
-      <DialogContent className="sm:max-w-md" data-goal-dialog="prisma"><DialogHeader><DialogTitle className="font-display text-2xl font-normal">{editing ? 'Editar meta' : 'Nueva meta'}</DialogTitle><DialogDescription>{editing ? 'Ajusta tu objetivo o plazo. Los aportes registrados se conservan.' : 'Define tu objetivo. Puedes empezar aunque todavía no tengas un aporte mensual planificado.'}</DialogDescription></DialogHeader>
+      <DialogContent className="sm:max-w-md" data-goal-dialog="prisma"><DialogHeader><DialogTitle className="font-display text-2xl font-normal">{editing ? 'Editar meta' : 'Nueva meta'}</DialogTitle><DialogDescription className="sr-only">Configura objetivo, plazo y aporte planificado.</DialogDescription></DialogHeader>
         <Form {...form}><form onSubmit={form.handleSubmit(submit)} className="space-y-4">
           <FormField control={form.control} name="name" render={({field}) => <FormItem><FormLabel>Nombre de la meta</FormLabel><FormControl><Input {...field} placeholder="Ej. Fondo de emergencia" autoComplete="off" /></FormControl><FormMessage /></FormItem>} />
           <FormField control={form.control} name="target" render={({field}) => <FormItem><FormLabel>Objetivo</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0.01" step="0.01" /></FormControl><FormMessage /></FormItem>} />
           <FormField control={form.control} name="date" render={({field}) => <FormItem><FormLabel>Fecha límite (opcional)</FormLabel><FormControl><Input {...field} type="date" min={earliestDate} /></FormControl><FormMessage /></FormItem>} />
-          {schedule && <p className="rounded-[var(--radius-interactive)] border border-[hsl(var(--brand-mint)/0.22)] bg-[hsl(var(--brand-mint)/0.08)] p-3 text-sm">Para llegar a tiempo: <strong>{money(schedule.requiredMonthly!)}</strong> por período financiero, desde el actual.</p>}
+          {schedule && <p className="rounded-[var(--radius-interactive)] border border-[hsl(var(--brand-mint)/0.22)] bg-[hsl(var(--brand-mint)/0.08)] p-3 text-sm">Aporte requerido: <strong>{money(schedule.requiredMonthly!)}</strong> por período.</p>}
           <FormField control={form.control} name="quota" render={({field}) => <FormItem><FormLabel>Aporte planificado por período (opcional)</FormLabel><FormControl><Input {...field} type="number" inputMode="decimal" min="0" step="0.01" /></FormControl><FormMessage /></FormItem>} />
           {schedule && <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue('quota',schedule.requiredMonthly!/100)}>Usar aporte sugerido</Button>}
           <Button type="submit" disabled={form.formState.isSubmitting} className="w-full">{form.formState.isSubmitting ? 'Guardando…' : editing ? 'Guardar cambios' : 'Crear meta'}</Button>
