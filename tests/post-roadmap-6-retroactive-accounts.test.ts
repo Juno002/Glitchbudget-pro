@@ -6,6 +6,7 @@ import { after, beforeEach, test } from 'node:test';
 import { accountStartDateBounds, assertAccountStartDateAllowed, assertEditedAccountStartDateAllowed, resolveEditedAccountStartDate } from '../src/domain/account-start';
 import { selectAccountBalance, selectAccountHasActivity, selectPosition, type AccountSnapshot } from '../src/domain/ledger';
 import type { Account, Expense, Income } from '../src/domain/models';
+import { asCents } from '../src/domain/money';
 import { selectReportsSnapshot } from '../src/domain/reports';
 import { shiftPeriodId } from '../src/domain/periods';
 import { db } from '../src/lib/db';
@@ -167,7 +168,7 @@ test('account with activity can rebase backward and then register a real retroac
   await saveIncome({
     id:'retro-income',
     date:bounds.min,
-    amount:50_000,
+    amount:asCents(50_000),
     amountBase:50_000,
     currency:'DOP',
     fxRate:1,
