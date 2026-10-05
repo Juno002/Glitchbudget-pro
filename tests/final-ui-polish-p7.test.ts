@@ -50,7 +50,8 @@ test('P7 retains exact Reports evidence behind one progressive disclosure', () =
     'detail',
     'budget-followup',
   ]);
-  assert.equal([...reports.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...reports.matchAll(/<Table>/g)].length, 3);
+  assert.match(reports, /data-report-largest-list="editorial"/);
   assert.match(reports, /Ver análisis detallado/);
   assert.match(reports, /Ocultar análisis detallado/);
   assert.match(reports, /aria-expanded=\{showDetailedAnalysis\}/);
