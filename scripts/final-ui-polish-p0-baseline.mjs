@@ -122,8 +122,11 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
             const shape = document.querySelector('[data-report-chart="category-donut"] .recharts-sector');
             if (!shape) return null;
             shape.scrollIntoView({ block: 'center' });
-            const rect = shape.getBoundingClientRect();
-            return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+            // Hover the ring, whose bounding-box center is an empty hole.
+            const arc = shape.getPointAtLength(shape.getTotalLength() * 0.2).matrixTransform(shape.getScreenCTM());
+            const rect = shape.ownerSVGElement.getBoundingClientRect();
+            const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+            return { x: center.x + (arc.x - center.x) * 0.85, y: center.y + (arc.y - center.y) * 0.85 };
           })()`);
           assert.ok(point, 'P0 chart con datos');
           await client.command('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });
