@@ -63,8 +63,6 @@ export default function ReportsTab() {
   const report=getReportSnapshot(range,range.end);
   const incomeExpenseTrend=selectIncomeExpenseTrend(incomes||[],expenses||[],range,preset);
   const topCategories=report.spending.categories;
-  const categoryCounts=new Map<string,number>();
-  for(const row of expenses||[]) if(row.date>=range.start && row.date<=range.end) categoryCounts.set(row.categoryId,(categoryCounts.get(row.categoryId)||0)+1);
   const changeWindow=(direction:-1|1)=>{
     if(preset==='custom'){
       const shifted=shiftReportDateRange({start:customStart,end:customEnd},direction,today);
@@ -83,7 +81,7 @@ export default function ReportsTab() {
   for(const row of accountTransfers||[]) if(row.date<=range.end){markAccountUse(row.fromAccountId);markAccountUse(row.toAccountId);}
   const accountRows=(accounts||[]).map(account=>({...account,balance:accountBalance(account,accountSnapshot,range.end),uses:accountUse.get(account.id)||0}))
     .sort((a,b)=>b.uses-a.uses || b.balance-a.balance || a.name.localeCompare(b.name));
-  const accountTotal=report.netWorth.cash+report.netWorth.banks;
+  const accountTotal=report.netWorth.liquidAssets;
   const budgetDetails=getBudgetStatusDetails(currentMonth).filter(row=>row.configured);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
   const currentLabel=rangeLabel(range.start,range.end);
@@ -171,13 +169,12 @@ export default function ReportsTab() {
               <CardContent className="p-5">
                 {topCategories.length ? (
                   <ol className="divide-y divide-border">
-                    {(showAllCategories?topCategories:topCategories.slice(0,5)).map((row,index)=>{
+                    {(showAllCategories?topCategories:topCategories.slice(0,5)).map(row=>{
                       const share=report.spending.total>0?row.value/report.spending.total*100:0;
                       return <li key={row.categoryId} className="py-4 first:pt-0 last:pb-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="break-words font-medium">{getCategoryInfo(row.categoryId)?.name||row.categoryId}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{index===0?'Mayor gasto del período':(categoryCounts.get(row.categoryId)||0)+' movimientos'}</p>
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="font-semibold tabular-nums">{money(row.value)}</p>
