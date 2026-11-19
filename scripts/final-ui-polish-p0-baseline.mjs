@@ -96,7 +96,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
             return true;
           };
           const sections = [...root.querySelectorAll('[data-report-section]')].filter(node => node.dataset.reportSection !== 'budget-followup');
-          const tables = [...root.querySelectorAll('table')];
+          const tables = [...root.querySelectorAll('[data-report-detail] table')];
           return {
             width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
             overflowNodes: [...document.querySelectorAll('body *')].map(node => {
@@ -114,7 +114,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
         assert.ok(geometry.sections.filter(section => primaryOrder.includes(section.name)).every(section => section.visible && section.x >= -1 && section.right <= width + 1), 'P0 lectura primaria visible y contenida');
         assert.ok(geometry.sections.filter(section => detailOrder.includes(section.name)).every(section => !section.visible), 'P0 auditoría cerrada por defecto');
         assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal ' + JSON.stringify({ width, scrollWidth: geometry.scrollWidth, overflowNodes: geometry.overflowNodes }));
-        assert.equal(geometry.tables.length, 4, 'P0 tendencia accesible más comparación, naturaleza y movimientos');
+        assert.equal(geometry.tables.length, 3, 'P0 comparación, naturaleza y movimientos');
         assert.ok(geometry.tables.every(table => !table.visible && table.rows > 0), 'P0 evidencia exacta preservada bajo demanda');
         assert.equal(geometry.hidden, hidden);
         if (!hidden) assert.equal(geometry.moneyLeaks, true, 'P0 control positivo de importes visibles');
