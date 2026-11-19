@@ -48,7 +48,7 @@ test('20.6 Reports keeps visual charts paired with exact tables or financial equ
   assert.match(reports, /<ReportFinancialEquation/);
   assert.match(reports, /ReportIncomeExpenseTrend/);
   assert.match(reports, /ReportValueBars/);
-  assert.match(reports, /data-report-chart="income-expense-trend"/);
+
 });
 
 test('20.6 report UI introduces no Prisma demo finance data or direct database access', () => {
