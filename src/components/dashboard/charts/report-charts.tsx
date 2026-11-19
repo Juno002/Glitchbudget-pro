@@ -284,7 +284,7 @@ export function ReportIncomeExpenseTrend({ data }: { data: IncomeExpenseTrendPoi
             <Tooltip
               isAnimationActive={false}
               labelFormatter={(_,payload)=>payload?.[0]?.payload ? formatReportRangeLabel((payload[0].payload as IncomeExpenseTrendPoint).range.start,(payload[0].payload as IncomeExpenseTrendPoint).range.end) : ''}
-              formatter={(value,name)=>[balancesHidden?'••••':money(Number(value)),name==='income'?'Ingresos':'Gastos']}
+              formatter={(value,name)=>[balancesHidden?'••••••':money(Number(value)),name==='income'?'Ingresos':'Gastos']}
             />
             <Bar dataKey="income" name="Ingresos" fill="hsl(var(--primary))" fillOpacity={0.42} radius={[4,4,0,0]} isAnimationActive={false} />
             <Bar dataKey="spending" name="Gastos" fill="hsl(var(--primary))" radius={[4,4,0,0]} isAnimationActive={false} />
