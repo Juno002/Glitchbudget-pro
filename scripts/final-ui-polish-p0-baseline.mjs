@@ -99,6 +99,10 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
           const tables = [...root.querySelectorAll('table')];
           return {
             width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
+            overflowNodes: [...document.querySelectorAll('body *')].map(node => {
+              const rect = node.getBoundingClientRect();
+              return { tag: node.tagName, id: node.id, className: String(node.className || '').slice(0,100), marker: node.getAttribute('data-report-section') || node.getAttribute('data-report-chart') || '', left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), scrollWidth: node.scrollWidth };
+            }).filter(node => node.width > 0 && (node.left < -1 || node.right > innerWidth + 1)).slice(0,12),
             sections: sections.map(node => ({ name: node.dataset.reportSection, visible: visible(node), x: node.getBoundingClientRect().x, right: node.getBoundingClientRect().right, height: node.getBoundingClientRect().height })),
             tables: tables.map(node => ({ visible: visible(node), rows: node.querySelectorAll('tbody tr').length, headers: node.querySelector('thead')?.innerText })),
             hidden: document.documentElement.dataset.balancesHidden === 'true',
@@ -109,7 +113,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
         assert.deepEqual(geometry.sections.map(section => section.name), order);
         assert.ok(geometry.sections.filter(section => primaryOrder.includes(section.name)).every(section => section.visible && section.x >= -1 && section.right <= width + 1), 'P0 lectura primaria visible y contenida');
         assert.ok(geometry.sections.filter(section => detailOrder.includes(section.name)).every(section => !section.visible), 'P0 auditoría cerrada por defecto');
-        assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal');
+        assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal ' + JSON.stringify({ width, scrollWidth: geometry.scrollWidth, overflowNodes: geometry.overflowNodes }));
         assert.equal(geometry.tables.length, 4, 'P0 tendencia accesible más comparación, naturaleza y movimientos');
         assert.ok(geometry.tables.every(table => !table.visible && table.rows > 0), 'P0 evidencia exacta preservada bajo demanda');
         assert.equal(geometry.hidden, hidden);
