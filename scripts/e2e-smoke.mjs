@@ -1348,7 +1348,7 @@ async function main() {
           && detail.hidden
           && primaryCharts.length >= 1
           && primaryCharts.every(visibleAndContained)
-          && presetButtons.length === 5
+          && presetButtons.length === 6
           && presetButtons.every(usableControl)
           && usableControl(detailButton)
           && document.documentElement.scrollWidth <= window.innerWidth + 1;
