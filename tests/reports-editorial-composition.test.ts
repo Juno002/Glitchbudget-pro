@@ -27,7 +27,7 @@ test('editorial opening gives period and consultation controls context before th
   const hero = reports.slice(heroStart, reports.indexOf('data-report-section="top-expenses"'));
   for (const field of ['total', 'percentChange', 'transactionCount']) assert.ok(hero.includes('report.spending.' + field));
   assert.match(hero, /<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
-  assert.match(hero, /<Card className/);
+  assert.match(reports, /<Card className="[^"]*" aria-labelledby="spending-title" data-report-section="spending"/);
   assert.doesNotMatch(hero, /<MetricCard/);
 });
 
