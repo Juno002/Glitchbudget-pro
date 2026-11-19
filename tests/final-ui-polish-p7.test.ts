@@ -39,23 +39,22 @@ test('P7 retains exact Reports evidence behind one progressive disclosure', () =
   const order = [...reports.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(order, [
     'spending',
-    'quick-read',
-    'spending-breakdown',
-    'comparison',
+    'top-expenses',
+    'budget-followup',
+    'accounts',
     'analysis-access',
     'comparison-detail',
     'spending-detail',
     'cash-flow',
     'net-worth',
     'detail',
-    'budget-followup',
   ]);
-  assert.equal([...reports.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...reports.matchAll(/<Table>/g)].length, 3);
   assert.match(reports, /Ver análisis detallado/);
   assert.match(reports, /Ocultar análisis detallado/);
   assert.match(reports, /aria-expanded=\{showDetailedAnalysis\}/);
   assert.match(reports, /hidden=\{!showDetailedAnalysis\}/);
-  assert.match(reports, /projectReportCategoryDistribution/);
+  assert.match(reports, /topCategories=report\.spending\.categories/);
 });
 
 test('P7 retains the P6 editorial Home contract without duplicate global notices', () => {
