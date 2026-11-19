@@ -27,7 +27,8 @@ test('editorial opening gives period and consultation controls context before th
   const hero = reports.slice(heroStart, reports.indexOf('data-report-section="top-expenses"'));
   for (const field of ['total', 'percentChange', 'transactionCount']) assert.ok(hero.includes('report.spending.' + field));
   assert.match(hero, /<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
-  assert.doesNotMatch(hero, /<Card|<MetricCard/);
+  assert.match(hero, /<Card className/);
+  assert.doesNotMatch(hero, /<MetricCard/);
 });
 
 test('report opening follows the compact period-to-spending hierarchy', () => {
