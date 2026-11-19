@@ -31,7 +31,7 @@ test('Reports now prioritizes progressive reading before on-demand audit detail'
 test('trend compares income and spending across the selected range and exact comparison stays on demand', () => {
   const hero = section('spending', 'top-expenses');
   assert.match(hero, /<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
-  assert.match(hero, /selectIncomeExpenseTrend\(incomes\|\|\[\],expenses\|\|\[\],range,preset\)/);
+  assert.match(source, /selectIncomeExpenseTrend\(incomes\|\|\[\],expenses\|\|\[\],range,preset\)/);
 
   const detail = section('comparison-detail', 'spending-detail');
   assert.match(detail, /<Table>/);
