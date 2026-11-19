@@ -1155,8 +1155,11 @@ async function main() {
         && Boolean(document.querySelector('[data-report-section="spending"]'))
         && Boolean(document.querySelector('[data-report-section="cash-flow"]'))
         && Boolean(document.querySelector('[data-report-section="net-worth"]'))
-        && Boolean(document.querySelector('[data-report-section="comparison"]'))
-        && document.querySelectorAll('[data-report-chart]').length >= 5
+        && Boolean(document.querySelector('[data-report-section="top-expenses"]'))
+        && Boolean(document.querySelector('[data-report-section="budget-followup"]'))
+        && Boolean(document.querySelector('[data-report-section="accounts"]'))
+        && Boolean(document.querySelector('[data-report-section="comparison-detail"]'))
+        && document.querySelectorAll('[data-report-chart]').length >= 1
         && window.location.search === '?tab=reports'`,
       'Reportes Prisma y gráficos',
     );
@@ -1198,16 +1201,16 @@ async function main() {
     }
 
     if (!await client.evaluate(`(() => {
-      const button = document.querySelector('[data-report-preset="custom"]');
+      const button = document.querySelector('button[aria-label="Elegir fechas personalizadas"]');
       if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
       button.click();
       return true;
-    })()`)) throw new Error('No se pudo activar Custom.');
+    })()`)) throw new Error('No se pudo activar el rango personalizado.');
     await waitFor(
       client,
-      `document.querySelector('[data-report-preset="custom"]')?.getAttribute('aria-pressed') === 'true'
+      `document.querySelector('button[aria-label="Elegir fechas personalizadas"]')?.getAttribute('aria-pressed') === 'true'
         && document.querySelectorAll('[data-report-range-controls="prisma"] input[type="date"]').length === 2`,
-      'Final UI Polish P7 rango Custom',
+      'Final UI Polish P7 rango personalizado',
     );
 
     // Return to the stable 30d fixture before validating composition and privacy.
@@ -1227,15 +1230,12 @@ async function main() {
       client,
       `(() => {
         const visual = document.querySelector('[data-report-visual="categories"]');
-        const donut = visual?.querySelector('[data-report-chart="category-donut"]');
-        const legend = visual?.querySelector('[data-category-legend]');
+        const ranking = visual?.querySelector('ol');
         const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
         const detail = document.querySelector('#report-detailed-analysis');
         return visual instanceof HTMLElement
-          && donut instanceof HTMLElement
-          && legend instanceof HTMLOListElement
-          && legend.querySelectorAll('[data-category-legend-item]').length > 0
-          && !visual.querySelector('table')
+          && ranking instanceof HTMLOListElement
+          && ranking.querySelectorAll('li').length > 0
           && button instanceof HTMLButtonElement
           && button.getAttribute('aria-expanded') === 'false'
           && detail instanceof HTMLElement
@@ -1262,13 +1262,12 @@ async function main() {
           'cash-flow',
           'net-worth',
           'detail',
-          'budget-followup',
         ];
         return button instanceof HTMLButtonElement
           && button.getAttribute('aria-expanded') === 'true'
           && detail instanceof HTMLElement
           && !detail.hidden
-          && detail.querySelectorAll('table').length === 4
+          && detail.querySelectorAll('table').length === 3
           && requiredSections.every(section => detail.querySelector('[data-report-section="' + section + '"]'));
       })()`,
       'Reportes análisis detallado completo',
@@ -1316,16 +1315,16 @@ async function main() {
         const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
         const detail = document.querySelector('#report-detailed-analysis');
         const requiredSections = [
-          'quick-read',
           'spending',
-          'spending-breakdown',
-          'comparison',
+          'top-expenses',
+          'budget-followup',
+          'accounts',
           'analysis-access',
         ];
         const sections = requiredSections
           .map(section => document.querySelector('[data-report-section="' + section + '"]'));
         const primaryCharts = [...document.querySelectorAll(
-          '[data-report-section="spending"] [data-report-chart], [data-report-section="spending-breakdown"] [data-report-chart], [data-report-section="comparison"] [data-report-chart]'
+          '[data-report-section="spending"] [data-report-chart]'
         )];
         const presetButtons = [...document.querySelectorAll('[data-report-preset]')];
         const detailButton = document.querySelector('button[aria-controls="report-detailed-analysis"]');
@@ -1353,9 +1352,9 @@ async function main() {
           && sections.every(visibleAndContained)
           && detail instanceof HTMLElement
           && detail.hidden
-          && primaryCharts.length >= 2
+          && primaryCharts.length >= 1
           && primaryCharts.every(visibleAndContained)
-          && presetButtons.length === 6
+          && presetButtons.length === 5
           && presetButtons.every(usableControl)
           && usableControl(detailButton)
           && document.documentElement.scrollWidth <= window.innerWidth + 1;
