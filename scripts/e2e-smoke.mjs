@@ -1428,7 +1428,7 @@ async function main() {
     await waitFor(
       client,
       `document.documentElement.dataset.balancesHidden === 'false'
-        && Boolean(document.querySelector('[data-category-legend-money]'))`,
+        && document.querySelector('[data-spending-money="total"]')?.textContent?.trim() !== '••••••'`,
       'Final UI Polish P7 restaurar importes',
     );
 
