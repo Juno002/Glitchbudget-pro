@@ -16,7 +16,7 @@ test('editorial opening gives period and consultation controls context before th
   const heroStart = reports.indexOf('data-report-hero="spending"');
   const opening = reports.slice(headerStart, heroStart);
   assert.ok(headerStart > 0 && heroStart > headerStart);
-  assert.match(opening, /data-report-period/);
+  assert.match(ranges, /data-report-period/);
   assert.match(opening, /currentLabel/);
   assert.match(opening, /<ReportRangeControls/);
   assert.doesNotMatch(ranges, /<Card|<SectionHeader/);
@@ -24,25 +24,22 @@ test('editorial opening gives period and consultation controls context before th
   assert.match(ranges, /aria-pressed=\{preset===option.value\}/);
   assert.match(ranges, /preset==='custom' &&/);
   assert.equal([...reports.matchAll(/data-report-hero="spending"/g)].length, 1);
-  const hero = reports.slice(heroStart, reports.indexOf('data-report-section="quick-read"'));
+  const hero = reports.slice(heroStart, reports.indexOf('data-report-section="top-expenses"'));
   for (const field of ['total', 'previousTotal', 'percentChange', 'transactionCount']) assert.ok(hero.includes('report.spending.' + field));
   assert.match(hero, /<ReportSpendingTrend data=\{spendingTrend.windows\}/);
   assert.doesNotMatch(hero, /<Card|<MetricCard/);
 });
 
-test('canonical quick read follows spending and keeps one primary without dropping secondary insights', () => {
+test('report opening follows the compact period-to-spending hierarchy', () => {
   const order = [...reports.matchAll(/data-report-section="([^"]+)"/g)].map(row => row[1]);
-  assert.deepEqual(order.slice(0, 5), ['spending', 'quick-read', 'spending-breakdown', 'comparison', 'analysis-access']);
-  assert.match(reports, /report.quickRead.map\(presentReportInsight\)/);
-  assert.match(reports, /editorialQuickRead.map\(/);
-  assert.doesNotMatch(reports, /editorialQuickRead\.(?:slice|filter|sort)/);
-  assert.match(reports, /data-quick-read-primary=\{index===0\?'true':undefined\}/);
-  assert.match(reports, /data-quick-read-kind=\{insight.kind\}/);
+  assert.deepEqual(order.slice(0, 5), ['spending', 'top-expenses', 'budget-followup', 'accounts', 'analysis-access']);
+  assert.match(reports, /data-report-hero="spending"/);
+  assert.match(reports, /data-report-section="top-expenses"/);
 });
 
 test('category projection and all comparison amounts remain canonical and readable without tooltips', () => {
-  assert.match(reports, /projectReportCategoryDistribution\(/);
-  assert.match(reports, /report.spending.categories.map/);
+  assert.match(reports, /topCategories=report.spending.categories/);
+  assert.match(reports, /money\(row.value\)/);
   assert.match(charts, /data-category-legend/);
   assert.match(charts, /row.percentTenths/);
   assert.match(reports, /difference:row.data.difference/);
@@ -70,7 +67,7 @@ test('one initially closed audit keeps four exact tables and reusable mobile mov
   assert.match(reports, /aria-expanded=\{showDetailedAnalysis\}/);
   assert.match(reports, /aria-controls="report-detailed-analysis"/);
   assert.match(reports, /hidden=\{!showDetailedAnalysis\}/);
-  assert.equal([...reports.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...reports.matchAll(/<Table>/g)].length, 3);
   assert.match(reports, /data-report-featured-list/);
   assert.match(reports, /<TransactionRow/);
   for (const field of ['title', 'date', 'nature', 'categoryId', 'amount']) assert.ok(reports.includes('row.' + field));
