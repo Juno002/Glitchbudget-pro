@@ -3,17 +3,19 @@
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   Cell,
   Pie,
   PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from 'recharts';
 import { useBalanceVisibility, usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { projectReportBarGeometry, type ReportCategoryVisualizationSegment } from '@/lib/report-visualization';
 import { formatReportRangeLabel } from '@/lib/report-formatting';
-import type { SpendingTrendPoint } from '@/domain/reports';
+import type { IncomeExpenseTrendPoint } from '@/domain/reports';
 
 // Category identity only. State colors are reserved for canonical financial states.
 const SEGMENT_COLORS = [
@@ -248,100 +250,59 @@ export function ReportFinancialEquation({
   );
 }
 
-function spendingWindowLabel(point: SpendingTrendPoint) {
-  return formatReportRangeLabel(point.range.start, point.range.end);
-}
 
-function SpendingTrendBar({
-  x, y, width, height, fill, fillOpacity, stroke, strokeWidth, strokeDasharray, payload,
-}: {
-  x?: number; y?: number; width?: number; height?: number;
-  fill?: string; fillOpacity?: number; stroke?: string; strokeWidth?: number; strokeDasharray?: string;
-  payload?: SpendingTrendPoint;
-}) {
-  return (
-    <rect
-      x={x} y={y} width={width} height={height} rx={4}
-      fill={fill} fillOpacity={fillOpacity} stroke={stroke} strokeWidth={strokeWidth} strokeDasharray={strokeDasharray}
-      data-spending-trend-bar
-      data-spending-coverage={payload?.coverage}
-      data-spending-current={payload?.isCurrent ? 'true' : 'false'}
-    >
-      {payload ? <title>{spendingWindowLabel(payload)} · {payload.isCurrent ? 'Actual' : 'Anterior'}{payload.coverage === 'partial' ? ' · Historial parcial' : ''}</title> : null}
-    </rect>
-  );
-}
-
-export function ReportSpendingTrend({ data }: { data: SpendingTrendPoint[] }) {
-  const money = usePrivateCurrency();
-  if (!data.length) return null;
-  if (data.length === 1) {
-    const point = data[0];
-    return point.coverage === 'partial' ? (
-      <p
-        className="report-hero-muted text-xs"
-        data-spending-trend-partial
-        data-spending-window-start={point.range.start}
-        data-spending-window-end={point.range.end}
-        data-spending-coverage={point.coverage}
-        data-spending-current={point.isCurrent ? 'true' : 'false'}
-      >Historial parcial</p>
-    ) : null;
+function trendAxisLabel(point:IncomeExpenseTrendPoint) {
+  const start=new Date(point.range.start+'T12:00:00');
+  if (point.labelKind === 'day') {
+    return new Intl.DateTimeFormat('es-DO',{day:'numeric'}).format(start);
   }
+  if (point.labelKind === 'week') {
+    return new Intl.DateTimeFormat('es-DO',{day:'numeric',month:'short'}).format(start);
+  }
+  return new Intl.DateTimeFormat('es-DO',{month:'short'}).format(start).replace('.','');
+}
 
+export function ReportIncomeExpenseTrend({ data }: { data: IncomeExpenseTrendPoint[] }) {
+  const money=usePrivateCurrency();
+  const {balancesHidden}=useBalanceVisibility();
+  if (!data.length) return <EmptyChart label="No hay datos para este período." />;
   return (
-    <div className="report-spending-trend min-w-0 space-y-3" data-report-chart="spending-trend">
-      <div className="h-36 w-full border-b border-current/20" aria-hidden="true">
+    <div className="min-w-0 space-y-3" data-report-chart="income-expense-trend">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="font-display text-lg font-normal">Tendencia</h3>
+        <div className="flex gap-4 text-xs text-muted-foreground" aria-label="Series del gráfico">
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-primary/40" aria-hidden="true" />Ingresos</span>
+          <span className="flex items-center gap-2"><i className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />Gastos</span>
+        </div>
+      </div>
+      <div className="h-48 w-full" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 8 }} accessibilityLayer={false}>
-            <XAxis dataKey="range.start" hide />
+          <BarChart data={data} margin={{top:8,right:4,bottom:0,left:-18}} barGap={3} accessibilityLayer={false}>
+            <XAxis tickFormatter={value=>trendAxisLabel(data.find(point=>point.range.start===value)||data[0])} interval="preserveStartEnd" dataKey="range.start" tickLine={false} axisLine={false} tick={{fontSize:11,fill:'hsl(var(--muted-foreground))'}} />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" />
+            <YAxis width={42} tickLine={false} axisLine={false} tick={{fontSize:10,fill:'hsl(var(--muted-foreground))'}} tickFormatter={value=>balancesHidden?'•••':new Intl.NumberFormat('es-DO',{notation:'compact',maximumFractionDigits:1}).format(Number(value))} />
             <Tooltip
               isAnimationActive={false}
-              content={({ active, payload }) => {
-                const point = payload?.[0]?.payload as SpendingTrendPoint | undefined;
-                if (!active || !point) return null;
-                return (
-                  <div className="rounded-[var(--radius-interactive)] border bg-card p-3 text-xs text-card-foreground shadow-[var(--shadow-control)]">
-                    <p>{spendingWindowLabel(point)} · {point.isCurrent ? 'Actual' : 'Anterior'}</p>
-                    {point.coverage === 'partial' ? <p>Historial parcial</p> : null}
-                    <p className="mt-1 whitespace-nowrap">{money(point.total)}</p>
-                  </div>
-                );
-              }}
+              labelFormatter={(_,payload)=>payload?.[0]?.payload ? formatReportRangeLabel((payload[0].payload as IncomeExpenseTrendPoint).range.start,(payload[0].payload as IncomeExpenseTrendPoint).range.end) : ''}
+              formatter={(value,name)=>[balancesHidden?'••••':money(Number(value)),name==='income'?'Ingresos':'Gastos']}
             />
-            <Bar dataKey="total" isAnimationActive={false} shape={<SpendingTrendBar />}>
-              {data.map(point => (
-                <Cell
-                  key={point.range.start}
-                  fill="hsl(var(--report-hero-ink, var(--foreground)))"
-                  fillOpacity={point.isCurrent ? 0.95 : 0.38}
-                  stroke={point.isCurrent || point.coverage === 'partial' ? 'hsl(var(--report-hero-ink, var(--foreground)))' : 'none'}
-                  strokeWidth={point.isCurrent || point.coverage === 'partial' ? 2 : 0}
-                  strokeDasharray={point.coverage === 'partial' ? '4 3' : undefined}
-                />
-              ))}
-            </Bar>
+            <Bar dataKey="income" name="Ingresos" fill="hsl(var(--primary))" fillOpacity={0.42} radius={[4,4,0,0]} isAnimationActive={false} />
+            <Bar dataKey="spending" name="Gastos" fill="hsl(var(--primary))" radius={[4,4,0,0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <ol className="grid grid-cols-2 gap-x-4 gap-y-3 text-xs sm:grid-cols-3">
-        {data.map(point => (
-          <li
-            key={point.range.start}
-            className={'min-w-0 space-y-1 ' + (point.isCurrent ? '' : 'report-hero-muted')}
-            data-spending-trend-point
-            data-spending-window-start={point.range.start}
-            data-spending-window-end={point.range.end}
-            data-spending-coverage={point.coverage}
-            data-spending-current={point.isCurrent ? 'true' : 'false'}
-          >
-            <p className={point.isCurrent ? 'font-semibold' : undefined}>{point.isCurrent ? 'Actual' : 'Anterior'}</p>
-            <p>{spendingWindowLabel(point)}</p>
-            {point.coverage === 'partial' ? <p>Historial parcial</p> : null}
-            <p className="whitespace-nowrap text-sm" data-spending-trend-money>{money(point.total)}</p>
-          </li>
-        ))}
-      </ol>
+      <p className="text-xs text-muted-foreground">Los períodos sin movimientos se muestran en {balancesHidden ? 'cero' : money(0)}.</p>
+      <table className="sr-only">
+        <caption>Tendencia de ingresos y gastos por período</caption>
+        <thead><tr><th>Período</th><th>Ingresos</th><th>Gastos</th></tr></thead>
+        <tbody>{data.map(point=>(
+          <tr key={point.range.start}>
+            <th scope="row">{formatReportRangeLabel(point.range.start,point.range.end)}</th>
+            <td>{money(point.income)}</td>
+            <td>{money(point.spending)}</td>
+          </tr>
+        ))}</tbody>
+      </table>
     </div>
   );
 }
