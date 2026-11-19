@@ -34,7 +34,7 @@ export default function Header() {
           <div className="order-last flex w-full min-w-0 items-center gap-2 pt-1 md:order-none md:w-auto md:pt-0">
             <span className="hidden text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground lg:inline">Período</span>
             <label className="relative h-9 min-w-0 flex-1 rounded-[var(--radius-interactive)] border border-input bg-card shadow-[var(--shadow-control)] focus-within:ring-2 focus-within:ring-ring md:w-[178px] md:flex-none">
-              <span aria-hidden="true" className="pointer-events-none flex h-full items-center justify-center px-3 text-[11px] font-semibold capitalize text-foreground sm:text-xs">
+              <span aria-hidden="true" className="pointer-events-none flex h-full items-center justify-center px-3 text-[11px] font-semibold text-foreground sm:text-xs">
                 {formatPeriodRange(currentPeriod)}
               </span>
               <Input
