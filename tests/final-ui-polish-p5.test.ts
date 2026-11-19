@@ -45,7 +45,7 @@ test('top expense ranking uses canonical categories while detailed nature remain
   const ranking = section('top-expenses', 'budget-followup');
   assert.match(ranking, /topCategories/);
   assert.match(ranking, /money\(row\.value\)/);
-  assert.match(ranking, /shareLabel\(row\.value,report\.spending\.total\)/);
+  assert.match(ranking, /row\.sharePercent\.toFixed\(1\)/);
   assert.match(ranking, /Ver todo/);
   assert.doesNotMatch(ranking, /categoryCounts/);
   assert.doesNotMatch(ranking, /ReportCategoryDonut/);
