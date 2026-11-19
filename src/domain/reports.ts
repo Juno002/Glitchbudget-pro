@@ -262,3 +262,76 @@ export function selectSpendingTrend(expenses: readonly Expense[], range: DateRan
   }
   return { spendingHistoryStart, windows };
 }
+
+export function shiftReportRangeAnchor(anchor:string, preset:Exclude<ReportRangePreset,'custom'>, direction:-1|1):string {
+  parseDate(anchor);
+  switch (preset) {
+    case '7d': return addDays(anchor, direction * 7);
+    case '30d': return addDays(anchor, direction * 30);
+    case '3m': return shiftMonthsClamped(anchor, direction * 3);
+    case '6m': return shiftMonthsClamped(anchor, direction * 6);
+    case '1y': return shiftMonthsClamped(anchor, direction * 12);
+  }
+  throw new Error('Rango de Reportes no reconocido.');
+}
+
+export type IncomeExpenseTrendPoint = {
+  range: DateRange;
+  income: number;
+  spending: number;
+  labelKind:'day'|'week'|'month';
+};
+
+function reportTrendGranularity(range:DateRange,preset:ReportRangePreset):'day'|'week'|'month' {
+  if (preset === '7d') return 'day';
+  if (preset === '30d') return 'week';
+  if (preset !== 'custom') return 'month';
+  const days = rangeDays(range);
+  return days <= 14 ? 'day' : days <= 90 ? 'week' : 'month';
+}
+
+/** Buckets real income and expense rows inside the selected report range for its comparison chart. */
+export function selectIncomeExpenseTrend(
+  incomes:readonly Income[],
+  expenses:readonly Expense[],
+  range:DateRange,
+  preset:ReportRangePreset,
+):IncomeExpenseTrendPoint[] {
+  const granularity=reportTrendGranularity(range,preset);
+  const buckets:IncomeExpenseTrendPoint[]=[];
+  let cursor=range.start;
+  while (cursor <= range.end) {
+    let end:string;
+    if (granularity === 'day') {
+      end=cursor;
+    } else if (granularity === 'week') {
+      end=addDays(cursor,6);
+    } else {
+      const {year,month}=parseDate(cursor);
+      const nextMonth=month===12 ? {year:year+1,month:1} : {year,month:month+1};
+      end=addDays(formatDate({...nextMonth,day:1}),-1);
+    }
+    if (end > range.end) end=range.end;
+    buckets.push({range:{start:cursor,end},income:0,spending:0,labelKind:granularity});
+    cursor=addDays(end,1);
+  }
+
+  for (const row of incomes) {
+    const date=row.date.slice(0,10);
+    const index=buckets.findIndex(bucket=>date>=bucket.range.start && date<=bucket.range.end);
+    if (index>=0) buckets[index].income+=row.amount;
+  }
+  for (const row of expenses) {
+    const date=row.date.slice(0,10);
+    const index=buckets.findIndex(bucket=>date>=bucket.range.start && date<=bucket.range.end);
+    if (index>=0) buckets[index].spending+=row.amount;
+  }
+  return buckets;
+}
+
+export function shiftReportDateRange(range:DateRange,direction:-1|1,latestEnd?:string):DateRange {
+  const days=rangeDays(range);
+  let end=addDays(range.end,direction*days);
+  if (direction>0 && latestEnd && end>latestEnd) end=latestEnd;
+  return {start:addDays(end,-days+1),end};
+}
