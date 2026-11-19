@@ -20,7 +20,7 @@ test('20.8.8 keeps the complete Information Design contracts executable', () => 
   assert.match(kpis, /canonical comparisons for the four Summary position KPIs/);
   assert.match(kpis, /does not reconstruct KPI comparison math in React/);
   assert.match(reports, /canonical editorial hierarchy/);
-  assert.match(reports, /preserves comparison, category, nature, cash-flow and net-worth visuals/);
+  assert.match(reports, /preserves the selected-range trend, category ranking, nature and exact financial equations/);
   assert.match(disclosure, /keeps financial interpretation details accessible without permanent helper rows/);
   assert.match(disclosure, /does not rely on hover-only disclosure/);
 });
@@ -37,7 +37,7 @@ test('20.8.8 exercises Home and Reports at desktop and mobile widths in browser 
   assert.match(e2e, /report-detailed-analysis/);
   assert.match(e2e, /width:\s*390/);
   assert.match(e2e, /requiredSections = \[/);
-  assert.match(e2e, /'quick-read'/);
+  assert.match(e2e, /'top-expenses'/);
   assert.match(e2e, /'detail'/);
   assert.match(e2e, /detail\.hidden/);
   assert.match(e2e, /sections\.every\(visibleAndContained\)/);
