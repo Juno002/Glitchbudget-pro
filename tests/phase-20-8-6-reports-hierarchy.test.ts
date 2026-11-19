@@ -30,7 +30,7 @@ test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
 test('20.8.6 shows the income and spending trend inside the canonical period hero', () => {
   assert.match(reports,/selectIncomeExpenseTrend\(incomes\|\|\[\],expenses\|\|\[\],range,preset\)/);
   assert.match(reports,/<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
-  assert.match(reports,/data-report-period/);
+  assert.match(ranges,/data-report-period/);
   assert.doesNotMatch(reports,/Math\.random|Date\.now|fetch\(/);
 });
 
