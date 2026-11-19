@@ -91,7 +91,7 @@ test('P4 keeps category ranking bound to the canonical report snapshot', () => {
   assert.doesNotMatch(visualization, /react|recharts|usePrivateCurrency|useFinances/i);
   assert.doesNotMatch(reports, /projectReportCategoryDistribution\(/);
   assert.match(reports, /const topCategories=report\.spending\.categories/);
-  assert.match(reports, /topCategories\.slice\(0,5\)/);
+  assert.match(reports, /projectReportCategoryRanking\(topCategories,report\.spending\.total\)/);
   assert.match(reports, /money\(row\.value\)/);
   assert.doesNotMatch(reports, /categoryCounts/);
   assert.doesNotMatch(donut, /<Legend/);
