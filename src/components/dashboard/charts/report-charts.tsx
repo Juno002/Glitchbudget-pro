@@ -292,7 +292,7 @@ export function ReportIncomeExpenseTrend({ data }: { data: IncomeExpenseTrendPoi
         </ResponsiveContainer>
       </div>
       <p className="text-xs text-muted-foreground">Los períodos sin movimientos se muestran en {balancesHidden ? 'cero' : money(0)}.</p>
-      <table className="sr-only">
+      <table className="sr-only" style={{position:'absolute',width:'1px',height:'1px',padding:0,margin:'-1px',overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0,tableLayout:'fixed'}}>
         <caption>Tendencia de ingresos y gastos por período</caption>
         <thead><tr><th>Período</th><th>Ingresos</th><th>Gastos</th></tr></thead>
         <tbody>{data.map(point=>(
