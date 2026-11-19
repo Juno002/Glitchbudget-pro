@@ -110,3 +110,17 @@ export function projectReportCategoryDistribution(
     })),
   };
 }
+
+export type ReportCategoryRankingInput = { categoryId:string; value:number };
+export type ReportCategoryRankingRow = ReportCategoryRankingInput & { sharePercent:number; widthPercent:number };
+
+/** Adds display-only category shares without changing canonical report rows. */
+export function projectReportCategoryRanking(
+  rows:readonly ReportCategoryRankingInput[],
+  total:number,
+):ReportCategoryRankingRow[] {
+  return rows.map(row=>{
+    const sharePercent=total>0 ? row.value/total*100 : 0;
+    return {...row,sharePercent,widthPercent:Math.min(100,sharePercent)};
+  });
+}
