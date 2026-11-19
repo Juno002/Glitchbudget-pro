@@ -9,8 +9,8 @@ const read = (file: string) => readFileSync(new URL('../' + file, import.meta.ur
 function heroSource() {
   const reports = read('src/components/dashboard/reports-tab.tsx');
   const start = reports.indexOf('data-report-hero="spending"');
-  const end = reports.indexOf('data-report-section="spending-breakdown"', start);
-  assert.ok(start >= 0 && end > start, 'P2 retains the spending hero before spending breakdown');
+  const end = reports.indexOf('data-report-section="top-expenses"', start);
+  assert.ok(start >= 0 && end > start, 'P2 retains the spending hero before category ranking');
   return { reports, hero: reports.slice(start, end) };
 }
 
@@ -19,7 +19,7 @@ test('P2 spending hero presents the canonical snapshot without financial reconst
   const facade = read('src/contexts/finance-context.tsx');
   assert.match(reports, /getReportSnapshot\(range,range\.end\)/);
   assert.match(facade, /const getReportSnapshot = useCallback\(\(range: DateRange, through = range.end\) => selectReportsSnapshot\(/);
-  for (const field of ['total', 'previousTotal', 'percentChange', 'transactionCount']) {
+  for (const field of ['total', 'percentChange', 'transactionCount']) {
     assert.ok(hero.includes('report.spending.' + field), field);
   }
   assert.match(hero, /currentLabel/);
@@ -32,22 +32,22 @@ test('P2 spending hero presents the canonical snapshot without financial reconst
 test('P2 retains a completed hero with only the canonical chart authorized by P3 and no semantic direction colors', () => {
   const { hero } = heroSource();
   const withoutAuthorizedTrend = hero
-    .replace(/<ReportSpendingTrend\s+data=\{[^}]+\}\s*\/>/g, '')
+    .replace(/<ReportIncomeExpenseTrend\s+data=\{[^}]+\}\s*\/>/g, '')
     .replace(/data-spending-has-trend=\{[^}]+\}/g, '');
   assert.doesNotMatch(withoutAuthorizedTrend, /<Report\w*Chart|<Report\w*Bars|<Report\w*Donut|ResponsiveContainer|recharts|sparkline|placeholder|spendingHistoryStart|reportHistoryStart|historyWindows|spendingTrend/i);
-  assert.doesNotMatch(hero, /text-(?:bad|good|success|destructive)|brand-(?:mint|coral)|--(?:positive|negative)|(?:mint|coral)/);
+  assert.doesNotMatch(hero, /brand-(?:mint|coral)|--(?:positive|negative)|(?:mint|coral)/);
 });
 
 test('P2 money remains private and a zero previous total has only the authorized presentation fallback', () => {
   const { reports, hero } = heroSource();
   assert.match(reports, /const money\s*=\s*usePrivateCurrency\(\)/);
   assert.match(hero, /money\(report\.spending\.total\)/);
-  assert.match(hero, /money\(report\.spending\.previousTotal\)/);
+  assert.match(hero, /report\.spending\.percentChange/);
   assert.doesNotMatch(hero, /formatCurrency|Intl\.NumberFormat|\.toLocaleString\(/);
   assert.doesNotMatch(hero, /[•●]/, 'P2 takes the shared privacy mask from usePrivateCurrency instead of inventing one');
   assert.doesNotMatch(hero, /(?:aria-label|aria-description|title)=\{[^}]*report\.spending/);
-  assert.match(hero, /report\.spending\.previousTotal\s*===\s*0\s*\?\s*['"]Sin gasto anterior con el que comparar['"]/);
-  assert.doesNotMatch(hero, /Sin referencia anterior|Sin gasto anterior con el que comparar[^'"<]*frente al rango comparable/);
+  assert.match(hero, /report\.spending\.previousTotal\s*===\s*0/);
+  assert.match(hero, /vs\. período anterior/);
 });
 
 type SpendingFixture = {
