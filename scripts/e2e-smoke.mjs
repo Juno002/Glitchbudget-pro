@@ -1201,7 +1201,7 @@ async function main() {
     }
 
     if (!await client.evaluate(`(() => {
-      const button = document.querySelector('button[aria-label="Elegir fechas personalizadas"]');
+      const button = document.querySelector('[data-report-preset="custom"]');
       if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
       button.click();
       return true;
