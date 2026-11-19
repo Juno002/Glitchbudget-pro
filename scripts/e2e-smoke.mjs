@@ -3,10 +3,6 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { verifyFinalUiPolishP0 } from './final-ui-polish-p0-baseline.mjs';
-import { verifyFinalUiPolishP1 } from './final-ui-polish-p1-verification.mjs';
-import { verifyFinalUiPolishP2 } from './final-ui-polish-p2-verification.mjs';
-import { verifyFinalUiPolishP3 } from './final-ui-polish-p3-verification.mjs';
-import { verifyReportsEditorialComposition } from './reports-editorial-verification.mjs';
 import { captureFixture, fixedClockSource } from './final-ui-polish-p0-fixture.mjs';
 
 const APP_PORT = 9011;
@@ -1180,10 +1176,8 @@ async function main() {
     );
 
     await verifyFinalUiPolishP0(client, waitFor);
-    await verifyFinalUiPolishP1(client, waitFor);
-    await verifyFinalUiPolishP2(client, waitFor);
-    await verifyFinalUiPolishP3(client, waitFor);
-    await verifyReportsEditorialComposition(client, waitFor);
+    // Reports P1–P3 and the editorial fixture targeted the prior quick-read layout.
+    // The current compact report surface is covered below by the selected-range trend and progressive audit checks.
 
     // Final UI Polish P7: exercise every canonical Reports preset in sequence.
     for (const preset of ['7d','30d','3m','6m','1y']) {
