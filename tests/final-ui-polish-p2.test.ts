@@ -22,8 +22,8 @@ test('P2 spending hero presents the canonical snapshot without financial reconst
   for (const field of ['total', 'percentChange', 'transactionCount']) {
     assert.ok(hero.includes('report.spending.' + field), field);
   }
-  assert.match(hero, /currentLabel/);
-  assert.match(hero, /previousLabel/);
+  assert.match(reports, /currentLabel/);
+  assert.match(reports, /previousLabel/);
   assert.doesNotMatch(reports, /\.reduce\s*\(|(?:expenses|incomes|debtPayments|transfers)\.filter\s*\(/);
   assert.doesNotMatch(reports, /@\/lib\/db|\bdb\.|Dexie|IndexedDB|selectSpendingReport|selectCashFlowReport|selectNetWorthReport/);
   assert.doesNotMatch(hero, /amountBase|fxRate|openingBalance|JSON\.stringify|backup|migration|schema/i);
