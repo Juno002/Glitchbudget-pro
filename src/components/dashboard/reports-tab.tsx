@@ -8,6 +8,7 @@ import { accountBalance, type AccountSnapshot } from '@/lib/accounts';
 import { resolveReportRange, selectIncomeExpenseTrend, shiftReportDateRange, shiftReportRangeAnchor, type ReportRangePreset } from '@/domain/reports';
 import { formatReportRangeLabel as rangeLabel } from '@/lib/report-formatting';
 import { localDate } from '@/lib/finance-calculations';
+import { projectReportCategoryRanking } from '@/lib/report-visualization';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,11 +28,6 @@ function percentLabel(value:number|null) {
   if (value === null) return 'Sin base comparable';
   if (value === 0) return 'Sin cambio';
   return (value > 0 ? '+' : '') + value.toLocaleString('es-DO',{maximumFractionDigits:2}) + '%';
-}
-
-function shareLabel(value:number,total:number) {
-  if (total <= 0) return '0.0%';
-  return (value / total * 100).toFixed(1)+'%';
 }
 
 function ComparisonValue({ value }: { value:number|null }) {
@@ -63,6 +59,7 @@ export default function ReportsTab() {
   const report=getReportSnapshot(range,range.end);
   const incomeExpenseTrend=selectIncomeExpenseTrend(incomes||[],expenses||[],range,preset);
   const topCategories=report.spending.categories;
+  const categoryRanking=projectReportCategoryRanking(topCategories,report.spending.total);
   const changeWindow=(direction:-1|1)=>{
     if(preset==='custom'){
       const shifted=shiftReportDateRange({start:customStart,end:customEnd},direction,today);
@@ -169,8 +166,7 @@ export default function ReportsTab() {
               <CardContent className="p-5">
                 {topCategories.length ? (
                   <ol className="divide-y divide-border">
-                    {(showAllCategories?topCategories:topCategories.slice(0,5)).map(row=>{
-                      const share=report.spending.total>0?row.value/report.spending.total*100:0;
+                    {(showAllCategories?categoryRanking:categoryRanking.slice(0,5)).map(row=>{
                       return <li key={row.categoryId} className="py-4 first:pt-0 last:pb-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
@@ -178,11 +174,11 @@ export default function ReportsTab() {
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="font-semibold tabular-nums">{money(row.value)}</p>
-                            <p className="text-sm text-muted-foreground">{shareLabel(row.value,report.spending.total)}</p>
+                            <p className="text-sm text-muted-foreground">{row.sharePercent.toFixed(1)+'%'}</p>
                           </div>
                         </div>
-                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={shareLabel(row.value,report.spending.total)+' del gasto'}>
-                          <span className="block h-full rounded-full bg-primary" style={{width:String(Math.min(100,share))+'%'}} />
+                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={row.sharePercent.toFixed(1)+'% del gasto'}>
+                          <span className="block h-full rounded-full bg-primary" style={{width:String(row.widthPercent)+'%'}} />
                         </div>
                       </li>;
                     })}
