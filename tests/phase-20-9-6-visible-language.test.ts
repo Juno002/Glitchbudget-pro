@@ -11,7 +11,7 @@ test('20.9.6 Reportes exposes Spanish section and metric labels', () => {
 
   for (const expected of [
     'Gasto del período',
-    '>Comparación<',
+    'Comparación exacta</span>',
     '>Flujo de caja<',
     '>Patrimonio neto<',
     "label:'Ingresos'",
