@@ -87,7 +87,7 @@ test('20.7 keeps sounds, motion and chart system protected', () => {
   assert.match(achievements,/playAchievementUnlock/);
   assert.match(achievements,/triggerConfetti/);
   const reports=read('src/components/dashboard/reports-tab.tsx');
-  for (const chart of ['ReportCategoryDonut','ReportValueBars','ReportComparisonBars']) assert.ok(reports.includes(chart),chart);
+  for (const chart of ['ReportIncomeExpenseTrend','ReportValueBars','ReportFinancialEquation']) assert.ok(reports.includes(chart),chart);
 });
 
 test('20.7 changed secondary UI does not introduce direct financial persistence', () => {

@@ -8,6 +8,7 @@ import { accountBalance, type AccountSnapshot } from '@/lib/accounts';
 import { resolveReportRange, selectIncomeExpenseTrend, shiftReportDateRange, shiftReportRangeAnchor, type ReportRangePreset } from '@/domain/reports';
 import { formatReportRangeLabel as rangeLabel } from '@/lib/report-formatting';
 import { localDate } from '@/lib/finance-calculations';
+import { projectReportCategoryRanking } from '@/lib/report-visualization';
 import { usePrivateCurrency } from '@/contexts/balance-visibility-context';
 import { useCategoryResolver } from '@/hooks/use-categories';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,11 +28,6 @@ function percentLabel(value:number|null) {
   if (value === null) return 'Sin base comparable';
   if (value === 0) return 'Sin cambio';
   return (value > 0 ? '+' : '') + value.toLocaleString('es-DO',{maximumFractionDigits:2}) + '%';
-}
-
-function shareLabel(value:number,total:number) {
-  if (total <= 0) return '0.0%';
-  return (value / total * 100).toFixed(1)+'%';
 }
 
 function ComparisonValue({ value }: { value:number|null }) {
@@ -63,8 +59,7 @@ export default function ReportsTab() {
   const report=getReportSnapshot(range,range.end);
   const incomeExpenseTrend=selectIncomeExpenseTrend(incomes||[],expenses||[],range,preset);
   const topCategories=report.spending.categories;
-  const categoryCounts=new Map<string,number>();
-  for(const row of expenses||[]) if(row.date>=range.start && row.date<=range.end) categoryCounts.set(row.categoryId,(categoryCounts.get(row.categoryId)||0)+1);
+  const categoryRanking=projectReportCategoryRanking(topCategories,report.spending.total);
   const changeWindow=(direction:-1|1)=>{
     if(preset==='custom'){
       const shifted=shiftReportDateRange({start:customStart,end:customEnd},direction,today);
@@ -83,7 +78,7 @@ export default function ReportsTab() {
   for(const row of accountTransfers||[]) if(row.date<=range.end){markAccountUse(row.fromAccountId);markAccountUse(row.toAccountId);}
   const accountRows=(accounts||[]).map(account=>({...account,balance:accountBalance(account,accountSnapshot,range.end),uses:accountUse.get(account.id)||0}))
     .sort((a,b)=>b.uses-a.uses || b.balance-a.balance || a.name.localeCompare(b.name));
-  const accountTotal=report.netWorth.cash+report.netWorth.banks;
+  const accountTotal=report.netWorth.liquidAssets;
   const budgetDetails=getBudgetStatusDetails(currentMonth).filter(row=>row.configured);
   const previousLabel=rangeLabel(report.previousRange.start,report.previousRange.end);
   const currentLabel=rangeLabel(range.start,range.end);
@@ -171,21 +166,19 @@ export default function ReportsTab() {
               <CardContent className="p-5">
                 {topCategories.length ? (
                   <ol className="divide-y divide-border">
-                    {(showAllCategories?topCategories:topCategories.slice(0,5)).map((row,index)=>{
-                      const share=report.spending.total>0?row.value/report.spending.total*100:0;
+                    {(showAllCategories?categoryRanking:categoryRanking.slice(0,5)).map(row=>{
                       return <li key={row.categoryId} className="py-4 first:pt-0 last:pb-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="break-words font-medium">{getCategoryInfo(row.categoryId)?.name||row.categoryId}</p>
-                            <p className="mt-1 text-sm text-muted-foreground">{index===0?'Mayor gasto del período':(categoryCounts.get(row.categoryId)||0)+' movimientos'}</p>
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="font-semibold tabular-nums">{money(row.value)}</p>
-                            <p className="text-sm text-muted-foreground">{shareLabel(row.value,report.spending.total)}</p>
+                            <p className="text-sm text-muted-foreground">{row.sharePercent.toFixed(1)+'%'}</p>
                           </div>
                         </div>
-                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={shareLabel(row.value,report.spending.total)+' del gasto'}>
-                          <span className="block h-full rounded-full bg-primary" style={{width:String(Math.min(100,share))+'%'}} />
+                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted" role="img" aria-label={row.sharePercent.toFixed(1)+'% del gasto'}>
+                          <span className="block h-full rounded-full bg-primary" style={{width:String(row.widthPercent)+'%'}} />
                         </div>
                       </li>;
                     })}

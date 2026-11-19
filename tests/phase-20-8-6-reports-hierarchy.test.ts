@@ -9,9 +9,9 @@ const ranges=read('src/components/dashboard/report-range-controls.tsx');
 test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
   const order=[
     'data-report-section="spending"',
-    'data-report-section="quick-read"',
-    'data-report-section="spending-breakdown"',
-    'data-report-section="comparison"',
+    'data-report-section="top-expenses"',
+    'data-report-section="budget-followup"',
+    'data-report-section="accounts"',
     'data-report-section="analysis-access"',
     'data-report-section="comparison-detail"',
     'data-report-section="spending-detail"',
@@ -27,19 +27,16 @@ test('20.8.6 Reports follows the canonical editorial hierarchy', () => {
   }
 });
 
-test('20.8.6 surfaces the deterministic quick read before exact analytics', () => {
-  assert.match(reports,/report\.quickRead\.map\(/);
-  assert.match(reports,/data-quick-read-kind=\{insight\.kind\}/);
-  assert.match(reports,/report\.quickRead\.map\(presentReportInsight\)/);
-  assert.match(reports,/insight\.title/);
-  assert.match(reports,/quickReadBody\(insight,money/);
-  assert.ok(reports.indexOf('report.quickRead.map') < reports.indexOf('data-report-hero="spending"'));
+test('20.8.6 shows the income and spending trend inside the canonical period hero', () => {
+  assert.match(reports,/selectIncomeExpenseTrend\(incomes\|\|\[\],expenses\|\|\[\],range,preset\)/);
+  assert.match(reports,/<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
+  assert.match(ranges,/data-report-period/);
   assert.doesNotMatch(reports,/Math\.random|Date\.now|fetch\(/);
 });
 
 test('20.8.6 establishes one analytical hero without rebuilding finance semantics', () => {
   const heroStart=reports.indexOf('data-report-hero="spending"');
-  const heroEnd=reports.indexOf('data-report-section="comparison"',heroStart);
+  const heroEnd=reports.indexOf('data-report-section="top-expenses"',heroStart);
   const hero=reports.slice(heroStart,heroEnd);
   assert.match(hero,/report\.spending\.total/);
   assert.match(hero,/report\.spending\.previousTotal/);
@@ -48,12 +45,12 @@ test('20.8.6 establishes one analytical hero without rebuilding finance semantic
   assert.doesNotMatch(hero,/\.reduce\(|selectSpendingReport|selectCashFlowReport|selectNetWorthReport|selectPosition/);
 });
 
-test('20.8.6 preserves comparison, category, nature, cash-flow and net-worth visuals with exact data under progressive disclosure', () => {
-  for(const visual of ['comparison','categories','nature','cash-flow','net-worth']){
+test('20.8.6 preserves the selected-range trend, category ranking, nature and exact financial equations', () => {
+  for(const visual of ['categories','nature','cash-flow','net-worth']){
     assert.ok(reports.includes('data-report-visual="'+visual+'"'),visual);
   }
-  assert.match(reports,/ReportComparisonBars/);
-  assert.match(reports,/ReportCategoryDonut/);
+  assert.match(reports,/ReportIncomeExpenseTrend/);
+  assert.match(reports,/topCategories/);
   assert.match(reports,/ReportValueBars/);
   assert.match(reports,/<Table>/);
   assert.match(reports,/<ReportFinancialEquation/);

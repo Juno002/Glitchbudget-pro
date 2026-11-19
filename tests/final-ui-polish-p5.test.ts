@@ -16,46 +16,41 @@ test('Reports now prioritizes progressive reading before on-demand audit detail'
   const order = [...source.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(order, [
     'spending',
-    'quick-read',
-    'spending-breakdown',
-    'comparison',
+    'top-expenses',
+    'budget-followup',
+    'accounts',
     'analysis-access',
     'comparison-detail',
     'spending-detail',
     'cash-flow',
     'net-worth',
     'detail',
-    'budget-followup',
   ]);
 });
 
-test('primary comparison is visual while exact comparison stays in the detailed block', () => {
-  const comparison = section('comparison', 'analysis-access');
-  assert.match(comparison, /<ReportComparisonBars/);
-  assert.doesNotMatch(comparison, /<Table>/);
+test('trend compares income and spending across the selected range and exact comparison stays on demand', () => {
+  const hero = section('spending', 'top-expenses');
+  assert.match(hero, /<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
+  assert.match(source, /selectIncomeExpenseTrend\(incomes\|\|\[\],expenses\|\|\[\],range,preset\)/);
 
   const detail = section('comparison-detail', 'spending-detail');
   assert.match(detail, /<Table>/);
   for (const label of ['Comparación exacta', 'Métrica', 'Cambio']) assert.ok(detail.includes(label), label);
-  for (const binding of [
-    'money(row.data.previous)',
-    'money(row.data.current)',
-    'money(row.data.difference)',
-    'row.data.percentChange',
-  ]) assert.ok(detail.includes(binding), binding);
+  for (const binding of ['money(row.data.previous)','money(row.data.current)','money(row.data.difference)','row.data.percentChange']) {
+    assert.ok(detail.includes(binding), binding);
+  }
 });
 
-test('category composition stays primary while exact categories and nature move to detail', () => {
-  const breakdown = section('spending-breakdown', 'comparison');
-  assert.match(breakdown, /Dónde se fue el gasto/);
-  assert.match(breakdown, /<ReportCategoryDonut data=\{categoryDistribution\.segments\} total=\{categoryDistribution\.total\}/);
-  assert.doesNotMatch(breakdown, /report\.spending\.categories\.map/);
-  assert.doesNotMatch(breakdown, /Fijo \/ Variable \/ Ocasional/);
+test('top expense ranking uses canonical categories while detailed nature remains available', () => {
+  const ranking = section('top-expenses', 'budget-followup');
+  assert.match(ranking, /topCategories/);
+  assert.match(ranking, /money\(row\.value\)/);
+  assert.match(ranking, /row\.sharePercent\.toFixed\(1\)/);
+  assert.match(ranking, /Ver todo/);
+  assert.doesNotMatch(ranking, /categoryCounts/);
+  assert.doesNotMatch(ranking, /ReportCategoryDonut/);
 
   const detail = section('spending-detail', 'cash-flow');
-  assert.match(detail, /report\.spending\.categories\.map\(row=>\(/);
-  assert.match(detail, /money\(row\.value\)/);
-  assert.match(detail, /shareLabel\(row\.value,report\.spending\.total\)/);
   assert.match(detail, /Fijo \/ Variable \/ Ocasional/);
   assert.match(detail, /report\.spending\.byNature\.map\(row=>\(/);
 });
@@ -81,7 +76,7 @@ test('deep analysis preserves every canonical cash-flow and net-worth binding', 
 });
 
 test('largest movements remain exact and available inside detailed analysis', () => {
-  const detail = section('detail', 'budget-followup');
+  const detail = source.slice(source.indexOf('data-report-section="detail"'));
   assert.match(detail, /Movimientos de mayor importe/);
   assert.match(detail, /report\.spending\.largestTransactions\.map\(row=>\(/);
   assert.match(detail, /money\(row\.amount\)/);
@@ -95,7 +90,7 @@ test('one accessible disclosure controls the audit block without rebuilding fina
   assert.match(source, /hidden=\{!showDetailedAnalysis\}/);
   assert.match(source, /Ver análisis detallado/);
   assert.match(source, /Ocultar análisis detallado/);
-  assert.equal([...source.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...source.matchAll(/<Table>/g)].length, 3);
   assert.doesNotMatch(source, /\.reduce\s*\(|(?:expenses|incomes|debtPayments|transfers)\.filter\s*\(/);
   assert.doesNotMatch(source, /selectSpendingReport|selectCashFlowReport|selectNetWorthReport|@\/lib\/db|Dexie|IndexedDB/);
 });

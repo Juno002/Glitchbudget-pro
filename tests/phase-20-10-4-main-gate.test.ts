@@ -74,7 +74,7 @@ test('20.10.4 production E2E covers every required visible surface plus offline 
     "clickButtonExpression('Movimientos')",
     "clickButtonExpression('Plan')",
     "clickButtonExpression('Reportes')",
-    "'quick-read'",
+    "'top-expenses'",
     "#theme-dark",
     "#theme-light",
     'data-app-lock-settings="prisma"',

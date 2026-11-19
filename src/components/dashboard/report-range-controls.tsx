@@ -69,7 +69,7 @@ export function ReportRangeControls({
         <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11" onClick={onNext} disabled={!canGoForward} aria-label="Período siguiente">
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </Button>
-        <Button type="button" variant="outline" size="icon" className="min-h-11 min-w-11 rounded-full" onClick={()=>onPresetChange(preset==='custom'?'30d':'custom')} aria-label="Elegir fechas personalizadas" aria-pressed={preset==='custom'}>
+        <Button type="button" variant="outline" size="icon" className="min-h-11 min-w-11 rounded-full" onClick={()=>onPresetChange(preset==='custom'?'30d':'custom')} aria-label="Elegir fechas personalizadas" data-report-preset="custom" aria-pressed={preset==='custom'}>
           <CalendarDays className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>

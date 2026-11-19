@@ -27,10 +27,11 @@ test('20.8.7 keeps financial interpretation details accessible without permanent
   assert.match(reports, /el crédito disponible nunca se trata como activo/i);
 });
 
-test('20.8.7 preserves exact report detail instead of hiding it behind disclosure', () => {
+test('20.8.7 preserves exact report detail inside one accessible disclosure', () => {
+  assert.match(reports, /hidden=\{!showDetailedAnalysis\}/);
   assert.match(reports, /data-report-section="detail"/);
   assert.match(reports, /Movimientos de mayor importe/);
-  assert.match(reports, /data-report-section="comparison"/);
+  assert.match(reports, /data-report-section="comparison-detail"/);
   assert.match(reports, /<TableHead>Métrica<\/TableHead>/);
 });
 

@@ -8,10 +8,10 @@ test('20.6 Reports preserves every canonical analytical section and range', () =
   const reports = read('src/components/dashboard/reports-tab.tsx');
   const ranges = read('src/components/dashboard/report-range-controls.tsx');
   assert.match(reports, /data-reports-prisma="true"/);
-  for (const section of ['spending','cash-flow','net-worth','comparison']) {
+  for (const section of ['spending','top-expenses','budget-followup','accounts','cash-flow','net-worth','comparison-detail']) {
     assert.ok(reports.includes('data-report-section="' + section + '"'), section);
   }
-  for (const label of ['Gastos','Flujo de caja','Patrimonio neto','Comparación','Distribución por categoría','Fijo / Variable / Ocasional','Movimientos de mayor importe']) {
+  for (const label of ['Gasto del período','Top gastos','Presupuestos','Mis cuentas','Flujo de caja','Patrimonio neto','Comparación exacta','Fijo / Variable / Ocasional','Movimientos de mayor importe']) {
     assert.ok(reports.includes(label), label);
   }
   for (const preset of ['7d','30d','3m','6m','1y','custom']) {
@@ -41,14 +41,14 @@ test('20.6 chart renderers receive derived values only and never access finance 
 
 test('20.6 Reports keeps visual charts paired with exact tables or financial equations', () => {
   const reports = read('src/components/dashboard/reports-tab.tsx');
-  for (const visual of ['categories','nature','cash-flow','net-worth','comparison']) {
+  for (const visual of ['categories','nature','cash-flow','net-worth']) {
     assert.ok(reports.includes('data-report-visual="' + visual + '"'), visual);
   }
   assert.match(reports, /<Table>/);
   assert.match(reports, /<ReportFinancialEquation/);
-  assert.match(reports, /ReportCategoryDonut/);
-  assert.match(reports, /ReportComparisonBars/);
+  assert.match(reports, /ReportIncomeExpenseTrend/);
   assert.match(reports, /ReportValueBars/);
+
 });
 
 test('20.6 report UI introduces no Prisma demo finance data or direct database access', () => {

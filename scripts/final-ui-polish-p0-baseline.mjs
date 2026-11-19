@@ -52,7 +52,7 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
   assertCaptureDataset(dataset);
   const directory = process.env.FINAL_UI_POLISH_BASELINE_DIR;
   if (directory) await mkdir(directory, { recursive: true });
-  const primaryOrder = ['spending', 'quick-read', 'spending-breakdown', 'comparison', 'analysis-access'];
+  const primaryOrder = ['spending', 'top-expenses', 'accounts', 'analysis-access'];
   const detailOrder = ['comparison-detail', 'spending-detail', 'cash-flow', 'net-worth', 'detail'];
   const order = [...primaryOrder, ...detailOrder];
   const originalTheme = await client.evaluate('document.documentElement.className');
@@ -96,9 +96,13 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
             return true;
           };
           const sections = [...root.querySelectorAll('[data-report-section]')].filter(node => node.dataset.reportSection !== 'budget-followup');
-          const tables = [...root.querySelectorAll('table')];
+          const tables = [...root.querySelectorAll('[data-report-detail] table')];
           return {
             width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
+            overflowNodes: [...document.querySelectorAll('body *')].map(node => {
+              const rect = node.getBoundingClientRect();
+              return { tag: node.tagName, id: node.id, className: String(node.className || '').slice(0,100), marker: node.getAttribute('data-report-section') || node.getAttribute('data-report-chart') || '', left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), scrollWidth: node.scrollWidth };
+            }).filter(node => node.width > 0 && (node.left < -1 || node.right > innerWidth + 1)).slice(0,12),
             sections: sections.map(node => ({ name: node.dataset.reportSection, visible: visible(node), x: node.getBoundingClientRect().x, right: node.getBoundingClientRect().right, height: node.getBoundingClientRect().height })),
             tables: tables.map(node => ({ visible: visible(node), rows: node.querySelectorAll('tbody tr').length, headers: node.querySelector('thead')?.innerText })),
             hidden: document.documentElement.dataset.balancesHidden === 'true',
@@ -109,8 +113,8 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
         assert.deepEqual(geometry.sections.map(section => section.name), order);
         assert.ok(geometry.sections.filter(section => primaryOrder.includes(section.name)).every(section => section.visible && section.x >= -1 && section.right <= width + 1), 'P0 lectura primaria visible y contenida');
         assert.ok(geometry.sections.filter(section => detailOrder.includes(section.name)).every(section => !section.visible), 'P0 auditoría cerrada por defecto');
-        assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal');
-        assert.equal(geometry.tables.length, 4, 'P0 comparación, categorías, naturaleza y detalle');
+        assert.ok(geometry.scrollWidth <= width + 1, 'P0 overflow horizontal ' + JSON.stringify({ width, scrollWidth: geometry.scrollWidth, overflowNodes: geometry.overflowNodes }));
+        assert.equal(geometry.tables.length, 3, 'P0 comparación, naturaleza y movimientos');
         assert.ok(geometry.tables.every(table => !table.visible && table.rows > 0), 'P0 evidencia exacta preservada bajo demanda');
         assert.equal(geometry.hidden, hidden);
         if (!hidden) assert.equal(geometry.moneyLeaks, true, 'P0 control positivo de importes visibles');
@@ -119,14 +123,11 @@ export async function verifyFinalUiPolishP0(client, waitFor) {
           assert.equal(geometry.moneyLeaks, false, 'P0 importes en texto/SVG/labels/tooltips');
           // Hover a real rendered chart to cover tooltip monetary formatting too.
           const point = await client.evaluate(`(() => {
-            const shape = document.querySelector('[data-report-chart="category-donut"] .recharts-sector');
+            const shape = document.querySelector('[data-report-chart="income-expense-trend"] .recharts-rectangle');
             if (!shape) return null;
             shape.scrollIntoView({ block: 'center' });
-            // Hover the ring, whose bounding-box center is an empty hole.
-            const arc = shape.getPointAtLength(shape.getTotalLength() * 0.2).matrixTransform(shape.getScreenCTM());
-            const rect = shape.ownerSVGElement.getBoundingClientRect();
-            const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-            return { x: center.x + (arc.x - center.x) * 0.85, y: center.y + (arc.y - center.y) * 0.85 };
+            const rect = shape.getBoundingClientRect();
+            return { x: rect.x + rect.width / 2, y: Math.max(rect.y + rect.height / 2, rect.y + 2) };
           })()`);
           assert.ok(point, 'P0 chart con datos');
           await client.command('Input.dispatchMouseEvent', { type: 'mouseMoved', ...point });

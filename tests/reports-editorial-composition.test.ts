@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import ts from 'typescript';
-import { projectReportBarGeometry } from '../src/lib/report-visualization';
+import { projectReportBarGeometry, projectReportCategoryRanking } from '../src/lib/report-visualization';
 import { presentReportInsight } from '../src/lib/report-editorial';
 import { selectReportsSnapshot, type ReportsSnapshotInput } from '../src/domain/reports';
 
@@ -16,7 +16,7 @@ test('editorial opening gives period and consultation controls context before th
   const heroStart = reports.indexOf('data-report-hero="spending"');
   const opening = reports.slice(headerStart, heroStart);
   assert.ok(headerStart > 0 && heroStart > headerStart);
-  assert.match(opening, /data-report-period/);
+  assert.match(ranges, /data-report-period/);
   assert.match(opening, /currentLabel/);
   assert.match(opening, /<ReportRangeControls/);
   assert.doesNotMatch(ranges, /<Card|<SectionHeader/);
@@ -24,29 +24,27 @@ test('editorial opening gives period and consultation controls context before th
   assert.match(ranges, /aria-pressed=\{preset===option.value\}/);
   assert.match(ranges, /preset==='custom' &&/);
   assert.equal([...reports.matchAll(/data-report-hero="spending"/g)].length, 1);
-  const hero = reports.slice(heroStart, reports.indexOf('data-report-section="quick-read"'));
-  for (const field of ['total', 'previousTotal', 'percentChange', 'transactionCount']) assert.ok(hero.includes('report.spending.' + field));
-  assert.match(hero, /<ReportSpendingTrend data=\{spendingTrend.windows\}/);
-  assert.doesNotMatch(hero, /<Card|<MetricCard/);
+  const hero = reports.slice(heroStart, reports.indexOf('data-report-section="top-expenses"'));
+  for (const field of ['total', 'percentChange', 'transactionCount']) assert.ok(hero.includes('report.spending.' + field));
+  assert.match(hero, /<ReportIncomeExpenseTrend data=\{incomeExpenseTrend\}/);
+  assert.match(reports, /<Card className="[^"]*" aria-labelledby="spending-title" data-report-section="spending"/);
+  assert.doesNotMatch(hero, /<MetricCard/);
 });
 
-test('canonical quick read follows spending and keeps one primary without dropping secondary insights', () => {
+test('report opening follows the compact period-to-spending hierarchy', () => {
   const order = [...reports.matchAll(/data-report-section="([^"]+)"/g)].map(row => row[1]);
-  assert.deepEqual(order.slice(0, 5), ['spending', 'quick-read', 'spending-breakdown', 'comparison', 'analysis-access']);
-  assert.match(reports, /report.quickRead.map\(presentReportInsight\)/);
-  assert.match(reports, /editorialQuickRead.map\(/);
-  assert.doesNotMatch(reports, /editorialQuickRead\.(?:slice|filter|sort)/);
-  assert.match(reports, /data-quick-read-primary=\{index===0\?'true':undefined\}/);
-  assert.match(reports, /data-quick-read-kind=\{insight.kind\}/);
+  assert.deepEqual(order.slice(0, 5), ['spending', 'top-expenses', 'budget-followup', 'accounts', 'analysis-access']);
+  assert.match(reports, /data-report-hero="spending"/);
+  assert.match(reports, /data-report-section="top-expenses"/);
 });
 
 test('category projection and all comparison amounts remain canonical and readable without tooltips', () => {
-  assert.match(reports, /projectReportCategoryDistribution\(/);
-  assert.match(reports, /report.spending.categories.map/);
+  assert.match(reports, /topCategories=report.spending.categories/);
+  assert.match(reports, /money\(row.value\)/);
   assert.match(charts, /data-category-legend/);
   assert.match(charts, /row.percentTenths/);
-  assert.match(reports, /difference:row.data.difference/);
-  assert.match(reports, /percentChange:row.data.percentChange/);
+  assert.match(reports, /report.comparison.spending/);
+  assert.match(reports, /money\(row.data.difference\)/);
   const comparison = charts.slice(charts.indexOf('export function ReportComparisonBars'), charts.indexOf('export type ReportEquationRow'));
   for (const field of ['difference', 'percentChange', 'previous', 'current']) assert.ok(comparison.includes(field));
   assert.match(comparison, /data-comparison-money/);
@@ -65,12 +63,12 @@ test('financial equations receive results and terms directly, including real pos
   assert.doesNotMatch(reports, /<MetricCard/);
 });
 
-test('one initially closed audit keeps four exact tables and reusable mobile movements with all metadata', () => {
+test('one initially closed audit keeps three exact tables and reusable mobile movements with all metadata', () => {
   assert.match(reports, /\[showDetailedAnalysis,setShowDetailedAnalysis\]=useState\(false\)/);
   assert.match(reports, /aria-expanded=\{showDetailedAnalysis\}/);
   assert.match(reports, /aria-controls="report-detailed-analysis"/);
   assert.match(reports, /hidden=\{!showDetailedAnalysis\}/);
-  assert.equal([...reports.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...reports.matchAll(/<Table>/g)].length, 3);
   assert.match(reports, /data-report-featured-list/);
   assert.match(reports, /<TransactionRow/);
   for (const field of ['title', 'date', 'nature', 'categoryId', 'amount']) assert.ok(reports.includes('row.' + field));
@@ -99,6 +97,15 @@ test('presentation components introduce no financial aggregation, arithmetic on 
   for (const source of [reports, charts]) assert.match(source, /usePrivateCurrency\(\)/);
   assert.match(charts, /!balancesHidden/);
   assert.match(charts, /isAnimationActive=\{false\}/);
+});
+
+test('category ranking projects display shares without mutating canonical rows', () => {
+  const rows = Object.freeze([{categoryId:'food',value:25},{categoryId:'rent',value:75}]);
+  const projected = projectReportCategoryRanking(rows,100);
+  assert.deepEqual(projected.map(row=>row.sharePercent),[25,75]);
+  assert.deepEqual(projected.map(row=>row.widthPercent),[25,75]);
+  assert.deepEqual(projectReportCategoryRanking(rows,0).map(row=>row.sharePercent),[0,0]);
+  assert.deepEqual(rows,[{categoryId:'food',value:25},{categoryId:'rent',value:75}]);
 });
 
 test('signed visual geometry preserves a shared zero, both directions, zero values and immutable input', () => {

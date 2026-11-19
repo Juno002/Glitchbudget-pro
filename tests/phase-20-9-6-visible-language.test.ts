@@ -10,8 +10,8 @@ test('20.9.6 Reportes exposes Spanish section and metric labels', () => {
   const reports = source('src/components/dashboard/reports-tab.tsx');
 
   for (const expected of [
-    '>Gastos<',
-    '>Comparación<',
+    'Gasto del período',
+    'Comparación exacta</span>',
     '>Flujo de caja<',
     '>Patrimonio neto<',
     "label:'Ingresos'",

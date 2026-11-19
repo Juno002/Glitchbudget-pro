@@ -80,7 +80,7 @@ test('P4 rejects an invalid visual segment limit', () => {
   assert.throws(() => projectReportCategoryDistribution([row('a', 1)], 0), /entero positivo/);
 });
 
-test('P4 keeps aggregation outside React and preserves exact category detail', () => {
+test('P4 keeps category ranking bound to the canonical report snapshot', () => {
   const visualization = readFileSync(new URL('../src/lib/report-visualization.ts', import.meta.url), 'utf8');
   const charts = readFileSync(new URL('../src/components/dashboard/charts/report-charts.tsx', import.meta.url), 'utf8');
   const reports = readFileSync(new URL('../src/components/dashboard/reports-tab.tsx', import.meta.url), 'utf8');
@@ -89,15 +89,17 @@ test('P4 keeps aggregation outside React and preserves exact category detail', (
   const donut = charts.slice(donutStart, donutEnd);
 
   assert.doesNotMatch(visualization, /react|recharts|usePrivateCurrency|useFinances/i);
-  assert.match(reports, /projectReportCategoryDistribution\(/);
-  assert.match(reports, /report\.spending\.categories\.map\(row=>\(/);
-  assert.match(reports, /<ReportCategoryDonut data=\{categoryDistribution\.segments\} total=\{categoryDistribution\.total\} \/>/);
+  assert.doesNotMatch(reports, /projectReportCategoryDistribution\(/);
+  assert.match(reports, /const topCategories=report\.spending\.categories/);
+  assert.match(reports, /projectReportCategoryRanking\(topCategories,report\.spending\.total\)/);
+  assert.match(reports, /money\(row\.value\)/);
+  assert.doesNotMatch(reports, /categoryCounts/);
   assert.doesNotMatch(donut, /<Legend/);
   assert.match(donut, /data-category-legend/);
   assert.match(donut, /percentTenths/);
   assert.match(donut, /usePrivateCurrency\(\)/);
   assert.match(donut, /balancesHidden/);
   assert.match(donut, /!balancesHidden/);
-  assert.match(reports, /<TableHead>Categoría<\/TableHead>/);
-  assert.match(reports, /<TableCell className="text-right font-mono">\{money\(row\.value\)\}<\/TableCell>/);
+  assert.match(reports, /data-report-section="top-expenses"/);
+  assert.match(reports, /Ver todo/);
 });

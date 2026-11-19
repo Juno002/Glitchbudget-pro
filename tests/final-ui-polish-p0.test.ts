@@ -23,22 +23,21 @@ test('P0 preserves exact report evidence under the authorized progressive disclo
   const sections = [...source.matchAll(/data-report-section="([^"]+)"/g)].map(match => match[1]);
   assert.deepEqual(sections, [
     'spending',
-    'quick-read',
-    'spending-breakdown',
-    'comparison',
+    'top-expenses',
+    'budget-followup',
+    'accounts',
     'analysis-access',
     'comparison-detail',
     'spending-detail',
     'cash-flow',
     'net-worth',
     'detail',
-    'budget-followup',
   ]);
-  assert.equal([...source.matchAll(/<Table>/g)].length, 4);
+  assert.equal([...source.matchAll(/<Table>/g)].length, 3);
   assert.match(source, /Ver análisis detallado/);
   assert.match(source, /aria-expanded=\{showDetailedAnalysis\}/);
   assert.match(source, /hidden=\{!showDetailedAnalysis\}/);
-  for (const binding of ['comparisonRows.map', 'report.spending.categories.map', 'report.spending.byNature.map', 'report.spending.largestTransactions.map']) {
+  for (const binding of ['comparisonRows.map', 'topCategories', 'report.spending.byNature.map', 'report.spending.largestTransactions.map']) {
     assert.ok(source.includes(binding), binding);
   }
 });

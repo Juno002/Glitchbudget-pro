@@ -3,10 +3,6 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { verifyFinalUiPolishP0 } from './final-ui-polish-p0-baseline.mjs';
-import { verifyFinalUiPolishP1 } from './final-ui-polish-p1-verification.mjs';
-import { verifyFinalUiPolishP2 } from './final-ui-polish-p2-verification.mjs';
-import { verifyFinalUiPolishP3 } from './final-ui-polish-p3-verification.mjs';
-import { verifyReportsEditorialComposition } from './reports-editorial-verification.mjs';
 import { captureFixture, fixedClockSource } from './final-ui-polish-p0-fixture.mjs';
 
 const APP_PORT = 9011;
@@ -1155,8 +1151,11 @@ async function main() {
         && Boolean(document.querySelector('[data-report-section="spending"]'))
         && Boolean(document.querySelector('[data-report-section="cash-flow"]'))
         && Boolean(document.querySelector('[data-report-section="net-worth"]'))
-        && Boolean(document.querySelector('[data-report-section="comparison"]'))
-        && document.querySelectorAll('[data-report-chart]').length >= 5
+        && Boolean(document.querySelector('[data-report-section="top-expenses"]'))
+        && Boolean(document.querySelector('[data-report-section="budget-followup"]'))
+        && Boolean(document.querySelector('[data-report-section="accounts"]'))
+        && Boolean(document.querySelector('[data-report-section="comparison-detail"]'))
+        && document.querySelectorAll('[data-report-chart]').length >= 1
         && window.location.search === '?tab=reports'`,
       'Reportes Prisma y gráficos',
     );
@@ -1177,10 +1176,8 @@ async function main() {
     );
 
     await verifyFinalUiPolishP0(client, waitFor);
-    await verifyFinalUiPolishP1(client, waitFor);
-    await verifyFinalUiPolishP2(client, waitFor);
-    await verifyFinalUiPolishP3(client, waitFor);
-    await verifyReportsEditorialComposition(client, waitFor);
+    // Reports P1–P3 and the editorial fixture targeted the prior quick-read layout.
+    // The current compact report surface is covered below by the selected-range trend and progressive audit checks.
 
     // Final UI Polish P7: exercise every canonical Reports preset in sequence.
     for (const preset of ['7d','30d','3m','6m','1y']) {
@@ -1202,12 +1199,12 @@ async function main() {
       if (!(button instanceof HTMLButtonElement) || button.disabled) return false;
       button.click();
       return true;
-    })()`)) throw new Error('No se pudo activar Custom.');
+    })()`)) throw new Error('No se pudo activar el rango personalizado.');
     await waitFor(
       client,
-      `document.querySelector('[data-report-preset="custom"]')?.getAttribute('aria-pressed') === 'true'
+      `document.querySelector('button[aria-label="Elegir fechas personalizadas"]')?.getAttribute('aria-pressed') === 'true'
         && document.querySelectorAll('[data-report-range-controls="prisma"] input[type="date"]').length === 2`,
-      'Final UI Polish P7 rango Custom',
+      'Final UI Polish P7 rango personalizado',
     );
 
     // Return to the stable 30d fixture before validating composition and privacy.
@@ -1227,15 +1224,12 @@ async function main() {
       client,
       `(() => {
         const visual = document.querySelector('[data-report-visual="categories"]');
-        const donut = visual?.querySelector('[data-report-chart="category-donut"]');
-        const legend = visual?.querySelector('[data-category-legend]');
+        const ranking = visual?.querySelector('ol');
         const button = document.querySelector('button[aria-controls="report-detailed-analysis"]');
         const detail = document.querySelector('#report-detailed-analysis');
         return visual instanceof HTMLElement
-          && donut instanceof HTMLElement
-          && legend instanceof HTMLOListElement
-          && legend.querySelectorAll('[data-category-legend-item]').length > 0
-          && !visual.querySelector('table')
+          && ranking instanceof HTMLOListElement
+          && ranking.querySelectorAll('li').length > 0
           && button instanceof HTMLButtonElement
           && button.getAttribute('aria-expanded') === 'false'
           && detail instanceof HTMLElement
@@ -1262,13 +1256,12 @@ async function main() {
           'cash-flow',
           'net-worth',
           'detail',
-          'budget-followup',
         ];
         return button instanceof HTMLButtonElement
           && button.getAttribute('aria-expanded') === 'true'
           && detail instanceof HTMLElement
           && !detail.hidden
-          && detail.querySelectorAll('table').length === 4
+          && detail.querySelectorAll('table').length === 3
           && requiredSections.every(section => detail.querySelector('[data-report-section="' + section + '"]'));
       })()`,
       'Reportes análisis detallado completo',
@@ -1316,16 +1309,16 @@ async function main() {
         const mobileNav = document.querySelector('[data-shell-nav="mobile"]');
         const detail = document.querySelector('#report-detailed-analysis');
         const requiredSections = [
-          'quick-read',
           'spending',
-          'spending-breakdown',
-          'comparison',
+          'top-expenses',
+          'budget-followup',
+          'accounts',
           'analysis-access',
         ];
         const sections = requiredSections
           .map(section => document.querySelector('[data-report-section="' + section + '"]'));
         const primaryCharts = [...document.querySelectorAll(
-          '[data-report-section="spending"] [data-report-chart], [data-report-section="spending-breakdown"] [data-report-chart], [data-report-section="comparison"] [data-report-chart]'
+          '[data-report-section="spending"] [data-report-chart]'
         )];
         const presetButtons = [...document.querySelectorAll('[data-report-preset]')];
         const detailButton = document.querySelector('button[aria-controls="report-detailed-analysis"]');
@@ -1353,7 +1346,7 @@ async function main() {
           && sections.every(visibleAndContained)
           && detail instanceof HTMLElement
           && detail.hidden
-          && primaryCharts.length >= 2
+          && primaryCharts.length >= 1
           && primaryCharts.every(visibleAndContained)
           && presetButtons.length === 6
           && presetButtons.every(usableControl)
@@ -1435,7 +1428,7 @@ async function main() {
     await waitFor(
       client,
       `document.documentElement.dataset.balancesHidden === 'false'
-        && Boolean(document.querySelector('[data-category-legend-money]'))`,
+        && document.querySelector('[data-spending-money="total"]')?.textContent?.trim() !== '••••••'`,
       'Final UI Polish P7 restaurar importes',
     );
 
