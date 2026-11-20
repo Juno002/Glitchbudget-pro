@@ -126,7 +126,11 @@ async function waitFor(client, expression, label, timeoutMs = 30_000) {
     if (await client.evaluate(expression)) return;
     await delay(100);
   }
-  throw new Error('Timeout esperando: ' + label);
+  const overflow = await client.evaluate(`Array.from(document.body.querySelectorAll('*'))
+    .filter(el => el.getBoundingClientRect().right > window.innerWidth + 1)
+    .slice(0, 10)
+    .map(el => [el.tagName, el.getAttribute('class'), Math.round(el.getBoundingClientRect().right)])`);
+  throw new Error('Timeout esperando: ' + label + '. Elementos fuera del viewport: ' + JSON.stringify(overflow));
 }
 
 function clickButtonExpression(label) {
