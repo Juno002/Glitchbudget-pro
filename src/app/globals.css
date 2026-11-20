@@ -463,6 +463,7 @@ html[data-balances-hidden='true'] [data-money-value='true'] {
 
 /* Phase 20.2 shell atmosphere: Prisma stays quiet; Neon retains ambient glow. */
 .ambient-background {
+  overflow: hidden;
   opacity: 0;
   transition: opacity var(--motion-dialog) ease;
 }
@@ -484,4 +485,19 @@ html.dark .ambient-background {
   [data-report-detail='expanded'], [data-report-period] {
     animation: report-reveal var(--motion-content) ease-out;
   }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(button, a)[class*="--motion-control"] {
+    transition-duration: var(--motion-control);
+  }
+  :is(button, a)[class*="--motion-press"]:active {
+    transition-duration: var(--motion-press);
+  }
+}
+
+@media (max-width: 359px) {
+  [data-home-prisma] { overflow-wrap: anywhere; }
+  [data-home-status-pill] { max-width: 100%; }
+  [data-home-status-pill] > * { white-space: normal; }
 }
