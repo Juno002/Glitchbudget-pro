@@ -65,7 +65,7 @@ export function ReportRangeControls({
         <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11" onClick={onPrevious} aria-label="Período anterior">
           <ChevronLeft className="h-5 w-5" aria-hidden="true" />
         </Button>
-        <p className="min-w-0 flex-1 text-center text-sm font-semibold tabular-nums" data-report-period>{rangeLabel}</p>
+        <p key={rangeLabel} className="min-w-0 flex-1 text-center text-sm font-semibold tabular-nums" data-report-period>{rangeLabel}</p>
         <Button type="button" variant="ghost" size="icon" className="min-h-11 min-w-11" onClick={onNext} disabled={!canGoForward} aria-label="Período siguiente">
           <ChevronRight className="h-5 w-5" aria-hidden="true" />
         </Button>
@@ -74,7 +74,7 @@ export function ReportRangeControls({
         </Button>
       </div>
 
-      <div className="flex flex-wrap gap-2" aria-label="Otros rangos">
+      <div className="flex flex-wrap justify-center gap-1" aria-label="Otros rangos">
         {presets.slice(3,5).map(option=>(
           <Button
             key={option.value}
