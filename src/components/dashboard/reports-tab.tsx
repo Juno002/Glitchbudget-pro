@@ -99,7 +99,6 @@ export default function ReportsTab() {
     <div className="space-y-8 pb-24 md:pb-8" data-reports-prisma="true">
       <div className="report-editorial-header" data-report-editorial-header>
         <div className="min-w-0">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Análisis</p>
           <PageHeader
             title={<><span>Reportes</span><span className="text-[hsl(var(--brand-coral))]">.</span></>}
           />
@@ -131,11 +130,11 @@ export default function ReportsTab() {
             <CardContent className="space-y-5 p-5 sm:p-6">
               <div>
                 <h2 id="spending-title" className="text-sm font-medium text-muted-foreground">Gasto del período</h2>
-                <p className="mt-2 font-display text-5xl font-semibold tracking-[-0.05em] sm:text-6xl" data-spending-money="total">{money(report.spending.total)}</p>
+                <p className="mt-2 font-display text-5xl tabular-nums font-semibold tracking-[-0.05em] sm:text-6xl" data-spending-money="total">{money(report.spending.total)}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
                   <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium" data-spending-variation>
                     {report.spending.previousTotal===0
-                      ? 'Sin gasto anterior con el que comparar'
+                      ? 'Sin gasto previo'
                       : percentLabel(report.spending.percentChange)+' vs. período anterior'}
                   </span>
                   <span className="text-muted-foreground" data-spending-count>{report.spending.transactionCount} {report.spending.transactionCount===1?'movimiento':'movimientos'}</span>
@@ -210,8 +209,8 @@ export default function ReportsTab() {
                     </ul>
                   </>
                 ) : (
-                  <div className="mx-auto max-w-sm py-5 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">◎</div>
+                  <div className="mx-auto max-w-sm py-1 text-center">
+                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden="true">◎</div>
                     <h3 className="mt-4 font-semibold">Aún no tienes presupuestos</h3>
                     <p className="mt-1 text-sm text-muted-foreground">Define un límite por categoría y sigue su avance desde aquí.</p>
                     <Button type="button" className="mt-5 min-h-11 rounded-full px-6" onClick={()=>{setPlanningTab('budgets');setActiveTab('planning');}}>Crear presupuesto</Button>
@@ -254,7 +253,7 @@ export default function ReportsTab() {
           </section>
 
           <section className="report-analysis-access flex flex-wrap items-center justify-between gap-3" data-report-section="analysis-access">
-            <p className="text-xs text-muted-foreground">Tablas exactas y detalle</p>
+  
             <Button
               type="button"
               variant="ghost"
@@ -371,8 +370,7 @@ export default function ReportsTab() {
             </div>
 
             <section className="space-y-4" aria-labelledby="detail-title" data-report-section="detail">
-              <SectionHeader title={<span id="detail-title">Movimientos destacados</span>} />
-              <h3 className="text-xs text-muted-foreground">Movimientos de mayor importe</h3>
+              <SectionHeader title={<span id="detail-title">Movimientos de mayor importe</span>} />
               {report.spending.largestTransactions.length ? (
                 <>
                   <ul className="min-w-0 divide-y divide-border sm:hidden" aria-label="Movimientos de mayor importe" data-report-featured-list>
