@@ -251,13 +251,16 @@ body {
     --gradient-accent: linear-gradient(135deg, #ea6959 0%, #84b6a7 100%);
     --backdrop: rgba(27,47,43,0.34);
 
+    --font-dm-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    --font-dm-serif: ui-serif, Georgia, serif;
+    --font-dm-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;
     --radius: 14px;
     --space-page: 2rem;
     --space-section: 1.5rem;
     --space-card: 1.25rem;
     --space-control: 0.75rem;
 
-    --radius-card: 0.875rem;
+    --radius-card: 1.375rem;
     --radius-interactive: 0.625rem;
     --radius-modal: 1.125rem;
 
@@ -267,7 +270,7 @@ body {
     --text-supporting: 0.875rem;
 
     /* Motion contract: decorative motion never delays the next input. */
-    --motion-press: 80ms;
+    --motion-press: 50ms;
     --motion-control: 110ms;
     --motion-menu: 130ms;
     --motion-content: 150ms;
@@ -460,9 +463,41 @@ html[data-balances-hidden='true'] [data-money-value='true'] {
 
 /* Phase 20.2 shell atmosphere: Prisma stays quiet; Neon retains ambient glow. */
 .ambient-background {
+  overflow: hidden;
   opacity: 0;
   transition: opacity var(--motion-dialog) ease;
 }
 html.dark .ambient-background {
   opacity: 1;
+}
+
+[data-report-range-controls] [role='group'] button[aria-pressed='true'] {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  box-shadow: var(--shadow-control);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes report-reveal {
+    from { opacity: 0.65; transform: translateY(2px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  [data-report-detail='expanded'], [data-report-period] {
+    animation: report-reveal var(--motion-content) ease-out;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :is(button, a)[class*="--motion-control"] {
+    transition-duration: var(--motion-control);
+  }
+  :is(button, a)[class*="--motion-press"]:active {
+    transition-duration: var(--motion-press);
+  }
+}
+
+@media (max-width: 359px) {
+  [data-home-prisma] { overflow-wrap: anywhere; }
+  [data-home-status-pill] { max-width: 100%; }
+  [data-home-status-pill] > * { white-space: normal; }
 }

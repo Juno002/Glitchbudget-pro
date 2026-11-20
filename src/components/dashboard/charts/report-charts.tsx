@@ -284,14 +284,14 @@ export function ReportIncomeExpenseTrend({ data }: { data: IncomeExpenseTrendPoi
             <Tooltip
               isAnimationActive={false}
               labelFormatter={(_,payload)=>payload?.[0]?.payload ? formatReportRangeLabel((payload[0].payload as IncomeExpenseTrendPoint).range.start,(payload[0].payload as IncomeExpenseTrendPoint).range.end) : ''}
-              formatter={(value,name)=>[balancesHidden?'••••••':money(Number(value)),name==='income'?'Ingresos':'Gastos']}
+              formatter={(value,name)=>[balancesHidden?'••••••':money(Number(value)),name]}
             />
             <Bar dataKey="income" name="Ingresos" fill="hsl(var(--primary))" fillOpacity={0.42} radius={[4,4,0,0]} isAnimationActive={false} />
             <Bar dataKey="spending" name="Gastos" fill="hsl(var(--primary))" radius={[4,4,0,0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <p className="text-xs text-muted-foreground">Los períodos sin movimientos se muestran en {balancesHidden ? 'cero' : money(0)}.</p>
+      {data.some(point => point.income === 0 && point.spending === 0) && <p className="text-xs text-muted-foreground">Los períodos sin movimientos se muestran en {balancesHidden ? 'cero' : money(0)}.</p>}
       <table className="sr-only" style={{position:'fixed',left:'-10000px',top:0,width:'1px',height:'1px',padding:0,margin:0,overflow:'hidden',clip:'rect(0,0,0,0)',whiteSpace:'nowrap',border:0,tableLayout:'fixed'}}>
         <caption>Tendencia de ingresos y gastos por período</caption>
         <thead><tr><th>Período</th><th>Ingresos</th><th>Gastos</th></tr></thead>

@@ -11,7 +11,7 @@ test('20.9.2 defines the authorized five-family motion scale', () => {
   const js = source('src/lib/motion.ts');
 
   for (const [name, ms] of [
-    ['press', 80],
+    ['press', 50],
     ['control', 110],
     ['menu', 130],
     ['content', 150],

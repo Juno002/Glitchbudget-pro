@@ -190,7 +190,7 @@ export default function OpfsBackupDialog() {
           <span>Copias de seguridad</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="overflow-x-hidden sm:max-w-2xl" data-backups-prisma="true">
+      <DialogContent className="min-w-0 grid-cols-[minmax(0,1fr)] px-4 [overflow-wrap:anywhere] overflow-x-hidden sm:max-w-2xl sm:px-6 [&_button]:whitespace-normal" data-backups-prisma="true">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl font-normal">Datos y copias</DialogTitle>
           <DialogDescription className="sr-only">Crear, exportar o restaurar copias de tus datos.</DialogDescription>

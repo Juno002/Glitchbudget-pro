@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { DM_Mono, DM_Sans, DM_Serif_Display } from 'next/font/google';
 import './globals.css';
 import { FinanceProvider } from '@/contexts/finance-context';
 import { Toaster } from '@/components/ui/toaster';
@@ -10,23 +9,6 @@ import { BalanceVisibilityProvider } from '@/contexts/balance-visibility-context
 import { BALANCE_VISIBILITY_STORAGE_KEY } from '@/domain/local-security';
 import { AppLockProvider } from '@/contexts/app-lock-context';
 import { AppLockGate } from '@/components/security/app-lock-gate';
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-dm-sans',
-});
-const dmSerif = DM_Serif_Display({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-dm-serif',
-});
-const dmMono = DM_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-dm-mono',
-});
-
 
 export const metadata: Metadata = {
   title: 'Prisma',
@@ -50,7 +32,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Prisma" />
       </head>
-      <body className={`${dmSans.variable} ${dmSerif.variable} ${dmMono.variable} font-body bg-background text-foreground relative min-h-screen overflow-x-hidden`}>
+      <body className="font-body bg-background text-foreground relative min-h-screen overflow-x-hidden">
         <VisibleViewport />
         {/* Background Gradients */}
         <div className="ambient-background fixed inset-0 pointer-events-none -z-10">
