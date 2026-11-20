@@ -227,22 +227,20 @@ export default function ReportsTab() {
             </div>
             <Card className="rounded-[var(--radius-card)] shadow-[var(--shadow-card)]">
               <CardContent className="p-5">
-                <div className="grid grid-cols-2 gap-4 border-b pb-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total en efectivo y bancos</p>
-                    <p className="mt-1 text-xl font-semibold tabular-nums">{money(accountTotal)}</p>
-                  </div>
-                  <div className="border-l pl-4">
-                    <p className="text-sm text-muted-foreground">Cuenta más usada</p>
-                    <p className="mt-1 break-words font-semibold">{accountRows[0]?.name||'Sin cuentas registradas'}</p>
-                    {accountRows[0]?.uses ? <p className="text-xs text-muted-foreground">{accountRows[0].uses} movimientos</p> : null}
-                  </div>
+                <div className="border-b pb-3">
+                  <p className="text-sm text-muted-foreground">Total en efectivo y bancos</p>
+                  <p className="mt-1 text-xl font-semibold tabular-nums">{money(accountTotal)}</p>
                 </div>
                 {accountRows.length ? (
                   <ul className="divide-y divide-border">
                     {accountRows.slice(0,3).map(account=>(
                       <li key={account.id} className="flex items-center justify-between gap-3 py-3 last:pb-0">
-                        <span className="min-w-0 break-words text-sm font-medium">{account.name}</span>
+                        <div className="min-w-0">
+                          <p className="break-words text-sm font-medium">{account.name}</p>
+                          {account.id === accountRows[0]?.id && account.uses > 0 && (
+                            <p className="text-xs text-muted-foreground">Cuenta más usada · {account.uses} {account.uses === 1 ? 'movimiento' : 'movimientos'}</p>
+                          )}
+                        </div>
                         <span className="shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums">{money(account.balance)}</span>
                       </li>
                     ))}
