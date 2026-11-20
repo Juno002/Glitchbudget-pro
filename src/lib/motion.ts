@@ -1,5 +1,5 @@
 export const MOTION_MS = {
-  press: 80,
+  press: 50,
   control: 110,
   menu: 130,
   content: 150,
